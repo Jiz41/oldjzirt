@@ -2,129 +2,222 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>競輪スコア計算</title>
+<title>RaceCalc 完全版</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  body { font-family: sans-serif; padding: 10px; }
-  input, select { font-size: 16px; margin: 5px 0; width: 100%; }
-  button { font-size: 16px; margin: 10px 0; width: 100%; }
-  .player { margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
-  .results { margin-top: 20px; }
+body {
+    font-family: sans-serif;
+    margin: 10px;
+}
+input, select, button, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+    font-size: 18px;
+}
+.result {
+    margin-top: 20px;
+    padding: 10px;
+    background: #f7f7f7;
+    border: 1px solid #ccc;
+}
+.line-title {
+    margin-top: 20px;
+    font-weight: bold;
+}
 </style>
 </head>
 <body>
 
-<h2>競輪スコア計算</h2>
+<h2>RaceCalc（完全版）</h2>
 
-<label>場名:</label>
-<select id="placeSelect"></select>
+<!-- 場名 -->
+<label>場名（bankdata.json から自動読込）</label>
+<select id="bankSelect"></select>
 
-<label>時間帯:</label>
+<!-- 時間帯 -->
+<label>時間帯</label>
 <select id="timeSelect">
-  <option value="day">デイ</option>
+  <option value="morning">朝</option>
+  <option value="day">昼</option>
+  <option value="evening">夕方</option>
   <option value="night">ナイター</option>
-  <option value="midnight">ミッドナイト</option>
 </select>
 
-<label>風・隊列補正:</label>
-<select id="windSelect">
-  <option value="">なし</option>
-  <option value="追い風">追い風</option>
-  <option value="向かい風">向かい風</option>
-  <option value="横風">横風</option>
-  <option value="外伸び">外伸び</option>
-</select>
+<!-- 風 -->
+<label>風向き（0〜360°）</label>
+<input id="windDir" type="number" value="0">
 
-<h3>選手情報 (7人)</h3>
-<div id="players">
-</div>
+<label>風速（m/s）</label>
+<input id="windSpeed" type="number" value="0">
 
-<label>並び (例: 123,45,6,7):</label>
-<input type="text" id="lineup" placeholder="並びをカンマ区切りで入力">
+<!-- 並び -->
+<label>並び（例：123,45,6,7）</label>
+<input id="lineInput" type="text" placeholder="例：123,45,6,7">
 
-<button onclick="calculate()">計算</button>
+<!-- 選手データ -->
+<div id="riderInputs"></div>
 
-<div class="results" id="results"></div>
+<button onclick="calc()">計算する</button>
+
+<div id="result" class="result"></div>
 
 <script>
-// JSONデータを読み込む
-let bankData;
-fetch('bankdata.json')
-  .then(res => res.json())
-  .then(data => {
-    bankData = data;
-    populatePlaces();
-    populatePlayers();
+// ===============================
+// JSON 読み込み（場名ロード）
+// ===============================
+let bankData = null;
+
+fetch("bankdata.json")
+  .then(r => r.json())
+  .then(j => {
+    bankData = j;
+    const select = document.getElementById("bankSelect");
+    j.banks.forEach(b => {
+      const op = document.createElement("option");
+      op.value = b.name;
+      op.textContent = b.name;
+      select.appendChild(op);
+    });
   });
 
-// 場名選択肢生成
-function populatePlaces() {
-  const select = document.getElementById('placeSelect');
-  for (let place in bankData) {
-    const opt = document.createElement('option');
-    opt.value = place;
-    opt.textContent = place;
-    select.appendChild(opt);
-  }
+// ===============================
+// 選手入力欄（7人固定）
+// ===============================
+const riderDiv = document.getElementById("riderInputs");
+for (let i = 1; i <= 7; i++) {
+  riderDiv.insertAdjacentHTML("beforeend", `
+    <div class="line-title">選手${i}</div>
+    <label>得点</label>
+    <input id="score${i}" type="number" step="0.1">
+    <label>脚質</label>
+    <select id="style${i}">
+      <option value="逃げ">逃げ</option>
+      <option value="差し">差し</option>
+      <option value="捲り">捲り</option>
+      <option value="マーク">マーク</option>
+    </select>
+  `);
 }
 
-// 選手入力欄生成
-function populatePlayers() {
-  const container = document.getElementById('players');
-  container.innerHTML = '';
-  for (let i=1; i<=7; i++) {
-    const div = document.createElement('div');
-    div.className = 'player';
-    div.innerHTML = `
-      <label>選手${i} 得点:</label>
-      <input type="number" id="score${i}" value="80">
-      <label>脚質:</label>
-      <select id="style${i}">
-        <option value="逃げ">逃げ</option>
-        <option value="差し">差し</option>
-        <option value="捲り">捲り</option>
-        <option value="マーク">マーク</option>
-      </select>
-    `;
-    container.appendChild(div);
-  }
+// ===============================
+// 並び解析
+// ===============================
+function parseLines(str) {
+  return str.split(",").map(g => g.split("").map(n => Number(n)));
 }
 
-// 計算処理
-function calculate() {
-  const place = document.getElementById('placeSelect').value;
-  const time = document.getElementById('timeSelect').value;
-  const wind = document.getElementById('windSelect').value;
-  const lineupStr = document.getElementById('lineup').value;
-  const lineupGroups = lineupStr.split(',').map(g => g.split('').map(n => parseInt(n)));
+// ===============================
+// スコア補正ロジック（本格版）
+// ===============================
+function scoreAdjust(r, lineInfo, bank, windDir, windSpeed, timeZone) {
+  let s = r.score;
 
-  const scores = [];
-  for (let i=1; i<=7; i++) {
-    let base = parseFloat(document.getElementById(`score${i}`).value);
-    let style = document.getElementById(`style${i}`).value;
-    let bias = bankData[place]?.keirin_bias?.[style] || 1.0;
-    let windBonus = bankData[place]?.wind_or_position?.[wind] || 1.0;
-    let finalScore = base * bias * windBonus;
-    scores.push({player:i, score:finalScore});
+  // --- 脚質補正 ---
+  if (r.style === "逃げ") s += 2.0;
+  if (r.style === "差し") s += 1.0;
+  if (r.style === "捲り") s += 1.5;
+  if (r.style === "マーク") s += 0.5;
+
+  // --- ライン位置 ---
+  if (lineInfo.pos === 1) s += 2.5;    // 先頭
+  if (lineInfo.pos === 2) s += 1.2;    // 2番手
+  if (lineInfo.pos >= 3) s -= 0.5;     // 後方気味
+
+  // --- 風補正 ---
+  s -= windSpeed * 0.3;
+
+  // --- 場バンク特性（カント etc） ---
+  if (bank && bank.cant) {
+    s += bank.cant * 0.2;
   }
 
-  // スコア降順
-  scores.sort((a,b)=>b.score-a.score);
+  // --- 時間帯 ---
+  if (timeZone === "night") s -= 0.5;
 
-  // 三連単12点・三連複4点を適当生成（並びに基づく）
-  let flatLineup = lineupGroups.flat().filter(n=>n>=1 && n<=7);
-  let trysan = flatLineup.slice(0,3);
-  let trin = flatLineup.slice(0,4);
+  return s;
+}
 
-  // 結果表示
-  let resultDiv = document.getElementById('results');
-  let html = '<h3>補正後スコアランキング</h3><ol>';
-  scores.forEach(s=>{html+=`<li>選手${s.player}: ${s.score.toFixed(2)}</li>`});
-  html += '</ol>';
-  html += '<h3>買い目</h3>';
-  html += `<p>三連単12点: ${trysan.join('-')}</p>`;
-  html += `<p>三連複4点: ${trin.join(',')}</p>`;
-  resultDiv.innerHTML = html;
+// ===============================
+// 買い目生成（本格）
+// ===============================
+function makeBets(sorted) {
+  let top = sorted.slice(0, 4).map(r => r.num);
+
+  // 三連単（最大12点）
+  let tris = [];
+  for (let a = 0; a < top.length; a++) {
+    for (let b = 0; b < top.length; b++) {
+      for (let c = 0; c < top.length; c++) {
+        if (a !== b && b !== c && a !== c) {
+          tris.push(`${top[a]}-${top[b]}-${top[c]}`);
+        }
+      }
+    }
+  }
+  tris = tris.slice(0, 12);
+
+  // 三連複（上位6名）
+  let fuku = sorted.slice(0, 6).map(r => r.num);
+
+  return { tris, fuku };
+}
+
+// ===============================
+// メイン計算
+// ===============================
+function calc() {
+  const lineStr = document.getElementById("lineInput").value.trim();
+  const lines = parseLines(lineStr);
+
+  const bank = bankData.banks.find(b => b.name === bankSelect.value);
+  const windDir = Number(document.getElementById("windDir").value);
+  const windSpeed = Number(document.getElementById("windSpeed").value);
+  const timeZone = timeSelect.value;
+
+  // ライン位置検索
+  function findLinePos(num) {
+    for (let g of lines) {
+      let idx = g.indexOf(num);
+      if (idx >= 0) return { group: g, pos: idx + 1 };
+    }
+    return { group: [num], pos: 1 };
+  }
+
+  // 選手データ作成
+  let riders = [];
+  for (let i = 1; i <= 7; i++) {
+    let pos = findLinePos(i);
+    riders.push({
+      num: i,
+      score: Number(document.getElementById("score"+i).value),
+      style: document.getElementById("style"+i).value,
+      linePos: pos,
+    });
+  }
+
+  // 補正スコア
+  riders.forEach(r => {
+    r.adjust = scoreAdjust(r, r.linePos, bank, windDir, windSpeed, timeZone);
+  });
+
+  // 並び順
+  let sorted = [...riders].sort((a,b)=>b.adjust - a.adjust);
+
+  // 買い目生成
+  const bets = makeBets(sorted);
+
+  // 出力
+  let out = "<h3>補正後スコアランキング</h3>";
+  sorted.forEach(r => {
+    out += `選手${r.num}: ${r.adjust.toFixed(2)}<br>`;
+  });
+
+  out += `<h3>買い目</h3>`;
+  out += `三連単 (${bets.tris.length}点):<br>${bets.tris.join("<br>")}<br><br>`;
+  out += `三連複 (${bets.fuku.length}点):<br>${bets.fuku.join(",")}<br>`;
+
+  document.getElementById("result").innerHTML = out;
 }
 </script>
 
