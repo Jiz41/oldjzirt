@@ -61,8 +61,29 @@
         .weight-weak { background-color: #428BCA; color: white; border-color: #357EBD; } /* 青 (7位以下) */
 
         /* Combined Ranking Styles */
-        #combined-ranking { margin-top: 30px; padding: 15px; border: 2px solid #ffc107; border-radius: 8px; background-color: #fffaf0; }
-        #combined-ranking h2 { 
+        #combined-ranking, #anamae-ranking, #mujirushi-anamae-ranking { margin-top: 30px; padding: 15px; border-radius: 8px; }
+        
+        #combined-ranking { 
+            border: 2px solid #ffc107; 
+            background-color: #fffaf0; 
+        }
+        #anamae-ranking {
+             border: 2px solid #d9534f;
+             background-color: #ffeeee;
+        }
+        #mujirushi-anamae-ranking {
+            border: 2px solid #000;
+            background-color: #e5e5e5;
+        }
+        #mujirushi-anamae-list li, #mujirushi-sanrenpuku-list li {
+            background-color: #333;
+            color: white;
+            font-weight: bold;
+            border-color: #000;
+        }
+
+
+        #combined-ranking h2, #anamae-ranking h2, #mujirushi-anamae-ranking h2 { 
             color: #d9534f; 
             font-size: 1.4rem; 
             margin-bottom: 0px; 
@@ -73,7 +94,9 @@
             color: #333;
             border-color: #cc9900;
         }
-        #combined-sanrenpuku-list {
+
+
+        #combined-sanrenpuku-list, #mujirushi-sanrenpuku-list {
              margin-top: 10px;
         }
 
@@ -260,7 +283,7 @@
             </div>
         
         <div id="combined-ranking" style="display:none;">
-            <h2>✨ 天輪奨 三鼎</h2> 
+            <h2>✨ 晴天令 三鼎 (せいてんりょう みつがなえ)</h2> 
             <p style="font-size: 0.75rem; margin-top: -5px; margin-bottom: 10px; color: #555; text-align: center;">
                 (おすすめ3連単3点と補助3連複2点の合計5点)
             </p>
@@ -271,6 +294,27 @@
             <ul id="combined-sanrenpuku-list" class="kaime-list"></ul>
         </div>
         
+        <div id="anamae-ranking" style="display:none;">
+            <h2>🔥 穴目推奨買い目 (低頻度高期待値)</h2> 
+            <p style="font-size: 0.75rem; margin-top: -5px; margin-bottom: 10px; color: #555; text-align: center;">
+                (特定のシナリオでのみ発生する、高期待値な穴目の組み合わせ)
+            </p>
+            <h4>三連単 (5点)</h4>
+            <ul id="anamae-list" class="kaime-list"></ul>
+        </div>
+
+        <div id="mujirushi-anamae-ranking" style="display:none;">
+            <h2>⚫️ 荒天令 三尽 (こうてんりょう みつづき)</h2> 
+            <p style="font-size: 0.75rem; margin-top: -5px; margin-bottom: 10px; color: #555; text-align: center;">
+                (大波乱を狙う3連単3点と補助3連複2点の合計5点) </p>
+            <h4>三連単 (3点)</h4>
+            <ul id="mujirushi-anamae-list" class="kaime-list"></ul>
+            <h4>三連複 (2点) - 三連単3点を補完</h4>
+            <ul id="mujirushi-sanrenpuku-list" class="kaime-list"></ul>
+        </div>
+        
+        <hr>
+
         <h2>📊 スコア・買い目シミュレーション結果</h2>
         <div id="scenario-results-container">
             </div>
@@ -281,6 +325,7 @@
     // グローバル変数
     let bankData = {};
     const PLAYER_COUNT = 7; 
+    let playerWinticketMap = {}; // W印をキャッシュするためのマップ
 
     // --- 係数定義 ---
     const COMMON_WIND_MAP = { "東": "バック追い風", "西": "バック向かい風", "南": "横風", "北": "バンク特有の風なし" };
@@ -404,6 +449,8 @@
         }
         
         let rawPlayers = [];
+        playerWinticketMap = {}; // W印マップをクリア
+        
         for (let i = 1; i <= PLAYER_COUNT; i++) {
             const leg = document.getElementById(`leg-${i}`)?.value;
             const rawScoreStr = document.getElementById(`score-${i}`)?.value;
@@ -418,6 +465,8 @@
 
             const rawScore = parseFloat(rawScoreStr);
             const winticketBias = WINTICKET_COEFFICIENTS[winticketMark] || 1.0;
+            
+            playerWinticketMap[i] = winticketMark; // W印をキャッシュ
 
             const rankInputs = recentRanksStr.split('').slice(0, 3); 
             
@@ -451,388 +500,4 @@
                 winticketBias: winticketBias,
                 staticBias: staticBias,
                 legKey: legKey,
-                meetingRankBias: meetingRankBias
-            });
-        }
-
-        if (rawPlayers.length < 3) {
-            alert("計算を行うには最低3名分の選手データを正しく入力してください。");
-            return;
-        }
-
-        displayBankFeedback(selectedBankName, currentBank.keirin_bias);
-        
-        const allScenarioResults = [];
-        const allSanrentanCombinations = {}; 
-        
-        Object.keys(DEVELOPMENT_BIAS).forEach(scenarioName => {
-            const developBiasMap = DEVELOPMENT_BIAS[scenarioName];
-            
-            let scenarioPlayers = rawPlayers.map(p => {
-                const developBiasVal = developBiasMap[p.legKey] || 1.0;
-                
-                let finalScore = p.rawScore * p.winticketBias * p.staticBias * developBiasVal * p.meetingRankBias; 
-
-                return { id: p.id, leg: p.leg, score: finalScore };
-            });
-            
-            scenarioPlayers.sort((a, b) => b.score - a.score);
-
-            const playersWithRating = applyTenScaleRating(scenarioPlayers);
-
-            const sanrentanDetails = generateSanrentanDetails(playersWithRating);
-
-            sanrentanDetails.forEach(c => {
-                if (!allSanrentanCombinations[c.nums]) {
-                    allSanrentanCombinations[c.nums] = { count: 0, totalVal: 0, combinations: [] };
-                }
-                allSanrentanCombinations[c.nums].count++;
-                allSanrentanCombinations[c.nums].totalVal += c.val;
-                allSanrentanCombinations[c.nums].combinations.push(c.nums);
-            });
-
-            allScenarioResults.push({
-                scenario: scenarioName,
-                players: playersWithRating, 
-                sanrentanDetails: sanrentanDetails 
-            });
-        });
-
-        displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations);
-    }
-    // メイン計算ロジック終了
-
-    // 10段階評価（矢印レーティング）の適用
-    function applyTenScaleRating(sortedPlayers) {
-        if (sortedPlayers.length === 0) return [];
-        
-        const scores = sortedPlayers.map(p => p.score);
-        const maxScore = scores[0]; 
-        const minScore = scores[scores.length - 1];
-        const range = maxScore - minScore;
-
-        if (range === 0) {
-            return sortedPlayers.map(p => ({ ...p, rating: '10↑', rawScore: p.score.toFixed(4) }));
-        }
-
-        const step = range / 10;
-        
-        let ratedPlayers = sortedPlayers.map(p => {
-            let ratingIndex = Math.floor((p.score - minScore) / step);
-            
-            if (p.score === maxScore) ratingIndex = 9; 
-
-            p.tenScaleRating = ratingIndex + 1;
-            p.rawScore = p.score.toFixed(4); 
-            return p;
-        });
-
-        const arrowMap = ['↑', '↗', '→', '↘', '↓']; 
-
-        let groupedByRating = ratedPlayers.reduce((acc, player) => {
-            if (!acc[player.tenScaleRating]) {
-                acc[player.tenScaleRating] = [];
-            }
-            acc[player.tenScaleRating].push(player);
-            return acc;
-        }, {});
-
-        let finalRatedPlayers = [];
-        Object.keys(groupedByRating).sort((a, b) => b - a).forEach(ratingKey => {
-            let group = groupedByRating[ratingKey];
-            
-            group.forEach((player, index) => {
-                const arrow = arrowMap[Math.min(index, arrowMap.length - 1)]; 
-                player.rating = `${ratingKey}${arrow}`;
-                finalRatedPlayers.push(player);
-            });
-        });
-
-        finalRatedPlayers.sort((a, b) => b.score - a.score);
-
-        return finalRatedPlayers;
-    }
-
-    // バンク特性フィードバック表示 (係数表示を削除)
-    function displayBankFeedback(bankName, biasMap) {
-        let strongestLeg = 'なし';
-        let maxBias = 1.0;
-
-        for (const leg in biasMap) {
-            if (biasMap[leg] > maxBias) {
-                maxBias = biasMap[leg];
-                strongestLeg = leg;
-            }
-        }
-        
-        const feedbackDiv = document.getElementById('bank-feedback');
-        if (strongestLeg !== 'なし') {
-            feedbackDiv.innerHTML = `🚨 **${bankName}バンクの特性:** 脚質補正が最も高いのは **${strongestLeg}** の傾向があります。`;
-            feedbackDiv.style.display = 'block';
-        } else {
-            feedbackDiv.innerHTML = `🚨 **${bankName}バンクの特性:** 脚質補正の大きな偏りはありません。`;
-            feedbackDiv.style.display = 'block';
-        }
-    }
-    
-    function generateSanrentanDetails(sortedPlayers) {
-        let combinations = [];
-        // 少なくとも5名が揃っているか確認
-        const topN = sortedPlayers.slice(0, Math.min(sortedPlayers.length, 5)); 
-        if (topN.length < 3) return combinations; // 3名未満なら組み合わせなし
-
-        for (let i = 0; i < topN.length; i++) {
-            for (let j = 0; j < topN.length; j++) {
-                if (i === j) continue;
-                for (let k = 0; k < topN.length; k++) {
-                    if (k === i || k === j) continue;
-                    
-                    let expectedVal = topN[i].score + topN[j].score + topN[k].score;
-                    
-                    combinations.push({
-                        nums: `${topN[i].id} - ${topN[j].id} - ${topN[k].id}`,
-                        val: expectedVal, 
-                    });
-                }
-            }
-        }
-        return combinations;
-    }
-
-    // 三連単 BEST3を補完する三連複2点を生成
-    function generateCombinedSanrenpukuHtml(combinedSanrentanList) {
-        let sanrenpukuSet = new Set();
-        let sanrenpukuCandidates = [];
-
-        if (combinedSanrentanList.length === 0) return "<li>データ不足</li>";
-
-        // 1. 全展開共通BEST3三連単に含まれる三連複の組合わせを把握
-        const best3SanrentanSets = new Set();
-        combinedSanrentanList.slice(0, 3).forEach(c => {
-            const parts = c.nums.split(' - ').map(n => parseInt(n));
-            // 組み合わせをソートして三連複として格納
-            best3SanrentanSets.add(parts.sort((a, b) => a - b).join('='));
-        });
-
-        // 2. 全組み合わせから三連複を抽出し、期待値でソート
-        // 最も多く出現した選手IDトップ4を使用
-        const allIDs = combinedSanrentanList.flatMap(c => c.nums.split(' - ').map(n => parseInt(n)));
-        const idCounts = allIDs.reduce((acc, id) => {
-            acc[id] = (acc[id] || 0) + 1;
-            return acc;
-        }, {});
-        const top4IDs = Object.keys(idCounts).sort((a, b) => idCounts[b] - idCounts[a]).slice(0, 4).map(Number).sort((a, b) => a - b);
-        
-        if (top4IDs.length < 3) return "<li>データ不足（軸選手不足）</li>";
-
-        // 3. トップ4の組み合わせ（4C3 = 4点）を生成
-        const candidates = [
-            [top4IDs[0], top4IDs[1], top4IDs[2]],
-            [top4IDs[0], top4IDs[1], top4IDs[3]],
-            [top4IDs[0], top4IDs[2], top4IDs[3]],
-            [top4IDs[1], top4IDs[2], top4IDs[3]]
-        ];
-
-        candidates.forEach(comb => {
-            const combStr = comb.join('=');
-            if (!best3SanrentanSets.has(combStr) && !sanrenpukuSet.has(combStr)) {
-                // 三連単BEST3に含まれておらず、重複していない組み合わせを候補に入れる
-                sanrenpukuCandidates.push(combStr);
-                sanrenpukuSet.add(combStr);
-            }
-        });
-
-        let html = '';
-        const finalPuku = sanrenpukuCandidates.slice(0, 2); 
-        
-        if (finalPuku.length > 0) {
-            finalPuku.forEach(p => {
-                html += `<li>${p}</li>`;
-            });
-        } else {
-             // BEST3の三連単でトップ4の組み合わせが既にカバーされている場合の予備策
-            const allPuku = candidates.map(c => c.join('='));
-            const remainingPuku = allPuku.filter(p => !best3SanrentanSets.has(p)).slice(0, 2);
-            
-            if (remainingPuku.length > 0) {
-                remainingPuku.forEach(p => {
-                    html += `<li>${p}</li>`;
-                });
-            } else {
-                // すべての三連複がカバーされている場合
-                const top3Box = top4IDs.slice(0, 3).join('=');
-                const secondPuku = (top4IDs.length > 3) ? [top4IDs[0], top4IDs[1], top4IDs[3]].sort((a,b)=>a-b).join('=') : ''; 
-                
-                html = `<li>${top3Box}</li>`;
-                if(top3Box !== secondPuku && secondPuku) {
-                    html += `<li>${secondPuku}</li>`;
-                } else if (top3Box === secondPuku && top4IDs.length >= 4) {
-                    // 同一の場合、別パターンを作成 (例: 134)
-                    const altPuku = [top4IDs[0], top4IDs[2], top4IDs[3]].sort((a,b)=>a-b).join('=');
-                    if (top3Box !== altPuku) {
-                        html += `<li>${altPuku}</li>`;
-                    }
-                }
-            }
-        }
-        
-        return html;
-    }
-
-
-    function displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations) {
-        document.getElementById('result-area').style.display = 'block';
-        const container = document.getElementById('scenario-results-container');
-        container.innerHTML = '';
-        
-        const combinedList = Object.keys(allSanrentanCombinations).map(nums => {
-            const data = allSanrentanCombinations[nums];
-            return {
-                nums: nums,
-                count: data.count, 
-                avgVal: data.totalVal / data.count 
-            };
-        });
-
-        // 期待値と頻度でソート
-        combinedList.sort((a, b) => {
-            if (b.count !== a.count) {
-                return b.count - a.count; 
-            }
-            return b.avgVal - a.avgVal; 
-        });
-
-        // 総合ランキングエリアの表示
-        const top3Combined = combinedList.slice(0, 3);
-        const combinedSanrentanList = document.getElementById('combined-sanrentan-list');
-        const combinedSanrenpukuList = document.getElementById('combined-sanrenpuku-list'); 
-        
-        combinedSanrentanList.innerHTML = '';
-        combinedSanrenpukuList.innerHTML = '';
-
-        if (top3Combined.length > 0) {
-            // 三連単3点を表示 (頻度・期待値なし)
-            top3Combined.forEach(c => {
-                const li = document.createElement('li');
-                li.textContent = c.nums;
-                combinedSanrentanList.appendChild(li);
-            });
-            
-            // 三連複2点を生成・表示
-            const sanrenpukuHtml = generateCombinedSanrenpukuHtml(combinedList);
-            combinedSanrenpukuList.innerHTML = sanrenpukuHtml;
-
-            document.getElementById('combined-ranking').style.display = 'block';
-        } else {
-            document.getElementById('combined-ranking').style.display = 'none';
-        }
-
-        allScenarioResults.forEach(result => {
-            const resultDiv = document.createElement('div');
-            resultDiv.className = 'scenario-result';
-            
-            const players = result.players; 
-            const rankingTable = generateRankingTable(players);
-            const top12Kaime = result.sanrentanDetails.sort((a,b) => b.val - a.val).slice(0, 12);
-            
-            const sanrentanHtml = top12Kaime.map((c, index) => {
-                let weightClass = 'weight-weak'; 
-                if (index === 0) {
-                    weightClass = 'weight-strong'; 
-                } else if (index === 1) {
-                    weightClass = 'weight-high'; 
-                } else if (index === 2) {
-                    weightClass = 'weight-medium'; 
-                } else if (index >= 3 && index <= 5) {
-                    weightClass = 'weight-low'; 
-                }
-                return `<li class="${weightClass}">${c.nums}</li>`;
-            }).join('');
-
-            const kaimeHtml = generateSanrenpukuHtml(players); 
-
-            resultDiv.innerHTML = `
-                <h3>${result.scenario} の予想</h3>
-                <div style="display: flex; gap: 20px;">
-                    <div style="flex: 1;">
-                        <h4>補正後スコア順位 (10段階評価)</h4>
-                        ${rankingTable}
-                    </div>
-                    <div style="flex: 1;">
-                        <h4>買い目</h4>
-                        <h5>三連単 (12点)</h5>
-                        <ul class="kaime-list">${sanrentanHtml}</ul>
-                        <h5>三連複 (4点)</h5>
-                        <ul class="kaime-list">${kaimeHtml.sanrenpuku}</ul>
-                    </div>
-                </div>
-            `;
-            container.appendChild(resultDiv);
-        });
-    }
-
-    function generateRankingTable(players) {
-        let tbodyContent = '';
-        players.forEach((p, index) => {
-            tbodyContent += `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td style="font-weight:bold; font-size:1.1em;">${p.id}番</td>
-                    <td class="score-rank">${p.rating} / 10</td>
-                    <td>${p.leg}</td>
-                </tr>
-            `;
-        });
-
-        return `
-            <table class="player-table">
-                <thead><tr><th>順位</th><th>ID</th><th>評価点</th><th>脚質</th></tr></thead>
-                <tbody>${tbodyContent}</tbody>
-            </table>
-        `;
-    }
-
-    function generateSanrenpukuHtml(sortedPlayers) {
-        const p1 = sortedPlayers[0]?.id;
-        const p2 = sortedPlayers[1]?.id;
-        const p3 = sortedPlayers[2]?.id;
-        const p4 = sortedPlayers[3]?.id;
-
-        let sanrenpukuHtml = '';
-        if (sortedPlayers.length >= 4) {
-            const boxIds = [p1, p2, p3, p4].sort((a,b)=>a-b); 
-            const boxCombs = [
-                [boxIds[0], boxIds[1], boxIds[2]],
-                [boxIds[0], boxIds[1], boxIds[3]],
-                [boxIds[0], boxIds[2], boxIds[3]],
-                [boxIds[1], boxIds[2], boxIds[3]]
-            ];
-
-            boxCombs.forEach(comb => {
-                sanrenpukuHtml += `<li>${comb[0]} = ${comb[1]} = ${comb[2]}</li>`;
-            });
-        } else {
-            sanrenpukuHtml += "<li>データ不足（4名以上必要）</li>";
-        }
-        
-        return { sanrenpuku: sanrenpukuHtml };
-    }
-    
-    // 説明書トグル機能
-    function toggleManual() {
-        const content = document.getElementById('manual-content');
-        const icon = document.getElementById('toggle-icon');
-        
-        if (content.classList.contains('manual-content-hidden')) {
-            content.classList.remove('manual-content-hidden');
-            icon.textContent = '▲'; 
-        } else {
-            content.classList.add('manual-content-hidden');
-            icon.textContent = '▼'; 
-        }
-    }
-
-</script>
-
-</body>
-</html>
+                meetingRan
