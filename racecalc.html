@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>競走補正スコア計算</title>
+<style>
+  body { font-family: sans-serif; margin: 20px; }
+  input, select, textarea { margin-bottom: 10px; width: 100%; }
+  table { border-collapse: collapse; margin-top: 20px; width: 100%; }
+  th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
+  .score { font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h2>競走補正スコア計算</h2>
+
+<!-- 選手データ -->
+<h3>選手データ（7人）</h3>
+<table>
+<tr>
+  <th>選手</th>
+  <th>脚質</th>
+  <th>競走得点</th>
+</tr>
+<tr><td>1</td><td><select class="type"><option value="先行">先行</option><option value="差し">差し</option><option value="追込">追込</option></select></td><td><input type="number" class="scoreInput" value="50"></td></tr>
+<tr><td>2</td><td><select class="type"><option value="先行">先行</option><option value="差し">差し</option><option value="追込">追込</option></select></td><td><input type="number" class="scoreInput" value="50"></td></tr>
+<tr><td>3</td><td><select class="type"><option value="先行">先行</option><option value="差し">差し</option><option value="追込">追込</option></select></td><td><input type="number" class="scoreInput" value="50"></td></tr>
+<tr><td>4</td><td><select class="type"><option value="先行">先行</option><option value="差し">差し</option><option value="追込">追込</option></select></td><td><input type="number" class="scoreInput" value="50"></td></tr>
+<tr><td>5</td><td><select class="type"><option value="先行">先行</option><option value="差し">差し</option><option value="追込">追込</option></select></td><td><input type="number" class="scoreInput" value="50"></td></tr>
+<tr><td>6</td><td><select class="type"><option value="先行">先行</option><option value="差し">差し</option><option value="追込">追込</option></select></td><td><input type="number" class="scoreInput" value="50"></td></tr>
+<tr><td>7</td><td><select class="type"><option value="先行">先行</option><option value="差し">差し</option><option value="追込">追込</option></select></td><td><input type="number" class="scoreInput" value="50"></td></tr>
+</table>
+
+<!-- 並び入力 -->
+<h3>並び（改行で複数ライン）</h3>
+<textarea id="orderInput" rows="4" placeholder="例：1,2,3&#10;4,5&#10;6&#10;7"></textarea>
+
+<!-- 場・風・時間帯 -->
+<h3>補正条件</h3>
+<select id="trackSelect">
+  <option value="函館">函館</option>
+  <option value="東京">東京</option>
+  <option value="阪神">阪神</option>
+  <option value="中山">中山</option>
+</select>
+<select id="windSelect">
+  <option value="なし">風なし</option>
+  <option value="追い風">追い風</option>
+  <option value="向かい風">向かい風</option>
+</select>
+<select id="timeSelect">
+  <option value="デイ">デイ</option>
+  <option value="ナイター">ナイター</option>
+  <option value="ミッドナイト">ミッドナイト</option>
+</select>
+
+<button onclick="calculate()">計算する</button>
+
+<h3>補正後スコアランキング</h3>
+<table id="scoreTable">
+<tr><th>選手</th><th>脚質</th><th>補正後スコア</th></tr>
+</table>
+
+<h3>買い目</h3>
+<p>三連単12点 / 三連複4点</p>
+<div id="trifecta"></div>
+<div id="trio"></div>
+
+<script>
+const typeCoeff = { "先行": 1.05, "差し": 1.00, "追込": 0.95 };
+const windCoeff = { "なし": 1.0, "追い風": 1.05, "向かい風": 0.95 };
+const timeCoeff = { "デイ": 1.0, "ナイター": 0.98, "ミッドナイト": 0.96 };
+
+function calculate() {
+  let table = document.getElementById("scoreTable");
+  table.innerHTML = "<tr><th>選手</th><th>脚質</th><th>補正後スコア</th></tr>";
+  let types = document.querySelectorAll(".type");
+  let scores = document.querySelectorAll(".scoreInput");
+  let wind = document.getElementById("windSelect").value;
+  let time = document.getElementById("timeSelect").value;
+
+  let result = [];
+  for(let i=0;i<7;i++){
+    let base = parseFloat(scores[i].value);
+    let tCoeff = typeCoeff[types[i].value];
+    let wCoeff = windCoeff[wind];
+    let timeC = timeCoeff[time];
+    let finalScore = base * tCoeff * wCoeff * timeC;
+    result.push({idx:i+1, type:types[i].value, score:finalScore});
+  }
+
+  result.sort((a,b)=>b.score-a.score);
+  result.forEach(r=>{
+    let row = table.insertRow();
+    row.insertCell(0).innerText = r.idx;
+    row.insertCell(1).innerText = r.type;
+    row.insertCell(2).innerText = r.score.toFixed(2);
+  });
+
+  // 並び解析
+  let orderText = document.getElementById("orderInput").value.trim();
+  let lines = orderText.split("\n").map(l=>l.split(",").map(Number));
+
+  // 三連単12点（単純に補正後スコア上位組み合わせ）
+  let top3 = result.slice(0,3).map(r=>r.idx);
+  let trifecta = [
+    [top3[0], top3[1], top3[2]],
+    [top3[0], top3[2], top3[1]],
+    [top3[1], top3[0], top3[2]],
+    [top3[1], top3[2], top3[0]],
+    [top3[2], top3[0], top3[1]],
+    [top3[2], top3[1], top3[0]]
+  ];
+  // 補完で12点
+  trifecta.push([top3[0], top3[1], result[3].idx]);
+  trifecta.push([top3[0], result[3].idx, top3[1]]);
+  trifecta.push([top3[1], top3[0], result[3].idx]);
+  trifecta.push([top3[1], result[3].idx, top3[0]]);
+  trifecta.push([result[3].idx, top3[0], top3[1]]);
+  trifecta.push([result[3].idx, top3[1], top3[0]]);
+  
+  document.getElementById("trifecta").innerText = trifecta.map(r=>"["+r.join(",")+"]").join(", ");
+
+  // 三連複4点（上位4頭から簡単に組み合わせ）
+  let trio = [
+    [top3[0], top3[1], top3[2]],
+    [top3[0], top3[1], result[3].idx],
+    [top3[0], top3[2], result[3].idx],
+    [top3[1], top3[2], result[3].idx]
+  ];
+  document.getElementById("trio").innerText = trio.map(r=>"["+r.join(",")+"]").join(", ");
+}
+</script>
+
+</body>
+</html>
