@@ -3,114 +3,130 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Race Calculator - Mobile</title>
+<title>競輪スコア計算</title>
 <style>
-  body { font-family: sans-serif; margin: 10px; font-size: 18px; }
-  label, input, select, button { display: block; width: 100%; margin: 8px 0; font-size: 18px; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 18px; }
-  button { padding: 12px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; }
-  button:active { background-color: #45a049; }
-  pre { background-color: #f2f2f2; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+  body { font-family: sans-serif; padding: 10px; }
+  input, select { font-size: 16px; margin: 5px 0; width: 100%; }
+  button { font-size: 16px; margin: 10px 0; width: 100%; }
+  .player { margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+  .results { margin-top: 20px; }
 </style>
 </head>
 <body>
-<h2>競走スコア計算（スマホ用）</h2>
 
-<label>場名:
-  <select id="racetrack"></select>
-</label>
-<label>風:
-  <select id="wind"></select>
-</label>
-<label>時間帯:
-  <select id="time"></select>
-</label>
+<h2>競輪スコア計算</h2>
 
-<h3>選手データ入力（7人）</h3>
-<table>
-<tr><th>選手</th><th>脚質</th><th>競走得点</th></tr>
-<tr><td>1</td><td><input type="text" class="style" placeholder="先行/差し/追込"></td><td><input type="number" class="score" value="0"></td></tr>
-<tr><td>2</td><td><input type="text" class="style" placeholder="先行/差し/追込"></td><td><input type="number" class="score" value="0"></td></tr>
-<tr><td>3</td><td><input type="text" class="style" placeholder="先行/差し/追込"></td><td><input type="number" class="score" value="0"></td></tr>
-<tr><td>4</td><td><input type="text" class="style" placeholder="先行/差し/追込"></td><td><input type="number" class="score" value="0"></td></tr>
-<tr><td>5</td><td><input type="text" class="style" placeholder="先行/差し/追込"></td><td><input type="number" class="score" value="0"></td></tr>
-<tr><td>6</td><td><input type="text" class="style" placeholder="先行/差し/追込"></td><td><input type="number" class="score" value="0"></td></tr>
-<tr><td>7</td><td><input type="text" class="style" placeholder="先行/差し/追込"></td><td><input type="number" class="score" value="0"></td></tr>
-</table>
+<label>場名:</label>
+<select id="placeSelect"></select>
 
-<label>並び（例:123,45,6,7）:
-  <input type="text" id="lineup" size="20">
-</label>
+<label>時間帯:</label>
+<select id="timeSelect">
+  <option value="day">デイ</option>
+  <option value="night">ナイター</option>
+  <option value="midnight">ミッドナイト</option>
+</select>
 
-<button id="calcBtn">計算</button>
+<label>風・隊列補正:</label>
+<select id="windSelect">
+  <option value="">なし</option>
+  <option value="追い風">追い風</option>
+  <option value="向かい風">向かい風</option>
+  <option value="横風">横風</option>
+  <option value="外伸び">外伸び</option>
+</select>
 
-<h3>補正後スコアランキング</h3>
-<pre id="result"></pre>
+<h3>選手情報 (7人)</h3>
+<div id="players">
+</div>
 
-<h3>買い目</h3>
-<pre id="bets"></pre>
+<label>並び (例: 123,45,6,7):</label>
+<input type="text" id="lineup" placeholder="並びをカンマ区切りで入力">
+
+<button onclick="calculate()">計算</button>
+
+<div class="results" id="results"></div>
 
 <script>
-let bankData = {};
-
+// JSONデータを読み込む
+let bankData;
 fetch('bankdata.json')
   .then(res => res.json())
   .then(data => {
     bankData = data;
-    const racetrackSelect = document.getElementById('racetrack');
-    Object.keys(bankData).forEach(track => {
-      const opt = document.createElement('option');
-      opt.value = track;
-      opt.textContent = track;
-      racetrackSelect.appendChild(opt);
-    });
-
-    ['東','西','南','北','無風'].forEach(w => {
-      const opt = document.createElement('option');
-      opt.value = w; opt.textContent = w;
-      document.getElementById('wind').appendChild(opt);
-    });
-    ['デイ','ナイター','ミッドナイト'].forEach(t => {
-      const opt = document.createElement('option');
-      opt.value = t; opt.textContent = t;
-      document.getElementById('time').appendChild(opt);
-    });
-  })
-  .catch(err => console.error('JSON読み込み失敗:', err));
-
-function calcScore() {
-  const styles = [...document.getElementsByClassName('style')].map(e => e.value.trim());
-  const scores = [...document.getElementsByClassName('score')].map(e => Number(e.value));
-  const track = document.getElementById('racetrack').value;
-  const wind = document.getElementById('wind').value;
-  const time = document.getElementById('time').value;
-
-  const adjScores = scores.map((s, i) => {
-    const style = styles[i];
-    let coef = 1;
-    if(bankData[track] && bankData[track][style]) coef = bankData[track][style];
-    if(wind === '東') coef *= 1.05;
-    if(time === 'ナイター') coef *= 1.02;
-    if(time === 'ミッドナイト') coef *= 0.98;
-    return s * coef;
+    populatePlaces();
+    populatePlayers();
   });
 
-  const ranked = adjScores.map((s,i)=>({i:i+1,s:s})).sort((a,b)=>b.s-a.s);
-  document.getElementById('result').textContent = ranked.map(r=>`選手${r.i}: ${r.s.toFixed(2)}`).join('\n');
-
-  const lineup = document.getElementById('lineup').value.split(',');
-  const allNumbers = lineup.flatMap(g=>g.split('').map(n=>Number(n)));
-  const triSingle = [];
-  for(let i=0;i<3;i++)
-    for(let j=i+1;j<3;j++)
-      for(let k=j+1;k<3;k++)
-        triSingle.push([allNumbers[i],allNumbers[j],allNumbers[k]]);
-  const triSingle12 = triSingle.slice(0,12);
-  document.getElementById('bets').textContent = `三連単12点:\n${triSingle12.map(a=>a.join('-')).join('\n')}\n\n三連複4点:\n${allNumbers.slice(0,4).join(',')}`;
+// 場名選択肢生成
+function populatePlaces() {
+  const select = document.getElementById('placeSelect');
+  for (let place in bankData) {
+    const opt = document.createElement('option');
+    opt.value = place;
+    opt.textContent = place;
+    select.appendChild(opt);
+  }
 }
 
-document.getElementById('calcBtn').addEventListener('click', calcScore);
+// 選手入力欄生成
+function populatePlayers() {
+  const container = document.getElementById('players');
+  container.innerHTML = '';
+  for (let i=1; i<=7; i++) {
+    const div = document.createElement('div');
+    div.className = 'player';
+    div.innerHTML = `
+      <label>選手${i} 得点:</label>
+      <input type="number" id="score${i}" value="80">
+      <label>脚質:</label>
+      <select id="style${i}">
+        <option value="逃げ">逃げ</option>
+        <option value="差し">差し</option>
+        <option value="捲り">捲り</option>
+        <option value="マーク">マーク</option>
+      </select>
+    `;
+    container.appendChild(div);
+  }
+}
+
+// 計算処理
+function calculate() {
+  const place = document.getElementById('placeSelect').value;
+  const time = document.getElementById('timeSelect').value;
+  const wind = document.getElementById('windSelect').value;
+  const lineupStr = document.getElementById('lineup').value;
+  const lineupGroups = lineupStr.split(',').map(g => g.split('').map(n => parseInt(n)));
+
+  const scores = [];
+  for (let i=1; i<=7; i++) {
+    let base = parseFloat(document.getElementById(`score${i}`).value);
+    let style = document.getElementById(`style${i}`).value;
+    let bias = bankData[place]?.keirin_bias?.[style] || 1.0;
+    let windBonus = bankData[place]?.wind_or_position?.[wind] || 1.0;
+    let finalScore = base * bias * windBonus;
+    scores.push({player:i, score:finalScore});
+  }
+
+  // スコア降順
+  scores.sort((a,b)=>b.score-a.score);
+
+  // 三連単12点・三連複4点を適当生成（並びに基づく）
+  let flatLineup = lineupGroups.flat().filter(n=>n>=1 && n<=7);
+  let trysan = flatLineup.slice(0,3);
+  let trin = flatLineup.slice(0,4);
+
+  // 結果表示
+  let resultDiv = document.getElementById('results');
+  let html = '<h3>補正後スコアランキング</h3><ol>';
+  scores.forEach(s=>{html+=`<li>選手${s.player}: ${s.score.toFixed(2)}</li>`});
+  html += '</ol>';
+  html += '<h3>買い目</h3>';
+  html += `<p>三連単12点: ${trysan.join('-')}</p>`;
+  html += `<p>三連複4点: ${trin.join(',')}</p>`;
+  resultDiv.innerHTML = html;
+}
 </script>
+
 </body>
 </html>
