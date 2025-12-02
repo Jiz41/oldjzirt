@@ -401,21 +401,18 @@
         }
     }
 
-    // JSONデータの読み込み
+    // JSONデータの読み込み (bankdata.jsonから取得)
     async function loadBankData() { 
         const bankSelect = document.getElementById('bank-select');
+        bankSelect.innerHTML = '<option value="">データ読み込み中...</option>';
+        
         try {
-            // bankdata.jsonは存在すると仮定し、データをロード
-            // 実際にはユーザー環境にbankdata.jsonを配置する必要がある
+            const response = await fetch('bankdata.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            bankData = await response.json();
             
-            // 以下はダミーデータ構造。実際のコードではFetch APIを使う
-            bankData = {
-                "奈良": {
-                    "keirin_bias": { "先行": 1.0, "捲り": 1.0, "差し": 1.0 },
-                    "wind_or_position": {}
-                }
-            };
-
             bankSelect.innerHTML = '<option value="">選択してください</option>';
             Object.keys(bankData).forEach(bankName => {
                 const option = document.createElement('option');
@@ -426,12 +423,22 @@
             if (Object.keys(bankData).length > 0) {
                 bankSelect.value = Object.keys(bankData)[0];
             }
+            
+            // 読み込み成功メッセージ
+            console.log("Bank data loaded successfully from bankdata.json");
+            
         } catch (error) {
             console.error("Bank data loading error:", error);
             bankSelect.innerHTML = '<option value="">🚨 データ読み込み失敗 (bankdata.jsonが未配置/エラー)</option>';
+            bankData = {}; // エラー時は空のオブジェクトを設定
+            
+            // ユーザーへの注意喚起
+            document.getElementById('bank-feedback').innerHTML = "🚨 **警告:** bankdata.jsonの読み込みに失敗しました。脚質・風補正なしで計算されます。";
+            document.getElementById('bank-feedback').style.display = 'block';
         }
     }
 
+    // ... (以下の関数は変更なし) ...
     // --- 新規ロジック: ライン・単騎の判定と補正値の計算 ---
 
     function parseLineupAndDetermineMode(lineupStr, players) {
@@ -544,9 +551,11 @@
     // メイン計算ロジック
     function calculate() {
         const selectedBankName = document.getElementById('bank-select').value;
-        if (!selectedBankName || !bankData[selectedBankName]) {
-            alert("バンクデータが読み込まれていません。「🚨 データ読み込み失敗」と表示されている場合は、外部ファイル「bankdata.json」を設置してください。");
-            return;
+        if (!bankData[selectedBankName]) {
+            // bankDataが読み込めていないか、選択したバンクのデータがない場合
+            alert("バンクデータが読み込まれていないか、選択したバンクのデータが存在しません。続行しますが、脚質・風補正は適用されません。");
+            // bankDataが空の場合に備え、ダミーデータを設定
+            bankData[selectedBankName] = { "keirin_bias": { "先行": 1.0, "捲り": 1.0, "差し": 1.0, "マーク": 1.0 }, "wind_or_position": {} };
         }
 
         const currentBank = bankData[selectedBankName];
@@ -765,8 +774,8 @@
             }
         }
         const feedbackDiv = document.getElementById('bank-feedback');
-        if (strongestLeg !== 'なし') {
-            feedbackDiv.innerHTML = `🚨 **${bankName}バンクの特性:** 脚質補正が最も高いのは **${strongestLeg}** の傾向があります。`;
+        if (strongestLeg !== 'なし' && maxBias > 1.0) {
+            feedbackDiv.innerHTML = `🚨 **${bankName}バンクの特性:** 脚質補正が最も高いのは **${strongestLeg}** の傾向があります。(補正値: ${maxBias.toFixed(2)})`;
             feedbackDiv.style.display = 'block';
         } else {
             feedbackDiv.innerHTML = `🚨 **${bankName}バンクの特性:** 脚質補正の大きな偏りはありません。`;
