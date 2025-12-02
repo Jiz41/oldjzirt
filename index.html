@@ -3,21 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>競輪スコア計算機</title>
+<title>競輪補正スコア計算機</title>
 <style>
-body { font-family: sans-serif; margin: 20px; font-size: 16px; }
-input, select { margin-bottom: 10px; width: 100%; padding: 5px; }
-button { padding: 10px; margin-top: 10px; width: 100%; }
-.result { margin-top: 20px; }
+  body { font-family: sans-serif; margin: 10px; padding: 0; background: #f0f0f0; }
+  h2 { margin-top: 20px; }
+  select, input { width: 100%; padding: 8px; margin: 5px 0; font-size: 1em; }
+  button { width: 100%; padding: 10px; font-size: 1em; margin: 10px 0; }
+  .result { background: #fff; padding: 10px; margin-top: 10px; border-radius: 5px; }
+  .player-input { margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
 </style>
 </head>
 <body>
-<h2>競輪スコア計算機</h2>
 
-<label>場名</label>
-<select id="trackSelect"></select>
+<h1>競輪補正スコア計算機</h1>
 
-<label>時間帯</label>
+<h2>場・条件選択</h2>
+<select id="bankSelect">
+  <option value="">場を選択してください</option>
+</select>
+
 <select id="timeSelect">
   <option value="モーニング">モーニング</option>
   <option value="デイ">デイ</option>
@@ -25,121 +29,123 @@ button { padding: 10px; margin-top: 10px; width: 100%; }
   <option value="ミッドナイト">ミッドナイト</option>
 </select>
 
-<label>風向き</label>
 <select id="windSelect">
+  <option value="">風向きを選択</option>
   <option value="東">東</option>
   <option value="西">西</option>
   <option value="南">南</option>
   <option value="北">北</option>
 </select>
 
-<h3>選手情報 (スコア、脚質)</h3>
-<div id="riders">
-  <div>
-    <input type="text" placeholder="選手名" class="riderName">
-    <select class="riderStyle">
+<h2>選手情報入力</h2>
+<div id="playersContainer"></div>
+<button id="addPlayer">選手追加</button>
+
+<h2>計算</h2>
+<button id="calculateBtn">計算する</button>
+
+<div id="result" class="result"></div>
+
+<script>
+// JSONから場データを読み込む
+let bankData = {};
+fetch('bankdata.json')
+  .then(res => res.json())
+  .then(data => {
+    bankData = data;
+    const bankSelect = document.getElementById('bankSelect');
+    Object.keys(bankData).forEach(bank => {
+      const opt = document.createElement('option');
+      opt.value = bank;
+      opt.textContent = bank;
+      bankSelect.appendChild(opt);
+    });
+  });
+
+// 選手追加
+let playerCount = 0;
+const playersContainer = document.getElementById('playersContainer');
+document.getElementById('addPlayer').addEventListener('click', () => {
+  playerCount++;
+  const div = document.createElement('div');
+  div.className = 'player-input';
+  div.innerHTML = `
+    <input type="text" placeholder="選手名" class="playerName">
+    <input type="number" placeholder="競走得点" class="playerScore">
+    <select class="playerStyle">
       <option value="逃げ">逃げ</option>
       <option value="差し">差し</option>
       <option value="捲り">捲り</option>
       <option value="マーク">マーク</option>
     </select>
-    <input type="number" placeholder="スコア" class="riderScore">
-  </div>
-</div>
-<button onclick="addRider()">選手追加</button>
-<button onclick="calculate()">計算</button>
+    <input type="text" placeholder="並び順(例:3,1,2,4)" class="playerOrder">
+  `;
+  playersContainer.appendChild(div);
+});
 
-<div class="result" id="result"></div>
-
-<script>
-let bankData;
-
-fetch('bankdata.json')
-  .then(res => res.json())
-  .then(data => {
-    bankData = data;
-    const trackSelect = document.getElementById('trackSelect');
-    for(const track in bankData){
-      const option = document.createElement('option');
-      option.value = track;
-      option.textContent = track;
-      trackSelect.appendChild(option);
-    }
-    updateWindOptions();
-  });
-
-document.getElementById('trackSelect').addEventListener('change', updateWindOptions);
-
-function updateWindOptions(){
-  const track = document.getElementById('trackSelect').value;
-  const windSelect = document.getElementById('windSelect');
-  windSelect.innerHTML = '';
-  if(bankData[track].wind_or_position){
-    for(const wind in bankData[track].wind_or_position){
-      const option = document.createElement('option');
-      option.value = wind;
-      option.textContent = wind;
-      windSelect.appendChild(option);
-    }
-  }
-}
-
-function addRider(){
-  const ridersDiv = document.getElementById('riders');
-  const div = document.createElement('div');
-  div.innerHTML = `<input type="text" placeholder="選手名" class="riderName">
-  <select class="riderStyle">
-    <option value="逃げ">逃げ</option>
-    <option value="差し">差し</option>
-    <option value="捲り">捲り</option>
-    <option value="マーク">マーク</option>
-  </select>
-  <input type="number" placeholder="スコア" class="riderScore">`;
-  ridersDiv.appendChild(div);
-}
-
-function calculate(){
-  const track = document.getElementById('trackSelect').value;
+// 計算
+document.getElementById('calculateBtn').addEventListener('click', () => {
+  const bank = document.getElementById('bankSelect').value;
   const time = document.getElementById('timeSelect').value;
   const wind = document.getElementById('windSelect').value;
 
-  const riders = [];
-  document.querySelectorAll('#riders > div').forEach(div => {
-    const name = div.querySelector('.riderName').value || '無名';
-    const style = div.querySelector('.riderStyle').value;
-    const score = parseFloat(div.querySelector('.riderScore').value) || 0;
-    riders.push({name, style, score});
+  if (!bank || !time || !wind) {
+    alert('場、時間帯、風向きは必須です');
+    return;
+  }
+
+  const players = [];
+  document.querySelectorAll('.player-input').forEach(div => {
+    const name = div.querySelector('.playerName').value;
+    const score = parseFloat(div.querySelector('.playerScore').value);
+    const style = div.querySelector('.playerStyle').value;
+    const orderStr = div.querySelector('.playerOrder').value;
+    const order = orderStr.split(',').map(x => x.trim());
+    if (name && !isNaN(score) && style && order.length > 0) {
+      players.push({ name, score, style, order });
+    }
   });
 
-  // スコア補正
-  riders.forEach(r => {
-    const bias = bankData[track].keirin_bias;
-    if(r.style === '逃げ') r.score *= bias['先行'] || 1;
-    if(r.style === '捲り') r.score *= bias['捲り'] || 1;
-    if(r.style === '差し') r.score *= bias['差し'] || 1;
+  if (players.length < 3) {
+    alert('選手は最低3人必要です');
+    return;
+  }
 
-    const windEffect = bankData[track].wind_or_position[wind] || 1;
-    r.score *= windEffect;
+  const bankInfo = bankData[bank];
+
+  // 補正後スコア計算
+  players.forEach(p => {
+    let styleCoef = bankInfo.keirin_bias[p.style] || 1;
+    let windCoef = 1;
+    for (const key in bankInfo.wind_or_position) {
+      if (key.includes(wind)) {
+        windCoef *= bankInfo.wind_or_position[key];
+      }
+    }
+    p.adjustedScore = p.score * styleCoef * windCoef;
   });
 
-  // スコア順ソート
-  riders.sort((a,b)=>b.score - a.score);
+  // スコア順に並べ替え
+  players.sort((a,b) => b.adjustedScore - a.adjustedScore);
 
-  // 三連単 12点
-  const top3 = riders.slice(0,3).map(r=>r.name);
-  const top4 = riders.slice(0,4).map(r=>r.name);
-  let trisan = `${top3[0]}-${top3[1]}-${top3[2]}`;
-  let sanrenfuku = top4.join(',');
-
-  const resultDiv = document.getElementById('result');
-  resultDiv.innerHTML = `<h3>補正後スコアランキング</h3>`;
-  riders.forEach(r=>{
-    resultDiv.innerHTML += `${r.name}: ${r.score.toFixed(2)}<br>`;
+  // 表示
+  let resultHTML = '<h3>補正後スコアランキング</h3><ol>';
+  players.forEach(p => {
+    resultHTML += `<li>${p.name}: ${p.adjustedScore.toFixed(2)}</li>`;
   });
-  resultDiv.innerHTML += `<h3>買い目</h3>`;
-  resultDiv.innerHTML += `三連単12点: ${trisan}<br>`;
-  resultDiv.innerHTML += `三連複4点: ${sanrenfuku}<br>`;
-}
+  resultHTML += '</ol>';
+
+  // 三連単12点、三連複4点
+  const threeTrifecta = players.slice(0,3).map(p=>p.name).join('-');
+  const threeBox = players.slice(0,4).map(p=>p.name).join(',');
+
+  resultHTML += `<h3>買い目</h3>`;
+  resultHTML += `<p>三連単12点: ${threeTrifecta}</p>`;
+  resultHTML += `<p>三連複4点: ${threeBox}</p>`;
+
+  document.getElementById('result').innerHTML = resultHTML;
+});
 </script>
+
 </body>
 </html>
