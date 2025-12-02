@@ -281,7 +281,7 @@
             </div>
         
         <div id="combined-ranking" style="display:none;">
-            <h2>✨ 晴天令 三鼎</h2> 
+            <h2>☀️ 晴天令</h2> 
             <p style="font-size: 0.75rem; margin-top: -5px; margin-bottom: 10px; color: #555; text-align: center;">
                 (おすすめ3連単3点と補助3連複2点の合計5点)
             </p>
@@ -293,7 +293,7 @@
         </div>
         
         <div id="mujirushi-anamae-ranking" style="display:none;"> 
-            <h2>⚫️ 荒天令 三尽</h2> 
+            <h2>⛈️ 荒天令</h2> 
             <p style="font-size: 0.75rem; margin-top: -5px; margin-bottom: 10px; color: #555; text-align: center;">
                 (低頻度/高期待値の穴目を優先的に抽出した3連単3点と補助3連複2点)
             </p>
@@ -677,7 +677,7 @@
         return html;
     }
 
-    // 三連単 BEST3を補完する三連複2点を生成 (荒天令 三尽用)
+    // 三連単 BEST3を補完する三連複2点を生成 (荒天令用)
     function generateHighRiskSanrenpukuHtml(sanrentanList) {
         if (sanrentanList.length === 0) return "<li>-</li>";
         
@@ -768,7 +768,7 @@
             document.getElementById('combined-ranking').style.display = 'none';
         }
         
-        // 荒天令 三尽 (高リスク推奨エリア) の表示
+        // 荒天令 (高リスク推奨エリア) の表示
         const highRiskCandidates = analyzeHighRiskCandidates(combinedList); // Top 3に修正済み
         const highRiskAnamaeListDiv = document.getElementById('mujirushi-anamae-list');
         const highRiskSanrenpukuListDiv = document.getElementById('mujirushi-sanrenpuku-list');
