@@ -45,6 +45,16 @@
         .kaime-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 5px; }
         .kaime-list li { padding: 3px 8px; border: 1px solid #ccc; border-radius: 3px; background: #fff; font-size: 0.9rem; }
         
+        /* New Combined Ranking Styles */
+        #combined-ranking { margin-top: 30px; padding: 15px; border: 2px solid #ffc107; border-radius: 8px; background-color: #fffaf0; }
+        #combined-ranking h2 { color: #d9534f; font-size: 1.4rem; }
+        #combined-ranking .kaime-list li { 
+            background-color: var(--accent-color); 
+            font-weight: bold; 
+            color: #333;
+            border-color: #cc9900;
+        }
+
         /* Responsive tweaks */
         @media (max-width: 600px) {
             .player-table th, .player-table td { padding: 4px; font-size: 0.7rem; }
@@ -114,6 +124,10 @@
     <button class="btn" onclick="calculate()">全パターン自動生成</button>
 
     <div id="result-area">
+        <div id="combined-ranking" style="display:none;">
+            <h2>✨ 全展開共通 BEST 3 買い目 (三連単)</h2>
+            <ul id="combined-sanrentan-list" class="kaime-list"></ul>
+        </div>
         <h2>📊 スコア・買い目シミュレーション結果</h2>
         <div id="scenario-results-container">
             </div>
@@ -150,7 +164,7 @@
         loadBankData(); 
     });
 
-    // 選手入力欄の生成 (W印のセレクトボックス)
+    // 選手入力欄の生成 (変更なし)
     function initPlayerTable() {
         const tbody = document.getElementById('player-inputs');
         const legOptions = ['先行', '捲り', '差し', 'マーク']; 
@@ -205,7 +219,7 @@
         }
     }
 
-    // メイン計算ロジック (変更なし)
+    // メイン計算ロジック
     function calculate() {
         const selectedBankName = document.getElementById('bank-select').value;
         if (!selectedBankName || !bankData[selectedBankName]) {
@@ -227,7 +241,6 @@
             }
         }
         
-        // 選手データの読み込み (共通)
         let rawPlayers = [];
         for (let i = 1; i <= PLAYER_COUNT; i++) {
             const leg = document.getElementById(`leg-${i}`).value;
@@ -246,14 +259,13 @@
             
             const legBias = currentBank.keirin_bias[legKey] || 1.0; 
 
-            // 静的係数 (システム固有のバンク/時間/風) の積
             const staticBias = legBias * windBiasVal * timeBiasVal;
 
             rawPlayers.push({
                 id: i,
                 leg: leg, 
                 rawScore: rawScore,
-                winticketBias: winticketBias, // WINTICKET係数
+                winticketBias: winticketBias,
                 staticBias: staticBias,
                 legKey: legKey
             });
@@ -265,46 +277,109 @@
         }
 
         const allScenarioResults = [];
+        const allSanrentanCombinations = {}; // 総合買い目計算用
         
-        // すべての展開パターン (DEVELOPMENT_BIAS) をループして計算を実行
         Object.keys(DEVELOPMENT_BIAS).forEach(scenarioName => {
             const developBiasMap = DEVELOPMENT_BIAS[scenarioName];
             
             let scenarioPlayers = rawPlayers.map(p => {
-                
-                // 展開動的係数の取得
                 const developBiasVal = developBiasMap[p.legKey] || 1.0;
-                
-                // 最終スコア計算: 得点 × WINTICKET係数 × 静的係数 × 展開動的係数
                 let finalScore = p.rawScore * p.winticketBias * p.staticBias * developBiasVal; 
-
-                return {
-                    id: p.id,
-                    leg: p.leg,
-                    score: finalScore
-                };
+                return { id: p.id, leg: p.leg, score: finalScore };
             });
             
-            // 順位付け
             scenarioPlayers.sort((a, b) => b.score - a.score);
+
+            // 買い目の詳細情報を取得
+            const sanrentanDetails = generateSanrentanDetails(scenarioPlayers);
+
+            // 総合買い目計算用のデータ蓄積
+            sanrentanDetails.forEach(c => {
+                if (!allSanrentanCombinations[c.nums]) {
+                    allSanrentanCombinations[c.nums] = { count: 0, totalVal: 0 };
+                }
+                allSanrentanCombinations[c.nums].count++;
+                allSanrentanCombinations[c.nums].totalVal += c.val;
+            });
 
             allScenarioResults.push({
                 scenario: scenarioName,
-                players: scenarioPlayers
+                players: scenarioPlayers,
+                sanrentanDetails: sanrentanDetails 
             });
         });
 
-        // 結果表示の実行
-        displayMultiScenarioResults(allScenarioResults);
+        // 結果表示の実行と総合買い目の計算
+        displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations);
     }
     // メイン計算ロジック終了
 
-    // 結果表示ロジック (複数パターン対応, 変更なし)
-    function displayMultiScenarioResults(allScenarioResults) {
+    // 三連単の全組み合わせとその期待値を返す関数 (Top12選定前の全データ)
+    function generateSanrentanDetails(sortedPlayers) {
+        let combinations = [];
+        const topN = sortedPlayers.slice(0, 5); 
+
+        for (let i = 0; i < topN.length; i++) {
+            for (let j = 0; j < topN.length; j++) {
+                if (i === j) continue;
+                for (let k = 0; k < topN.length; k++) {
+                    if (k === i || k === j) continue;
+                    
+                    let expectedVal = topN[i].score + topN[j].score + topN[k].score;
+                    
+                    combinations.push({
+                        nums: `${topN[i].id} - ${topN[j].id} - ${topN[k].id}`,
+                        val: expectedVal, // 期待値
+                    });
+                }
+            }
+        }
+        return combinations;
+    }
+
+
+    // ★★★ 結果表示ロジック (総合買い目対応) ★★★
+    function displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations) {
         document.getElementById('result-area').style.display = 'block';
         const container = document.getElementById('scenario-results-container');
         container.innerHTML = '';
+        
+        // 1. 総合買い目の計算と表示
+        const combinedList = Object.keys(allSanrentanCombinations).map(nums => {
+            const data = allSanrentanCombinations[nums];
+            return {
+                nums: nums,
+                count: data.count, // 出現頻度
+                avgVal: data.totalVal / data.count // 平均期待値
+            };
+        });
 
+        // 総合評価基準: まず頻度、次に平均期待値でソート
+        combinedList.sort((a, b) => {
+            if (b.count !== a.count) {
+                return b.count - a.count; // 頻度が高い順
+            }
+            return b.avgVal - a.avgVal; // 頻度が同じなら平均期待値が高い順
+        });
+
+        const top3Combined = combinedList.slice(0, 3);
+        const combinedSanrentanList = document.getElementById('combined-sanrentan-list');
+        const combinedRankingDiv = document.getElementById('combined-ranking');
+        combinedSanrentanList.innerHTML = '';
+
+        if (top3Combined.length > 0) {
+            top3Combined.forEach(c => {
+                const li = document.createElement('li');
+                li.textContent = `${c.nums} (頻度: ${c.count} / 平均期待値: ${c.avgVal.toFixed(3)})`;
+                combinedSanrentanList.appendChild(li);
+            });
+            combinedRankingDiv.style.display = 'block';
+        } else {
+            combinedRankingDiv.style.display = 'none';
+        }
+
+
+        // 2. シナリオごとの結果表示
         allScenarioResults.forEach(result => {
             const resultDiv = document.createElement('div');
             resultDiv.className = 'scenario-result';
@@ -312,7 +387,11 @@
             const players = result.players;
             
             const rankingTable = generateRankingTable(players);
-            const kaimeHtml = generateKaimeHtml(players);
+            // Top12の買い目を生成して表示
+            const top12Kaime = result.sanrentanDetails.sort((a,b) => b.val - a.val).slice(0, 12);
+            const sanrentanHtml = top12Kaime.map(c => `<li>${c.nums}</li>`).join('');
+
+            const kaimeHtml = generateSanrenpukuHtml(players); // 三連複は変更なし
 
             resultDiv.innerHTML = `
                 <h3>${result.scenario} の予想</h3>
@@ -324,7 +403,7 @@
                     <div style="flex: 1;">
                         <h4>買い目</h4>
                         <h5>三連単 (12点)</h5>
-                        <ul class="kaime-list">${kaimeHtml.sanrentan}</ul>
+                        <ul class="kaime-list">${sanrentanHtml}</ul>
                         <h5>三連複 (4点)</h5>
                         <ul class="kaime-list">${kaimeHtml.sanrenpuku}</ul>
                     </div>
@@ -355,39 +434,13 @@
         `;
     }
 
-    function generateKaimeHtml(sortedPlayers) {
+    // 三連複の買い目HTML生成（三連単はgenerateSanrentanDetailsとdisplayMultiScenarioResults内で処理）
+    function generateSanrenpukuHtml(sortedPlayers) {
         const p1 = sortedPlayers[0]?.id;
         const p2 = sortedPlayers[1]?.id;
         const p3 = sortedPlayers[2]?.id;
         const p4 = sortedPlayers[3]?.id;
 
-        // --- 三連単 (12点) ---
-        let sanrentanHtml = '';
-        let combinations = [];
-        const topN = sortedPlayers.slice(0, 5); 
-
-        for (let i = 0; i < topN.length; i++) {
-            for (let j = 0; j < topN.length; j++) {
-                if (i === j) continue;
-                for (let k = 0; k < topN.length; k++) {
-                    if (k === i || k === j) continue;
-                    
-                    let expectedVal = topN[i].score + topN[j].score + topN[k].score;
-                    
-                    combinations.push({
-                        nums: `${topN[i].id} - ${topN[j].id} - ${topN[k].id}`,
-                        val: expectedVal
-                    });
-                }
-            }
-        }
-
-        combinations.sort((a, b) => b.val - a.val);
-        const top12 = combinations.slice(0, 12);
-
-        top12.forEach(c => { sanrentanHtml += `<li>${c.nums}</li>`; });
-
-        // --- 三連複 (4点) ---
         let sanrenpukuHtml = '';
         if (sortedPlayers.length >= 4) {
             const boxIds = [p1, p2, p3, p4].sort((a,b)=>a-b); 
@@ -405,7 +458,7 @@
             sanrenpukuHtml += "<li>データ不足（4名以上必要）</li>";
         }
         
-        return { sanrentan: sanrentanHtml, sanrenpuku: sanrenpukuHtml };
+        return { sanrenpuku: sanrenpukuHtml };
     }
     // 結果表示ロジック終了
 
