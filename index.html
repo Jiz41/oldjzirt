@@ -65,7 +65,7 @@
         #combined-ranking h2 { 
             color: #d9534f; 
             font-size: 1.4rem; 
-            margin-bottom: 0px; /* 説明文を近づけるため調整 */
+            margin-bottom: 0px; 
         }
         #combined-sanrentan-list li { 
             background-color: var(--accent-color); 
@@ -310,13 +310,19 @@
     // --- 係数定義終了 ---
 
     window.addEventListener('DOMContentLoaded', () => {
-        initPlayerTable();
-        loadBankData(); 
+        initPlayerTable(); // 選手テーブル初期化
+        loadBankData();    // バンクデータ読み込み
     });
 
     // 選手入力欄の生成 (単一入力)
     function initPlayerTable() {
         const tbody = document.getElementById('player-inputs');
+        if (!tbody) {
+            console.error("Error: Player input table body (id='player-inputs') not found.");
+            return;
+        }
+        
+        tbody.innerHTML = ''; // 既存の内容をクリア
         const legOptions = ['先行', '捲り', '差し', 'マーク']; 
         const markOptions = Object.keys(WINTICKET_COEFFICIENTS).map(mark => `<option value="${mark}">${mark}</option>`).join('');
         
@@ -348,10 +354,10 @@
     }
 
     // JSONデータの読み込み (ダミーデータ含む)
-    async function loadBankData() {
+    function loadBankData() { // asyncを削除
         const bankSelect = document.getElementById('bank-select');
         try {
-            // ダミーデータ
+            // ダミーデータ (ハードコード)
             bankData = {
                 "立川": {
                     "keirin_bias": { "先行": 1.05, "捲り": 1.03, "差し": 1.0 },
@@ -374,11 +380,12 @@
                 option.textContent = bankName;
                 bankSelect.appendChild(option);
             });
+            // 最初のバンクをデフォルトで選択
             if (Object.keys(bankData).length > 0) {
                 bankSelect.value = Object.keys(bankData)[0];
             }
         } catch (error) {
-            console.error(error);
+            console.error("Bank data loading error:", error);
             bankSelect.innerHTML = '<option value="">データ読み込み失敗</option>';
         }
     }
@@ -405,16 +412,20 @@
         
         let rawPlayers = [];
         for (let i = 1; i <= PLAYER_COUNT; i++) {
-            const leg = document.getElementById(`leg-${i}`).value;
-            const rawScoreStr = document.getElementById(`score-${i}`).value;
-            const winticketMark = document.getElementById(`winticket-mark-${i}`).value; 
-            
-            if (!rawScoreStr || isNaN(parseFloat(rawScoreStr))) continue;
+            const leg = document.getElementById(`leg-${i}`)?.value;
+            const rawScoreStr = document.getElementById(`score-${i}`)?.value;
+            const winticketMark = document.getElementById(`winticket-mark-${i}`)?.value; 
+            const recentRanksStr = document.getElementById(`recent-ranks-${i}`)?.value.trim();
+
+            // 必須入力項目のチェックを強化
+            if (!rawScoreStr || isNaN(parseFloat(rawScoreStr)) || !leg || !recentRanksStr) {
+                 // 入力がないプレイヤーはスキップ（エラーではなく、処理対象から除外）
+                continue; 
+            }
 
             const rawScore = parseFloat(rawScoreStr);
             const winticketBias = WINTICKET_COEFFICIENTS[winticketMark] || 1.0;
 
-            const recentRanksStr = document.getElementById(`recent-ranks-${i}`).value.trim();
             const rankInputs = recentRanksStr.split('').slice(0, 3); 
             
             const rankKeys = ['1', '2', '3']; 
@@ -451,8 +462,8 @@
             });
         }
 
-        if (rawPlayers.length === 0) {
-            alert("選手データを入力してください");
+        if (rawPlayers.length < 3) {
+            alert("計算を行うには最低3名分の選手データを正しく入力してください。");
             return;
         }
 
@@ -498,7 +509,7 @@
     }
     // メイン計算ロジック終了
 
-    // 10段階評価（矢印レーティング）の適用 (変更なし)
+    // 10段階評価（矢印レーティング）の適用
     function applyTenScaleRating(sortedPlayers) {
         if (sortedPlayers.length === 0) return [];
         
@@ -573,7 +584,9 @@
     
     function generateSanrentanDetails(sortedPlayers) {
         let combinations = [];
-        const topN = sortedPlayers.slice(0, 5); 
+        // 少なくとも5名が揃っているか確認
+        const topN = sortedPlayers.slice(0, Math.min(sortedPlayers.length, 5)); 
+        if (topN.length < 3) return combinations; // 3名未満なら組み合わせなし
 
         for (let i = 0; i < topN.length; i++) {
             for (let j = 0; j < topN.length; j++) {
@@ -598,6 +611,8 @@
         let sanrenpukuSet = new Set();
         let sanrenpukuCandidates = [];
 
+        if (combinedSanrentanList.length === 0) return "<li>データ不足</li>";
+
         // 1. 全展開共通BEST3三連単に含まれる三連複の組合わせを把握
         const best3SanrentanSets = new Set();
         combinedSanrentanList.slice(0, 3).forEach(c => {
@@ -615,7 +630,7 @@
         }, {});
         const top4IDs = Object.keys(idCounts).sort((a, b) => idCounts[b] - idCounts[a]).slice(0, 4).map(Number).sort((a, b) => a - b);
         
-        if (top4IDs.length < 3) return "<li>データ不足</li>";
+        if (top4IDs.length < 3) return "<li>データ不足（軸選手不足）</li>";
 
         // 3. トップ4の組み合わせ（4C3 = 4点）を生成
         const candidates = [
@@ -642,8 +657,7 @@
                 html += `<li>${p}</li>`;
             });
         } else {
-             // BEST3の三連単でトップ4の組み合わせが既にカバーされている場合
-            // トップ4ボックスの残りの2点を表示する（予備策）
+             // BEST3の三連単でトップ4の組み合わせが既にカバーされている場合の予備策
             const allPuku = candidates.map(c => c.join('='));
             const remainingPuku = allPuku.filter(p => !best3SanrentanSets.has(p)).slice(0, 2);
             
@@ -652,13 +666,19 @@
                     html += `<li>${p}</li>`;
                 });
             } else {
-                // すべての三連複がカバーされている場合、強制的にトップ3ボックスと次点を含むボックスを表示
+                // すべての三連複がカバーされている場合
                 const top3Box = top4IDs.slice(0, 3).join('=');
-                const secondPuku = [top4IDs[0], top4IDs[1], top4IDs[3]].sort((a,b)=>a-b).join('='); 
+                const secondPuku = (top4IDs.length > 3) ? [top4IDs[0], top4IDs[1], top4IDs[3]].sort((a,b)=>a-b).join('=') : ''; 
                 
                 html = `<li>${top3Box}</li>`;
-                if(top3Box !== secondPuku) {
+                if(top3Box !== secondPuku && secondPuku) {
                     html += `<li>${secondPuku}</li>`;
+                } else if (top3Box === secondPuku && top4IDs.length >= 4) {
+                    // 同一の場合、別パターンを作成 (例: 134)
+                    const altPuku = [top4IDs[0], top4IDs[2], top4IDs[3]].sort((a,b)=>a-b).join('=');
+                    if (top3Box !== altPuku) {
+                        html += `<li>${altPuku}</li>`;
+                    }
                 }
             }
         }
@@ -802,4 +822,24 @@
             sanrenpukuHtml += "<li>データ不足（4名以上必要）</li>";
         }
         
-        return { sanrenpuku: sanrenpuku
+        return { sanrenpuku: sanrenpukuHtml };
+    }
+    
+    // 説明書トグル機能
+    function toggleManual() {
+        const content = document.getElementById('manual-content');
+        const icon = document.getElementById('toggle-icon');
+        
+        if (content.classList.contains('manual-content-hidden')) {
+            content.classList.remove('manual-content-hidden');
+            icon.textContent = '▲'; 
+        } else {
+            content.classList.add('manual-content-hidden');
+            icon.textContent = '▼'; 
+        }
+    }
+
+</script>
+
+</body>
+</html>
