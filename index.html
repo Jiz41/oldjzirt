@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>華耀天輪 自在律 競輪スコア計算システム</title>
+    <title>競輪予想ツール 華耀天輪 真・自在律</title>
     <style>
         :root {
             --primary-color: #0056b3;
@@ -168,7 +168,7 @@
 <body>
 
 <div class="container">
-    <h1>華耀天輪 自在律</h1>
+    <h1>華耀天輪 真・自在律</h1>
 
     <div class="manual-container">
         <h2 id="manual-toggle" onclick="toggleManual()">
@@ -185,7 +185,7 @@
                     <tr><td>**競走得点**</td><td>選手の基本得点（例: 110.50）。</td><td>期待値計算の**ベース**となる基本実力を設定します。</td></tr>
                     <tr><td>**W印**</td><td>WINTICKETの予想印を選択。</td><td>**外部予想の信頼度**（W印係数）を反映します。</td></tr>
                     <tr><td>**直近3走着順**</td><td>3走分を続けて入力 (例: `372`は1走前3着→2走前7着→3走前2着を意味します)。</td><td>**最新の勢い**（今節着順係数）を**加重平均**で精密に算出します。</td></tr>
-                    <tr><td>**全体並び**</td><td>選手IDをラインごとにコンマ区切りで入力。</td><td>買い目生成の軸として使用されます。</td></tr>
+                    <tr><td>**全体並び**</td><td>選手IDをラインごとにコンマ区切りで入力。</td><td>**ライン・単騎の特定**に使用されます。</td></tr>
                 </tbody>
             </table>
 
@@ -271,7 +271,7 @@
 
     <div class="control-group" style="margin-top: 15px;">
         <label for="overall-lineup">全体並び（例: 153,24,6,7）</label>
-        <input type="text" id="overall-lineup" placeholder="ラインごとにコンマ区切りで入力してください">
+        <input type="text" id="overall-lineup" placeholder="ラインごとにコンマ区切りで入力してください" value="153,24,6,7">
     </div>
 
     <button class="btn" onclick="calculate()">全パターン自動生成</button>
@@ -295,7 +295,7 @@
         <div id="mujirushi-anamae-ranking" style="display:none;"> 
             <h2>⛈️ 荒天令</h2> 
             <p style="font-size: 0.75rem; margin-top: -5px; margin-bottom: 10px; color: #555; text-align: center;">
-                (低頻度/高期待値の穴目を優先的に抽出した3連単3点と補助3連複2点)
+                (単騎など低頻度/高期待値の穴目を優先的に抽出した3連単3点と補助3連複2点)
             </p>
             <h4>三連単 (3点)</h4>
             <ul id="mujirushi-anamae-list" class="kaime-list"></ul>
@@ -316,10 +316,14 @@
     let bankData = {};
     const PLAYER_COUNT = 7; 
     let playerWinticketMap = {};
+    let singleRiders = []; // 単騎の選手IDを格納
 
     // --- 係数定義 ---
     const COMMON_WIND_MAP = { "東": "バック追い風", "西": "バック向かい風", "南": "横風", "北": "バンク特有の風なし" };
     const COMMON_TIME_BIAS = { "モーニング": 1.0, "デイ": 1.0, "ナイター": 1.02, "ミッドナイト": 0.98 };
+
+    // 連係ボーナス (ラインを組んだ選手、特に番手・三番手にかかる補正)
+    const COOPERATION_BONUS = 1.02; // 2%の連係ボーナス
 
     const WINTICKET_COEFFICIENTS = {
         "なし": 1.00, "△": 1.02, "▲": 1.05, "◯": 1.10, "◎": 1.15 
@@ -333,9 +337,9 @@
         'default': 1.00
     };
     const DEVELOPMENT_BIAS = {
-        "A. 先行有利": { "先行": 1.05, "捲り": 1.0, "差し": 0.95 },
-        "B. 捲り有利": { "先行": 0.98, "捲り": 1.05, "差し": 1.0 },
-        "C. 差し有利": { "先行": 0.95, "捲り": 1.0, "差し": 1.05 }
+        "A. 先行有利": { "先行": 1.05, "捲り": 1.0, "差し": 0.95, "マーク": 1.0 },
+        "B. 捲り有利": { "先行": 0.98, "捲り": 1.05, "差し": 1.0, "マーク": 1.0 },
+        "C. 差し有利": { "先行": 0.95, "捲り": 1.0, "差し": 1.05, "マーク": 1.0 }
     };
     // --- 係数定義終了 ---
 
@@ -409,8 +413,33 @@
         }
     }
 
+    // 新規関数: ライン構成から単騎選手を特定する
+    function identifySingleRiders() {
+        const lineupStr = document.getElementById('overall-lineup').value.trim();
+        if (!lineupStr) {
+            singleRiders = [];
+            return;
+        }
+
+        const lines = lineupStr.split(',').map(line => line.trim());
+        const singleRidersSet = new Set();
+        
+        lines.forEach(line => {
+            if (line.length === 1) {
+                const riderId = parseInt(line, 10);
+                if (!isNaN(riderId)) {
+                    singleRidersSet.add(riderId);
+                }
+            }
+        });
+        
+        singleRiders = Array.from(singleRidersSet);
+    }
+    
     // メイン計算ロジック
     function calculate() {
+        identifySingleRiders(); // 並びを解析し、単騎選手を特定
+
         const selectedBankName = document.getElementById('bank-select').value;
         if (!selectedBankName || !bankData[selectedBankName]) {
             alert("バンクデータが読み込まれていません。「🚨 データ読み込み失敗」と表示されている場合は、外部ファイル「bankdata.json」を設置してください。");
@@ -468,8 +497,15 @@
             
             let legKey = (leg === 'マーク') ? '差し' : leg;
             const legBias = currentBank.keirin_bias[legKey] || 1.0; 
+            
+            // **連係ボーナスを適用**
+            let coopBias = 1.0;
+            if (!singleRiders.includes(i)) {
+                // 単騎ではない（誰かとラインを組んでいる）場合にボーナス適用
+                coopBias = COOPERATION_BONUS;
+            }
 
-            const staticBias = legBias * windBiasVal * timeBiasVal;
+            const staticBias = legBias * windBiasVal * timeBiasVal * coopBias; // 連係補正を追加
 
             rawPlayers.push({
                 id: i,
@@ -478,7 +514,8 @@
                 winticketBias: winticketBias,
                 staticBias: staticBias,
                 legKey: legKey,
-                meetingRankBias: meetingRankBias
+                meetingRankBias: meetingRankBias,
+                isSingle: singleRiders.includes(i) // 単騎フラグ
             });
         }
 
@@ -498,9 +535,10 @@
             let scenarioPlayers = rawPlayers.map(p => {
                 const developBiasVal = developBiasMap[p.legKey] || 1.0;
                 
+                // 最終スコア計算
                 let finalScore = p.rawScore * p.winticketBias * p.staticBias * developBiasVal * p.meetingRankBias; 
 
-                return { id: p.id, leg: p.leg, score: finalScore };
+                return { id: p.id, leg: p.leg, score: finalScore, isSingle: p.isSingle };
             });
             
             scenarioPlayers.sort((a, b) => b.score - a.score);
@@ -511,11 +549,15 @@
 
             sanrentanDetails.forEach(c => {
                 if (!allSanrentanCombinations[c.nums]) {
-                    allSanrentanCombinations[c.nums] = { count: 0, totalVal: 0, combinations: [] };
+                    allSanrentanCombinations[c.nums] = { count: 0, totalVal: 0, combinations: [], hasSingle: c.hasSingle };
                 }
                 allSanrentanCombinations[c.nums].count++;
                 allSanrentanCombinations[c.nums].totalVal += c.val;
                 allSanrentanCombinations[c.nums].combinations.push(c.nums);
+                // 一度でも単騎が絡んでいればフラグを立てる
+                if (c.hasSingle) {
+                    allSanrentanCombinations[c.nums].hasSingle = true;
+                }
             });
 
             allScenarioResults.push({
@@ -531,11 +573,19 @@
     
     // --- 穴目分析ロジック (統合) ---
     function analyzeHighRiskCandidates(combinedList) {
-        // シナリオ一致回数が2回以下のものを抽出
-        const highRiskCandidates = combinedList.filter(c => c.count <= 2);
+        // 1. 単騎が絡んでいる、またはシナリオ一致回数が2回以下のものを抽出
+        const highRiskCandidates = combinedList.filter(c => c.hasSingle || c.count <= 2);
         
-        // 期待値順にソートし、トップ3を返却 (3点に修正済み)
-        highRiskCandidates.sort((a, b) => b.avgVal - a.avgVal); 
+        // 単騎が絡むものを優先しつつ、期待値順にソート
+        highRiskCandidates.sort((a, b) => {
+            if (b.hasSingle && !a.hasSingle) return 1; // bが単騎絡みなら優先
+            if (a.hasSingle && !b.hasSingle) return -1; // aが単騎絡みなら優先
+            
+            // 単騎フラグが同じ場合は、期待値でソート
+            return b.avgVal - a.avgVal; 
+        });
+
+        // トップ3を返却
         return highRiskCandidates.slice(0, 3); 
     }
     // --- 穴目分析ロジック終了 ---
@@ -606,6 +656,7 @@
         }
     }
     
+    // 三連単の組み合わせ生成ロジックを更新
     function generateSanrentanDetails(sortedPlayers) {
         let combinations = [];
         const topN = sortedPlayers.slice(0, Math.min(sortedPlayers.length, 5)); 
@@ -616,10 +667,17 @@
                 if (i === j) continue;
                 for (let k = 0; k < topN.length; k++) {
                     if (k === i || k === j) continue;
-                    let expectedVal = topN[i].score + topN[j].score + topN[k].score;
+                    
+                    const players = [topN[i], topN[j], topN[k]];
+                    const expectedVal = players[0].score + players[1].score + players[2].score;
+                    
+                    // 組み合わせに単騎選手が含まれているかチェック
+                    const hasSingle = players.some(p => p.isSingle); 
+                    
                     combinations.push({
                         nums: `${topN[i].id} - ${topN[j].id} - ${topN[k].id}`,
                         val: expectedVal, 
+                        hasSingle: hasSingle // 単騎フラグを付与
                     });
                 }
             }
@@ -734,7 +792,8 @@
             return {
                 nums: nums,
                 count: data.count, 
-                avgVal: data.totalVal / data.count 
+                avgVal: data.totalVal / data.count,
+                hasSingle: data.hasSingle 
             };
         });
 
@@ -768,8 +827,8 @@
             document.getElementById('combined-ranking').style.display = 'none';
         }
         
-        // 荒天令 (高リスク推奨エリア) の表示
-        const highRiskCandidates = analyzeHighRiskCandidates(combinedList); // Top 3に修正済み
+        // ⛈️ 荒天令 (高リスク推奨エリア) の表示
+        const highRiskCandidates = analyzeHighRiskCandidates(combinedList); // 単騎・低頻度優先のTop 3
         const highRiskAnamaeListDiv = document.getElementById('mujirushi-anamae-list');
         const highRiskSanrenpukuListDiv = document.getElementById('mujirushi-sanrenpuku-list');
         
@@ -785,7 +844,6 @@
                 highRiskAnamaeListDiv.appendChild(li);
             });
             
-            // 三連複2点の生成と表示 (3点に修正されているため、生成関数も修正)
             const anamaePukuHtml = generateHighRiskSanrenpukuHtml(highRiskCandidates);
             highRiskSanrenpukuListDiv.innerHTML = anamaePukuHtml;
         } else {
@@ -841,10 +899,11 @@
     function generateRankingTable(players) {
         let tbodyContent = '';
         players.forEach((p, index) => {
+            let singleMarker = p.isSingle ? ' 👤' : ''; // 単騎マーク
             tbodyContent += `
                 <tr>
                     <td>${index + 1}</td>
-                    <td style="font-weight:bold; font-size:1.1em;">${p.id}番</td>
+                    <td style="font-weight:bold; font-size:1.1em;">${p.id}番${singleMarker}</td>
                     <td class="score-rank">${p.rating} / 10</td>
                     <td>${p.leg}</td>
                 </tr>
