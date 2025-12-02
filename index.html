@@ -2,21 +2,30 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Race Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Race Calculator - Mobile</title>
 <style>
-  body { font-family: sans-serif; margin: 20px; }
-  table { border-collapse: collapse; margin-bottom: 20px; }
-  th, td { border: 1px solid #ccc; padding: 5px 10px; text-align: center; }
-  select, input { margin: 5px; }
+  body { font-family: sans-serif; margin: 10px; font-size: 18px; }
+  label, input, select, button { display: block; width: 100%; margin: 8px 0; font-size: 18px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 18px; }
+  button { padding: 12px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; }
+  button:active { background-color: #45a049; }
+  pre { background-color: #f2f2f2; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
 </style>
 </head>
 <body>
-<h2>競走スコア計算</h2>
+<h2>競走スコア計算（スマホ用）</h2>
 
-<!-- 場名・風・時間帯 -->
-<label>場名: <select id="racetrack"></select></label>
-<label>風: <select id="wind"></select></label>
-<label>時間帯: <select id="time"></select></label>
+<label>場名:
+  <select id="racetrack"></select>
+</label>
+<label>風:
+  <select id="wind"></select>
+</label>
+<label>時間帯:
+  <select id="time"></select>
+</label>
 
 <h3>選手データ入力（7人）</h3>
 <table>
@@ -30,7 +39,10 @@
 <tr><td>7</td><td><input type="text" class="style" placeholder="先行/差し/追込"></td><td><input type="number" class="score" value="0"></td></tr>
 </table>
 
-<label>並び（例:123,45,6,7）: <input type="text" id="lineup" size="20"></label><br>
+<label>並び（例:123,45,6,7）:
+  <input type="text" id="lineup" size="20">
+</label>
+
 <button id="calcBtn">計算</button>
 
 <h3>補正後スコアランキング</h3>
@@ -76,23 +88,19 @@ function calcScore() {
 
   const adjScores = scores.map((s, i) => {
     const style = styles[i];
-    // 補正計算例（bankDataの係数を使用）
     let coef = 1;
     if(bankData[track] && bankData[track][style]) coef = bankData[track][style];
-    if(wind === '東') coef *= 1.05; // 仮の補正
+    if(wind === '東') coef *= 1.05;
     if(time === 'ナイター') coef *= 1.02;
     if(time === 'ミッドナイト') coef *= 0.98;
     return s * coef;
   });
 
-  // ランキング表示
   const ranked = adjScores.map((s,i)=>({i:i+1,s:s})).sort((a,b)=>b.s-a.s);
   document.getElementById('result').textContent = ranked.map(r=>`選手${r.i}: ${r.s.toFixed(2)}`).join('\n');
 
-  // 並びから買い目生成
   const lineup = document.getElementById('lineup').value.split(',');
   const allNumbers = lineup.flatMap(g=>g.split('').map(n=>Number(n)));
-  // 三連単12点（上位3頭組み合わせで簡略）
   const triSingle = [];
   for(let i=0;i<3;i++)
     for(let j=i+1;j<3;j++)
