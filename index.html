@@ -1,3 +1,8 @@
+承知いたしました！ご要望の**10段階評価（X/10）と矢印レーティング（↑, ↗, →, ↘, ↓）**を組み合わせた、最終スコア表示ロジックをシステムに組み込みます。
+これで、システムが出力する情報が**「精度」と「直感的な分かりやすさ」**を両立したものになります。
+💻 競輪予想システム：最終コード（全機能搭載）
+以下のコードブロックは、これまでに議論・修正した全機能（多層係数、マルチ展開、総合買い目、バンク特性フィードバック、購入ウェイトカラー、そして新しい10段階評価）を搭載した、index.html の最終版です。
+bankdata.json と共に、このファイルをHugging Face Spacesにアップロードすれば、システムが完成します。
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -38,14 +43,28 @@
 
         /* Results */
         #result-area { margin-top: 20px; display: none; }
-        .result-box { border: 1px solid #ddd; padding: 10px; border-radius: 5px; margin-bottom: 15px; background: #fafafa; }
         .scenario-result { margin-top: 15px; border-left: 5px solid var(--primary-color); padding-left: 10px; margin-bottom: 20px; }
         .scenario-result h3 { margin-top: 0; background-color: #eaf4ff; padding: 5px; border-radius: 3px; font-size: 1.1rem; }
-        .score-rank { font-weight: bold; color: #d9534f; }
-        .kaime-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 5px; }
-        .kaime-list li { padding: 3px 8px; border: 1px solid #ccc; border-radius: 3px; background: #fff; font-size: 0.9rem; }
         
-        /* New Combined Ranking Styles */
+        /* 10段階評価のスタイル */
+        .score-rank { font-weight: bold; color: #d9534f; font-size: 1.1em; } 
+        
+        .kaime-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 5px; }
+        
+        /* --- 購入ウェイト カラーグラデーション --- */
+        .kaime-list li { 
+            padding: 3px 8px; 
+            border: 1px solid #ccc; 
+            border-radius: 3px; 
+            font-size: 0.9rem; 
+        }
+        .weight-strong { background-color: #D9534F; color: white; border-color: #A94442; font-weight: bold; } /* 赤 (1位) */
+        .weight-high { background-color: #F0AD4E; color: #333; border-color: #EEA236; } /* オレンジ (2位) */
+        .weight-medium { background-color: #FFFFCC; color: #333; border-color: #E8E87D; } /* 黄色 (3位) */
+        .weight-low { background-color: #D9EDF7; color: #333; border-color: #BCE8F1; } /* 水色 (4-6位) */
+        .weight-weak { background-color: #428BCA; color: white; border-color: #357EBD; } /* 青 (7位以下) */
+
+        /* Combined Ranking Styles */
         #combined-ranking { margin-top: 30px; padding: 15px; border: 2px solid #ffc107; border-radius: 8px; background-color: #fffaf0; }
         #combined-ranking h2 { color: #d9534f; font-size: 1.4rem; }
         #combined-ranking .kaime-list li { 
@@ -107,9 +126,10 @@
         <thead>
             <tr>
                 <th style="width:5%">ID</th>
-                <th style="width:20%">脚質</th>
+                <th style="width:15%">脚質</th>
                 <th style="width:20%">競走得点</th>
-                <th style="width:25%">W印</th>
+                <th style="width:15%">W印</th>
+                <th style="width:25%">今節最高着順</th> 
             </tr>
         </thead>
         <tbody id="player-inputs">
@@ -124,10 +144,14 @@
     <button class="btn" onclick="calculate()">全パターン自動生成</button>
 
     <div id="result-area">
+        <div id="bank-feedback" style="margin-bottom: 20px; padding: 10px; border: 1px solid #0056b3; background-color: #eaf4ff; border-radius: 5px; font-weight: bold; text-align: center; display: none;">
+            </div>
+        
         <div id="combined-ranking" style="display:none;">
             <h2>✨ 全展開共通 BEST 3 買い目 (三連単)</h2>
             <ul id="combined-sanrentan-list" class="kaime-list"></ul>
         </div>
+        
         <h2>📊 スコア・買い目シミュレーション結果</h2>
         <div id="scenario-results-container">
             </div>
@@ -143,13 +167,21 @@
     const COMMON_WIND_MAP = { "東": "バック追い風", "西": "バック向かい風", "南": "横風", "北": "バンク特有の風なし" };
     const COMMON_TIME_BIAS = { "モーニング": 1.0, "デイ": 1.0, "ナイター": 1.02, "ミッドナイト": 0.98 };
 
-    // WINTICKET予想印と係数の対応表
+    // WINTICKET予想印と係数の対応表 (修正後の値)
     const WINTICKET_COEFFICIENTS = {
         "なし": 1.00,
-        "△": 1.05,
-        "▲": 1.10,
-        "◯": 1.15,
-        "◎": 1.20 
+        "△": 1.02, 
+        "▲": 1.05, 
+        "◯": 1.10, 
+        "◎": 1.15 
+    };
+    
+    // 今節着順係数の定義
+    const CURRENT_MEETING_RANK_BIAS = {
+        1: 1.10, 
+        2: 1.05, 
+        3: 1.02, 
+        'default': 1.00 
     };
 
     // 展開補正値の定義 (パターン生成のベース)
@@ -164,7 +196,7 @@
         loadBankData(); 
     });
 
-    // 選手入力欄の生成 (変更なし)
+    // 選手入力欄の生成
     function initPlayerTable() {
         const tbody = document.getElementById('player-inputs');
         const legOptions = ['先行', '捲り', '差し', 'マーク']; 
@@ -189,6 +221,7 @@
                         ${markOptions}
                     </select>
                 </td> 
+                <td><input type="number" id="meeting-rank-${i}" placeholder="例: 1, 2, 4など" value="4" min="1" max="9"></td> 
             `;
             tbody.appendChild(tr);
         }
@@ -235,10 +268,8 @@
         
         let windBiasVal = 1.0;
         const commonWindCondition = COMMON_WIND_MAP[windDir]; 
-        if (commonWindCondition) {
-            if (currentBank.wind_or_position && currentBank.wind_or_position[commonWindCondition]) {
-                windBiasVal = currentBank.wind_or_position[commonWindCondition];
-            }
+        if (commonWindCondition && currentBank.wind_or_position && currentBank.wind_or_position[commonWindCondition]) {
+            windBiasVal = currentBank.wind_or_position[commonWindCondition];
         }
         
         let rawPlayers = [];
@@ -246,19 +277,23 @@
             const leg = document.getElementById(`leg-${i}`).value;
             const rawScoreStr = document.getElementById(`score-${i}`).value;
             const winticketMark = document.getElementById(`winticket-mark-${i}`).value; 
-
+            const meetingRankStr = document.getElementById(`meeting-rank-${i}`).value;
+            
             if (!rawScoreStr || isNaN(parseFloat(rawScoreStr))) continue;
 
             const rawScore = parseFloat(rawScoreStr);
             const winticketBias = WINTICKET_COEFFICIENTS[winticketMark] || 1.0;
 
-            let legKey = leg;
-            if (leg === 'マーク') {
-                legKey = '差し';
+            const meetingRankNum = parseInt(meetingRankStr);
+            let meetingRankBias = CURRENT_MEETING_RANK_BIAS['default'];
+            if (meetingRankNum >= 1 && meetingRankNum <= 3) {
+                meetingRankBias = CURRENT_MEETING_RANK_BIAS[meetingRankNum];
             }
-            
+
+            let legKey = (leg === 'マーク') ? '差し' : leg;
             const legBias = currentBank.keirin_bias[legKey] || 1.0; 
 
+            // 静的係数 (バンク/風/時間)
             const staticBias = legBias * windBiasVal * timeBiasVal;
 
             rawPlayers.push({
@@ -267,7 +302,8 @@
                 rawScore: rawScore,
                 winticketBias: winticketBias,
                 staticBias: staticBias,
-                legKey: legKey
+                legKey: legKey,
+                meetingRankBias: meetingRankBias
             });
         }
 
@@ -276,24 +312,32 @@
             return;
         }
 
-        const allScenarioResults = [];
-        const allSanrentanCombinations = {}; // 総合買い目計算用
+        // バンク特性の判定と表示
+        displayBankFeedback(selectedBankName, currentBank.keirin_bias);
         
+        const allScenarioResults = [];
+        const allSanrentanCombinations = {}; 
+        
+        // シナリオ計算
         Object.keys(DEVELOPMENT_BIAS).forEach(scenarioName => {
             const developBiasMap = DEVELOPMENT_BIAS[scenarioName];
             
             let scenarioPlayers = rawPlayers.map(p => {
                 const developBiasVal = developBiasMap[p.legKey] || 1.0;
-                let finalScore = p.rawScore * p.winticketBias * p.staticBias * developBiasVal; 
+                
+                // Final Score = 得点 × W印係数 × 静的係数 × 展開動的係数 × 今節着順係数
+                let finalScore = p.rawScore * p.winticketBias * p.staticBias * developBiasVal * p.meetingRankBias; 
+
                 return { id: p.id, leg: p.leg, score: finalScore };
             });
             
             scenarioPlayers.sort((a, b) => b.score - a.score);
 
-            // 買い目の詳細情報を取得
-            const sanrentanDetails = generateSanrentanDetails(scenarioPlayers);
+            // 10段階評価の計算と適用
+            const playersWithRating = applyTenScaleRating(scenarioPlayers);
 
-            // 総合買い目計算用のデータ蓄積
+            const sanrentanDetails = generateSanrentanDetails(playersWithRating);
+
             sanrentanDetails.forEach(c => {
                 if (!allSanrentanCombinations[c.nums]) {
                     allSanrentanCombinations[c.nums] = { count: 0, totalVal: 0 };
@@ -304,17 +348,98 @@
 
             allScenarioResults.push({
                 scenario: scenarioName,
-                players: scenarioPlayers,
+                players: playersWithRating, // 評価適用後のデータを使用
                 sanrentanDetails: sanrentanDetails 
             });
         });
 
-        // 結果表示の実行と総合買い目の計算
         displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations);
     }
     // メイン計算ロジック終了
 
-    // 三連単の全組み合わせとその期待値を返す関数 (Top12選定前の全データ)
+    // --- 新規機能: 10段階評価（矢印レーティング）の適用 ---
+    function applyTenScaleRating(sortedPlayers) {
+        if (sortedPlayers.length === 0) return [];
+        
+        // 1. スコアレンジの計算
+        const scores = sortedPlayers.map(p => p.score);
+        const maxScore = scores[0]; 
+        const minScore = scores[scores.length - 1];
+        const range = maxScore - minScore;
+
+        if (range === 0) { // 全員同点の場合の例外処理
+            return sortedPlayers.map(p => ({ ...p, rating: '10↑', rawScore: p.score.toFixed(4) }));
+        }
+
+        // 2. 10段階評価のステップ計算
+        const step = range / 10;
+        
+        // 3. 評価と矢印の適用
+        let ratedPlayers = sortedPlayers.map(p => {
+            // スコアを0-9のインデックスに変換 (10点満点評価)
+            let ratingIndex = Math.floor((p.score - minScore) / step);
+            
+            // maxScoreの選手が確実に10になるように調整
+            if (p.score === maxScore) ratingIndex = 9; 
+
+            // 評価点 (1から10)
+            p.tenScaleRating = ratingIndex + 1;
+            p.rawScore = p.score.toFixed(4); // デバッグ用に元のスコアも格納
+            return p;
+        });
+
+        // 4. 同一評価点内での矢印レーティング付与
+        const arrowMap = ['↑', '↗', '→', '↘', '↓']; // 順位1位から5位+αの矢印
+
+        // 評価点ごとにグループ化
+        let groupedByRating = ratedPlayers.reduce((acc, player) => {
+            if (!acc[player.tenScaleRating]) {
+                acc[player.tenScaleRating] = [];
+            }
+            acc[player.tenScaleRating].push(player);
+            return acc;
+        }, {});
+
+        // グループ内で矢印を付与
+        let finalRatedPlayers = [];
+        Object.keys(groupedByRating).sort((a, b) => b - a).forEach(ratingKey => {
+            let group = groupedByRating[ratingKey];
+            
+            group.forEach((player, index) => {
+                const arrow = arrowMap[Math.min(index, arrowMap.length - 1)]; // 5位以下は全て '↓'
+                player.rating = `${ratingKey}${arrow}`;
+                finalRatedPlayers.push(player);
+            });
+        });
+
+        return finalRatedPlayers;
+    }
+    // --- 10段階評価の適用終了 ---
+
+    // --- バンク特性フィードバック表示 ---
+    function displayBankFeedback(bankName, biasMap) {
+        let strongestLeg = 'なし';
+        let maxBias = 1.0;
+
+        for (const leg in biasMap) {
+            if (biasMap[leg] > maxBias) {
+                maxBias = biasMap[leg];
+                strongestLeg = leg;
+            }
+        }
+        
+        const feedbackDiv = document.getElementById('bank-feedback');
+        if (strongestLeg !== 'なし') {
+            const biasValue = maxBias.toFixed(2);
+            feedbackDiv.innerHTML = `🚨 **${bankName}バンクの特性:** 脚質補正が最も高いのは **${strongestLeg}** (係数: ${biasValue}) の傾向があります。`;
+            feedbackDiv.style.display = 'block';
+        } else {
+            feedbackDiv.innerHTML = `🚨 **${bankName}バンクの特性:** 脚質補正の大きな偏りはありません (全て1.00)。`;
+            feedbackDiv.style.display = 'block';
+        }
+    }
+
+    // --- 買い目生成ロジック (変更なし) ---
     function generateSanrentanDetails(sortedPlayers) {
         let combinations = [];
         const topN = sortedPlayers.slice(0, 5); 
@@ -329,7 +454,7 @@
                     
                     combinations.push({
                         nums: `${topN[i].id} - ${topN[j].id} - ${topN[k].id}`,
-                        val: expectedVal, // 期待値
+                        val: expectedVal, 
                     });
                 }
             }
@@ -337,29 +462,27 @@
         return combinations;
     }
 
-
-    // ★★★ 結果表示ロジック (総合買い目対応) ★★★
+    // --- 結果表示ロジック ---
     function displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations) {
         document.getElementById('result-area').style.display = 'block';
         const container = document.getElementById('scenario-results-container');
         container.innerHTML = '';
         
-        // 1. 総合買い目の計算と表示
+        // 1. 総合買い目の計算と表示 (変更なし)
         const combinedList = Object.keys(allSanrentanCombinations).map(nums => {
             const data = allSanrentanCombinations[nums];
             return {
                 nums: nums,
-                count: data.count, // 出現頻度
-                avgVal: data.totalVal / data.count // 平均期待値
+                count: data.count, 
+                avgVal: data.totalVal / data.count 
             };
         });
 
-        // 総合評価基準: まず頻度、次に平均期待値でソート
         combinedList.sort((a, b) => {
             if (b.count !== a.count) {
-                return b.count - a.count; // 頻度が高い順
+                return b.count - a.count; 
             }
-            return b.avgVal - a.avgVal; // 頻度が同じなら平均期待値が高い順
+            return b.avgVal - a.avgVal; 
         });
 
         const top3Combined = combinedList.slice(0, 3);
@@ -384,20 +507,35 @@
             const resultDiv = document.createElement('div');
             resultDiv.className = 'scenario-result';
             
-            const players = result.players;
+            const players = result.players; // 既にレーティング適用済み
             
             const rankingTable = generateRankingTable(players);
-            // Top12の買い目を生成して表示
+            
+            // Top12の買い目を生成し、期待値の高い順にソート
             const top12Kaime = result.sanrentanDetails.sort((a,b) => b.val - a.val).slice(0, 12);
-            const sanrentanHtml = top12Kaime.map(c => `<li>${c.nums}</li>`).join('');
+            
+            // 買い目リストにウェイトクラスを適用
+            const sanrentanHtml = top12Kaime.map((c, index) => {
+                let weightClass = 'weight-weak'; 
+                if (index === 0) {
+                    weightClass = 'weight-strong'; 
+                } else if (index === 1) {
+                    weightClass = 'weight-high'; 
+                } else if (index === 2) {
+                    weightClass = 'weight-medium'; 
+                } else if (index >= 3 && index <= 5) {
+                    weightClass = 'weight-low'; 
+                }
+                return `<li class="${weightClass}">${c.nums}</li>`;
+            }).join('');
 
-            const kaimeHtml = generateSanrenpukuHtml(players); // 三連複は変更なし
+            const kaimeHtml = generateSanrenpukuHtml(players); 
 
             resultDiv.innerHTML = `
                 <h3>${result.scenario} の予想</h3>
                 <div style="display: flex; gap: 20px;">
                     <div style="flex: 1;">
-                        <h4>補正後スコア順位</h4>
+                        <h4>補正後スコア順位 (10段階評価)</h4>
                         ${rankingTable}
                     </div>
                     <div style="flex: 1;">
@@ -413,6 +551,7 @@
         });
     }
 
+    // --- ランキングテーブルの生成 (評価点表示に変更) ---
     function generateRankingTable(players) {
         let tbodyContent = '';
         players.forEach((p, index) => {
@@ -420,7 +559,7 @@
                 <tr>
                     <td>${index + 1}</td>
                     <td style="font-weight:bold; font-size:1.1em;">${p.id}番</td>
-                    <td class="score-rank">${p.score.toFixed(4)}</td>
+                    <td class="score-rank">${p.rating} / 10</td>
                     <td>${p.leg}</td>
                 </tr>
             `;
@@ -428,13 +567,13 @@
 
         return `
             <table class="player-table">
-                <thead><tr><th>順位</th><th>ID</th><th>スコア</th><th>脚質</th></tr></thead>
+                <thead><tr><th>順位</th><th>ID</th><th>評価点</th><th>脚質</th></tr></thead>
                 <tbody>${tbodyContent}</tbody>
             </table>
         `;
     }
 
-    // 三連複の買い目HTML生成（三連単はgenerateSanrentanDetailsとdisplayMultiScenarioResults内で処理）
+    // --- 三連複生成ロジック (変更なし) ---
     function generateSanrenpukuHtml(sortedPlayers) {
         const p1 = sortedPlayers[0]?.id;
         const p2 = sortedPlayers[1]?.id;
@@ -460,9 +599,9 @@
         
         return { sanrenpuku: sanrenpukuHtml };
     }
-    // 結果表示ロジック終了
 
 </script>
 
 </body>
 </html>
+
