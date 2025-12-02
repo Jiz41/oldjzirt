@@ -313,7 +313,7 @@
             <ul id="anamae-list" class="kaime-list"></ul>
         </div>
 
-        <div id="mujirushi-anamae-ranking" style="display:none;">
+        <div id="mujirushi-anamae-ranking" style="display:none;"> 
             <h2>⚫️ 荒天令 三尽 (こうてんりょう みつづき)</h2> 
             <p style="font-size: 0.75rem; margin-top: -5px; margin-bottom: 10px; color: #555; text-align: center;">
                 (大波乱を狙う3連単3点と補助3連複2点の合計5点)
@@ -340,8 +340,9 @@
 <script>
     // グローバル変数
     let bankData = {};
+    let isDebugMode = false; // ★追加: デバッグモードフラグ
     const PLAYER_COUNT = 7; 
-    let playerWinticketMap = {}; // W印をキャッシュするためのマップ
+    let playerWinticketMap = {};
 
     // --- 係数定義 (省略) ---
     const COMMON_WIND_MAP = { "東": "バック追い風", "西": "バック向かい風", "南": "横風", "北": "バンク特有の風なし" };
@@ -370,7 +371,7 @@
         loadBankData();
     });
     
-    // デバッグログ出力関数 (省略)
+    // デバッグログ出力関数
     function debugLog(message) {
         const debugContent = document.getElementById('debug-content');
         if (debugContent) {
@@ -380,7 +381,7 @@
     }
 
 
-    // 選手入力欄の生成 (省略)
+    // 選手入力欄の生成
     function initPlayerTable() {
         const tbody = document.getElementById('player-inputs');
         if (!tbody) {
@@ -419,11 +420,12 @@
         }
     }
 
-    // JSONデータの読み込み (省略)
+    // JSONデータの読み込み
     async function loadBankData() { 
         const bankSelect = document.getElementById('bank-select');
         try {
-            const response = await fetch('bankdata.json');
+            // bankdata.jsonは、このHTMLと同じディレクトリに配置することを想定
+            const response = await fetch('bankdata.json'); 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -447,9 +449,38 @@
         }
     }
 
-    // メイン計算ロジック (省略)
+    // メイン計算ロジック
     function calculate() {
-        debugLog('計算開始...');
+        // 1. モードのリセット
+        isDebugMode = false; 
+
+        // 2. デバッグモード移行条件のチェック
+        const bankVal = document.getElementById('bank-select').value;
+        const timeVal = document.getElementById('time-select').value;
+        const windVal = document.getElementById('wind-select').value;
+        const leg1Val = document.getElementById('leg-1')?.value;
+        const score1Val = parseFloat(document.getElementById('score-1')?.value);
+        const mark1Val = document.getElementById('winticket-mark-1')?.value;
+
+        const debugConditionMet = (
+            bankVal === "" && 
+            timeVal === "ナイター" &&
+            windVal === "南" &&
+            leg1Val === "先行" &&
+            score1Val === 110.00 && 
+            mark1Val === "◎"
+        );
+
+        if (debugConditionMet) {
+            if (confirm("デバッグモード（全選手ログ出力）に移行しますか？")) {
+                isDebugMode = true;
+                debugLog('*** 🟢 DEBUG MODE ACTIVATED (条件一致: 全選手ログ出力) ***');
+            }
+        }
+
+        debugLog(`計算開始... (デバッグモード: ${isDebugMode ? 'ON' : 'OFF'})`);
+        
+        // 3. 通常の計算開始処理
         const selectedBankName = document.getElementById('bank-select').value;
         if (!selectedBankName || !bankData[selectedBankName]) {
             alert("バンクデータが読み込まれていません。「🚨 データ読み込み失敗」と表示されている場合は、外部ファイル「bankdata.json」を設置してください。");
@@ -541,6 +572,12 @@
                 
                 let finalScore = p.rawScore * p.winticketBias * p.staticBias * developBiasVal * p.meetingRankBias; 
 
+                // ★ 全選手分の計算ログ出力
+                if (isDebugMode) {
+                    debugLog(`ID ${p.id} 計算詳細 (${scenarioName}): ${p.rawScore.toFixed(2)} (基点) * ${p.winticketBias.toFixed(2)} (W印) * ${p.staticBias.toFixed(2)} (静的補正) * ${developBiasVal.toFixed(2)} (展開補正) * ${p.meetingRankBias.toFixed(2)} (直近勢い) = ${finalScore.toFixed(4)} (最終スコア)`);
+                }
+                // ★ 修正終了
+
                 return { id: p.id, leg: p.leg, score: finalScore };
             });
             
@@ -596,7 +633,7 @@
     }
     // --- 穴目分析ロジック終了 ---
 
-    // 10段階評価（矢印レーティング）の適用 (省略)
+    // 10段階評価（矢印レーティング）の適用
     function applyTenScaleRating(sortedPlayers) {
         if (sortedPlayers.length === 0) return [];
         const scores = sortedPlayers.map(p => p.score);
@@ -641,7 +678,7 @@
         return finalRatedPlayers;
     }
 
-    // バンク特性フィードバック表示 (省略)
+    // バンク特性フィードバック表示
     function displayBankFeedback(bankName, biasMap) {
         let strongestLeg = 'なし';
         let maxBias = 1.0;
@@ -682,7 +719,7 @@
         return combinations;
     }
 
-    // 三連単 BEST3を補完する三連複2点を生成 (かため推奨用 - 省略)
+    // 三連単 BEST3を補完する三連複2点を生成 (かため推奨用)
     function generateCombinedSanrenpukuHtml(combinedSanrentanList) {
         let sanrenpukuSet = new Set();
         let sanrenpukuCandidates = [];
@@ -732,9 +769,9 @@
         return html;
     }
 
-    // 三連単 BEST3を補完する三連複2点を生成 (荒天令 三尽/超穴目用 - 省略)
+    // 三連単 BEST3を補完する三連複2点を生成 (荒天令 三尽/超穴目用)
     function generateAnamaeSanrenpukuHtml(sanrentanList) {
-        if (sanrentanList.length === 0) return "<li>データ不足</li>";
+        if (sanrentanList.length === 0) return "<li>-</li>";
 
         const allIDs = sanrentanList.flatMap(c => c.nums.split(' - ').map(n => parseInt(n)));
         const idCounts = allIDs.reduce((acc, id) => {
@@ -744,7 +781,7 @@
         
         const top4IDs = Object.keys(idCounts).sort((a, b) => idCounts[b] - idCounts[a]).slice(0, 4).map(Number).sort((a, b) => a - b);
         
-        if (top4IDs.length < 3) return "<li>データ不足（軸選手不足）</li>";
+        if (top4IDs.length < 3) return "<li>-</li>";
 
         let pukuSet = new Set();
         
@@ -864,7 +901,7 @@
         }
         // --- 修正終了 ---
 
-        // シナリオ別結果の表示 (省略)
+        // シナリオ別結果の表示
         allScenarioResults.forEach(result => {
             const resultDiv = document.createElement('div');
             resultDiv.className = 'scenario-result';
