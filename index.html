@@ -281,7 +281,7 @@
             </div>
         
         <div id="combined-ranking" style="display:none;">
-            <h2>✨ 晴天令 三鼎 (せいてんりょう みつがなえ)</h2> 
+            <h2>✨ 晴天令 三鼎</h2> 
             <p style="font-size: 0.75rem; margin-top: -5px; margin-bottom: 10px; color: #555; text-align: center;">
                 (おすすめ3連単3点と補助3連複2点の合計5点)
             </p>
@@ -293,13 +293,13 @@
         </div>
         
         <div id="mujirushi-anamae-ranking" style="display:none;"> 
-            <h2>⚫️ 荒天令 乱舞 (こうてんりょう らんぶ)</h2> 
+            <h2>⚫️ 荒天令 三尽</h2> 
             <p style="font-size: 0.75rem; margin-top: -5px; margin-bottom: 10px; color: #555; text-align: center;">
-                (低頻度/高期待値の穴目を優先的に抽出した3連単8点と補助3連複3点)
+                (低頻度/高期待値の穴目を優先的に抽出した3連単3点と補助3連複2点)
             </p>
-            <h4>三連単 (8点)</h4>
+            <h4>三連単 (3点)</h4>
             <ul id="mujirushi-anamae-list" class="kaime-list"></ul>
-            <h4>三連複 (3点) - 三連単8点を補完</h4>
+            <h4>三連複 (2点) - 三連単3点を補完</h4>
             <ul id="mujirushi-sanrenpuku-list" class="kaime-list"></ul>
         </div>
         
@@ -534,9 +534,9 @@
         // シナリオ一致回数が2回以下のものを抽出
         const highRiskCandidates = combinedList.filter(c => c.count <= 2);
         
-        // 期待値順にソートし、トップ8を返却
+        // 期待値順にソートし、トップ3を返却 (3点に修正済み)
         highRiskCandidates.sort((a, b) => b.avgVal - a.avgVal); 
-        return highRiskCandidates.slice(0, 8); 
+        return highRiskCandidates.slice(0, 3); 
     }
     // --- 穴目分析ロジック終了 ---
 
@@ -677,51 +677,50 @@
         return html;
     }
 
-    // 三連単 BEST8を補完する三連複3点を生成 (荒天令 乱舞用)
+    // 三連単 BEST3を補完する三連複2点を生成 (荒天令 三尽用)
     function generateHighRiskSanrenpukuHtml(sanrentanList) {
         if (sanrentanList.length === 0) return "<li>-</li>";
+        
+        // 荒天令は3点に修正されているため、上位3点の組み合わせから軸を抽出
+        const top3Sanrentan = sanrentanList.slice(0, 3);
 
-        const allIDs = sanrentanList.flatMap(c => c.nums.split(' - ').map(n => parseInt(n)));
+        const allIDs = top3Sanrentan.flatMap(c => c.nums.split(' - ').map(n => parseInt(n)));
         const idCounts = allIDs.reduce((acc, id) => {
             acc[id] = (acc[id] || 0) + 1;
             return acc;
         }, {});
         
-        // 出現頻度トップ5のIDを使用
-        const top5IDs = Object.keys(idCounts).sort((a, b) => idCounts[b] - idCounts[a]).slice(0, 5).map(Number).sort((a, b) => a - b);
+        // 出現頻度トップ4のIDを使用 (三連複2点を生成するため)
+        const top4IDs = Object.keys(idCounts).sort((a, b) => idCounts[b] - idCounts[a]).slice(0, 4).map(Number).sort((a, b) => a - b);
         
-        if (top5IDs.length < 3) return "<li>-</li>";
+        if (top4IDs.length < 3) return "<li>-</li>";
 
         let pukuSet = new Set();
         
-        // 組み合わせ候補を生成 (トップ5から3つ選ぶ)
+        // 組み合わせ候補を生成 (トップ4から3つ選ぶ)
         const combinations = [];
-        for (let i = 0; i < top5IDs.length; i++) {
-            for (let j = i + 1; j < top5IDs.length; j++) {
-                for (let k = j + 1; k < top5IDs.length; k++) {
-                    combinations.push([top5IDs[i], top5IDs[j], top5IDs[k]]);
+        for (let i = 0; i < top4IDs.length; i++) {
+            for (let j = i + 1; j < top4IDs.length; j++) {
+                for (let k = j + 1; k < top4IDs.length; k++) {
+                    combinations.push([top4IDs[i], top4IDs[j], top4IDs[k]]);
                 }
             }
         }
         
-        // 頻度トップ3の選手を含む組み合わせを優先
-        const top3 = top5IDs.slice(0, 3);
-        const top3Str = top3.join('=');
-        if (top3.length === 3 && !pukuSet.has(top3Str)) {
-            pukuSet.add(top3Str);
-        }
+        // 上位2点を採用
+        const finalPuku = combinations.map(c => c.sort((a,b)=>a-b).join('='));
+        const uniqueFinalPuku = Array.from(new Set(finalPuku)).slice(0, 2);
 
-        // 次に頻度の高い組み合わせを選ぶ
-        for (const comb of combinations) {
-            const combStr = comb.sort((a,b)=>a-b).join('=');
-            if (pukuSet.size < 3 && !pukuSet.has(combStr)) {
-                 pukuSet.add(combStr);
+        if (uniqueFinalPuku.length === 0) {
+            // 最低限、上位3点からBOXを作成
+            const top3IDs = top4IDs.slice(0,3);
+            if(top3IDs.length === 3) {
+                return `<li class="weight-strong">${top3IDs.join('=')}</li>`;
             }
+            return "<li>-</li>";
         }
-
-        const finalPuku = Array.from(pukuSet).slice(0, 3);
         
-        return finalPuku.map(p => `<li class="weight-strong">${p}</li>`).join('');
+        return uniqueFinalPuku.map(p => `<li class="weight-strong">${p}</li>`).join('');
     }
 
 
@@ -769,8 +768,8 @@
             document.getElementById('combined-ranking').style.display = 'none';
         }
         
-        // 荒天令 乱舞 (高リスク推奨エリア) の表示
-        const highRiskCandidates = analyzeHighRiskCandidates(combinedList);
+        // 荒天令 三尽 (高リスク推奨エリア) の表示
+        const highRiskCandidates = analyzeHighRiskCandidates(combinedList); // Top 3に修正済み
         const highRiskAnamaeListDiv = document.getElementById('mujirushi-anamae-list');
         const highRiskSanrenpukuListDiv = document.getElementById('mujirushi-sanrenpuku-list');
         
@@ -786,7 +785,7 @@
                 highRiskAnamaeListDiv.appendChild(li);
             });
             
-            // 三連複3点の生成と表示
+            // 三連複2点の生成と表示 (3点に修正されているため、生成関数も修正)
             const anamaePukuHtml = generateHighRiskSanrenpukuHtml(highRiskCandidates);
             highRiskSanrenpukuListDiv.innerHTML = anamaePukuHtml;
         } else {
