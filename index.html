@@ -271,7 +271,7 @@
 
     <div class="control-group" style="margin-top: 15px;">
         <label for="overall-lineup">全体並び（例: 153,24,6,7）</label>
-        <input type="text" id="overall-lineup" placeholder="ラインごとにコンマ区切りで入力してください" value="153,24,6,7">
+        <input type="text" id="overall-lineup" placeholder="ラインごとにコンマ区切りで入力してください" value="47,15,36,2">
     </div>
 
     <button class="btn" onclick="calculate()">全パターン自動生成</button>
@@ -899,7 +899,8 @@
     function generateRankingTable(players) {
         let tbodyContent = '';
         players.forEach((p, index) => {
-            let singleMarker = p.isSingle ? ' 👤' : ''; // 単騎マーク
+            // 単騎マークを「(単騎)」に変更し、スタイルを適用
+            let singleMarker = p.isSingle ? '<span style="font-size: 0.7em; font-weight: normal; margin-left: 3px;">(単騎)</span>' : ''; 
             tbodyContent += `
                 <tr>
                     <td>${index + 1}</td>
