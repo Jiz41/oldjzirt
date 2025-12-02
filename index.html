@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>競輪スコア計算システム</title>
+    <title>競輪スコア計算システム (マルチパターン版)</title>
     <style>
         :root {
             --primary-color: #0056b3;
@@ -21,16 +21,16 @@
         h1, h2 { text-align: center; font-size: 1.2rem; margin-bottom: 10px; }
         
         /* Layout & Forms */
-        .container { max-width: 600px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .control-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
-        select, input[type="number"] { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+        select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
         
         /* Player Table */
         .player-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .player-table th, .player-table td { padding: 8px; border-bottom: 1px solid #ddd; text-align: center; font-size: 0.9rem; }
+        .player-table th, .player-table td { padding: 8px; border-bottom: 1px solid #ddd; text-align: center; font-size: 0.8rem; }
         .player-table th { background-color: #eee; }
-        .player-row input, .player-row select { width: 100%; padding: 5px; font-size: 0.9rem; }
+        .player-row input, .player-row select { width: 100%; padding: 5px; font-size: 0.8rem; }
         
         /* Buttons */
         .btn { display: block; width: 100%; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 5px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 20px; }
@@ -39,20 +39,22 @@
         /* Results */
         #result-area { margin-top: 20px; display: none; }
         .result-box { border: 1px solid #ddd; padding: 10px; border-radius: 5px; margin-bottom: 15px; background: #fafafa; }
+        .scenario-result { margin-top: 15px; border-left: 5px solid var(--primary-color); padding-left: 10px; margin-bottom: 20px; }
+        .scenario-result h3 { margin-top: 0; background-color: #eaf4ff; padding: 5px; border-radius: 3px; font-size: 1.1rem; }
         .score-rank { font-weight: bold; color: #d9534f; }
-        .kaime-list { list-style: none; padding: 0; }
-        .kaime-list li { padding: 5px 0; border-bottom: 1px dashed #ccc; }
+        .kaime-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 5px; }
+        .kaime-list li { padding: 3px 8px; border: 1px solid #ccc; border-radius: 3px; background: #fff; font-size: 0.9rem; }
         
         /* Responsive tweaks */
-        @media (max-width: 400px) {
-            .player-table th, .player-table td { padding: 4px; font-size: 0.8rem; }
+        @media (max-width: 600px) {
+            .player-table th, .player-table td { padding: 4px; font-size: 0.7rem; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>競輪スコア計算システム</h1>
+    <h1>競輪スコア計算システム (マルチパターン)</h1>
 
     <div class="control-group">
         <label for="bank-select">バンク選択</label>
@@ -86,7 +88,7 @@
                         風競輪.info
                     </a>
                 </div>
-                </div>
+            </div>
         </div>
     </div>
 
@@ -94,65 +96,53 @@
     <table class="player-table">
         <thead>
             <tr>
-                <th style="width:10%">ID</th>
-                <th style="width:30%">脚質</th>
-                <th style="width:30%">競走得点</th>
-                <th style="width:30%">並び</th>
+                <th style="width:5%">ID</th>
+                <th style="width:20%">脚質</th>
+                <th style="width:20%">競走得点</th>
+                <th style="width:25%">WINTICKET係数</th>
             </tr>
         </thead>
         <tbody id="player-inputs">
             </tbody>
     </table>
 
-    <button class="btn" onclick="calculate()">スコア計算・買い目算出</button>
+    <div class="control-group" style="margin-top: 15px;">
+        <label for="overall-lineup">全体並び（例: 153,24,6,7）</label>
+        <input type="text" id="overall-lineup" placeholder="ラインごとにコンマ区切りで入力してください">
+    </div>
+
+    <button class="btn" onclick="calculate()">全パターン自動生成</button>
 
     <div id="result-area">
-        <div class="result-box">
-            <h3>補正後スコア順位</h3>
-            <table class="player-table">
-                <thead><tr><th>順位</th><th>ID</th><th>スコア</th><th>脚質</th></tr></thead>
-                <tbody id="score-ranking-body"></tbody>
-            </table>
-        </div>
-
-        <div class="result-box">
-            <h3>三連単 (上位期待値12点)</h3>
-            <ul id="sanrentan-list" class="kaime-list"></ul>
-        </div>
-
-        <div class="result-box">
-            <h3>三連複 (上位BOX 4点)</h3>
-            <ul id="sanrenpuku-list" class="kaime-list"></ul>
-        </div>
+        <h2>📊 スコア・買い目シミュレーション結果</h2>
+        <div id="scenario-results-container">
+            </div>
     </div>
 </div>
 
 <script>
     // グローバル変数
     let bankData = {};
-    const PLAYER_COUNT = 7; // 7車立てを想定
+    const PLAYER_COUNT = 7; 
 
     // 外部定義データ (JSONにないためコード側で補完)
-    const COMMON_WIND_MAP = {
-        "東": "バック追い風", 
-        "西": "バック向かい風",
-        "南": "横風",
-        "北": "バンク特有の風なし"
-    };
-    const COMMON_TIME_BIAS = {
-        "モーニング": 1.0,
-        "デイ": 1.0,
-        "ナイター": 1.02,
-        "ミッドナイト": 0.98
-    };
+    const COMMON_WIND_MAP = { "東": "バック追い風", "西": "バック向かい風", "南": "横風", "北": "バンク特有の風なし" };
+    const COMMON_TIME_BIAS = { "モーニング": 1.0, "デイ": 1.0, "ナイター": 1.02, "ミッドナイト": 0.98 };
 
-    // 初期化処理
+    // ★★★ 展開補正値の定義 (パターン生成のベース) ★★★
+    const DEVELOPMENT_BIAS = {
+        "A. 先行有利": { "先行": 1.05, "捲り": 1.0, "差し": 0.95 },
+        "B. 捲り有利": { "先行": 0.98, "捲り": 1.05, "差し": 1.0 },
+        "C. 差し有利": { "先行": 0.95, "捲り": 1.0, "差し": 1.05 }
+    };
+    // ★★★ ここまで ★★★
+
     window.addEventListener('DOMContentLoaded', () => {
         initPlayerTable();
-        loadBankData(); // Hugging Face環境でfetchで読み込む
+        loadBankData(); 
     });
 
-    // 選手入力欄の生成 (脚質に「マーク」を含める)
+    // 選手入力欄の生成 (WINTICKET係数欄を追加)
     function initPlayerTable() {
         const tbody = document.getElementById('player-inputs');
         const legOptions = ['先行', '捲り', '差し', 'マーク']; 
@@ -171,23 +161,20 @@
                     </select>
                 </td>
                 <td><input type="number" id="score-${i}" placeholder="得点" step="0.01"></td>
-                <td><input type="text" id="line-${i}" placeholder="例:1"></td>
+                <td><input type="number" id="winticket-bias-${i}" placeholder="例: 1.0" value="1.0" step="0.01"></td> 
             `;
             tbody.appendChild(tr);
         }
     }
 
-    // JSONデータの読み込み (fetch)
+    // JSONデータの読み込み (変更なし)
     async function loadBankData() {
         const bankSelect = document.getElementById('bank-select');
         const bankDataUrl = 'bankdata.json'; 
-
         try {
             const response = await fetch(bankDataUrl);
             if (!response.ok) throw new Error("バンクデータファイルが見つからないか、読み込みエラーです。");
-            
             bankData = await response.json();
-            
             bankSelect.innerHTML = '<option value="">選択してください</option>';
             Object.keys(bankData).forEach(bankName => {
                 const option = document.createElement('option');
@@ -195,18 +182,17 @@
                 option.textContent = bankName;
                 bankSelect.appendChild(option);
             });
-
             if (Object.keys(bankData).length > 0) {
                 bankSelect.value = Object.keys(bankData)[0];
             }
         } catch (error) {
             console.error(error);
             bankSelect.innerHTML = '<option value="">データ読み込み失敗</option>';
-            alert('バンクデータの読み込みに失敗しました。ファイル名と配置を確認してください。');
+            alert('バンクデータ (bankdata.json) の読み込みに失敗しました。');
         }
     }
 
-    // 計算メインロジック
+    // ★★★ メイン計算ロジック (全パターン自動生成) ★★★
     function calculate() {
         const selectedBankName = document.getElementById('bank-select').value;
         if (!selectedBankName || !bankData[selectedBankName]) {
@@ -217,91 +203,154 @@
         const currentBank = bankData[selectedBankName];
         const timeZone = document.getElementById('time-select').value;
         const windDir = document.getElementById('wind-select').value;
-
-        // 1. 各種補正値の取得
+        
+        const timeBiasVal = COMMON_TIME_BIAS[timeZone] || 1.0;
+        
         let windBiasVal = 1.0;
         const commonWindCondition = COMMON_WIND_MAP[windDir]; 
-        
         if (commonWindCondition) {
             if (currentBank.wind_or_position && currentBank.wind_or_position[commonWindCondition]) {
                 windBiasVal = currentBank.wind_or_position[commonWindCondition];
             }
         }
         
-        const timeBiasVal = COMMON_TIME_BIAS[timeZone] || 1.0;
-
-        let players = [];
-
-        // 2. 選手ごとのスコア計算
+        // 選手データの読み込み (共通)
+        let rawPlayers = [];
         for (let i = 1; i <= PLAYER_COUNT; i++) {
             const leg = document.getElementById(`leg-${i}`).value;
             const rawScoreStr = document.getElementById(`score-${i}`).value;
+            const winticketBiasStr = document.getElementById(`winticket-bias-${i}`).value;
 
             if (!rawScoreStr || isNaN(parseFloat(rawScoreStr))) continue;
 
             const rawScore = parseFloat(rawScoreStr);
-            
+            const winticketBias = parseFloat(winticketBiasStr) || 1.0; // 係数未入力なら1.0
+
             let legKey = leg;
-            // 「マーク」の場合は「差し」の補正値を使用
             if (leg === 'マーク') {
                 legKey = '差し';
             }
             
             const legBias = currentBank.keirin_bias[legKey] || 1.0; 
 
-            // スコア計算式
-            let finalScore = rawScore * legBias * windBiasVal * timeBiasVal;
+            // 静的係数 (システム固有のバンク/時間/風) の積
+            const staticBias = legBias * windBiasVal * timeBiasVal;
 
-            players.push({
+            rawPlayers.push({
                 id: i,
                 leg: leg, 
-                score: finalScore
+                rawScore: rawScore,
+                winticketBias: winticketBias,
+                staticBias: staticBias,
+                legKey: legKey
             });
         }
 
-        if (players.length === 0) {
+        if (rawPlayers.length === 0) {
             alert("選手データを入力してください");
             return;
         }
 
-        // 3. 期待値順（スコア降順）にソート
-        players.sort((a, b) => b.score - a.score);
+        const allScenarioResults = [];
+        
+        // すべての展開パターン (DEVELOPMENT_BIAS) をループして計算を実行
+        Object.keys(DEVELOPMENT_BIAS).forEach(scenarioName => {
+            const developBiasMap = DEVELOPMENT_BIAS[scenarioName];
+            
+            let scenarioPlayers = rawPlayers.map(p => {
+                
+                // 展開動的係数の取得
+                const developBiasVal = developBiasMap[p.legKey] || 1.0;
+                
+                // 最終スコア計算
+                // Final Score = 得点 × WINTICKET係数 × 静的係数 × 展開動的係数
+                let finalScore = p.rawScore * p.winticketBias * p.staticBias * developBiasVal; 
 
-        // 結果表示
-        displayResults(players);
-    }
+                return {
+                    id: p.id,
+                    leg: p.leg,
+                    score: finalScore
+                };
+            });
+            
+            // 順位付け
+            scenarioPlayers.sort((a, b) => b.score - a.score);
 
-    function displayResults(players) {
-        document.getElementById('result-area').style.display = 'block';
-
-        // ランキング表示
-        const tbody = document.getElementById('score-ranking-body');
-        tbody.innerHTML = '';
-        players.forEach((p, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td style="font-weight:bold; font-size:1.1em;">${p.id}番</td>
-                <td class="score-rank">${p.score.toFixed(2)}</td>
-                <td>${p.leg}</td>
-            `;
-            tbody.appendChild(tr);
+            allScenarioResults.push({
+                scenario: scenarioName,
+                players: scenarioPlayers
+            });
         });
 
-        generateKaime(players);
+        // 結果表示の実行
+        displayMultiScenarioResults(allScenarioResults);
+    }
+    // ★★★ メイン計算ロジック終了 ★★★
+
+    // ★★★ 結果表示ロジック (複数パターン対応) ★★★
+    function displayMultiScenarioResults(allScenarioResults) {
+        document.getElementById('result-area').style.display = 'block';
+        const container = document.getElementById('scenario-results-container');
+        container.innerHTML = '';
+
+        allScenarioResults.forEach(result => {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'scenario-result';
+            
+            const players = result.players;
+            
+            const rankingTable = generateRankingTable(players);
+            const kaimeHtml = generateKaimeHtml(players);
+
+            resultDiv.innerHTML = `
+                <h3>${result.scenario} の予想</h3>
+                <div style="display: flex; gap: 20px;">
+                    <div style="flex: 1;">
+                        <h4>補正後スコア順位</h4>
+                        ${rankingTable}
+                    </div>
+                    <div style="flex: 1;">
+                        <h4>買い目</h4>
+                        <h5>三連単 (12点)</h5>
+                        <ul class="kaime-list">${kaimeHtml.sanrentan}</ul>
+                        <h5>三連複 (4点)</h5>
+                        <ul class="kaime-list">${kaimeHtml.sanrenpuku}</ul>
+                    </div>
+                </div>
+            `;
+            container.appendChild(resultDiv);
+        });
     }
 
-    // 買い目生成ロジック (変更なし)
-    function generateKaime(sortedPlayers) {
+    function generateRankingTable(players) {
+        let tbodyContent = '';
+        players.forEach((p, index) => {
+            tbodyContent += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td style="font-weight:bold; font-size:1.1em;">${p.id}番</td>
+                    <td class="score-rank">${p.score.toFixed(4)}</td>
+                    <td>${p.leg}</td>
+                </tr>
+            `;
+        });
+
+        return `
+            <table class="player-table">
+                <thead><tr><th>順位</th><th>ID</th><th>スコア</th><th>脚質</th></tr></thead>
+                <tbody>${tbodyContent}</tbody>
+            </table>
+        `;
+    }
+
+    function generateKaimeHtml(sortedPlayers) {
         const p1 = sortedPlayers[0]?.id;
         const p2 = sortedPlayers[1]?.id;
         const p3 = sortedPlayers[2]?.id;
         const p4 = sortedPlayers[3]?.id;
 
         // --- 三連単 (12点) ---
-        const sanrentanList = document.getElementById('sanrentan-list');
-        sanrentanList.innerHTML = '';
-        
+        let sanrentanHtml = '';
         let combinations = [];
         const topN = sortedPlayers.slice(0, 5); 
 
@@ -324,16 +373,10 @@
         combinations.sort((a, b) => b.val - a.val);
         const top12 = combinations.slice(0, 12);
 
-        top12.forEach(c => {
-            const li = document.createElement('li');
-            li.textContent = c.nums;
-            sanrentanList.appendChild(li);
-        });
+        top12.forEach(c => { sanrentanHtml += `<li>${c.nums}</li>`; });
 
         // --- 三連複 (4点) ---
-        const sanrenpukuList = document.getElementById('sanrenpuku-list');
-        sanrenpukuList.innerHTML = '';
-
+        let sanrenpukuHtml = '';
         if (sortedPlayers.length >= 4) {
             const boxIds = [p1, p2, p3, p4].sort((a,b)=>a-b); 
             const boxCombs = [
@@ -344,16 +387,16 @@
             ];
 
             boxCombs.forEach(comb => {
-                const li = document.createElement('li');
-                li.textContent = `${comb[0]} = ${comb[1]} = ${comb[2]}`;
-                sanrenpukuList.appendChild(li);
+                sanrenpukuHtml += `<li>${comb[0]} = ${comb[1]} = ${comb[2]}</li>`;
             });
         } else {
-            const li = document.createElement('li');
-            li.textContent = "データ不足（4名以上必要）";
-            sanrenpukuList.appendChild(li);
+            sanrenpukuHtml += "<li>データ不足（4名以上必要）</li>";
         }
+        
+        return { sanrentan: sanrentanHtml, sanrenpuku: sanrenpukuHtml };
     }
+    // ★★★ 結果表示ロジック終了 ★★★
+
 </script>
 
 </body>
