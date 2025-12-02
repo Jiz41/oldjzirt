@@ -3,114 +3,125 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>競輪スコア計算機</title>
+<title>競輪スコア計算機 完全版</title>
 <style>
-body { font-family: sans-serif; margin: 10px; padding: 0; background: #f7f7f7; }
-h1 { text-align: center; }
-select, button { font-size: 16px; padding: 5px; margin: 5px 0; width: 100%; }
-.result { margin-top: 20px; background: #fff; padding: 10px; border-radius: 5px; }
-.player-list { margin: 5px 0; }
+  body { font-family: sans-serif; margin: 10px; font-size: 16px; }
+  select, input { font-size: 16px; margin: 5px 0; }
+  table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+  th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
+  th { background: #eee; }
+  .result { margin-top: 10px; }
 </style>
 </head>
 <body>
-<h1>競輪スコア計算機</h1>
 
-<label>場を選択：</label>
-<select id="venueSelect"></select>
+<h2>競輪スコア計算機</h2>
 
-<label>時間帯：</label>
-<select id="timeSelect">
-  <option value="morning">モーニング</option>
-  <option value="day">デイ</option>
-  <option value="night">ナイター</option>
-  <option value="midnight">ミッドナイト</option>
-</select>
-
-<label>風向き：</label>
-<select id="windSelect">
-  <option value="none">なし</option>
-  <option value="北">北</option>
-  <option value="東">東</option>
-  <option value="南">南</option>
-  <option value="西">西</option>
-</select>
-
+<label>場を選択：
+  <select id="bankSelect"></select>
+</label>
+<br>
+<label>時間帯：
+  <select id="timeSelect">
+    <option value="モーニング">モーニング</option>
+    <option value="デイ">デイ</option>
+    <option value="ナイター">ナイター</option>
+    <option value="ミッドナイト">ミッドナイト</option>
+  </select>
+</label>
+<br>
+<label>風向き：
+  <select id="windSelect">
+    <option value="なし">なし</option>
+    <option value="東">東</option>
+    <option value="西">西</option>
+    <option value="南">南</option>
+    <option value="北">北</option>
+  </select>
+</label>
+<br>
 <button id="calcBtn">スコア計算</button>
 
 <div class="result" id="result"></div>
 
 <script>
-// JSON読み込み
 let bankData = {};
-fetch('bankdata.json')
-  .then(response => response.json())
-  .then(data => {
-    bankData = data;
-    const venueSelect = document.getElementById('venueSelect');
-    for (const venue in bankData) {
-      const opt = document.createElement('option');
-      opt.value = venue;
-      opt.textContent = venue;
-      venueSelect.appendChild(opt);
-    }
-  });
-
-// 手入力の選手データ
-const players = [
-  {name:"選手1", keirin:"逃げ", score:87.12},
-  {name:"選手2", keirin:"差し", score:83.28},
-  {name:"選手3", keirin:"捲り", score:87.58},
-  {name:"選手4", keirin:"マーク", score:81.86},
-  {name:"選手5", keirin:"差し", score:80.95},
-  {name:"選手6", keirin:"捲り", score:80.74},
-  {name:"選手7", keirin:"逃げ", score:81.42}
+let players = [
+  // 手入力例：名前、脚質、競走得点
+  {name:"選手1", style:"逃げ", score:87.12},
+  {name:"選手2", style:"差し", score:83.28},
+  {name:"選手3", style:"捲り", score:91.96},
+  {name:"選手4", style:"マーク", score:81.86},
+  {name:"選手5", style:"差し", score:80.95},
+  {name:"選手6", style:"捲り", score:84.78},
+  {name:"選手7", style:"逃げ", score:81.42},
 ];
 
-// 計算
-function calcScore() {
-  const venue = document.getElementById('venueSelect').value;
+// 選手全体並び順（手入力）
+let playerOrder = ["選手3","選手1","選手6","選手2","選手4","選手7","選手5"];
+
+fetch('bankdata.json')
+  .then(res => res.json())
+  .then(data => {
+    bankData = data;
+    const select = document.getElementById('bankSelect');
+    Object.keys(bankData).forEach(bank => {
+      const option = document.createElement('option');
+      option.value = bank;
+      option.textContent = bank;
+      select.appendChild(option);
+    });
+  });
+
+function calculateScore() {
+  const bank = document.getElementById('bankSelect').value;
   const time = document.getElementById('timeSelect').value;
   const wind = document.getElementById('windSelect').value;
+  const bankInfo = bankData[bank];
 
-  const venueData = bankData[venue];
+  let result = players.map(p => {
+    let score = p.score;
 
-  // スコア補正
-  const adjustedPlayers = players.map(p => {
-    let adj = p.score;
-    const bias = venueData.keirin_bias[p.keirin] || 1;
-    adj *= bias;
-
-    // 風補正（東西南北のみ簡易適用）
-    for (const w in venueData.wind_or_position) {
-      if ((w.includes("追い風") && wind !== "none") || (w.includes("向かい風") && wind !== "none")) {
-        adj *= venueData.wind_or_position[w];
-      }
+    // 脚質補正
+    if(bankInfo.keirin_bias[p.style]) {
+      score *= bankInfo.keirin_bias[p.style];
     }
 
-    return {...p, adjScore: adj};
+    // 風向き補正
+    if(wind !== "なし" && bankInfo.wind_or_position[wind]) {
+      score *= bankInfo.wind_or_position[wind];
+    }
+
+    return {...p, adjusted: parseFloat(score.toFixed(2))};
   });
 
-  // 高い順ソート
-  adjustedPlayers.sort((a,b)=>b.adjScore - a.adjScore);
-
-  // 三連単12点、三連複4点
-  const trisan = adjustedPlayers.slice(0,3).map(p=>p.name).join('-');
-  const sanrenpuku = adjustedPlayers.slice(0,4).map(p=>p.name).join(',');
-
-  // 出力
-  let html = '<h3>補正後スコアランキング</h3><div class="player-list">';
-  adjustedPlayers.forEach(p=>{
-    html += `${p.name}: ${p.adjScore.toFixed(2)}<br>`;
+  // 全体並び順で並び替え
+  result.sort((a,b) => {
+    return playerOrder.indexOf(a.name) - playerOrder.indexOf(b.name);
   });
-  html += '</div>';
-  html += `<h3>買い目</h3>`;
-  html += `三連単12点: ${trisan}<br>`;
-  html += `三連複4点: ${sanrenpuku}<br>`;
 
-  document.getElementById('result').innerHTML = html;
+  // スコア順に表示用に再ソート
+  const scoreRank = [...result].sort((a,b) => b.adjusted - a.adjusted);
+
+  // 三連単12点、三連複4点（単純例）
+  const trianSingle = scoreRank.slice(0,3).map(p => p.name).join('-');
+  const trianMulti = scoreRank.slice(0,4).map(p => p.name).join(',');
+
+  const resDiv = document.getElementById('result');
+  resDiv.innerHTML = `
+    <h3>補正後スコアランキング</h3>
+    <table>
+      <tr><th>選手</th><th>スコア</th></tr>
+      ${scoreRank.map(p => `<tr><td>${p.name}</td><td>${p.adjusted}</td></tr>`).join('')}
+    </table>
+    <h3>買い目</h3>
+    <p>三連単12点: ${trianSingle}</p>
+    <p>三連複4点: ${trianMulti}</p>
+  `;
 }
 
-document.getElementById('calcBtn').addEventListener('click', calcScore);
+document.getElementById('calcBtn').addEventListener('click', calculateScore);
 </script>
+
 </body>
 </html>
