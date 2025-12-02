@@ -353,25 +353,17 @@
         }
     }
 
-    // JSONデータの読み込み (ダミーデータ含む)
-    function loadBankData() { // asyncを削除
+    // JSONデータの読み込み (外部ファイル 'bankdata.json' から)
+    async function loadBankData() { 
         const bankSelect = document.getElementById('bank-select');
         try {
-            // ダミーデータ (ハードコード)
-            bankData = {
-                "立川": {
-                    "keirin_bias": { "先行": 1.05, "捲り": 1.03, "差し": 1.0 },
-                    "wind_or_position": { "バック追い風": 1.02, "バック向かい風": 0.98 }
-                },
-                "弥彦": {
-                    "keirin_bias": { "先行": 1.0, "捲り": 1.05, "差し": 1.0 },
-                    "wind_or_position": { "バック追い風": 1.0, "バック向かい風": 1.0 }
-                },
-                "名古屋": {
-                    "keirin_bias": { "先行": 1.0, "捲り": 1.0, "差し": 1.05 },
-                    "wind_or_position": { "バック追い風": 1.01, "バック向かい風": 0.99 }
-                }
-            };
+            // 外部ファイル 'bankdata.json' を読み込む
+            const response = await fetch('bankdata.json');
+            if (!response.ok) {
+                // ファイルが見つからない、または読み込みエラーの場合
+                throw new Error(`HTTP error! status: ${response.status} - ファイル名を確認してください: bankdata.json`);
+            }
+            bankData = await response.json();
             
             bankSelect.innerHTML = '<option value="">選択してください</option>';
             Object.keys(bankData).forEach(bankName => {
@@ -386,7 +378,8 @@
             }
         } catch (error) {
             console.error("Bank data loading error:", error);
-            bankSelect.innerHTML = '<option value="">データ読み込み失敗</option>';
+            // エラーメッセージを表示
+            bankSelect.innerHTML = '<option value="">🚨 データ読み込み失敗 (bankdata.jsonが見つかりません)</option>';
         }
     }
 
