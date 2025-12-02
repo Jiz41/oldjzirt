@@ -270,7 +270,7 @@
     </table>
 
     <div class="control-group" style="margin-top: 15px;">
-        <label for="overall-lineup">全体並び（例: 153,24,6,7）</label>
+        <label for="overall-lineup">全体並び（例: 153,24,6,7 または ガールズ追走: 3,2,1,5,6,7）</label>
         <input type="text" id="overall-lineup" placeholder="ラインごとにコンマ区切りで入力してください" value="47,15,36,2">
     </div>
 
@@ -316,14 +316,22 @@
     let bankData = {};
     const PLAYER_COUNT = 7; 
     let playerWinticketMap = {};
-    let singleRiders = []; // 単騎の選手IDを格納
+    let playerRawScores = {}; // 選手の素点をIDごとに保持
+    let isGirlsMode = false; // ガールズモード（単騎戦）かどうかのフラグ
+    let singleRiders = []; // 単騎の選手IDを格納 (ライン戦用)
 
     // --- 係数定義 ---
     const COMMON_WIND_MAP = { "東": "バック追い風", "西": "バック向かい風", "南": "横風", "北": "バンク特有の風なし" };
     const COMMON_TIME_BIAS = { "モーニング": 1.0, "デイ": 1.0, "ナイター": 1.02, "ミッドナイト": 0.98 };
 
-    // 連係ボーナス (ラインを組んだ選手、特に番手・三番手にかかる補正)
-    const COOPERATION_BONUS = 1.02; // 2%の連係ボーナス
+    // ライン戦（ポジション補正）
+    const POSITION_BONUS = {
+        'second': 1.04, // 番手 (2番目の選手)
+        'third_or_later': 1.02 // 3番手以降
+    };
+
+    // ガールズ戦（得点1位追走補正）
+    const GIRLS_CHASER_BONUS = 1.04; 
 
     const WINTICKET_COEFFICIENTS = {
         "なし": 1.00, "△": 1.02, "▲": 1.05, "◯": 1.10, "◎": 1.15 
@@ -413,33 +421,126 @@
         }
     }
 
-    // 新規関数: ライン構成から単騎選手を特定する
-    function identifySingleRiders() {
-        const lineupStr = document.getElementById('overall-lineup').value.trim();
+    // --- 新規ロジック: ライン・単騎の判定と補正値の計算 ---
+
+    function parseLineupAndDetermineMode(lineupStr, players) {
         if (!lineupStr) {
-            singleRiders = [];
-            return;
+            isGirlsMode = true; // 並び入力なしは単騎（ガールズ）と見なす
+            return { lineupPlayers: new Set(), singleRiders: Array.from({ length: PLAYER_COUNT }, (_, i) => i + 1) };
         }
 
+        const allRiders = Array.from({ length: PLAYER_COUNT }, (_, i) => i + 1);
+        const allRidersSet = new Set(allRiders);
         const lines = lineupStr.split(',').map(line => line.trim());
-        const singleRidersSet = new Set();
-        
+        const lineupPlayers = new Set();
+        let hasMultiPlayerLine = false;
+
         lines.forEach(line => {
-            if (line.length === 1) {
-                const riderId = parseInt(line, 10);
-                if (!isNaN(riderId)) {
-                    singleRidersSet.add(riderId);
-                }
+            if (line.length > 1) {
+                hasMultiPlayerLine = true;
             }
+            line.split('').forEach(idStr => {
+                const id = parseInt(idStr, 10);
+                if (!isNaN(id)) {
+                    lineupPlayers.add(id);
+                }
+            });
         });
-        
-        singleRiders = Array.from(singleRidersSet);
+
+        // 競輪形態の判定
+        isGirlsMode = !hasMultiPlayerLine && lines.every(line => line.length <= 1);
+
+        // 単騎選手の特定 (ライン戦の場合)
+        let determinedSingleRiders = [];
+        if (hasMultiPlayerLine) {
+            // 2車以上のラインがある場合はライン戦とみなし、並びに入っていない選手を単騎とする
+            determinedSingleRiders = allRiders.filter(id => !lineupPlayers.has(id));
+        } else {
+            // 全員単騎形式（例: 1,2,3...）または単一ライン（321）の場合は、ライン戦と見なさない
+            determinedSingleRiders = allRiders;
+        }
+
+        return { lineupPlayers, singleRiders: determinedSingleRiders };
     }
-    
+
+
+    // 補正値の計算ロジック（ポジション or 得点追走）
+    function calculateCoopBias(playerId, rawScore, players) {
+        let coopBias = 1.0;
+        const lineupStr = document.getElementById('overall-lineup').value.trim();
+        
+        if (!lineupStr) {
+            // 並び入力がない場合は連係ボーナスなし（単騎扱い）
+            return 1.0;
+        }
+
+        // --- 1. ライン戦 (通常競輪) の補正 ---
+        const lines = lineupStr.split(',').map(line => line.trim());
+        const hasMultiPlayerLine = lines.some(line => line.length > 1);
+
+        if (hasMultiPlayerLine) {
+            // 2車以上のラインがある場合は「ポジション補正」を適用
+            lines.forEach(line => {
+                const linePlayers = line.split('').map(Number);
+                const index = linePlayers.indexOf(playerId);
+                
+                if (index === 0) {
+                    // 先頭 (自力役)
+                    coopBias = 1.0;
+                } else if (index === 1) {
+                    // 番手 (2番目の選手)
+                    coopBias = POSITION_BONUS['second'];
+                } else if (index >= 2) {
+                    // 3番手以降
+                    coopBias = POSITION_BONUS['third_or_later'];
+                }
+            });
+            
+            // 並びに入っていない選手は単騎扱い
+            if (coopBias === 1.0 && !lines.some(line => line.includes(String(playerId)))) {
+                 coopBias = 1.0; // 完全単騎もボーナスなし
+            }
+
+            return coopBias;
+        } 
+        
+        // --- 2. 単騎戦 (ガールズケイリン) の補正 ---
+        
+        // 連続した入力がない場合 (例: 1,2,3...) は、全員ボーナスなし（実態通り）
+        if (lines.every(line => line.length <= 1)) {
+            return 1.0;
+        }
+
+        // 連続した入力があるが、ライン戦形式ではない場合 (例: 321567) は、ガールズ追走と判断
+        
+        // 1. 得点1位の選手IDを特定
+        const playerScores = players.map(p => ({ id: p.id, score: p.rawScore }));
+        playerScores.sort((a, b) => b.score - a.score);
+        const topScoreId = playerScores[0]?.id;
+
+        if (!topScoreId) return 1.0;
+
+        // 2. 単一の並び文字列を結合
+        const fullLine = lines.join('');
+        
+        // 3. 得点1位の直後の選手を特定 (並びのIDのすぐ後ろ)
+        const targetIndex = fullLine.indexOf(String(topScoreId));
+        
+        if (targetIndex !== -1 && targetIndex < fullLine.length - 1) {
+            const chaserId = parseInt(fullLine[targetIndex + 1], 10);
+            
+            if (chaserId === playerId) {
+                // 得点1位の直後についた選手にのみボーナス
+                return GIRLS_CHASER_BONUS;
+            }
+        }
+        
+        // 得点1位の直後ではない場合
+        return 1.0;
+    }
+
     // メイン計算ロジック
     function calculate() {
-        identifySingleRiders(); // 並びを解析し、単騎選手を特定
-
         const selectedBankName = document.getElementById('bank-select').value;
         if (!selectedBankName || !bankData[selectedBankName]) {
             alert("バンクデータが読み込まれていません。「🚨 データ読み込み失敗」と表示されている場合は、外部ファイル「bankdata.json」を設置してください。");
@@ -449,6 +550,7 @@
         const currentBank = bankData[selectedBankName];
         const timeZone = document.getElementById('time-select').value;
         const windDir = document.getElementById('wind-select').value;
+        const lineupStr = document.getElementById('overall-lineup').value.trim();
         
         const timeBiasVal = COMMON_TIME_BIAS[timeZone] || 1.0;
         
@@ -460,7 +562,8 @@
         
         let rawPlayers = [];
         playerWinticketMap = {}; 
-        
+        playerRawScores = {}; // リセット
+
         for (let i = 1; i <= PLAYER_COUNT; i++) {
             const leg = document.getElementById(`leg-${i}`)?.value;
             const rawScoreStr = document.getElementById(`score-${i}`)?.value;
@@ -475,6 +578,7 @@
             const winticketBias = WINTICKET_COEFFICIENTS[winticketMark] || 1.0;
             
             playerWinticketMap[i] = winticketMark; 
+            playerRawScores[i] = rawScore; // 素点を保存
 
             const rankInputs = recentRanksStr.split('').slice(0, 3); 
             const rankKeys = ['1', '2', '3']; 
@@ -498,14 +602,7 @@
             let legKey = (leg === 'マーク') ? '差し' : leg;
             const legBias = currentBank.keirin_bias[legKey] || 1.0; 
             
-            // **連係ボーナスを適用**
-            let coopBias = 1.0;
-            if (!singleRiders.includes(i)) {
-                // 単騎ではない（誰かとラインを組んでいる）場合にボーナス適用
-                coopBias = COOPERATION_BONUS;
-            }
-
-            const staticBias = legBias * windBiasVal * timeBiasVal * coopBias; // 連係補正を追加
+            const staticBias = legBias * windBiasVal * timeBiasVal; // 連係補正は後で適用
 
             rawPlayers.push({
                 id: i,
@@ -515,14 +612,23 @@
                 staticBias: staticBias,
                 legKey: legKey,
                 meetingRankBias: meetingRankBias,
-                isSingle: singleRiders.includes(i) // 単騎フラグ
             });
         }
-
+        
         if (rawPlayers.length < 3) {
             alert("計算を行うには最低3名分の選手データを正しく入力してください。");
             return;
         }
+
+        // 連係補正の計算と適用
+        rawPlayers = rawPlayers.map(p => {
+            p.coopBias = calculateCoopBias(p.id, p.rawScore, rawPlayers);
+            return p;
+        });
+        
+        // 単騎選手の特定とモード設定
+        const { lineupPlayers, singleRiders: determinedSingleRiders } = parseLineupAndDetermineMode(lineupStr, rawPlayers);
+        singleRiders = determinedSingleRiders; // グローバル変数にセット
 
         displayBankFeedback(selectedBankName, currentBank.keirin_bias);
         
@@ -536,9 +642,12 @@
                 const developBiasVal = developBiasMap[p.legKey] || 1.0;
                 
                 // 最終スコア計算
-                let finalScore = p.rawScore * p.winticketBias * p.staticBias * developBiasVal * p.meetingRankBias; 
+                let finalScore = p.rawScore * p.winticketBias * p.staticBias * developBiasVal * p.meetingRankBias * p.coopBias; 
 
-                return { id: p.id, leg: p.leg, score: finalScore, isSingle: p.isSingle };
+                // 単騎判定は、ライン戦の場合のみsingleRidersリストを参照
+                const isSingle = !p.coopBias > 1.0 && singleRiders.includes(p.id);
+
+                return { id: p.id, leg: p.leg, score: finalScore, isSingle: isSingle };
             });
             
             scenarioPlayers.sort((a, b) => b.score - a.score);
@@ -554,7 +663,6 @@
                 allSanrentanCombinations[c.nums].count++;
                 allSanrentanCombinations[c.nums].totalVal += c.val;
                 allSanrentanCombinations[c.nums].combinations.push(c.nums);
-                // 一度でも単騎が絡んでいればフラグを立てる
                 if (c.hasSingle) {
                     allSanrentanCombinations[c.nums].hasSingle = true;
                 }
@@ -897,14 +1005,28 @@
     }
 
     function generateRankingTable(players) {
+        // 全員が単騎と判定された場合は、単騎マークを表示しない（ガールズのノイズ回避）
+        const lineupStr = document.getElementById('overall-lineup').value.trim();
+        let allSingle = false;
+        if (lineupStr.split(',').every(line => line.length === 1)) {
+            allSingle = true;
+        }
+
         let tbodyContent = '';
         players.forEach((p, index) => {
+            // isSingleフラグがtrue、かつ全員単騎ではない場合のみマーク表示
+            let showMarker = p.isSingle && !allSingle;
             // 単騎マークを「(単騎)」に変更し、スタイルを適用
-            let singleMarker = p.isSingle ? '<span style="font-size: 0.7em; font-weight: normal; margin-left: 3px;">(単騎)</span>' : ''; 
+            let singleMarker = showMarker ? '<span style="font-size: 0.7em; font-weight: normal; margin-left: 3px;">(単騎)</span>' : ''; 
+            
+            // 補正値が適用された選手には '*' をつけて強調 (デバッグ/確認用)
+            let isBonusApplied = p.coopBias > 1.0;
+            let bonusMarker = isBonusApplied ? '🔥' : '';
+
             tbodyContent += `
                 <tr>
                     <td>${index + 1}</td>
-                    <td style="font-weight:bold; font-size:1.1em;">${p.id}番${singleMarker}</td>
+                    <td style="font-weight:bold; font-size:1.1em;">${p.id}番${singleMarker}${bonusMarker}</td>
                     <td class="score-rank">${p.rating} / 10</td>
                     <td>${p.leg}</td>
                 </tr>
