@@ -2,136 +2,157 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>競走補正スコア計算</title>
+<title>Race Calculator</title>
 <style>
-  body { font-family: sans-serif; margin: 20px; }
-  input, select, textarea { margin-bottom: 10px; width: 100%; }
-  table { border-collapse: collapse; margin-top: 20px; width: 100%; }
-  th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
-  .score { font-weight: bold; }
+body { font-family: sans-serif; margin: 20px; }
+input, select { margin: 5px; }
+table { border-collapse: collapse; margin-top: 10px; }
+th, td { border: 1px solid #333; padding: 5px; text-align: center; }
 </style>
 </head>
 <body>
+<h2>Race Calculator</h2>
 
-<h2>競走補正スコア計算</h2>
-
-<!-- 選手データ -->
-<h3>選手データ（7人）</h3>
-<table>
-<tr>
-  <th>選手</th>
-  <th>脚質</th>
-  <th>競走得点</th>
-</tr>
-<tr><td>1</td><td><select class="type"><option value="先行">先行</option><option value="差し">差し</option><option value="追込">追込</option></select></td><td><input type="number" class="scoreInput" value="50"></td></tr>
-<tr><td>2</td><td><select class="type"><option value="先行">先行</option><option value="差し">差し</option><option value="追込">追込</option></select></td><td><input type="number" class="scoreInput" value="50"></td></tr>
-<tr><td>3</td><td><select class="type"><option value="先行">先行</option><option value="差し">差し</option><option value="追込">追込</option></select></td><td><input type="number" class="scoreInput" value="50"></td></tr>
-<tr><td>4</td><td><select class="type"><option value="先行">先行</option><option value="差し">差し</option><option value="追込">追込</option></select></td><td><input type="number" class="scoreInput" value="50"></td></tr>
-<tr><td>5</td><td><select class="type"><option value="先行">先行</option><option value="差し">差し</option><option value="追込">追込</option></select></td><td><input type="number" class="scoreInput" value="50"></td></tr>
-<tr><td>6</td><td><select class="type"><option value="先行">先行</option><option value="差し">差し</option><option value="追込">追込</option></select></td><td><input type="number" class="scoreInput" value="50"></td></tr>
-<tr><td>7</td><td><select class="type"><option value="先行">先行</option><option value="差し">差し</option><option value="追込">追込</option></select></td><td><input type="number" class="scoreInput" value="50"></td></tr>
-</table>
-
-<!-- 並び入力 -->
-<h3>並び（改行で複数ライン）</h3>
-<textarea id="orderInput" rows="4" placeholder="例：1,2,3&#10;4,5&#10;6&#10;7"></textarea>
-
-<!-- 場・風・時間帯 -->
-<h3>補正条件</h3>
-<select id="trackSelect">
-  <option value="函館">函館</option>
-  <option value="東京">東京</option>
-  <option value="阪神">阪神</option>
-  <option value="中山">中山</option>
-</select>
+<div>
+<label>場名：
+<select id="trackSelect"></select>
+</label>
+<label>風向：
 <select id="windSelect">
-  <option value="なし">風なし</option>
-  <option value="追い風">追い風</option>
-  <option value="向かい風">向かい風</option>
+<option value="0">なし</option>
+<option value="1">追い風</option>
+<option value="-1">向かい風</option>
 </select>
+</label>
+<label>時間帯：
 <select id="timeSelect">
-  <option value="デイ">デイ</option>
-  <option value="ナイター">ナイター</option>
-  <option value="ミッドナイト">ミッドナイト</option>
+<option value="day">デイ</option>
+<option value="night">ナイター</option>
+<option value="midnight">ミッドナイト</option>
 </select>
+</label>
+</div>
 
-<button onclick="calculate()">計算する</button>
-
-<h3>補正後スコアランキング</h3>
-<table id="scoreTable">
-<tr><th>選手</th><th>脚質</th><th>補正後スコア</th></tr>
+<h3>選手データ</h3>
+<table>
+<tr><th>選手</th><th>脚質</th><th>得点</th></tr>
+<tr><td>1</td><td><input type="text" id="style1" size="4"></td><td><input type="number" id="score1" size="4"></td></tr>
+<tr><td>2</td><td><input type="text" id="style2" size="4"></td><td><input type="number" id="score2" size="4"></td></tr>
+<tr><td>3</td><td><input type="text" id="style3" size="4"></td><td><input type="number" id="score3" size="4"></td></tr>
+<tr><td>4</td><td><input type="text" id="style4" size="4"></td><td><input type="number" id="score4" size="4"></td></tr>
+<tr><td>5</td><td><input type="text" id="style5" size="4"></td><td><input type="number" id="score5" size="4"></td></tr>
+<tr><td>6</td><td><input type="text" id="style6" size="4"></td><td><input type="number" id="score6" size="4"></td></tr>
+<tr><td>7</td><td><input type="text" id="style7" size="4"></td><td><input type="number" id="score7" size="4"></td></tr>
 </table>
 
-<h3>買い目</h3>
-<p>三連単12点 / 三連複4点</p>
-<div id="trifecta"></div>
-<div id="trio"></div>
+<div>
+<label>並び（カンマ区切り）：
+<input type="text" id="orderInput" size="20" value="123,45,6,7">
+</label>
+</div>
+
+<button onclick="calc()">計算</button>
+
+<h3>結果</h3>
+<div id="results"></div>
 
 <script>
-const typeCoeff = { "先行": 1.05, "差し": 1.00, "追込": 0.95 };
-const windCoeff = { "なし": 1.0, "追い風": 1.05, "向かい風": 0.95 };
-const timeCoeff = { "デイ": 1.0, "ナイター": 0.98, "ミッドナイト": 0.96 };
+let bankData;
 
-function calculate() {
-  let table = document.getElementById("scoreTable");
-  table.innerHTML = "<tr><th>選手</th><th>脚質</th><th>補正後スコア</th></tr>";
-  let types = document.querySelectorAll(".type");
-  let scores = document.querySelectorAll(".scoreInput");
-  let wind = document.getElementById("windSelect").value;
-  let time = document.getElementById("timeSelect").value;
+fetch('bankdata.json')
+.then(r => r.json())
+.then(data => {
+    bankData = data;
+    const trackSelect = document.getElementById('trackSelect');
+    data.tracks.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.name;
+        opt.textContent = t.name;
+        trackSelect.appendChild(opt);
+    });
+});
 
-  let result = [];
-  for(let i=0;i<7;i++){
-    let base = parseFloat(scores[i].value);
-    let tCoeff = typeCoeff[types[i].value];
-    let wCoeff = windCoeff[wind];
-    let timeC = timeCoeff[time];
-    let finalScore = base * tCoeff * wCoeff * timeC;
-    result.push({idx:i+1, type:types[i].value, score:finalScore});
-  }
+function calc() {
+    const track = document.getElementById('trackSelect').value;
+    const wind = parseInt(document.getElementById('windSelect').value);
+    const time = document.getElementById('timeSelect').value;
 
-  result.sort((a,b)=>b.score-a.score);
-  result.forEach(r=>{
-    let row = table.insertRow();
-    row.insertCell(0).innerText = r.idx;
-    row.insertCell(1).innerText = r.type;
-    row.insertCell(2).innerText = r.score.toFixed(2);
-  });
+    let players = [];
+    for(let i=1;i<=7;i++){
+        players.push({
+            id:i,
+            style: document.getElementById('style'+i).value,
+            baseScore: parseFloat(document.getElementById('score'+i).value)
+        });
+    }
 
-  // 並び解析
-  let orderText = document.getElementById("orderInput").value.trim();
-  let lines = orderText.split("\n").map(l=>l.split(",").map(Number));
+    // 補正適用
+    const trackData = bankData.tracks.find(t => t.name===track);
+    players.forEach(p=>{
+        let mod = 1;
+        if(trackData && trackData.corrections){
+            const sMod = trackData.corrections.style[p.style] || 1;
+            const wMod = wind!==0 ? trackData.corrections.wind[wind] || 1 : 1;
+            const tMod = trackData.corrections.time[time] || 1;
+            mod = sMod * wMod * tMod;
+        }
+        p.finalScore = p.baseScore * mod;
+    });
 
-  // 三連単12点（単純に補正後スコア上位組み合わせ）
-  let top3 = result.slice(0,3).map(r=>r.idx);
-  let trifecta = [
-    [top3[0], top3[1], top3[2]],
-    [top3[0], top3[2], top3[1]],
-    [top3[1], top3[0], top3[2]],
-    [top3[1], top3[2], top3[0]],
-    [top3[2], top3[0], top3[1]],
-    [top3[2], top3[1], top3[0]]
-  ];
-  // 補完で12点
-  trifecta.push([top3[0], top3[1], result[3].idx]);
-  trifecta.push([top3[0], result[3].idx, top3[1]]);
-  trifecta.push([top3[1], top3[0], result[3].idx]);
-  trifecta.push([top3[1], result[3].idx, top3[0]]);
-  trifecta.push([result[3].idx, top3[0], top3[1]]);
-  trifecta.push([result[3].idx, top3[1], top3[0]]);
-  
-  document.getElementById("trifecta").innerText = trifecta.map(r=>"["+r.join(",")+"]").join(", ");
+    // ランキング
+    players.sort((a,b)=>b.finalScore-a.finalScore);
 
-  // 三連複4点（上位4頭から簡単に組み合わせ）
-  let trio = [
-    [top3[0], top3[1], top3[2]],
-    [top3[0], top3[1], result[3].idx],
-    [top3[0], top3[2], result[3].idx],
-    [top3[1], top3[2], result[3].idx]
-  ];
-  document.getElementById("trio").innerText = trio.map(r=>"["+r.join(",")+"]").join(", ");
+    // 並び取得
+    const orderStr = document.getElementById('orderInput').value;
+    const orderGroups = orderStr.split(',').map(g=>g.split('').map(Number));
+
+    // 三連単12点
+    const tria = [];
+    for(let i=0;i<orderGroups.length;i++){
+        for(let j=0;j<orderGroups[i].length;j++){
+            for(let k=i+1;k<orderGroups.length;k++){
+                for(let l=0;l<orderGroups[k].length;l++){
+                    for(let m=k+1;m<orderGroups.length;m++){
+                        for(let n=0;n<orderGroups[m].length;n++){
+                            tria.push([orderGroups[i][j],orderGroups[k][l],orderGroups[m][n]]);
+                            if(tria.length>=12) break;
+                        }
+                        if(tria.length>=12) break;
+                    }
+                    if(tria.length>=12) break;
+                }
+                if(tria.length>=12) break;
+            }
+            if(tria.length>=12) break;
+        }
+        if(tria.length>=12) break;
+    }
+
+    // 三連複4点（組み合わせ3つ選ぶだけ）
+    const triR = [];
+    for(let i=0;i<orderGroups.length;i++){
+        for(let j=i+1;j<orderGroups.length;j++){
+            for(let k=j+1;k<orderGroups.length;k++){
+                triR.push([orderGroups[i][0],orderGroups[j][0],orderGroups[k][0]]);
+                if(triR.length>=4) break;
+            }
+            if(triR.length>=4) break;
+        }
+        if(triR.length>=4) break;
+    }
+
+    // 表示
+    let html = '<h4>総合スコアランキング</h4><table><tr><th>選手</th><th>得点</th></tr>';
+    players.forEach(p=>{
+        html += `<tr><td>${p.id}</td><td>${p.finalScore.toFixed(2)}</td></tr>`;
+    });
+    html += '</table>';
+
+    html += '<h4>三連単12点</h4><pre>'+tria.map(a=>a.join('-')).join('\n')+'</pre>';
+    html += '<h4>三連複4点</h4><pre>'+triR.map(a=>a.join('-')).join('\n')+'</pre>';
+
+    document.getElementById('results').innerHTML = html;
 }
 </script>
-
 </body>
 </html>
