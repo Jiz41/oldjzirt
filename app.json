@@ -1,0 +1,6 @@
+{
+  "title": "競輪スコア計算システム",
+  "app_mode": "static",
+  "enable_gradio_app_loading": false,
+  "enable_standard_navbar": false
+}
