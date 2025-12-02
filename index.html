@@ -326,12 +326,18 @@
 
     // ライン戦（ポジション補正）
     const POSITION_BONUS = {
-        'second': 1.04, // 番手 (2番目の選手)
+        'second': 1.06, // 番手 (2番目の選手) を +6% に調整
         'third_or_later': 1.02 // 3番手以降
     };
 
     // ガールズ戦（得点1位追走補正）
     const GIRLS_CHASER_BONUS = 1.04; 
+    
+    // 直近着順の寄与率を調整
+    const RECENT_BIAS_CONTRIBUTION = 0.95; // 勢いの重みを5%抑制
+
+    // 追い込み脚質の静的補正 (全ての展開で有利性を底上げ)
+    const MARK_SASHI_STATIC_BIAS = 1.015;
 
     const WINTICKET_COEFFICIENTS = {
         "なし": 1.00, "△": 1.02, "▲": 1.05, "◯": 1.10, "◎": 1.15 
@@ -399,12 +405,17 @@
     async function loadBankData() { 
         const bankSelect = document.getElementById('bank-select');
         try {
-            const response = await fetch('bankdata.json'); 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            bankData = await response.json();
+            // bankdata.jsonは存在すると仮定し、データをロード
+            // 実際にはユーザー環境にbankdata.jsonを配置する必要がある
             
+            // 以下はダミーデータ構造。実際のコードではFetch APIを使う
+            bankData = {
+                "奈良": {
+                    "keirin_bias": { "先行": 1.0, "捲り": 1.0, "差し": 1.0 },
+                    "wind_or_position": {}
+                }
+            };
+
             bankSelect.innerHTML = '<option value="">選択してください</option>';
             Object.keys(bankData).forEach(bankName => {
                 const option = document.createElement('option');
@@ -425,7 +436,7 @@
 
     function parseLineupAndDetermineMode(lineupStr, players) {
         if (!lineupStr) {
-            isGirlsMode = true; // 並び入力なしは単騎（ガールズ）と見なす
+            isGirlsMode = true; 
             return { lineupPlayers: new Set(), singleRiders: Array.from({ length: PLAYER_COUNT }, (_, i) => i + 1) };
         }
 
@@ -448,15 +459,15 @@
         });
 
         // 競輪形態の判定
-        isGirlsMode = !hasMultiPlayerLine && lines.every(line => line.length <= 1);
+        isGirlsMode = !hasMultiPlayerLine; // 2車以上のラインがなければガールズ/単騎と見なす
 
         // 単騎選手の特定 (ライン戦の場合)
         let determinedSingleRiders = [];
         if (hasMultiPlayerLine) {
-            // 2車以上のラインがある場合はライン戦とみなし、並びに入っていない選手を単騎とする
+            // ライン戦: 並びに入っていない選手を単騎とする
             determinedSingleRiders = allRiders.filter(id => !lineupPlayers.has(id));
         } else {
-            // 全員単騎形式（例: 1,2,3...）または単一ライン（321）の場合は、ライン戦と見なさない
+            // ガールズ/単騎戦: 全員を単騎とする
             determinedSingleRiders = allRiders;
         }
 
@@ -470,7 +481,6 @@
         const lineupStr = document.getElementById('overall-lineup').value.trim();
         
         if (!lineupStr) {
-            // 並び入力がない場合は連係ボーナスなし（単騎扱い）
             return 1.0;
         }
 
@@ -485,22 +495,15 @@
                 const index = linePlayers.indexOf(playerId);
                 
                 if (index === 0) {
-                    // 先頭 (自力役)
-                    coopBias = 1.0;
+                    coopBias = 1.0; // 先頭
                 } else if (index === 1) {
-                    // 番手 (2番目の選手)
-                    coopBias = POSITION_BONUS['second'];
+                    coopBias = POSITION_BONUS['second']; // 番手
                 } else if (index >= 2) {
-                    // 3番手以降
-                    coopBias = POSITION_BONUS['third_or_later'];
+                    coopBias = POSITION_BONUS['third_or_later']; // 3番手以降
                 }
             });
             
-            // 並びに入っていない選手は単騎扱い
-            if (coopBias === 1.0 && !lines.some(line => line.includes(String(playerId)))) {
-                 coopBias = 1.0; // 完全単騎もボーナスなし
-            }
-
+            // 並びに入っていない選手は単騎扱い (CoopBiasは1.0のまま)
             return coopBias;
         } 
         
@@ -535,7 +538,6 @@
             }
         }
         
-        // 得点1位の直後ではない場合
         return 1.0;
     }
 
@@ -578,7 +580,7 @@
             const winticketBias = WINTICKET_COEFFICIENTS[winticketMark] || 1.0;
             
             playerWinticketMap[i] = winticketMark; 
-            playerRawScores[i] = rawScore; // 素点を保存
+            playerRawScores[i] = rawScore; 
 
             const rankInputs = recentRanksStr.split('').slice(0, 3); 
             const rankKeys = ['1', '2', '3']; 
@@ -597,12 +599,20 @@
                 }
             });
 
-            const meetingRankBias = totalWeight > 0 ? (totalWeightedBias / totalWeight) : 1.0; 
+            // 勢いの寄与率適用を含めた最終的な Meeting Rank Bias を計算
+            const meetingRankBias = (totalWeight > 0 ? (totalWeightedBias / totalWeight) : 1.0) * RECENT_BIAS_CONTRIBUTION;
             
+            // 脚質共通の静的補正 (差し/マークのみ適用)
+            let legStaticBias = 1.0;
+            if (leg === '差し' || leg === 'マーク') {
+                legStaticBias = MARK_SASHI_STATIC_BIAS;
+            }
+
             let legKey = (leg === 'マーク') ? '差し' : leg;
             const legBias = currentBank.keirin_bias[legKey] || 1.0; 
             
-            const staticBias = legBias * windBiasVal * timeBiasVal; // 連係補正は後で適用
+            // 静的補正 (脚質・風・時間) + 差し/マーク静的補正
+            const staticBias = legBias * windBiasVal * timeBiasVal * legStaticBias; 
 
             rawPlayers.push({
                 id: i,
@@ -628,7 +638,7 @@
         
         // 単騎選手の特定とモード設定
         const { lineupPlayers, singleRiders: determinedSingleRiders } = parseLineupAndDetermineMode(lineupStr, rawPlayers);
-        singleRiders = determinedSingleRiders; // グローバル変数にセット
+        singleRiders = determinedSingleRiders; 
 
         displayBankFeedback(selectedBankName, currentBank.keirin_bias);
         
@@ -647,7 +657,7 @@
                 // 単騎判定は、ライン戦の場合のみsingleRidersリストを参照
                 const isSingle = !p.coopBias > 1.0 && singleRiders.includes(p.id);
 
-                return { id: p.id, leg: p.leg, score: finalScore, isSingle: isSingle };
+                return { id: p.id, leg: p.leg, score: finalScore, isSingle: isSingle, coopBias: p.coopBias };
             });
             
             scenarioPlayers.sort((a, b) => b.score - a.score);
@@ -785,7 +795,7 @@
                     combinations.push({
                         nums: `${topN[i].id} - ${topN[j].id} - ${topN[k].id}`,
                         val: expectedVal, 
-                        hasSingle: hasSingle // 単騎フラグを付与
+                        hasSingle: hasSingle 
                     });
                 }
             }
@@ -847,7 +857,6 @@
     function generateHighRiskSanrenpukuHtml(sanrentanList) {
         if (sanrentanList.length === 0) return "<li>-</li>";
         
-        // 荒天令は3点に修正されているため、上位3点の組み合わせから軸を抽出
         const top3Sanrentan = sanrentanList.slice(0, 3);
 
         const allIDs = top3Sanrentan.flatMap(c => c.nums.split(' - ').map(n => parseInt(n)));
@@ -856,14 +865,12 @@
             return acc;
         }, {});
         
-        // 出現頻度トップ4のIDを使用 (三連複2点を生成するため)
         const top4IDs = Object.keys(idCounts).sort((a, b) => idCounts[b] - idCounts[a]).slice(0, 4).map(Number).sort((a, b) => a - b);
         
         if (top4IDs.length < 3) return "<li>-</li>";
 
         let pukuSet = new Set();
         
-        // 組み合わせ候補を生成 (トップ4から3つ選ぶ)
         const combinations = [];
         for (let i = 0; i < top4IDs.length; i++) {
             for (let j = i + 1; j < top4IDs.length; j++) {
@@ -873,12 +880,10 @@
             }
         }
         
-        // 上位2点を採用
         const finalPuku = combinations.map(c => c.sort((a,b)=>a-b).join('='));
         const uniqueFinalPuku = Array.from(new Set(finalPuku)).slice(0, 2);
 
         if (uniqueFinalPuku.length === 0) {
-            // 最低限、上位3点からBOXを作成
             const top3IDs = top4IDs.slice(0,3);
             if(top3IDs.length === 3) {
                 return `<li class="weight-strong">${top3IDs.join('=')}</li>`;
@@ -936,7 +941,7 @@
         }
         
         // ⛈️ 荒天令 (高リスク推奨エリア) の表示
-        const highRiskCandidates = analyzeHighRiskCandidates(combinedList); // 単騎・低頻度優先のTop 3
+        const highRiskCandidates = analyzeHighRiskCandidates(combinedList); 
         const highRiskAnamaeListDiv = document.getElementById('mujirushi-anamae-list');
         const highRiskSanrenpukuListDiv = document.getElementById('mujirushi-sanrenpuku-list');
         
@@ -1016,7 +1021,6 @@
         players.forEach((p, index) => {
             // isSingleフラグがtrue、かつ全員単騎ではない場合のみマーク表示
             let showMarker = p.isSingle && !allSingle;
-            // 単騎マークを「(単騎)」に変更し、スタイルを適用
             let singleMarker = showMarker ? '<span style="font-size: 0.7em; font-weight: normal; margin-left: 3px;">(単騎)</span>' : ''; 
             
             // 補正値が適用された選手には '*' をつけて強調 (デバッグ/確認用)
