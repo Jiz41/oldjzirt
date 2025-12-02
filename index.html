@@ -3,14 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>競輪スコア計算機 完全版</title>
+<title>競輪スコア計算機</title>
 <style>
-  body { font-family: sans-serif; margin: 10px; font-size: 16px; }
-  select, input { font-size: 16px; margin: 5px 0; }
-  table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+  body { font-family: sans-serif; margin: 10px; }
+  select, button { font-size: 16px; margin: 5px 0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
   th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
-  th { background: #eee; }
-  .result { margin-top: 10px; }
+  @media (max-width: 600px) {
+    th, td { font-size: 14px; padding: 3px; }
+    select, button { font-size: 14px; }
+  }
 </style>
 </head>
 <body>
@@ -33,94 +35,90 @@
 <label>風向き：
   <select id="windSelect">
     <option value="なし">なし</option>
-    <option value="東">東</option>
-    <option value="西">西</option>
-    <option value="南">南</option>
     <option value="北">北</option>
+    <option value="東">東</option>
+    <option value="南">南</option>
+    <option value="西">西</option>
   </select>
 </label>
 <br>
-<button id="calcBtn">スコア計算</button>
+<button onclick="calculateScores()">スコア計算</button>
 
-<div class="result" id="result"></div>
+<h3>補正後スコアランキング</h3>
+<table id="rankingTable">
+  <thead>
+    <tr><th>順位</th><th>選手</th><th>スコア</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h3>買い目</h3>
+<div id="bets"></div>
 
 <script>
 let bankData = {};
-let players = [
-  // 手入力例：名前、脚質、競走得点
-  {name:"選手1", style:"逃げ", score:87.12},
-  {name:"選手2", style:"差し", score:83.28},
-  {name:"選手3", style:"捲り", score:91.96},
-  {name:"選手4", style:"マーク", score:81.86},
-  {name:"選手5", style:"差し", score:80.95},
-  {name:"選手6", style:"捲り", score:84.78},
-  {name:"選手7", style:"逃げ", score:81.42},
-];
-
-// 選手全体並び順（手入力）
-let playerOrder = ["選手3","選手1","選手6","選手2","選手4","選手7","選手5"];
-
+// バンクデータをJSONから読み込み
 fetch('bankdata.json')
   .then(res => res.json())
   .then(data => {
     bankData = data;
-    const select = document.getElementById('bankSelect');
-    Object.keys(bankData).forEach(bank => {
-      const option = document.createElement('option');
+    const bankSelect = document.getElementById('bankSelect');
+    for (let bank in bankData) {
+      let option = document.createElement('option');
       option.value = bank;
       option.textContent = bank;
-      select.appendChild(option);
-    });
+      bankSelect.appendChild(option);
+    }
   });
 
-function calculateScore() {
+// 手入力で選手データ・全体並び
+const riders = [
+  { id: 1, style: '先行', score: 87.12 },
+  { id: 2, style: '差し', score: 83.28 },
+  { id: 3, style: '捲り', score: 91.96 },
+  { id: 4, style: '差し', score: 81.86 },
+  { id: 5, style: '先行', score: 80.95 },
+  { id: 6, style: '差し', score: 84.78 },
+  { id: 7, style: '捲り', score: 81.42 }
+];
+const overallOrder = [3,1,6,2,4,7,5]; // 全体並び順
+
+function calculateScores() {
   const bank = document.getElementById('bankSelect').value;
   const time = document.getElementById('timeSelect').value;
   const wind = document.getElementById('windSelect').value;
+
   const bankInfo = bankData[bank];
 
-  let result = players.map(p => {
-    let score = p.score;
-
+  // 補正後スコア計算
+  const scores = riders.map(r => {
+    let s = r.score;
     // 脚質補正
-    if(bankInfo.keirin_bias[p.style]) {
-      score *= bankInfo.keirin_bias[p.style];
-    }
-
-    // 風向き補正
-    if(wind !== "なし" && bankInfo.wind_or_position[wind]) {
-      score *= bankInfo.wind_or_position[wind];
-    }
-
-    return {...p, adjusted: parseFloat(score.toFixed(2))};
+    if (bankInfo.keirin_bias[r.style]) s *= bankInfo.keirin_bias[r.style];
+    // 風向き補正（東西南北）
+    if (wind !== 'なし' && bankInfo.wind_or_position[wind]) s *= bankInfo.wind_or_position[wind];
+    return { id: r.id, score: s };
   });
 
-  // 全体並び順で並び替え
-  result.sort((a,b) => {
-    return playerOrder.indexOf(a.name) - playerOrder.indexOf(b.name);
+  // 並び順でソート
+  const sorted = overallOrder.map(id => scores.find(r=>r.id===id));
+
+  // ランキング表示
+  const tbody = document.querySelector('#rankingTable tbody');
+  tbody.innerHTML = '';
+  sorted.forEach((r,i)=>{
+    let tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i+1}</td><td>選手${r.id}</td><td>${r.score.toFixed(2)}</td>`;
+    tbody.appendChild(tr);
   });
 
-  // スコア順に表示用に再ソート
-  const scoreRank = [...result].sort((a,b) => b.adjusted - a.adjusted);
-
-  // 三連単12点、三連複4点（単純例）
-  const trianSingle = scoreRank.slice(0,3).map(p => p.name).join('-');
-  const trianMulti = scoreRank.slice(0,4).map(p => p.name).join(',');
-
-  const resDiv = document.getElementById('result');
-  resDiv.innerHTML = `
-    <h3>補正後スコアランキング</h3>
-    <table>
-      <tr><th>選手</th><th>スコア</th></tr>
-      ${scoreRank.map(p => `<tr><td>${p.name}</td><td>${p.adjusted}</td></tr>`).join('')}
-    </table>
-    <h3>買い目</h3>
-    <p>三連単12点: ${trianSingle}</p>
-    <p>三連複4点: ${trianMulti}</p>
+  // 買い目表示
+  const betsDiv = document.getElementById('bets');
+  betsDiv.innerHTML = `
+    <p>三連単12点: ${sorted[0].id}-${sorted[1].id}-${sorted[2].id}</p>
+    <p>三連複4点: ${sorted[0].id},${sorted[1].id},${sorted[2].id},${sorted[3].id}</p>
   `;
 }
-
-document.getElementById('calcBtn').addEventListener('click', calculateScore);
 </script>
 
 </body>
