@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>競輪スコア計算システム (マルチパターン版)</title>
+    <title>競輪スコア計算システム (マルチパターン)</title>
     <style>
         :root {
             --primary-color: #0056b3;
@@ -99,7 +99,7 @@
                 <th style="width:5%">ID</th>
                 <th style="width:20%">脚質</th>
                 <th style="width:20%">競走得点</th>
-                <th style="width:25%">WINTICKET係数</th>
+                <th style="width:25%">W印</th>
             </tr>
         </thead>
         <tbody id="player-inputs">
@@ -129,23 +129,32 @@
     const COMMON_WIND_MAP = { "東": "バック追い風", "西": "バック向かい風", "南": "横風", "北": "バンク特有の風なし" };
     const COMMON_TIME_BIAS = { "モーニング": 1.0, "デイ": 1.0, "ナイター": 1.02, "ミッドナイト": 0.98 };
 
-    // ★★★ 展開補正値の定義 (パターン生成のベース) ★★★
+    // WINTICKET予想印と係数の対応表
+    const WINTICKET_COEFFICIENTS = {
+        "なし": 1.00,
+        "△": 1.05,
+        "▲": 1.10,
+        "◯": 1.15,
+        "◎": 1.20 
+    };
+
+    // 展開補正値の定義 (パターン生成のベース)
     const DEVELOPMENT_BIAS = {
         "A. 先行有利": { "先行": 1.05, "捲り": 1.0, "差し": 0.95 },
         "B. 捲り有利": { "先行": 0.98, "捲り": 1.05, "差し": 1.0 },
         "C. 差し有利": { "先行": 0.95, "捲り": 1.0, "差し": 1.05 }
     };
-    // ★★★ ここまで ★★★
 
     window.addEventListener('DOMContentLoaded', () => {
         initPlayerTable();
         loadBankData(); 
     });
 
-    // 選手入力欄の生成 (WINTICKET係数欄を追加)
+    // 選手入力欄の生成 (W印のセレクトボックス)
     function initPlayerTable() {
         const tbody = document.getElementById('player-inputs');
         const legOptions = ['先行', '捲り', '差し', 'マーク']; 
+        const markOptions = Object.keys(WINTICKET_COEFFICIENTS).map(mark => `<option value="${mark}">${mark}</option>`).join('');
         
         for (let i = 1; i <= PLAYER_COUNT; i++) {
             const tr = document.createElement('tr');
@@ -161,7 +170,11 @@
                     </select>
                 </td>
                 <td><input type="number" id="score-${i}" placeholder="得点" step="0.01"></td>
-                <td><input type="number" id="winticket-bias-${i}" placeholder="例: 1.0" value="1.0" step="0.01"></td> 
+                <td>
+                    <select id="winticket-mark-${i}">
+                        ${markOptions}
+                    </select>
+                </td> 
             `;
             tbody.appendChild(tr);
         }
@@ -192,7 +205,7 @@
         }
     }
 
-    // ★★★ メイン計算ロジック (全パターン自動生成) ★★★
+    // メイン計算ロジック (変更なし)
     function calculate() {
         const selectedBankName = document.getElementById('bank-select').value;
         if (!selectedBankName || !bankData[selectedBankName]) {
@@ -219,12 +232,12 @@
         for (let i = 1; i <= PLAYER_COUNT; i++) {
             const leg = document.getElementById(`leg-${i}`).value;
             const rawScoreStr = document.getElementById(`score-${i}`).value;
-            const winticketBiasStr = document.getElementById(`winticket-bias-${i}`).value;
+            const winticketMark = document.getElementById(`winticket-mark-${i}`).value; 
 
             if (!rawScoreStr || isNaN(parseFloat(rawScoreStr))) continue;
 
             const rawScore = parseFloat(rawScoreStr);
-            const winticketBias = parseFloat(winticketBiasStr) || 1.0; // 係数未入力なら1.0
+            const winticketBias = WINTICKET_COEFFICIENTS[winticketMark] || 1.0;
 
             let legKey = leg;
             if (leg === 'マーク') {
@@ -240,7 +253,7 @@
                 id: i,
                 leg: leg, 
                 rawScore: rawScore,
-                winticketBias: winticketBias,
+                winticketBias: winticketBias, // WINTICKET係数
                 staticBias: staticBias,
                 legKey: legKey
             });
@@ -262,8 +275,7 @@
                 // 展開動的係数の取得
                 const developBiasVal = developBiasMap[p.legKey] || 1.0;
                 
-                // 最終スコア計算
-                // Final Score = 得点 × WINTICKET係数 × 静的係数 × 展開動的係数
+                // 最終スコア計算: 得点 × WINTICKET係数 × 静的係数 × 展開動的係数
                 let finalScore = p.rawScore * p.winticketBias * p.staticBias * developBiasVal; 
 
                 return {
@@ -285,9 +297,9 @@
         // 結果表示の実行
         displayMultiScenarioResults(allScenarioResults);
     }
-    // ★★★ メイン計算ロジック終了 ★★★
+    // メイン計算ロジック終了
 
-    // ★★★ 結果表示ロジック (複数パターン対応) ★★★
+    // 結果表示ロジック (複数パターン対応, 変更なし)
     function displayMultiScenarioResults(allScenarioResults) {
         document.getElementById('result-area').style.display = 'block';
         const container = document.getElementById('scenario-results-container');
@@ -395,7 +407,7 @@
         
         return { sanrentan: sanrentanHtml, sanrenpuku: sanrenpukuHtml };
     }
-    // ★★★ 結果表示ロジック終了 ★★★
+    // 結果表示ロジック終了
 
 </script>
 
