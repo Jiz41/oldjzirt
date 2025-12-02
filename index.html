@@ -569,17 +569,15 @@
         // 1. 低頻度 (count <= 2) の組み合わせに絞る
         const lowFrequencyCandidates = combinedList.filter(c => c.count <= 2);
         
-        // 2. 1着または2着の選手が「なし」または「△」であるものを抽出
+        // 2. 1着、2着、または3着の選手が「なし」または「△」であるものを抽出 (ロジック緩和済み)
         const mujirushiCandidates = lowFrequencyCandidates.filter(c => {
             const parts = c.nums.split(' - ').map(n => parseInt(n)); // [1着ID, 2着ID, 3着ID]
-            const id1 = parts[0];
-            const id2 = parts[1];
+            
+            // 緩和: 1着、2着、3着のいずれかのW印をチェック
+            const marks = parts.map(id => playerWinticketMap[id]);
 
-            const mark1 = playerWinticketMap[id1];
-            const mark2 = playerWinticketMap[id2];
-
-            // 1着または2着が「なし」または「△」である
-            return (mark1 === 'なし' || mark1 === '△') || (mark2 === 'なし' || mark2 === '△');
+            // 1着、2着、または3着のいずれかが「なし」または「△」である
+            return marks.some(mark => mark === 'なし' || mark === '△');
         });
 
         // 3. 期待値の高い順にソートして、トップ3を抽出
