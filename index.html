@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>華耀天輪 真・自在律 V6.0 - Mobile</title>
+    <title>華耀天輪 真・自在律 V6.0 - Mobile (Friendly)</title>
     <style>
-        /* 🎨 以前の色味（青、緑、赤）を基調としたCSS */
+        /* 🎨 新デザイン: 優しく、落ち着いた色合い */
         
-        /* 横スクロール対策の最重要設定 */
         html, body {
-            overflow-x: hidden; /* 横方向のスクロールを完全に禁止 */
+            overflow-x: hidden; 
             width: 100%;
         }
 
@@ -18,7 +17,7 @@
             margin: 0; 
             padding: 0; 
             padding-bottom: 30px; 
-            background-color: #f4f4f9; 
+            background-color: #fbf8f5; /* ★基調色: 非常に薄いグリーン/ベージュ */
             color: #333; 
         }
         
@@ -26,77 +25,91 @@
             width: calc(100% - 20px); 
             max-width: 600px; 
             margin: 10px auto; 
-            background-color: #fff; 
+            background-color: #ffffff; /* コンテンツ背景 */
             padding: 0; 
-            border-radius: 0; 
-            box-shadow: none; 
+            border-radius: 8px; /* 角を丸く */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* 影を優しく */
             box-sizing: border-box; 
         }
         
-        h1 { font-size: 1.5em; color: #2c3e50; border-bottom: 3px solid #3498db; padding: 10px 10px 5px 10px; margin-top: 0; }
-        h2 { font-size: 1.2em; color: #2c3e50; border-bottom: 2px solid #3498db; padding: 10px 10px 3px 10px; margin-top: 20px; }
+        /* ヘッダー/タイトル */
+        h1 { 
+            font-size: 1.5em; 
+            color: #698b69; /* 落ち着いたグリーン */
+            border-bottom: 3px solid #98b498; /* セージグリーン */
+            padding: 15px 15px 10px 15px; /* 内側paddingを調整 */ 
+            margin-top: 0; 
+            border-radius: 8px 8px 0 0; /* 上の角だけ丸く */
+        }
         
+        h2 { 
+            font-size: 1.2em; 
+            color: #698b69; 
+            border-bottom: 2px solid #b3c7b3; /* さらに薄いグリーン */
+            padding: 15px 15px 5px 15px; 
+            margin-top: 20px; 
+        }
+        
+        /* グループボックス（入力・結果） */
         .input-group, .result-section { 
-            margin: 0 10px 15px 10px; 
-            padding: 10px; 
-            border: 1px solid #ccc; 
-            border-radius: 6px; 
-            background-color: #fafafa; 
+            margin: 0 15px 20px 15px; /* 左右マージンを15pxに拡大 */
+            padding: 15px; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 8px; 
+            background-color: #fcfcf0; /* ★情報ボックスの薄いクリーム色 */
             box-sizing: border-box; 
         }
 
         /* 縦積み化の基本スタイル */
         .input-item { margin-bottom: 15px; }
-        .input-item label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .input-item label { display: block; font-weight: bold; margin-bottom: 5px; color: #5a5a5a; }
         
-        /* input/selectの幅を100%に固定し、paddingもbox-sizingで制御 */
         select, input[type="number"], input[type="text"] { 
             width: 100%; 
-            padding: 7px; 
+            padding: 8px; 
             box-sizing: border-box; 
-            border: 1px solid #bdc3c7; 
-            border-radius: 3px; 
+            border: 1px solid #dcdcdc; 
+            border-radius: 4px; 
             font-size: 1em; 
+            background-color: #ffffff;
         }
 
-        /* 選手データ入力リストのスタイル（横スクロール回避の徹底） */
+        /* 選手データ入力リスト */
         .player-input-list { margin-top: 10px; }
         
         /* 選手行の基本スタイル */
-        .player-row { border: 1px solid #ddd; padding: 0; /* paddingをHeaderとFieldsに移す */ margin-bottom: 8px; border-radius: 5px; background-color: #fff; overflow: hidden; }
+        .player-row { border: 1px solid #e0e0e0; padding: 0; margin-bottom: 10px; border-radius: 6px; background-color: #ffffff; overflow: hidden; }
 
-        /* ★修正点: 選手ヘッダーに背景色を適用し、paddingを移す */
+        /* 選手ヘッダー（枠番カラー） */
         .player-header { 
             font-weight: bold; 
             font-size: 1.0em; 
             color: #333; 
-            padding: 6px; 
+            padding: 8px 10px; 
             margin-bottom: 0; 
             display: flex; 
             justify-content: space-between; 
             align-items: center;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* 境界線も薄く */
         }
 
-        /* ★新規追加: 枠番色に合わせた非常に薄い背景色 */
-        .id-1 .player-header { background-color: #ffffff; color: #2c3e50; } /* 白 */
-        .id-2 .player-header { background-color: #f0f0f0; color: #2c3e50; } /* 非常に薄い黒 */
-        .id-3 .player-header { background-color: #fff0f0; color: #2c3e50; } /* 非常に薄い赤 */
-        .id-4 .player-header { background-color: #f0f8ff; color: #2c3e50; } /* 非常に薄い青 */
-        .id-5 .player-header { background-color: #fffaf0; color: #2c3e50; } /* 非常に薄い黄 */
-        .id-6 .player-header { background-color: #f0fff0; color: #2c3e50; } /* 非常に薄い緑 */
-        .id-7 .player-header { background-color: #fff5ee; color: #2c3e50; } /* 非常に薄いオレンジ */
+        /* 枠番色：非常に薄い色を維持 */
+        .id-1 .player-header { background-color: #ffffff; color: #333; } 
+        .id-2 .player-header { background-color: #f0f0f0; color: #333; } 
+        .id-3 .player-header { background-color: #fff0f0; color: #333; } 
+        .id-4 .player-header { background-color: #f0f8ff; color: #333; } 
+        .id-5 .player-header { background-color: #fffaf0; color: #333; } 
+        .id-6 .player-header { background-color: #f0fff0; color: #333; } 
+        .id-7 .player-header { background-color: #fff5ee; color: #333; }
 
-
-        /* 選手フィールドは引き続きpaddingを持つ */
+        /* 選手フィールド */
         .player-fields { 
             display: flex; 
             flex-wrap: wrap; 
-            gap: 2px; 
-            padding: 6px; /* 以前player-rowにあったpaddingを移動 */
+            gap: 4px; /* ギャップを少し広げる */
+            padding: 8px 10px; 
         }
         
-        /* 選手情報のフィールド幅の調整 */
         .player-field { 
             flex: 1 1 23%; 
             min-width: 50px; 
@@ -108,26 +121,28 @@
         .player-field:nth-child(3) { flex: 1 1 20%; } 
         .player-field:nth-child(4) { flex: 1 1 25%; } 
         
-        .player-field label { display: block; font-size: 0.75em; color: #555; margin-bottom: 1px;}
+        .player-field label { display: block; font-size: 0.7em; color: #666; margin-bottom: 2px;}
         .player-field input, .player-field select { 
             width: 100%; 
-            padding: 3px; 
+            padding: 3px 5px; 
             box-sizing: border-box; 
             font-size: 0.85em; 
         }
 
         /* S/B 1位のラジオボタン用レイアウト */
-        .sb-group { display: flex; gap: 4px; font-size: 0.75em; }
-        .sb-group label { display: inline-flex; align-items: center; font-weight: normal; color: #555; }
+        .sb-group { display: flex; gap: 6px; font-size: 0.75em; }
+        .sb-group label { display: inline-flex; align-items: center; font-weight: normal; color: #666; }
         .sb-group input[type="radio"] { width: auto; margin-left: 2px; }
         
-        /* ライン強度用CSS (変更なし) */
+        /* ライン強度用CSS */
         #line-strength { padding: 8px 0; font-size: 1.1em; }
         .line-display { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+        
+        /* ラインカラーは以前の強い色を維持 (枠番とは別の意味合いのため) */
         .line-box { 
             display: inline-block; 
-            padding: 2px 4px; 
-            border-radius: 3px; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
             font-weight: bold; 
             color: white; 
             margin-right: 5px; 
@@ -139,53 +154,77 @@
         .line-color-4 { background-color: #9b59b6; } 
         .line-solo { background-color: #95a5a6; } 
         
-        /* バンク展開傾向 (変更なし) */
-        #bank-tendency-display { margin-top: 5px; margin-bottom: 10px; padding: 5px 0; font-size: 0.95em; color: #3498db; font-weight: bold;}
+        /* バンク展開傾向 */
+        #bank-tendency-display { margin-top: 5px; margin-bottom: 10px; padding: 5px 0; font-size: 0.95em; color: #698b69; font-weight: bold;}
 
 
-        /* 結果テーブルの横スクロール回避 (変更なし) */
-        .scenario-detail table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        /* 結果テーブル */
+        .scenario-detail table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 10px; }
         .scenario-detail th, .scenario-detail td { 
-            border: 1px solid #ddd; 
-            padding: 4px 2px; 
+            border: 1px solid #efefef; /* 罫線も薄く */
+            padding: 6px 3px; 
             text-align: center; 
-            font-size: 0.8em; 
+            font-size: 0.85em; 
             word-break: break-all; 
         }
+        .scenario-detail th { background-color: #f7f7f7; color: #555; }
         
-        /* スコアと順位を非表示にするためのクラス (変更なし) */
         .hide-score-rank { display: none !important; }
 
-        /* その他UI要素 (変更なし) */
+        /* その他UI要素 */
         .debug-log { 
-            background-color: #2c3e50; 
-            color: #ecf0f1; 
+            background-color: #384e38; /* ダークグリーン系 */
+            color: #f0fff0; 
             padding: 10px; 
             height: 100px; 
             overflow-y: scroll; 
             font-family: 'Courier New', Courier, monospace; 
             border-radius: 5px; 
             font-size: 0.75em; 
-            margin: 0 10px; 
+            margin: 0 15px 15px 15px; /* マージン調整 */
         }
-        .recommendation { padding: 10px; border-radius: 5px; font-weight: bold; margin-top: 10px; font-size: 0.9em; }
-        #seitenrei-output { background-color: #e8f8f5; border-left: 5px solid #1abc9c; } 
-        #koutenrei-output { background-color: #fbecec; border-left: 5px solid #e74c3c; } 
-        .scenario-detail { border: 1px dashed #95a5a6; padding: 10px; margin-top: 15px; border-radius: 5px; }
-        .scenario-detail h4 { font-size: 1em; margin: 0 0 10px 0; border-bottom: 1px solid #ccc; padding-bottom: 5px;}
         
-        button { width: 100%; padding: 12px; background-color: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; font-size: 1em; }
+        .recommendation { padding: 12px; border-radius: 6px; font-weight: bold; margin-top: 10px; font-size: 0.95em; line-height: 1.6; }
+        
+        /* 晴天令・荒天令の色味を優しく調整 */
+        #seitenrei-output { 
+            background-color: #e6f5e6; 
+            border-left: 5px solid #698b69; /* 落ち着いた緑 */ 
+            color: #444; 
+        }
+        #koutenrei-output { 
+            background-color: #fcf0f0; 
+            border-left: 5px solid #c07777; /* 落ち着いた赤 */ 
+            color: #444; 
+        }
+        
+        .scenario-detail { border: 1px dashed #dcdcdc; padding: 12px; margin-top: 15px; border-radius: 6px; }
+        .scenario-detail h4 { font-size: 1.05em; margin: 0 0 10px 0; border-bottom: 1px solid #e0e0e0; padding-bottom: 5px; color: #698b69;}
+        
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background-color: #698b69; /* 落ち着いた緑 */
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin-top: 15px; 
+            font-size: 1.05em; 
+            transition: background-color 0.3s;
+        }
+        button:hover { background-color: #557755; }
 
-        /* フッターCSS (変更なし) */
+        /* フッターCSS */
         .copyright-footer {
             text-align: center;
-            font-size: 0.7em;
+            font-size: 0.75em;
             color: #aaa; 
             margin-top: 20px;
             width: 100%;
         }
 
-        /* 実行前の結果セクションを非表示にしてがたつきを解消 (変更なし) */
+        /* 実行前の結果セクションを非表示にしてがたつきを解消 */
         #results-container {
             display: none;
             opacity: 0;
@@ -213,7 +252,7 @@
     <div class="input-group">
         
         <div class="input-item">
-            <label for="race-type"><strong>レースタイプ/級班:</strong></label>
+            <label for="race-type">レースタイプ/級班:</label>
             <select id="race-type">
                 <option value="girls">🚴‍♀️ ガールズ競輪</option>
                 <option value="s-kyu">🏆 S級</option>
@@ -500,11 +539,11 @@
 
 
         <div class="input-item">
-            <label for="line-input"><strong>全体並び:</strong> (例: 123,45,67 または 1,2,3,4,5,6,7)</label>
+            <label for="line-input">全体並び: (例: 123,45,67 または 1,2,3,4,5,6,7)</label>
             <input type="text" id="line-input" value="1,2,3,4,5,6,7">
         </div>
         
-        <button onclick="calculatePrediction()">🚀 予想を計算 (実行)</button>
+        <button onclick="calculatePrediction()">🚀 予想を計算 (実行)</option>
     </div>
 
     <div id="results-container">
