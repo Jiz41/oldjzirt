@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>競輪予想ツール 華耀天輪 真・自在律 V3.8</title>
+<title>競輪予想ツール 華耀天輪 真・自在律 V3.9</title>
 <style>
-/* 🎨 V3.8 スタイル (V3.5/V3.6/V3.7から変更なし) */
+/* 🎨 V3.9 スタイル */
 :root { 
     --primary-color: #4682B4; 
     --accent-color: #FFD700; 
@@ -101,7 +101,7 @@ select, input[type="number"], input[type="text"] {
 /* Results */ 
 #result-area { 
     margin-top: 20px; 
-    /* 計算前は非表示のまま */
+    /* 🚨 修正: 親要素のみ display: none; で制御 */
     display: none; 
 } 
 .scenario-result { 
@@ -168,8 +168,7 @@ select, input[type="number"], input[type="text"] {
     margin-top: 30px; 
     padding: 15px; 
     border-radius: 8px; 
-    /* JSで表示制御するため、一旦非表示を設定 */
-    display: none;
+    /* 🚨 修正: 子要素からは display: none; を削除 */
 } 
 #combined-ranking { 
     border: 2px solid var(--accent-color); 
@@ -309,7 +308,7 @@ select, input[type="number"], input[type="text"] {
 </head> 
 <body> 
 <div class="container"> 
-    <h1>華耀天輪 真・自在律 V3.8</h1> 
+    <h1>華耀天輪 真・自在律 V3.9</h1> 
     <div class="manual-container"> 
         <h2 id="manual-toggle" onclick="toggleManual()"> 📜 説明書・評価ロジック解説 <span id="toggle-icon">▼</span> </h2> 
         <div id="manual-content" class="manual-content-hidden"> 
@@ -485,7 +484,7 @@ select, input[type="number"], input[type="text"] {
     </div> 
 </div> 
 <script> 
-// グローバル変数/定数 (V3.5/V3.6/V3.7から変更なし)
+// グローバル変数/定数 (V3.9から変更なし)
 let bankData = {}; 
 const PLAYER_COUNT = 7; 
 let playerWinticketMap = {}; 
@@ -513,12 +512,11 @@ const DEVELOPMENT_BIAS = {
 window.addEventListener('DOMContentLoaded', () => { 
     initPlayerTable(); 
     loadBankData(); 
-    // 初回ロード時に非表示にする
-    document.getElementById('combined-ranking').style.display = 'none';
-    document.getElementById('mujirushi-anamae-ranking').style.display = 'none';
+    // 初回ロード時に親要素を非表示
+    document.getElementById('result-area').style.display = 'none';
 }); 
 
-// 選手入力欄の生成 + 排他制御のイベントリスナー設定 (V3.5/V3.6/V3.7から変更なし)
+// 選手入力欄の生成 + 排他制御のイベントリスナー設定 (V3.9から変更なし)
 function initPlayerTable() { 
     const tbody = document.getElementById('player-inputs'); 
     if (!tbody) { 
@@ -571,7 +569,7 @@ function initPlayerTable() {
     });
 } 
 
-// JSONデータの読み込み (V3.5/V3.6/V3.7から変更なし)
+// JSONデータの読み込み (V3.9から変更なし)
 async function loadBankData() { 
     const bankSelect = document.getElementById('bank-select'); 
     bankSelect.innerHTML = '<option value="">データ読み込み中...</option>'; 
@@ -611,7 +609,7 @@ async function loadBankData() {
     } 
 } 
 
-// ライン結束力・整合性の評価とUI表示 (V3.5/V3.6/V3.7から変更なし)
+// ライン結束力・整合性の評価とUI表示 (V3.9から変更なし)
 function calculateLineCohesion(rawPlayers, lineupStr) {
     const lines = {};
     const lineNames = lineupStr.split(',').map(l => l.trim()).filter(l => l.length > 0);
@@ -670,7 +668,7 @@ function calculateLineCohesion(rawPlayers, lineupStr) {
 }
 
 
-// 連係補正値の計算ロジック (V3.5/V3.6/V3.7から変更なし)
+// 連係補正値の計算ロジック (V3.9から変更なし)
 function calculateCoopBias(playerId, rawScore, players, lineupStr, lineCohesionResults) { 
     if (!lineupStr) { return 1.0; } 
 
@@ -708,7 +706,7 @@ function calculateCoopBias(playerId, rawScore, players, lineupStr, lineCohesionR
     return 1.0; 
 } 
 
-// バンク特性フィードバック (V3.5/V3.6/V3.7から変更なし)
+// バンク特性フィードバック (V3.9から変更なし)
 function displayBankFeedback(bankName, biasMap) {
     const feedbackDiv = document.getElementById('bank-feedback');
     if (!feedbackDiv) return;
@@ -730,10 +728,6 @@ function displayBankFeedback(bankName, biasMap) {
 // メイン計算ロジック
 function calculate() { 
     const resultArea = document.getElementById('result-area');
-    // 🚨 修正: 計算開始時に結果エリア全体を強制表示
-    if (resultArea) { 
-        resultArea.style.display = 'block'; 
-    } 
     
     const selectedBankName = document.getElementById('bank-select').value; 
     const currentBank = bankData[selectedBankName] || { keirin_bias: {}, wind_or_position: {} };
@@ -845,16 +839,15 @@ function calculate() {
     
     displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations); 
 
-    // **🚨 最終修正点**: ここで晴天令と荒天令のエリアを確実に表示させます
-    document.getElementById('combined-ranking').style.display = 'block'; 
-    document.getElementById('mujirushi-anamae-ranking').style.display = 'block';
+    // 🚨 修正: 計算完了後、親要素を確実に表示する
+    document.getElementById('result-area').style.display = 'block'; 
 } 
 
 // ----------------------------------------------------------------------
 // 予想生成・表示ヘルパー関数
 // ----------------------------------------------------------------------
 
-// ... (helper functions - V3.5/V3.6/V3.7から変更なし) ...
+// ... (helper functions - V3.9から変更なし) ...
 function generateSanrenpukuHtml(sortedPlayers) {
     const sanrenpukuSet = new Set();
     for (let i = 0; i < 3 && i < sortedPlayers.length; i++) {
@@ -971,7 +964,7 @@ function displayMultiScenarioResults(allScenarioResults, allSanrentanCombination
     mujirushiSanrenpukuListElement.innerHTML = generateHighRiskSanrenpukuHtml(highRiskList);
 }
 
-// ... (その他のヘルパー関数 - V3.5/V3.6/V3.7から変更なし) ...
+// ... (その他のヘルパー関数 - V3.9から変更なし) ...
 function parseLineupAndDetermineMode(lineupStr, players) { /* ... */ return { lineupPlayers: new Set(), singleRiders: [] }; }
 function applyTenScaleRating(sortedPlayers) { 
     if (sortedPlayers.length === 0) return [];
