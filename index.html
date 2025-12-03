@@ -2,36 +2,100 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>華耀天輪 真・自在律 V6.0 - Mobile</title>
     <style>
         /* 🎨 以前の色味（青、緑、赤）を基調としたCSS */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px 10px 30px 10px; /* フッター分のスペースを確保 */ background-color: #f4f4f9; color: #333; }
-        .container { width: 100%; max-width: 600px; margin: auto; background-color: #fff; padding: 15px; border-radius: 0; box-shadow: none; }
+        
+        /* 横スクロール対策の最重要設定 */
+        html, body {
+            overflow-x: hidden; /* 横方向のスクロールを完全に禁止 */
+            width: 100%;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 10px; /* 左右の余白を固定 */
+            padding-bottom: 30px; /* フッター分のスペースを確保 */ 
+            background-color: #f4f4f9; 
+            color: #333; 
+        }
+        
+        .container { 
+            width: 100%; 
+            max-width: 600px; /* PCでの表示上限 */
+            margin: auto; 
+            background-color: #fff; 
+            padding: 15px; 
+            border-radius: 0; 
+            box-shadow: none; 
+            box-sizing: border-box; /* paddingを含めて幅100%とする */
+        }
+        
         h1 { font-size: 1.5em; color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 5px; margin-top: 10px; }
         h2 { font-size: 1.2em; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 3px; margin-top: 20px; }
-        .input-group, .result-section { margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; background-color: #fafafa; }
+        
+        .input-group, .result-section { 
+            margin-bottom: 15px; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            background-color: #fafafa; 
+            box-sizing: border-box; /* 横幅100%内で収める */
+        }
         
         /* 縦積み化の基本スタイル */
         .input-item { margin-bottom: 15px; }
         .input-item label { display: block; font-weight: bold; margin-bottom: 5px; }
-        /* 横スクロール対策として、input/selectのpaddingを微調整し、幅を100%に固定 */
-        select, input[type="number"], input[type="text"] { width: 100%; padding: 7px; box-sizing: border-box; border: 1px solid #bdc3c7; border-radius: 3px; font-size: 1em; }
+        
+        /* input/selectの幅を100%に固定し、paddingもbox-sizingで制御 */
+        select, input[type="number"], input[type="text"] { 
+            width: 100%; 
+            padding: 7px; 
+            box-sizing: border-box; 
+            border: 1px solid #bdc3c7; 
+            border-radius: 3px; 
+            font-size: 1em; 
+        }
 
-        /* 選手データ入力リストのスタイル（横スクロール回避） */
+        /* 選手データ入力リストのスタイル（横スクロール回避の徹底） */
         .player-input-list { margin-top: 10px; }
-        .player-row { border: 1px solid #ddd; padding: 8px; margin-bottom: 8px; border-radius: 5px; background-color: #fff; }
+        .player-row { border: 1px solid #ddd; padding: 6px; /* 縦横のpaddingを小さく */ margin-bottom: 8px; border-radius: 5px; background-color: #fff; }
         .player-header { font-weight: bold; font-size: 1.0em; color: #3498db; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;}
-        .player-fields { display: flex; flex-wrap: wrap; gap: 4px; /* ギャップを小さく */ }
-        /* 選手情報のフィールドを3列表示に挑戦 */
-        .player-field { flex: 1 1 30%; /* 3列表示を基本とする */ min-width: 80px; }
-        .player-field label { display: block; font-size: 0.8em; color: #555; }
-        .player-field input, .player-field select { width: 100%; padding: 4px; box-sizing: border-box; font-size: 0.9em; }
+        
+        /* 選手情報のフィールドを4列表示 (得点を優先し、W印をコンパクトに) */
+        .player-fields { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 2px; /* ギャップを極小化 */
+        }
+        
+        /* 選手情報のフィールド幅の調整 */
+        .player-field { 
+            /* 理想: 脚質(25%) / 得点(25%) / W印(20%) / 直近3走(30%) */
+            flex: 1 1 25%; /* デフォルトは25% */
+            min-width: 50px; /* 最小幅を設定 */
+            box-sizing: border-box; 
+        }
+
+        .player-field:nth-child(1) { flex: 1 1 23%; } /* 脚質 */
+        .player-field:nth-child(2) { flex: 1 1 27%; } /* 得点 (重要度高) */
+        .player-field:nth-child(3) { flex: 1 1 20%; } /* W印 (コンパクトに) */
+        .player-field:nth-child(4) { flex: 1 1 25%; } /* 直近3走 */
+        
+        .player-field label { display: block; font-size: 0.75em; /* フォントを小さく */ color: #555; margin-bottom: 1px;}
+        .player-field input, .player-field select { 
+            width: 100%; 
+            padding: 3px; /* input/selectのpaddingを極小化 */ 
+            box-sizing: border-box; 
+            font-size: 0.85em; 
+        }
 
         /* S/B 1位のラジオボタン用レイアウト */
-        .sb-group { display: flex; gap: 8px; font-size: 0.85em; }
+        .sb-group { display: flex; gap: 4px; font-size: 0.75em; /* さらに小さく */ }
         .sb-group label { display: inline-flex; align-items: center; font-weight: normal; color: #555; }
-        .sb-group input[type="radio"] { width: auto; margin-left: 3px; }
+        .sb-group input[type="radio"] { width: auto; margin-left: 2px; }
         
         /* ライン強度用CSS */
         #line-strength { padding: 8px 0; font-size: 1.1em; }
@@ -57,8 +121,13 @@
 
         /* 結果テーブルの横スクロール回避 */
         .scenario-detail table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        /* 最終スコアを非表示にするため、セル幅を調整 */
-        .scenario-detail th, .scenario-detail td { border: 1px solid #ddd; padding: 6px 4px; text-align: center; font-size: 0.8em; word-break: break-all; }
+        .scenario-detail th, .scenario-detail td { 
+            border: 1px solid #ddd; 
+            padding: 4px 2px; /* セルpaddingを極小化 */
+            text-align: center; 
+            font-size: 0.8em; 
+            word-break: break-all; 
+        }
         
         /* スコアと順位を非表示にするためのクラス */
         .hide-score-rank { display: none !important; }
@@ -79,6 +148,18 @@
             color: #aaa; /* 薄いグレー */
             margin-top: 20px;
             width: 100%;
+        }
+
+        /* ★修正点1: 実行前の結果セクションを非表示にしてがたつきを解消 */
+        #results-container {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        #results-container.visible {
+            display: block;
+            opacity: 1;
         }
     </style>
 </head>
@@ -140,8 +221,9 @@
                         <select class="wmark">
                             <option value="◎">◎</option>
                             <option value="〇">〇</option>
+                            <option value="✕">✕</option>
                             <option value="△">△</option>
-                            <option value="✕">✕</option> <option value="無" selected>無</option>
+                            <option value="無" selected>無</option>
                         </select>
                     </div>
                     <div class="player-field">
@@ -177,8 +259,9 @@
                         <select class="wmark">
                             <option value="◎">◎</option>
                             <option value="〇">〇</option>
+                            <option value="✕">✕</option>
                             <option value="△">△</option>
-                            <option value="✕">✕</option> <option value="無" selected>無</option>
+                            <option value="無" selected>無</option>
                         </select>
                     </div>
                     <div class="player-field">
@@ -214,8 +297,9 @@
                         <select class="wmark">
                             <option value="◎">◎</option>
                             <option value="〇">〇</option>
+                            <option value="✕">✕</option>
                             <option value="△" selected>△</option>
-                            <option value="✕">✕</option> <option value="無">無</option>
+                            <option value="無">無</option>
                         </select>
                     </div>
                     <div class="player-field">
@@ -251,8 +335,9 @@
                         <select class="wmark">
                             <option value="◎">◎</option>
                             <option value="〇">〇</option>
+                            <option value="✕">✕</option>
                             <option value="△">△</option>
-                            <option value="✕">✕</option> <option value="無" selected>無</option>
+                            <option value="無" selected>無</option>
                         </select>
                     </div>
                     <div class="player-field">
@@ -288,8 +373,9 @@
                         <select class="wmark">
                             <option value="◎">◎</option>
                             <option value="〇">〇</option>
+                            <option value="✕">✕</option>
                             <option value="△">△</option>
-                            <option value="✕">✕</option> <option value="無" selected>無</option>
+                            <option value="無" selected>無</option>
                         </select>
                     </div>
                     <div class="player-field">
@@ -325,8 +411,9 @@
                         <select class="wmark">
                             <option value="◎">◎</option>
                             <option value="〇">〇</option>
+                            <option value="✕">✕</option>
                             <option value="△">△</option>
-                            <option value="✕">✕</option> <option value="無" selected>無</option>
+                            <option value="無" selected>無</option>
                         </select>
                     </div>
                     <div class="player-field">
@@ -362,8 +449,9 @@
                         <select class="wmark">
                             <option value="◎">◎</option>
                             <option value="〇">〇</option>
+                            <option value="✕">✕</option>
                             <option value="△">△</option>
-                            <option value="✕">✕</option> <option value="無" selected>無</option>
+                            <option value="無" selected>無</option>
                         </select>
                     </div>
                     <div class="player-field">
@@ -384,31 +472,33 @@
         <button onclick="calculatePrediction()">🚀 予想を計算 (実行)</button>
     </div>
 
-    <h2>📊 予想結果・推奨買い目</h2>
-    <div class="result-section">
-        
-        <div id="bank-tendency-display"></div>
+    <div id="results-container">
+        <h2>📊 予想結果・推奨買い目</h2>
+        <div class="result-section">
+            
+            <div id="bank-tendency-display"></div>
 
-        <h3>🔗 ライン強度</h3>
-        <div id="line-display" class="line-display">
-            計算結果待ち...
-        </div>
-
-        <h3>☀️ 晴天令 (安定推奨)</h3>
-        <div class="recommendation" id="seitenrei-output">
-            計算結果待ち...
-        </div>
-
-        <h3>⛈️ 荒天令 (高配当狙い)</h3>
-        <div class="recommendation" id="koutenrei-output">
-            計算結果待ち...
-        </div>
-
-        <h3>展開別シミュレーション詳細</h3>
-        
-        <div id="scenario-output">
+            <h3>🔗 ライン強度</h3>
+            <div id="line-display" class="line-display">
+                計算結果待ち...
             </div>
 
+            <h3>☀️ 晴天令 (安定推奨)</h3>
+            <div class="recommendation" id="seitenrei-output">
+                計算結果待ち...
+            </div>
+
+            <h3>⛈️ 荒天令 (高配当狙い)</h3>
+            <div class="recommendation" id="koutenrei-output">
+                計算結果待ち...
+            </div>
+
+            <h3>展開別シミュレーション詳細</h3>
+            
+            <div id="scenario-output">
+                </div>
+
+        </div>
     </div>
 </div>
 
