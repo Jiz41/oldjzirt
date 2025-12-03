@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>競輪予想ツール 華耀天輪 真・自在律 V4.0</title>
+<title>競輪予想ツール 華耀天輪 真・自在律 V4.1</title>
 <style>
-/* 🎨 V4.0 スタイル (V3.9から変更なし) */
+/* 🎨 V4.1 スタイル (V4.0から変更なし) */
 :root { 
     --primary-color: #4682B4; 
     --accent-color: #FFD700; 
@@ -307,7 +307,7 @@ select, input[type="number"], input[type="text"] {
 </head> 
 <body> 
 <div class="container"> 
-    <h1>華耀天輪 真・自在律 V4.0</h1> 
+    <h1>華耀天輪 真・自在律 V4.1</h1> 
     <div class="manual-container"> 
         <h2 id="manual-toggle" onclick="toggleManual()"> 📜 説明書・評価ロジック解説 <span id="toggle-icon">▼</span> </h2> 
         <div id="manual-content" class="manual-content-hidden"> 
@@ -483,7 +483,7 @@ select, input[type="number"], input[type="text"] {
     </div> 
 </div> 
 <script> 
-// グローバル変数/定数 (V4.0から変更なし)
+// グローバル変数/定数
 let bankData = {}; 
 const PLAYER_COUNT = 7; 
 let playerWinticketMap = {}; 
@@ -496,7 +496,6 @@ const B_BONUS = 1.005;
 const COMMON_WIND_MAP = { "東": "バック追い風", "西": "バック向かい風", "南": "横風", "北": "バンク特有の風なし" }; 
 const COMMON_TIME_BIAS = { "モーニング": 1.0, "デイ": 1.0, "ナイター": 1.02, "ミッドナイト": 0.98 }; 
 const POSITION_BONUS = { 'second': 1.06, 'third_or_later': 1.02 }; 
-const GIRLS_CHASER_BONUS = 1.04; 
 const RECENT_BIAS_CONTRIBUTION = 0.95; 
 const MARK_SASHI_STATIC_BIAS = 1.015; 
 const WINTICKET_COEFFICIENTS = { "なし": 1.00, "△": 1.02, "▲": 1.05, "◯": 1.10, "◎": 1.15 }; 
@@ -511,22 +510,17 @@ const DEVELOPMENT_BIAS = {
 window.addEventListener('DOMContentLoaded', () => { 
     initPlayerTable(); 
     loadBankData(); 
-    // 初回ロード時に親要素を非表示
     document.getElementById('result-area').style.display = 'none';
 }); 
 
-// 選手入力欄の生成 + 排他制御のイベントリスナー設定 (V4.0から変更なし)
+// 選手入力欄の生成 + 排他制御のイベントリスナー設定
 function initPlayerTable() { 
     const tbody = document.getElementById('player-inputs'); 
-    if (!tbody) { 
-        console.error("Error: Player input table body (id='player-inputs') not found."); 
-        return; 
-    } 
+    if (!tbody) { return; } 
     tbody.innerHTML = ''; 
     const legOptions = ['先行', '捲り', '差し', 'マーク']; 
     const markOptions = Object.keys(WINTICKET_COEFFICIENTS).map(mark => `<option value="${mark}">${mark}</option>`).join(''); 
     
-    // 🚨 修正: 競走得点の初期値を現実的な値 (100.00) に修正し、計算が成立するようにする
     for (let i = 1; i <= PLAYER_COUNT; i++) { 
         const tr = document.createElement('tr'); 
         tr.className = 'player-row'; 
@@ -536,21 +530,18 @@ function initPlayerTable() {
             <td> <select id="leg-${i}"> ${selectOptions} </select> </td> 
             <td><input type="number" id="score-${i}" placeholder="得点" step="0.01" value="100.00"></td> 
             <td> <select id="winticket-mark-${i}"> ${markOptions} </select> </td> 
-            <td> <input type="text" id="recent-ranks-${i}" placeholder="3桁 (例: 372)" value="444" maxlength="3" style="width: 100%; text-align: center;"> </td> 
+            <td> <input type="text" id="recent-ranks-${i}" placeholder="3桁 (例: 444)" value="444" maxlength="3" style="width: 100%; text-align: center;"> </td> 
             <td> <input type="checkbox" id="s1st-${i}" class="s1st-checkbox"> </td>
             <td> <input type="checkbox" id="b1st-${i}" class="b1st-checkbox"> </td>
         `; 
         tbody.appendChild(tr); 
     } 
     
-    // S1位/B1位チェックボックスの排他制御ロジックを適用
     document.querySelectorAll('.s1st-checkbox').forEach(checkbox => {
         checkbox.addEventListener('click', function() {
             if (this.checked) {
                 document.querySelectorAll('.s1st-checkbox').forEach(otherCheckbox => {
-                    if (otherCheckbox !== this) {
-                        otherCheckbox.checked = false;
-                    }
+                    if (otherCheckbox !== this) { otherCheckbox.checked = false; }
                 });
             }
         });
@@ -560,16 +551,14 @@ function initPlayerTable() {
         checkbox.addEventListener('click', function() {
             if (this.checked) {
                 document.querySelectorAll('.b1st-checkbox').forEach(otherCheckbox => {
-                    if (otherCheckbox !== this) {
-                        otherCheckbox.checked = false;
-                    }
+                    if (otherCheckbox !== this) { otherCheckbox.checked = false; }
                 });
             }
         });
     });
 } 
 
-// JSONデータの読み込み (V4.0から変更なし)
+// JSONデータの読み込み
 async function loadBankData() { 
     const bankSelect = document.getElementById('bank-select'); 
     bankSelect.innerHTML = '<option value="">データ読み込み中...</option>'; 
@@ -582,13 +571,12 @@ async function loadBankData() {
         
         let response;
         try {
+            // ローカルファイルからの読み込みはブラウザセキュリティの制約があるため、失敗する可能性があることを考慮
             response = await fetch('bankdata.json');
             if (!response.ok) throw new Error("Fetch failed, using dummy data.");
             bankData = await response.json();
-            console.log("Bank data loaded successfully from bankdata.json");
         } catch (e) {
              bankData = dummyBankData;
-             console.warn("Could not load bankdata.json. Using internal dummy data.");
         }
         
         bankSelect.innerHTML = '<option value="">選択してください</option>'; 
@@ -604,14 +592,13 @@ async function loadBankData() {
     } catch (error) { 
         console.error("Bank data loading error:", error); 
         bankData = {}; 
-        document.getElementById('bank-feedback').innerHTML = "🚨 **警告:** bankdata.jsonの読み込みに失敗しました。脚質・風補正なしで計算されます。"; 
+        document.getElementById('bank-feedback').innerHTML = "🚨 **警告:** バンクデータの読み込みに失敗しました。脚質・風補正なしで計算されます。"; 
         document.getElementById('bank-feedback').style.display = 'block'; 
     } 
 } 
 
-// ライン結束力・整合性の評価とUI表示 (V4.0から変更なし)
+// ライン結束力・整合性の評価
 function calculateLineCohesion(rawPlayers, lineupStr) {
-    const lines = {};
     const lineNames = lineupStr.split(',').map(l => l.trim()).filter(l => l.length > 0);
     const container = document.getElementById('line-evaluation-container');
     container.innerHTML = '';
@@ -619,7 +606,7 @@ function calculateLineCohesion(rawPlayers, lineupStr) {
     const classMap = { 'A': 'line-strong', 'B': 'line-medium', 'C': 'line-medium', 'D': 'line-weak' };
 
     lineNames.forEach((lineStr, index) => {
-        const lineMembers = lineStr.split('').map(idStr => parseInt(idStr));
+        const lineMembers = lineStr.split('').map(idStr => parseInt(idStr)).filter(id => !isNaN(id)); // IDをパース
         if (lineMembers.length < 2) return; 
 
         const line = { members: [], totalRating: 0 };
@@ -631,6 +618,8 @@ function calculateLineCohesion(rawPlayers, lineupStr) {
             }
         });
         
+        if (line.members.length < 2) return;
+
         const N = line.members.length;
         const avgRating = line.totalRating / N;
 
@@ -655,21 +644,19 @@ function calculateLineCohesion(rawPlayers, lineupStr) {
             evaluationKey = 'D'; // 不安定
         }
         
-        // --- 簡潔なUI構築 (ラインの数字と色枠のみ) ---
         const lineResult = document.createElement('div');
         lineResult.className = `line-box ${classMap[evaluationKey]}`;
         lineResult.textContent = `${lineStr}`;
         container.appendChild(lineResult);
         
-        lineCohesionResults[index] = { ...lines[index], totalBiasFactor: totalBiasFactor, k: (avgRating >= 115) ? 0.8 : (avgRating >= 110) ? 0.7 : (avgRating >= 105) ? 0.6 : 0.5, N: N };
+        lineCohesionResults[index] = { totalBiasFactor: totalBiasFactor, k: (avgRating >= 115) ? 0.8 : (avgRating >= 110) ? 0.7 : (avgRating >= 105) ? 0.6 : 0.5, N: N };
     });
     
     return lineCohesionResults;
 }
 
-
-// 連係補正値の計算ロジック (V4.0から変更なし)
-function calculateCoopBias(playerId, rawScore, players, lineupStr, lineCohesionResults) { 
+// 連係補正値の計算ロジック
+function calculateCoopBias(playerId, players, lineupStr, lineCohesionResults) { 
     if (!lineupStr) { return 1.0; } 
 
     const lines = lineupStr.split(',').map(line => line.trim());
@@ -691,22 +678,28 @@ function calculateCoopBias(playerId, rawScore, players, lineupStr, lineCohesionR
             const { k, N, totalBiasFactor } = lineCohesionResults[lineIndex];
             
             let posBias = 1.0;
+            // 2番手以降に連係補正をかける
             if (positionIndex === 1) {
                 posBias = POSITION_BONUS['second'];
             } else if (positionIndex >= 2) {
                 posBias = POSITION_BONUS['third_or_later'];
             }
-
-            const baseCoop = (N - 1) * k;
+            
+            // k: 平均点に基づく基礎連係度 (0.5～0.8)
+            // N: ライン人数
+            // totalBiasFactor: 結束力・脚質整合性に基づく補正
+            const baseCoop = (N - 1) * k; 
             return baseCoop * totalBiasFactor * posBias;
         }
 
+        // ラインにいるが、ライン強度の計算から漏れた場合（単騎ではない）
         return 1.0;
     } 
+    // 単騎の場合
     return 1.0; 
 } 
 
-// バンク特性フィードバック (V4.0から変更なし)
+// バンク特性フィードバック
 function displayBankFeedback(bankName, biasMap) {
     const feedbackDiv = document.getElementById('bank-feedback');
     if (!feedbackDiv) return;
@@ -753,8 +746,8 @@ function calculate() {
             const s1st = document.getElementById(`s1st-${i}`)?.checked || false;
             const b1st = document.getElementById(`b1st-${i}`)?.checked || false;
 
-            // 🚨 必須チェックの強化: 競走得点がNaNやゼロ、または未入力の場合はスキップ
             const rawScore = parseFloat(rawScoreStr); 
+            // 🚨 停止箇所チェック: 数値変換に失敗した、または得点が無効な選手はスキップ
             if (isNaN(rawScore) || rawScore <= 0 || !leg || !recentRanksStr) { continue; } 
 
             const winticketBias = WINTICKET_COEFFICIENTS[winticketMark] || 1.0; 
@@ -787,8 +780,9 @@ function calculate() {
         } 
 
         if (rawPlayers.length < 3) { 
-            alert("計算を行うには最低3名分の選手データを正しく入力してください。得点が0や未入力の選手はカウントされません。"); 
+            // 警告メッセージ
             if (resultArea) { resultArea.style.display = 'none'; } 
+            alert("計算を行うには最低3名分の選手データを正しく入力してください。得点が0や未入力の選手はカウントされません。"); 
             return; 
         } 
 
@@ -799,7 +793,7 @@ function calculate() {
             if (p.s1st) sBBonus *= S_BONUS;
             if (p.b1st) sBBonus *= B_BONUS;
 
-            p.coopBias = calculateCoopBias(p.id, p.rawScore, rawPlayers, lineupStr, lineCohesionResults); 
+            p.coopBias = calculateCoopBias(p.id, rawPlayers, lineupStr, lineCohesionResults); 
 
             let finalScore = p.rawScore * p.winticketBias * p.staticBias * p.meetingRankBias * p.coopBias * sBBonus; 
             return { ...p, score: finalScore, sBBonus: sBBonus }; 
@@ -818,6 +812,7 @@ function calculate() {
                 const developBiasVal = developBiasMap[p.legKey] || 1.0; 
                 let scenarioScore = p.score * developBiasVal; 
                 
+                // 単騎判定
                 const isSingle = !p.coopBias > 1.0 && singleRiders.includes(p.id); 
                 return { id: p.id, leg: p.leg, score: scenarioScore, isSingle: isSingle, coopBias: p.coopBias }; 
             }); 
@@ -855,7 +850,7 @@ function calculate() {
                     <h2>致命的なエラーが発生しました</h2>
                     <p>予想の計算処理中に予期せぬエラーが発生し、結果を表示できませんでした。</p>
                     <p>エラーメッセージ: **${e.message}**</p>
-                    <p>入力データ（特に競走得点やライン並び）が正しいかご確認ください。</p>
+                    <p>コンソールログで詳細なエラーをご確認ください。</p>
                 </div>
             `;
         }
@@ -864,16 +859,23 @@ function calculate() {
 } 
 
 // ----------------------------------------------------------------------
-// 予想生成・表示ヘルパー関数 (V4.0から変更なし)
+// 予想生成・表示ヘルパー関数
 // ----------------------------------------------------------------------
 
+// 🚨 修正箇所: generateSanrenpukuHtml (三連複生成のバグ修正)
 function generateSanrenpukuHtml(sortedPlayers) {
     const sanrenpukuSet = new Set();
+    // 上位3名から5名までを軸に、上位6名までの組み合わせから4点を選出
     for (let i = 0; i < 3 && i < sortedPlayers.length; i++) {
         for (let j = i + 1; j < 5 && j < sortedPlayers.length; j++) {
             for (let k = j + 1; k < 6 && k < sortedPlayers.length; k++) {
-                const nums = [sortedPlayers[i].id, sortedPlayers[j].id, sortedPlayers[k].id].sort((a, b) => a - b).join('-');
-                sanrenpukuSet.add(`${p1}-${p2}-${p3}`);
+                // 選手IDを確実に取得
+                const id1 = sortedPlayers[i].id;
+                const id2 = sortedPlayers[j].id;
+                const id3 = sortedPlayers[k].id;
+
+                const nums = [id1, id2, id3].sort((a, b) => a - b).join('-');
+                sanrenpukuSet.add(nums);
             }
         }
     }
@@ -882,10 +884,12 @@ function generateSanrenpukuHtml(sortedPlayers) {
 
 function generateSanrentanDetails(sortedPlayers, limit) {
     const details = [];
-    for (let i = 0; i < 3 && i < sortedPlayers.length; i++) {
-        for (let j = 0; j < 3 && j < sortedPlayers.length; j++) {
+    const len = sortedPlayers.length;
+
+    for (let i = 0; i < 3 && i < len; i++) { // 1着: 上位3名
+        for (let j = 0; j < 3 && j < len; j++) { // 2着: 上位3名
             if (i === j) continue;
-            for (let k = 0; k < 7 && k < sortedPlayers.length; k++) {
+            for (let k = 0; k < 7 && k < len; k++) { // 3着: 全員
                 if (k === i || k === j) continue;
                 
                 const p1 = sortedPlayers[i];
@@ -894,6 +898,7 @@ function generateSanrentanDetails(sortedPlayers, limit) {
                 
                 const val = p1.score * 0.5 + p2.score * 0.3 + p3.score * 0.2; 
                 
+                // isSingleプロパティが確実に存在するよう、選手オブジェクトから直接取得
                 details.push({
                     nums: `${p1.id}-${p2.id}-${p3.id}`,
                     val: val,
@@ -908,6 +913,7 @@ function generateSanrentanDetails(sortedPlayers, limit) {
 
 function generateCombinedSanrenpukuHtml(sanrentanList) {
     const sanrenpukuSet = new Set();
+    // 晴天令の三連単上位3点の組み合わせから三連複を抽出
     sanrentanList.slice(0, 3).forEach(item => {
         const [p1, p2, p3] = item.nums.split('-').map(Number).sort((a, b) => a - b);
         sanrenpukuSet.add(`${p1}-${p2}-${p3}`);
@@ -916,6 +922,7 @@ function generateCombinedSanrenpukuHtml(sanrentanList) {
 }
 
 function generateHighRiskSanrenpukuHtml(sanrentanList) {
+    // 荒天令の三連単上位3点の組み合わせから三連複を抽出
     return generateCombinedSanrenpukuHtml(sanrentanList);
 }
 
@@ -991,7 +998,7 @@ function parseLineupAndDetermineMode(lineupStr, players) {
     
     lines.forEach(line => {
         line.split('').map(Number).forEach(id => {
-            lineupPlayers.add(id);
+            if (!isNaN(id)) { lineupPlayers.add(id); }
         });
     });
     
@@ -1037,7 +1044,10 @@ function applyTenScaleRating(sortedPlayers) {
         return { ...p, rankIcon };
     });
 }
-function analyzeHighRiskCandidates(combinedList) { return combinedList.filter(item => item.hasSingle).slice(0, 3); }
+function analyzeHighRiskCandidates(combinedList) { 
+    // 単騎の選手が絡んでいる組み合わせを抽出し、高リスク穴目とする
+    return combinedList.filter(item => item.hasSingle).slice(0, 3); 
+}
 function getWeightClass(index, totalCount) {
     if (index === 0) return 'weight-strong';
     if (index === 1) return 'weight-high';
