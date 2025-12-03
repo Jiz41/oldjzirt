@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>競輪予想ツール 華耀天輪 真・自在律 V4.5</title>
+<title>競輪予想ツール 華耀天輪 真・自在律 V4.6</title>
 <style>
-/* 🎨 V4.5 スタイル (V4.3から変更なし) */ 
+/* 🎨 V4.6 スタイル (V4.5から変更なし) */ 
 :root { 
     --primary-color: #4682B4; 
     --accent-color: #FFD700; 
@@ -306,7 +306,7 @@ select, input[type="number"], input[type="text"] {
 </head> 
 <body> 
 <div class="container"> 
-    <h1>華耀天輪 真・自在律 V4.5</h1> 
+    <h1>華耀天輪 真・自在律 V4.6</h1> 
     <div class="manual-container"> 
         <h2 id="manual-toggle" onclick="toggleManual()"> 📜 説明書・評価ロジック解説 <span id="toggle-icon">▼</span> </h2> 
         <div id="manual-content" class="manual-content-hidden"> 
@@ -448,7 +448,7 @@ select, input[type="number"], input[type="text"] {
     </table> 
     <div class="control-group" style="margin-top: 15px;"> 
         <label for="overall-lineup">全体並び（例: 47,15,36,2）</label> 
-        <input type="text" id="overall-lineup" placeholder="ラインごとにコンマ区切りで入力してください" value="47,15,36,2"> 
+        <input type="text" id="overall-lineup" placeholder="ラインごとにコンマ区切りで入力してください" value="1,2,3,4,5,6,7"> 
     </div> 
     <button class="btn" onclick="calculate()">全パターン自動生成</button> 
     <div id="result-area"> 
@@ -483,7 +483,7 @@ select, input[type="number"], input[type="text"] {
 </div> 
 <script> 
 // ----------------------------------------------------------------------
-// 🚨 V4.5 定数定義: 係数は一切変更なし
+// 🚨 V4.6 定数定義: 係数は一切変更なし
 // ----------------------------------------------------------------------
 let bankData = {}; 
 const PLAYER_COUNT = 7; 
@@ -537,7 +537,6 @@ function initPlayerTable() {
         tbody.appendChild(tr); 
     } 
     
-    // 排他制御ロジック
     const setupExclusiveCheck = (className) => {
         document.querySelectorAll(`.${className}`).forEach(checkbox => {
             checkbox.addEventListener('click', function() {
@@ -560,7 +559,6 @@ async function loadBankData() {
 
     bankSelect.innerHTML = '<option value="">データ読み込み中...</option>'; 
     try { 
-        // ダミーデータはV4.3のまま維持
         const dummyBankData = {
             "標準バンク": { "keirin_bias": { "先行": 1.00, "捲り": 1.00, "差し": 1.00, "マーク": 1.00 }, "wind_or_position": {} },
             "弥彦": { "keirin_bias": { "先行": 1.02, "捲り": 1.05, "差し": 1.00, "マーク": 1.00 }, "wind_or_position": {} },
@@ -595,7 +593,7 @@ async function loadBankData() {
 } 
 
 // ----------------------------------------------------------------------
-// 🚨 V4.5 構造化: 選手入力値の取得とバリデーションを集中化
+// 🚨 V4.6 構造化: 選手入力値の取得とバリデーションを集中化 (V4.5と同一)
 // ----------------------------------------------------------------------
 
 function getValidatedPlayerInputs() {
@@ -610,15 +608,12 @@ function getValidatedPlayerInputs() {
 
         const rawScore = parseFloat(rawScoreStr); 
         
-        // 🚨 V4.5 厳格なバリデーション: 必須項目と数値チェック
         if (isNaN(rawScore) || rawScore <= 0 || !leg || !recentRanksStr || recentRanksStr.length !== 3) { 
-            continue; // 無効な選手はスキップ
+            continue; 
         } 
 
-        // WINTICKET係数
         const winticketBias = WINTICKET_COEFFICIENTS[winticketMark] || 1.0; 
         
-        // 直近3走着順係数の計算
         const rankInputs = recentRanksStr.split('').slice(0, 3);
         const rankKeys = ['1', '2', '3'];
         let totalWeightedBias = 0;
@@ -660,7 +655,6 @@ function calculate() {
             return; 
         } 
         
-        // 環境設定の取得と係数の適用 (V4.3ロジックを維持)
         const selectedBankName = document.getElementById('bank-select').value; 
         const currentBank = bankData[selectedBankName] || { keirin_bias: {}, wind_or_position: {} };
         const timeZone = document.getElementById('time-select').value; 
@@ -689,7 +683,6 @@ function calculate() {
             const legBias = currentBank.keirin_bias[p.legKey] || 1.0; 
             const staticBias = legBias * windBiasVal * timeBiasVal * legStaticBias; 
             
-            // 🚨 V4.5 最終スコア計算ロジック (V4.3係数/ロジックを厳守)
             let finalScore = p.rawScore * p.winticketBias * staticBias * p.meetingRankBias * p.coopBias * sBBonus; 
             
             return { ...p, score: finalScore, staticBias: staticBias }; 
@@ -716,7 +709,6 @@ function calculate() {
             const playersWithRating = applyTenScaleRating(scenarioPlayers); 
             const sanrentanDetails = generateSanrentanDetails(playersWithRating, 6); 
             
-            // 総合ランキング用のデータ収集
             sanrentanDetails.forEach(c => { 
                 const key = c.nums;
                 if (!allSanrentanCombinations[key]) { 
@@ -740,7 +732,6 @@ function calculate() {
         }
     
     } catch (e) {
-        // 🚨 致命的なエラーハンドリング (V4.3を維持)
         console.error("Critical calculation error:", e);
         if (resultArea) {
             resultArea.style.display = 'block'; 
@@ -749,7 +740,7 @@ function calculate() {
                     <h2>致命的なエラーが発生しました</h2>
                     <p>予想の計算処理中に予期せぬエラーが発生し、結果を表示できませんでした。</p>
                     <p>エラーメッセージ: **${e.message}**</p>
-                    <p>入力データ（特に並び）をご確認ください。</p>
+                    <p>入力データをご確認ください。このエラーは、得点や着順が正しく入力されていない選手が原因で発生する可能性があります。</p>
                 </div>
             `;
         }
@@ -758,19 +749,24 @@ function calculate() {
 } 
 
 // ----------------------------------------------------------------------
-// ヘルパー関数群 (V4.3のロジックと係数を維持)
+// ヘルパー関数群
 // ----------------------------------------------------------------------
 
 function calculateLineCohesion(rawPlayers, lineupStr) {
-    if (!lineupStr || lineupStr.trim().length === 0) {
-        return {}; 
-    }
-    
-    const lineNames = lineupStr.split(',').map(l => l.trim()).filter(l => l.length > 0);
     const container = document.getElementById('line-evaluation-container');
     if (!container) return {}; 
     
     container.innerHTML = '';
+    
+    // 🚨 V4.6 修正: 並びが空欄の場合、ライン評価エリアを非表示にし、計算をスキップ
+    if (!lineupStr || lineupStr.trim().length === 0) {
+        container.style.display = 'none';
+        return {}; 
+    }
+    
+    container.style.display = 'flex';
+
+    const lineNames = lineupStr.split(',').map(l => l.trim()).filter(l => l.length > 0);
     const lineCohesionResults = {};
     const classMap = { 'A': 'line-strong', 'B': 'line-medium', 'C': 'line-medium', 'D': 'line-weak' };
 
