@@ -1,9 +1,4 @@
-/*
-* ======================================================
-* バージョン保存日時: 2025年12月3日
-* バージョン: V6.0 (マニュアルとデバッグログの配置/体裁調整完了版 + X投稿機能追加)
-* ======================================================
-*/
+// --- 華耀天輪 真・自在律 V6.0 ロジック ---
 
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
@@ -320,7 +315,7 @@ function assignFinalGrades(scenarioPlayers) {
 // メイン計算関数
 async function calculatePrediction() {
     
-    // 【追加】計算開始時にX投稿ボタンを無効化
+    // 【修正点1】計算開始時にX投稿ボタンを無効化
     document.getElementById('post-to-x-button').disabled = true;
 
     if (Object.keys(BANK_DATA).length === 0) {
@@ -406,10 +401,11 @@ async function calculatePrediction() {
     if (resultsContainer) {
         resultsContainer.classList.add('visible');
     }
-
-    // 【追加】計算完了後、X投稿ボタンを有効化
+    
+    // 【修正点2】計算完了後、X投稿ボタンを有効化
     document.getElementById('post-to-x-button').disabled = false;
-    logMessage('[CALC END] 予想計算が完了し、結果が表示されました。X投稿ボタンを有効化しました。');
+    
+    logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
 }
 
 // 最終スコアと順位の表示を削除
@@ -473,7 +469,7 @@ function displayResults(allScenarioResults, players, bankName) {
             `${top4[0].id}=${top4[1].id}=${top4[3] ? top4[3].id : 'X'}`
         ].join(', ');
         
-        // 【修正】X投稿時に内容を取得しやすいようヘッダーとHTMLタグを追加
+        // 【修正点3】X投稿のため、ヘッダー情報とHTMLタグを追加
         seitenreiOutput.innerHTML = `☀️ 晴天令 (安定推奨) <br>
             三連単 (3点): <strong>${seitenTritan}</strong><br>
             三連複 (2点): <strong>${seitenTrifuku}</strong>
@@ -499,7 +495,7 @@ function displayResults(allScenarioResults, players, bankName) {
             koutenTrifuku = 'データ不足のため生成不可';
         }
 
-        // 【修正】X投稿時に内容を取得しやすいようヘッダーとHTMLタグを追加
+        // 【修正点3】X投稿のため、ヘッダー情報とHTMLタグを追加
         koutenreiOutput.innerHTML = `⛈️ 荒天令 (高配当狙い) <br>
             推奨軸 (4位): **${koutenLeader ? koutenLeader : 'N/A'}**<br>
             三連複 (3点): <strong>${koutenTrifuku}</strong>
@@ -528,33 +524,33 @@ function postToX() {
     
     // ★★★ 改行制御ロジック (点数と買い目の間に改行を挿入) ★★★
     
-    const cleanAndFormat = (text, prefix) => {
-        // 1. ヘッダーを必要な形に置換し、全ての空白文字を単一のスペースに統一
-        let cleaned = text
-            .replace(prefix, prefix.split(' ')[0] + ':') // "☀️ 晴天令 (安定推奨)" -> "☀️ 晴天令:"
-            .replace(/(\s\s*|\n|\r|\t)/g, ' ') // 全ての空白文字を単一スペースに置換
-            .trim();
+    // displayResults() の output にヘッダーが含まれる前提で処理を簡略化
 
-        // 2. 目的の項目の前に改行、そして点数表記の直後（閉じ括弧 ")" の後）に改行を挿入して整形
+    const cleanAndFormat = (text) => {
+        // 1. 全ての空白文字を単一スペースに置換
+        let cleaned = text.replace(/(\s\s*|\n|\r|\t)/g, ' ').trim();
+        
+        // 2. ヘッダーを整形 (例: "☀️ 晴天令 (安定推奨) 三連単" -> "☀️ 晴天令:\n三連単")
         cleaned = cleaned
-            // ヘッダー直後を改行
-            .replace(/: /, ':\n') 
-            // 三連単/三連複/推奨軸の前に改行
-            .replace(/三連単/g, '\n三連単')
-            .replace(/三連複/g, '\n三連複')
-            .replace(/推奨軸/g, '\n推奨軸')
-            // 点数表記の閉じ括弧 ")" の直後に改行を挿入 (例: (3点) の後に \n)
-            .replace(/\) /g, ')\n')
-            // 推奨軸のコロン ":" の後にも改行を挿入（買い目が次行に来るように）
-            .replace(/\*\*\: /g, '**\n') 
-            // 行頭のスペースを削除
-            .trim();
+            .replace(/\s(安定推奨|高配当狙い)/, ' (安定推奨):') // 説明タグを保持しコロンを追加
+            .replace(/\:\s*三連単/g, ':\n三連単') // 三連単の前に改行
+            .replace(/\:\s*推奨軸/g, ':\n推奨軸'); // 推奨軸の前に改行
+
+        // 3. 点数表記の閉じ括弧 ")" の直後に改行を挿入
+        cleaned = cleaned.replace(/\) /g, ')\n');
+        
+        // 4. 推奨軸の買い目の前（**5**の前）に改行を挿入（太字**がある場合）
+        // 推奨軸 (4位)\n**3**三連複... -> 推奨軸 (4位)\n**3**\n三連複...
+        cleaned = cleaned.replace(/\*\*\s*三連複/g, '**\n三連複');
+
+        // 5. 不要な(安定推奨)や(高配当狙い)を削除
+        cleaned = cleaned.replace(/\s\(安定推奨\)/, '').replace(/\s\(高配当狙い\)/, '');
             
-        return cleaned;
+        return cleaned.trim();
     };
     
-    const seitenreiContent = cleanAndFormat(seitenreiOutput, '☀️ 晴天令 (安定推奨)');
-    const koutenreiContent = cleanAndFormat(koutenreiOutput, '⛈️ 荒天令 (高配当狙い)');
+    const seitenreiContent = cleanAndFormat(seitenreiOutput);
+    const koutenreiContent = cleanAndFormat(koutenreiOutput);
 
     const toolURL = 'https://huggingface.co/spaces/Jiz41/Jiz41r1t5u';
 
@@ -570,6 +566,8 @@ ${koutenreiContent}
 #卦有中亦有不中
     
 ${toolURL}`;
+
+    // ★★★ 改行制御ロジック終了 ★★★
 
     logMessage(`[INFO] 生成された投稿テキスト: ${postText.substring(0, 50).replace(/\n/g, '\\n')}...`);
 
