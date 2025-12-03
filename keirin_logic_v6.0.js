@@ -348,10 +348,10 @@ async function calculatePrediction() {
         const avgRank = recentScores.length > 0 ? recentScores.reduce((a, b) => a + b, 0) / recentScores.length : 4.0; 
         p.c_recent = (1.0 + (4 - avgRank) * 0.05) * settings.RECENT_WEIGHT; 
 
-        // ★修正点: W印の係数を「✕」は「△」と「無」の間、1.015に設定
+        // W印の係数
         if (p.wmark === '◎') p.c_wmark = 1.04;
         else if (p.wmark === '〇') p.c_wmark = 1.02;
-        else if (p.wmark === '✕') p.c_wmark = 1.015; // ✕: 穴目推奨（△と無の間）
+        else if (p.wmark === '✕') p.c_wmark = 1.015; 
         else if (p.wmark === '△') p.c_wmark = 1.01;
         else p.c_wmark = 1.0; // 無
 
@@ -392,6 +392,13 @@ async function calculatePrediction() {
 
     // --- IV. 最終結果の統合と表示 ---
     displayResults(allScenarioResults, players, bankName); 
+    
+    // ★修正点2: 計算完了後、結果コンテナを表示する
+    const resultsContainer = document.getElementById('results-container');
+    if (resultsContainer) {
+        resultsContainer.classList.add('visible');
+    }
+    
     logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
 }
 
@@ -441,7 +448,6 @@ function displayResults(allScenarioResults, players, bankName) {
 
     const top3 = finalRanking.slice(0, 3);
     const top4 = finalRanking.slice(0, 4);
-    // const top5 = finalRanking.slice(0, 5); // 荒天令で5位まで使用
 
     // 晴天令 (安定推奨)
     const seitenreiOutput = document.getElementById('seitenrei-output');
