@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>競輪予想ツール 華耀天輪 真・自在律 V3.4</title>
+<title>競輪予想ツール 華耀天輪 真・自在律 V3.6</title>
 <style>
-/* 🎨 V3.4 最終配色：落ち着いたトーン (変更なし) */
+/* 🎨 V3.6 スタイル (V3.5から変更なし) */
 :root { 
-    --primary-color: #4682B4; /* スチールブルー */
-    --accent-color: #FFD700; /* ゴールド */
-    --bg-color: #F0F8FF; /* アリスブルー (優しい背景) */
-    --container-bg: #FFFFF0; /* アイボリー (コンテナ背景) */
+    --primary-color: #4682B4; 
+    --accent-color: #FFD700; 
+    --bg-color: #F0F8FF; 
+    --container-bg: #FFFFF0; 
     --text-color: #333; 
 } 
 body { 
@@ -112,7 +112,7 @@ select, input[type="number"], input[type="text"] {
 } 
 .scenario-result h3 { 
     margin-top: 0; 
-    background-color: #F5F5DC; /* ベージュ */
+    background-color: #F5F5DC; 
     padding: 5px; 
     border-radius: 3px; 
     font-size: 1.1rem; 
@@ -120,7 +120,7 @@ select, input[type="number"], input[type="text"] {
 /* 10段階評価のスタイル */ 
 .score-rank { 
     font-weight: bold; 
-    color: #CD5C5C; /* インディアンレッド */
+    color: #CD5C5C; 
     font-size: 1.1em; 
 } 
 .kaime-list { 
@@ -130,7 +130,7 @@ select, input[type="number"], input[type="text"] {
     flex-wrap: wrap; 
     gap: 5px; 
 } 
-/* --- 購入ウェイト カラーグラデーション (変更なし) --- */ 
+/* --- 購入ウェイト カラーグラデーション (V3.5から変更なし) --- */ 
 .kaime-list li { 
     padding: 3px 8px; 
     border: 1px solid #ccc; 
@@ -138,23 +138,23 @@ select, input[type="number"], input[type="text"] {
     font-size: 0.9rem; 
 } 
 .weight-strong { 
-    background-color: #A52A2A; /* ブラウン (最強軸) */ 
+    background-color: #A52A2A; 
     color: white; 
     border-color: #8B0000; 
     font-weight: bold; 
 } 
 .weight-high { 
-    background-color: #F0AD4E; /* オレンジ (強力) */ 
+    background-color: #F0AD4E; 
     color: #333; 
     border-color: #EEA236; 
 } 
 .weight-medium { 
-    background-color: #F8F8FF; /* ゴーストホワイト (推奨) */ 
+    background-color: #F8F8FF; 
     color: #333; 
     border-color: #E8E87D; 
 } 
 .weight-low { 
-    background-color: #B0E0E6; /* パウダーブルー (中程度) */ 
+    background-color: #B0E0E6; 
     color: #333; 
     border-color: #ADD8E6; 
 } 
@@ -168,16 +168,15 @@ select, input[type="number"], input[type="text"] {
     margin-top: 30px; 
     padding: 15px; 
     border-radius: 8px; 
-    /* デフォルトは非表示 */
 } 
 #combined-ranking { 
     border: 2px solid var(--accent-color); 
-    background-color: #F0FFF0; /* ハニーデュー */
+    background-color: #F0FFF0; 
 } 
 /* 荒天令 */ 
 #mujirushi-anamae-ranking { 
     border: 2px solid #333; 
-    background-color: #E6E6FA; /* ラベンダー (落ち着いた紫) */
+    background-color: #E6E6FA; 
 } 
 #mujirushi-anamae-list li, #mujirushi-sanrenpuku-list li { 
     background-color: #333; 
@@ -186,7 +185,7 @@ select, input[type="number"], input[type="text"] {
     border-color: #000; 
 } 
 #combined-ranking h2, #mujirushi-anamae-ranking h2 { 
-    color: #CD5C5C; /* インディアンレッド */
+    color: #CD5C5C; 
     font-size: 1.4rem; 
     margin-bottom: 0px; 
 } 
@@ -204,14 +203,14 @@ select, input[type="number"], input[type="text"] {
     margin-bottom: 20px; 
     padding: 10px; 
     border: 1px solid var(--primary-color); 
-    background-color: #F5F5DC; /* ベージュ */
+    background-color: #F5F5DC; 
     border-radius: 5px; 
     font-weight: bold; 
     text-align: center; 
     display: none;
 }
 
-/* --- V3.3 ライン強度評価: 文字なし・一列表示 (変更なし) --- */
+/* ライン強度評価 (V3.5から変更なし) */
 #line-evaluation-container {
     display: flex;
     flex-wrap: wrap;
@@ -228,11 +227,11 @@ select, input[type="number"], input[type="text"] {
     box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
 }
 /* 強度に応じた色 */
-.line-strong { border-color: #A52A2A; background-color: #FFFAFA; color: #A52A2A; } /* 強: ブラウン系 */
-.line-medium { border-color: #FFD700; background-color: #FFFFF0; color: #DAA520; } /* 中: ゴールド系 */
-.line-weak { border-color: #4682B4; background-color: #F0F8FF; color: #4682B4; } /* 弱: スチールブルー系 */
+.line-strong { border-color: #A52A2A; background-color: #FFFAFA; color: #A52A2A; } 
+.line-medium { border-color: #FFD700; background-color: #FFFFF0; color: #DAA520; } 
+.line-weak { border-color: #4682B4; background-color: #F0F8FF; color: #4682B4; } 
 
-/* 説明書アコーディオン スタイル (変更なし) */ 
+/* 説明書アコーディオン スタイル (V3.5から変更なし) */ 
 .manual-container { 
     margin: 20px 0; 
     border: 1px solid #ccc; 
@@ -308,11 +307,11 @@ select, input[type="number"], input[type="text"] {
 </head> 
 <body> 
 <div class="container"> 
-    <h1>華耀天輪 真・自在律 V3.4</h1> 
+    <h1>華耀天輪 真・自在律 V3.6</h1> 
     <div class="manual-container"> 
         <h2 id="manual-toggle" onclick="toggleManual()"> 📜 説明書・評価ロジック解説 <span id="toggle-icon">▼</span> </h2> 
         <div id="manual-content" class="manual-content-hidden"> 
-             <h3>1. 🎛️ 使い方と入力項目</h3> 
+            <h3>1. 🎛️ 使い方と入力項目</h3> 
             <table class="manual-table"> 
             <thead> 
             <tr><th>項目</th><th>入力内容</th><th>目的</th></tr> 
@@ -322,7 +321,7 @@ select, input[type="number"], input[type="text"] {
             <tr><td>**競走得点**</td><td>選手の基本得点（例: 110.50）。</td><td>期待値計算の**ベース**となる基本実力を設定します。</td></tr> 
             <tr><td>**W印**</td><td>WINTICKETの予想印を選択。</td><td>**外部予想の信頼度**（W印係数）を反映します。</td></tr> 
             <tr><td>**直近3走着順**</td><td>3走分を続けて入力 (例: `372`は1走前3着→2走前7着→3走前2着を意味します)。</td><td>**最新の勢い**（今節着順係数）を**加重平均**で精密に算出します。</td></tr> 
-            <tr><td>**S1位/B1位**</td><td>S(抑え先行)/B(バック)回数が1位かチェック。</td><td>**選手の積極性**（S/Bボーナス）を評価します。</td></tr>
+            <tr><td>**S1位/B1位**</td><td>S(抑え先行)/B(バック)回数が1位かチェック。（排他制御）</td><td>**選手の積極性**（S/Bボーナス）を評価します。</td></tr>
             <tr><td>**全体並び**</td><td>選手IDをラインごとにコンマ区切りで入力。</td><td>**ライン・単騎の特定**に使用されます。</td></tr> 
             </tbody> 
             </table> 
@@ -350,6 +349,55 @@ select, input[type="number"], input[type="text"] {
             </ul> 
             <h3>4. 🏛️ バンク特性フィードバック</h3> 
             <p>設定されているバンクのデータに基づき、風の影響を考慮した上で**最も有利な脚質**を明示します。どの展開シナリオを重視すべきかのヒントとなります。</p> 
+            
+            <hr>
+
+            <h3>5. 🔮 最終評価と推奨 (晴天令・荒天令)</h3> 
+            <p>全展開シミュレーションの結果を統合し、期待値の視点から買い目を分類しています。</p>
+            <table class="manual-table">
+            <thead> 
+            <tr><th>項目</th><th>目的</th><th>選出ロジック (簡易)</th></tr> 
+            </thead> 
+            <tbody>
+            <tr>
+                <td>**☀️ 晴天令**</td>
+                <td>**最も安定して期待値が高い**と判断される買い目。資金配分の軸として推奨。</td>
+                <td>全ての展開（先行有利、捲り有利、差し有利）で共通して高い評価点を得た組み合わせを、その**合計期待値**が高い順に選出します。</td>
+            </tr>
+            <tr>
+                <td>**⛈️ 荒天令**</td>
+                <td>**高配当を狙うための、リスクが高い波乱パターン**の買い目。</td>
+                <td>晴天令のランキング上位の中から、特に**単騎の選手**（ラインを組んでいない選手）が絡んでいる組み合わせを抽出し、波乱の可能性を提示します。</td>
+            </tr>
+            </tbody>
+            </table>
+            
+            <h3>6. 🤝 ライン強度評価</h3>
+            <p>レースにおけるラインの結束力や信頼度を、視覚的に分かりやすく評価します。</p>
+            <table class="manual-table">
+            <thead>
+            <tr><th>評価</th><th>意味 (選手番号の色枠)</th><th>判断基準 (簡易)</th></tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>**強**</td>
+                <td>**🟫 ブラウン系**</td>
+                <td>選手の**実力差が小さく**、ライン全体の**得点も高い**。連係が最も信頼できる状態。</td>
+            </tr>
+            <tr>
+                <td>**中**</td>
+                <td>**🟨 ゴールド系**</td>
+                <td>選手の**実力差が中程度**、またはライン構成にやや**不安要素がある**が、連係自体は成立している状態。</td>
+            </tr>
+            <tr>
+                <td>**弱**</td>
+                <td>**🟦 ブルー系**</td>
+                <td>選手の**実力差が大きい**（スコアの分散が大きい）か、**脚質の構成に大きな問題がある**ため、連係が途切れる可能性が高い。</td>
+            </tr>
+            </tbody>
+            </table>
+
+            <p style="font-size: 0.85rem; margin-top: 15px;">**補足**: S1位/B1位やW印、直近3走着順は、すべて最終的な期待値スコアに**補正係数**として反映されています。</p>
         </div> 
     </div> 
     <div class="control-group"> 
@@ -435,7 +483,7 @@ select, input[type="number"], input[type="text"] {
     </div> 
 </div> 
 <script> 
-// グローバル変数/定数 (省略)
+// グローバル変数/定数 (V3.5から変更なし)
 let bankData = {}; 
 const PLAYER_COUNT = 7; 
 let playerWinticketMap = {}; 
@@ -465,7 +513,7 @@ window.addEventListener('DOMContentLoaded', () => {
     loadBankData(); 
 }); 
 
-// 選手入力欄の生成 (省略)
+// 選手入力欄の生成 + 排他制御のイベントリスナー設定 (V3.5から変更なし)
 function initPlayerTable() { 
     const tbody = document.getElementById('player-inputs'); 
     if (!tbody) { 
@@ -475,6 +523,7 @@ function initPlayerTable() {
     tbody.innerHTML = ''; 
     const legOptions = ['先行', '捲り', '差し', 'マーク']; 
     const markOptions = Object.keys(WINTICKET_COEFFICIENTS).map(mark => `<option value="${mark}">${mark}</option>`).join(''); 
+    
     for (let i = 1; i <= PLAYER_COUNT; i++) { 
         const tr = document.createElement('tr'); 
         tr.className = 'player-row'; 
@@ -485,14 +534,39 @@ function initPlayerTable() {
             <td><input type="number" id="score-${i}" placeholder="得点" step="0.01" value="110.00"></td> 
             <td> <select id="winticket-mark-${i}"> ${markOptions} </select> </td> 
             <td> <input type="text" id="recent-ranks-${i}" placeholder="3桁 (例: 372)" value="444" maxlength="3" style="width: 100%; text-align: center;"> </td> 
-            <td> <input type="checkbox" id="s1st-${i}"> </td>
-            <td> <input type="checkbox" id="b1st-${i}"> </td>
+            <td> <input type="checkbox" id="s1st-${i}" class="s1st-checkbox"> </td>
+            <td> <input type="checkbox" id="b1st-${i}" class="b1st-checkbox"> </td>
         `; 
         tbody.appendChild(tr); 
     } 
+    
+    // S1位/B1位チェックボックスの排他制御ロジックを適用
+    document.querySelectorAll('.s1st-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('click', function() {
+            if (this.checked) {
+                document.querySelectorAll('.s1st-checkbox').forEach(otherCheckbox => {
+                    if (otherCheckbox !== this) {
+                        otherCheckbox.checked = false;
+                    }
+                });
+            }
+        });
+    });
+
+    document.querySelectorAll('.b1st-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('click', function() {
+            if (this.checked) {
+                document.querySelectorAll('.b1st-checkbox').forEach(otherCheckbox => {
+                    if (otherCheckbox !== this) {
+                        otherCheckbox.checked = false;
+                    }
+                });
+            }
+        });
+    });
 } 
 
-// JSONデータの読み込み (省略)
+// JSONデータの読み込み (V3.5から変更なし)
 async function loadBankData() { 
     const bankSelect = document.getElementById('bank-select'); 
     bankSelect.innerHTML = '<option value="">データ読み込み中...</option>'; 
@@ -532,7 +606,7 @@ async function loadBankData() {
     } 
 } 
 
-// ライン結束力・整合性の評価とUI表示 (変更なし)
+// ライン結束力・整合性の評価とUI表示 (V3.5から変更なし)
 function calculateLineCohesion(rawPlayers, lineupStr) {
     const lines = {};
     const lineNames = lineupStr.split(',').map(l => l.trim()).filter(l => l.length > 0);
@@ -591,7 +665,7 @@ function calculateLineCohesion(rawPlayers, lineupStr) {
 }
 
 
-// 連係補正値の計算ロジック (省略 - 変更なし)
+// 連係補正値の計算ロジック (V3.5から変更なし)
 function calculateCoopBias(playerId, rawScore, players, lineupStr, lineCohesionResults) { 
     if (!lineupStr) { return 1.0; } 
 
@@ -629,7 +703,7 @@ function calculateCoopBias(playerId, rawScore, players, lineupStr, lineCohesionR
     return 1.0; 
 } 
 
-// バンク特性フィードバック (変更なし)
+// バンク特性フィードバック (V3.5から変更なし)
 function displayBankFeedback(bankName, biasMap) {
     const feedbackDiv = document.getElementById('bank-feedback');
     if (!feedbackDiv) return;
@@ -648,7 +722,7 @@ function displayBankFeedback(bankName, biasMap) {
     feedbackDiv.style.display = 'block';
 }
 
-// メイン計算ロジック
+// メイン計算ロジック (V3.5から変更なし)
 function calculate() { 
     const resultArea = document.getElementById('result-area');
     // 🚨 修正: 計算開始時に結果エリア全体を強制表示
@@ -656,7 +730,6 @@ function calculate() {
         resultArea.style.display = 'block'; 
     } 
     
-    // ... (入力データ取得ロジックは省略/変更なし) ...
     const selectedBankName = document.getElementById('bank-select').value; 
     const currentBank = bankData[selectedBankName] || { keirin_bias: {}, wind_or_position: {} };
     const timeZone = document.getElementById('time-select').value; 
@@ -713,11 +786,9 @@ function calculate() {
 
     if (rawPlayers.length < 3) { 
         alert("計算を行うには最低3名分の選手データを正しく入力してください。"); 
-        // 🚨 修正: エラー時は結果エリアを非表示に戻す
         if (resultArea) { resultArea.style.display = 'none'; } 
         return; 
     } 
-    // ... (計算ロジックは省略/変更なし) ...
 
     const lineCohesionResults = calculateLineCohesion(rawPlayers, lineupStr);
 
@@ -750,7 +821,7 @@ function calculate() {
         }); 
         scenarioPlayers.sort((a, b) => b.score - a.score); 
         const playersWithRating = applyTenScaleRating(scenarioPlayers); 
-        const sanrentanDetails = generateSanrentanDetails(playersWithRating, 6); // 展開別は6点
+        const sanrentanDetails = generateSanrentanDetails(playersWithRating, 6); 
         
         sanrentanDetails.forEach(c => { 
             const key = c.nums;
@@ -774,7 +845,7 @@ function calculate() {
 // 予想生成・表示ヘルパー関数
 // ----------------------------------------------------------------------
 
-// ... (generateSanrenpukuHtml, generateSanrentanDetails, generateCombinedSanrenpukuHtml, generateHighRiskSanrenpukuHtml は省略/変更なし) ...
+// ... (generateSanrenpukuHtml, generateSanrentanDetails, generateCombinedSanrenpukuHtml, generateHighRiskSanrenpukuHtml, generateRankingTable は V3.5から変更なし) ...
 function generateSanrenpukuHtml(sortedPlayers) {
     const sanrenpukuSet = new Set();
     for (let i = 0; i < 3 && i < sortedPlayers.length; i++) {
@@ -840,8 +911,7 @@ function generateRankingTable(players) {
     }).join('');
 }
 
-
-// メイン結果表示
+// メイン結果表示 (V3.5から変更なし)
 function displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations) {
     const container = document.getElementById('scenario-results-container');
     
@@ -898,7 +968,7 @@ function displayMultiScenarioResults(allScenarioResults, allSanrentanCombination
     document.getElementById('mujirushi-anamae-ranking').style.display = 'block';
 }
 
-// ... (parseLineupAndDetermineMode, applyTenScaleRating, analyzeHighRiskCandidates, getWeightClass, toggleManual は省略/変更なし) ...
+// ... (parseLineupAndDetermineMode, applyTenScaleRating, analyzeHighRiskCandidates, getWeightClass, toggleManual は V3.5から変更なし) ...
 function parseLineupAndDetermineMode(lineupStr, players) { /* ... */ return { lineupPlayers: new Set(), singleRiders: [] }; }
 function applyTenScaleRating(sortedPlayers) { 
     if (sortedPlayers.length === 0) return [];
