@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>競輪予想ツール 華耀天輪 真・自在律 V4.1</title>
+<title>競輪予想ツール 華耀天輪 真・自在律 V4.2</title>
 <style>
-/* 🎨 V4.1 スタイル (V4.0から変更なし) */ 
+/* 🎨 V4.2 スタイル (V4.1から変更なし) */ 
 :root { 
     --primary-color: #4682B4; 
     --accent-color: #FFD700; 
@@ -307,7 +307,7 @@ select, input[type="number"], input[type="text"] {
 </head> 
 <body> 
 <div class="container"> 
-    <h1>華耀天輪 真・自在律 V4.1</h1> 
+    <h1>華耀天輪 真・自在律 V4.2</h1> 
     <div class="manual-container"> 
         <h2 id="manual-toggle" onclick="toggleManual()"> 📜 説明書・評価ロジック解説 <span id="toggle-icon">▼</span> </h2> 
         <div id="manual-content" class="manual-content-hidden"> 
@@ -561,6 +561,13 @@ function initPlayerTable() {
 // JSONデータの読み込み
 async function loadBankData() { 
     const bankSelect = document.getElementById('bank-select'); 
+    // 🚨 修正: bank-feedbackの存在チェック
+    const feedbackDiv = document.getElementById('bank-feedback');
+    if (!feedbackDiv) { 
+        console.error("HTML element #bank-feedback not found.");
+        return; 
+    }
+
     bankSelect.innerHTML = '<option value="">データ読み込み中...</option>'; 
     try { 
         const dummyBankData = {
@@ -592,8 +599,9 @@ async function loadBankData() {
     } catch (error) { 
         console.error("Bank data loading error:", error); 
         bankData = {}; 
-        document.getElementById('bank-feedback').innerHTML = "🚨 **警告:** バンクデータの読み込みに失敗しました。脚質・風補正なしで計算されます。"; 
-        document.getElementById('bank-feedback').style.display = 'block'; 
+        // 🚨 修正: feedbackDivの存在チェックは済んでいる
+        feedbackDiv.innerHTML = "🚨 **警告:** バンクデータの読み込みに失敗しました。脚質・風補正なしで計算されます。"; 
+        feedbackDiv.style.display = 'block'; 
     } 
 } 
 
@@ -601,6 +609,8 @@ async function loadBankData() {
 function calculateLineCohesion(rawPlayers, lineupStr) {
     const lineNames = lineupStr.split(',').map(l => l.trim()).filter(l => l.length > 0);
     const container = document.getElementById('line-evaluation-container');
+    if (!container) return {}; // 🚨 修正: 存在しない場合は空オブジェクトを返す
+    
     container.innerHTML = '';
     const lineCohesionResults = {};
     const classMap = { 'A': 'line-strong', 'B': 'line-medium', 'C': 'line-medium', 'D': 'line-weak' };
@@ -702,7 +712,8 @@ function calculateCoopBias(playerId, players, lineupStr, lineCohesionResults) {
 // バンク特性フィードバック
 function displayBankFeedback(bankName, biasMap) {
     const feedbackDiv = document.getElementById('bank-feedback');
-    if (!feedbackDiv) return;
+    // 🚨 修正: 存在しない場合は処理を中断
+    if (!feedbackDiv) return; 
     
     const sortedBiases = Object.entries(biasMap)
         .sort(([, biasA], [, biasB]) => biasB - biasA)
@@ -801,6 +812,8 @@ function calculate() {
         
         const { singleRiders: determinedSingleRiders } = parseLineupAndDetermineMode(lineupStr, rawPlayers); 
         singleRiders = determinedSingleRiders; 
+        
+        // 🚨 修正: displayBankFeedback内で存在チェックが行われるため、呼び出しは安全
         displayBankFeedback(selectedBankName, currentBank.keirin_bias); 
 
         const allScenarioResults = []; 
@@ -838,7 +851,9 @@ function calculate() {
         displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations); 
 
         // 🚨 修正: 計算完了後、親要素を確実に表示する
-        document.getElementById('result-area').style.display = 'block';
+        if (resultArea) { 
+            resultArea.style.display = 'block'; 
+        }
     
     } catch (e) {
         // 🚨 予期せぬエラーが発生した場合の表示
@@ -862,7 +877,7 @@ function calculate() {
 // 予想生成・表示ヘルパー関数
 // ----------------------------------------------------------------------
 
-// 🚨 修正箇所: generateSanrenpukuHtml (三連複生成のバグ修正)
+// 🚨 修正箇所: generateSanrenpukuHtml (V4.1から変更なし)
 function generateSanrenpukuHtml(sortedPlayers) {
     const sanrenpukuSet = new Set();
     // 上位3名から5名までを軸に、上位6名までの組み合わせから4点を選出
@@ -942,6 +957,7 @@ function generateRankingTable(players) {
 // メイン結果表示
 function displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations) {
     const container = document.getElementById('scenario-results-container');
+    if (!container) return; // 🚨 修正: 存在チェック
     
     // 展開別シミュレーション結果を表示
     container.innerHTML = allScenarioResults.map(res => {
@@ -972,23 +988,31 @@ function displayMultiScenarioResults(allScenarioResults, allSanrentanCombination
         .slice(0, 10); 
     
     const combinedSanrentanListElement = document.getElementById('combined-sanrentan-list');
-    combinedSanrentanListElement.innerHTML = combinedList.slice(0, 3).map((item, i) => 
-        `<li class="${getWeightClass(i, 3)}">${item.combinations[0]}</li>`
-    ).join('');
+    if (combinedSanrentanListElement) { // 🚨 修正: 存在チェック
+        combinedSanrentanListElement.innerHTML = combinedList.slice(0, 3).map((item, i) => 
+            `<li class="${getWeightClass(i, 3)}">${item.combinations[0]}</li>`
+        ).join('');
+    }
 
     const combinedSanrenpukuListElement = document.getElementById('combined-sanrenpuku-list');
-    combinedSanrenpukuListElement.innerHTML = generateCombinedSanrenpukuHtml(combinedList);
+    if (combinedSanrenpukuListElement) { // 🚨 修正: 存在チェック
+        combinedSanrenpukuListElement.innerHTML = generateCombinedSanrenpukuHtml(combinedList);
+    }
     
     // --- 荒天令 (高リスク穴目) ---
     const highRiskList = analyzeHighRiskCandidates(combinedList);
 
     const mujirushiSanrentanListElement = document.getElementById('mujirushi-anamae-list');
-    mujirushiSanrentanListElement.innerHTML = highRiskList.slice(0, 3).map((item, i) => 
-        `<li class="weight-strong">${item.combinations[0]}</li>`
-    ).join('');
+    if (mujirushiSanrentanListElement) { // 🚨 修正: 存在チェック
+        mujirushiSanrentanListElement.innerHTML = highRiskList.slice(0, 3).map((item, i) => 
+            `<li class="weight-strong">${item.combinations[0]}</li>`
+        ).join('');
+    }
 
     const mujirushiSanrenpukuListElement = document.getElementById('mujirushi-sanrenpuku-list');
-    mujirushiSanrenpukuListElement.innerHTML = generateHighRiskSanrenpukuHtml(highRiskList);
+    if (mujirushiSanrenpukuListElement) { // 🚨 修正: 存在チェック
+        mujirushiSanrenpukuListElement.innerHTML = generateHighRiskSanrenpukuHtml(highRiskList);
+    }
 }
 
 function parseLineupAndDetermineMode(lineupStr, players) {
@@ -1058,6 +1082,8 @@ function getWeightClass(index, totalCount) {
 function toggleManual() {
     const content = document.getElementById('manual-content');
     const icon = document.getElementById('toggle-icon');
+    if (!content || !icon) return; // 🚨 修正: 存在チェック
+    
     if (content.classList.contains('manual-content-hidden')) {
         content.classList.remove('manual-content-hidden');
         icon.textContent = '▲';
