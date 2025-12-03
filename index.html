@@ -2,1033 +2,438 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>競輪予想ツール 華耀天輪 真・自在律 (最終調整版)</title>
+    <title>真・自在律 v3.1（最終版）</title>
     <style>
-        :root {
-            --primary-color: #0056b3;
-            --accent-color: #ffc107;
-            --bg-color: #f4f4f4;
-            --text-color: #333;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            margin: 0;
-            padding: 10px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-        h1 { text-align: center; font-size: 1.6rem; margin-bottom: 10px; color: var(--primary-color); }
-        h2 { text-align: center; font-size: 1.2rem; margin-bottom: 10px; }
-        
-        /* Layout & Forms */
-        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .control-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
-        select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-        
-        /* Player Table */
-        .player-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .player-table th, .player-table td { padding: 8px 4px; border-bottom: 1px solid #ddd; text-align: center; font-size: 0.8rem; }
-        .player-table th { background-color: #eee; }
-        .player-row input, .player-row select { width: 100%; padding: 5px; font-size: 0.8rem; }
-        
-        /* Buttons */
-        .btn { display: block; width: 100%; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 5px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        .btn:hover { background-color: #004494; }
-
-        /* Results */
-        #result-area { margin-top: 20px; display: none; }
-        .scenario-result { margin-top: 15px; border-left: 5px solid var(--primary-color); padding-left: 10px; margin-bottom: 20px; }
-        .scenario-result h3 { margin-top: 0; background-color: #eaf4ff; padding: 5px; border-radius: 3px; font-size: 1.1rem; }
-        
-        /* 10段階評価のスタイル */
-        .score-rank { font-weight: bold; color: #d9534f; font-size: 1.1em; } 
-        
-        .kaime-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 5px; }
-        
-        /* --- 購入ウェイト カラーグラデーション --- */
-        .kaime-list li { 
-            padding: 3px 8px; 
-            border: 1px solid #ccc; 
-            border-radius: 3px; 
-            font-size: 0.9rem; 
-        }
-        .weight-strong { background-color: #D9534F; color: white; border-color: #A94442; font-weight: bold; } /* 赤 (1位) */
-        .weight-high { background-color: #F0AD4E; color: #333; border-color: #EEA236; } /* オレンジ (2位) */
-        .weight-medium { background-color: #FFFFCC; color: #333; border-color: #E8E87D; } /* 黄色 (3位) */
-        .weight-low { background-color: #D9EDF7; color: #333; border-color: #BCE8F1; } /* 水色 (4-6位) */
-        .weight-weak { background-color: #428BCA; color: white; border-color: #357EBD; } /* 青 (7位以下) */
-
-        /* Combined Ranking Styles */
-        #combined-ranking, #mujirushi-anamae-ranking { margin-top: 30px; padding: 15px; border-radius: 8px; }
-        
-        #combined-ranking { 
-            border: 2px solid #ffc107; 
-            background-color: #fffaf0; 
-        }
-
-        /* 荒天令 (統合後の高リスク推奨エリア) */
-        #mujirushi-anamae-ranking {
-            border: 2px solid #000;
-            background-color: #e5e5e5;
-        }
-        #mujirushi-anamae-list li, #mujirushi-sanrenpuku-list li {
-            background-color: #333;
-            color: white;
-            font-weight: bold;
-            border-color: #000;
-        }
-
-
-        #combined-ranking h2, #mujirushi-anamae-ranking h2 { 
-            color: #d9534f; 
-            font-size: 1.4rem; 
-            margin-bottom: 0px; 
-        }
-        #combined-sanrentan-list li { 
-            background-color: var(--accent-color); 
-            font-weight: bold; 
-            color: #333;
-            border-color: #cc9900;
-        }
-
-
-        #combined-sanrenpuku-list, #mujirushi-sanrenpuku-list {
-             margin-top: 10px;
-        }
-
-        /* --- 説明書アコーディオン スタイル --- */
-        .manual-container {
-            margin: 20px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #fff;
-        }
-        #manual-toggle {
-            cursor: pointer;
-            background-color: #f7f7f7;
-            padding: 10px;
-            border-radius: 5px 5px 0 0;
-            margin: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1rem;
-            color: var(--primary-color);
-            font-weight: bold;
-        }
-        #manual-content {
-            padding: 15px;
-            border-top: 1px solid #ccc;
-        }
-        .manual-content-hidden {
-            display: none; 
-        }
-        .manual-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
-            font-size: 0.85rem;
-        }
-        .manual-table th, .manual-table td {
-            border: 1px solid #ddd;
-            padding: 6px;
-            text-align: left;
-        }
-        .manual-table th {
-            background-color: #f7f7f7;
-            font-weight: bold;
-        }
-        .color-guide-list {
-            list-style: none;
-            padding: 0;
-            margin-top: 10px;
-        }
-        .color-guide-list li {
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            font-size: 0.9rem;
-        }
-        .color-box {
-            display: inline-block;
-            width: 20px;
-            height: 10px;
-            margin-right: 8px;
-            border: 1px solid #666;
-        }
-        
-        /* Responsive tweaks */
-        @media (max-width: 600px) {
-            .player-table th, .player-table td { padding: 4px; font-size: 0.7rem; }
-        }
+        /* 基本スタイル */
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f9; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        h1, h2, h3 { color: #333; border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #e9e9e9; }
+        input[type="number"], input[type="text"] { width: 60px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        input[type="checkbox"] { width: 20px; height: 20px; } 
+        /* ライン評価のカラースタイル */
+        .line-strongest { background-color: #D9534F; color: white; font-weight: bold; } /* 超特級 */
+        .line-strong { background-color: #F0AD4E; color: white; font-weight: bold; } /* 特級 */
+        .line-high { background-color: #F0AD4E; color: black; } /* 上級 */
+        .line-medium-high { background-color: #F7E79B; color: black; } /* 中上級 */
+        .line-medium { background-color: #FFFFE0; color: black; } /* 標準 */
+        .line-medium-low { background-color: #D4EDDA; color: black; } /* 中下級 */
+        .line-low { background-color: #5CB85C; color: white; } /* 下級 */
+        .line-weak { background-color: #5BC0DE; color: white; } /* 劣級 */
+        .line-weakest { background-color: #0275D8; color: white; } /* 最劣級 */
+        .single-rider { background-color: #6C757D; color: white; font-style: italic; } /* 単騎 */
+        .result-best { background-color: #D9534F; color: white; font-weight: bold; } /* 買い目強調 */
+        /* ボタンとアラート */
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: #0056b3; }
+        .debug-info { margin-top: 20px; padding: 10px; border: 1px dashed #aaa; background-color: #f9f9f9; font-size: 0.9em; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>華耀天輪 真・自在律</h1>
+    <h1>真・自在律 v3.1</h1>
+    <p>競走得点、ライン連係、W印、展開、S/B積極性から総合スコアを算出します。</p>
 
-    <div class="manual-container">
-        <h2 id="manual-toggle" onclick="toggleManual()">
-            📜 説明書・評価ロジック解説 <span id="toggle-icon">▼</span>
-        </h2>
-        <div id="manual-content" class="manual-content-hidden">
-            <h3>1. 🎛️ 使い方と入力項目</h3>
-            <table class="manual-table">
-                <thead>
-                    <tr><th>項目</th><th>入力内容</th><th>目的</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>**バンク・環境設定**</td><td>バンク名、時間帯、風向きを選択。</td><td>環境による静的補正を適用します。</td></tr>
-                    <tr><td>**競走得点**</td><td>選手の基本得点（例: 110.50）。</td><td>期待値計算の**ベース**となる基本実力を設定します。</td></tr>
-                    <tr><td>**W印**</td><td>WINTICKETの予想印を選択。</td><td>**外部予想の信頼度**（W印係数）を反映します。</td></tr>
-                    <tr><td>**直近3走着順**</td><td>3走分を続けて入力 (例: `372`は1走前3着→2走前7着→3走前2着を意味します)。</td><td>**最新の勢い**（今節着順係数）を**加重平均**で精密に算出します。</td></tr>
-                    <tr><td>**全体並び**</td><td>選手IDをラインごとにコンマ区切りで入力。</td><td>**ライン・単騎の特定**に使用されます。</td></tr>
-                </tbody>
-            </table>
-
-            <h3>2. ⚖️ スコア評価ロジック（10段階 + 矢印レーティング）</h3>
-            <p>最終スコアは、直感的な**10段階評価（X/10）**に変換されて表示されます。矢印（レーティング）で細かく順位を区別します。</p>
-            <table class="manual-table">
-                <thead>
-                    <tr><th>評価項目</th><th>記号</th><th>意味</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>**大分類**</td><td>**X / 10**</td><td>**期待値のクラス**。スコアの全体レンジを10等分した絶対的な強さ。</td></tr>
-                    <tr><td>**小分類**</td><td>**↑**</td><td>同じ評価点グループ内の**最上位**（最も勢いが強い）。</td></tr>
-                    <tr><td></td><td>**→**</td><td>同じ評価点グループ内の**中位**。</td></tr>
-                    <tr><td></td><td>**↓**</td><td>同じ評価点グループ内の**最下層**（勢いが弱い）。</td></tr>
-                </tbody>
-            </table>
-
-            <h3>3. 🌈 買い目の購入ウェイト（色の意味）</h3>
-            <p>三連単の買い目リストは、期待値の高さに応じて色分けされており、資金配分や優先順位を判断するためのガイドです。</p>
-            <ul class="color-guide-list">
-                <li><span class="color-box weight-strong"></span> **赤**: 最強軸。最も厚く購入を推奨。</li>
-                <li><span class="color-box weight-high"></span> **橙**: 強力。次点として厚く購入。</li>
-                <li><span class="color-box weight-medium"></span> **黄**: 推奨。中間的なウェイト。</li>
-                <li><span class="color-box weight-low"></span> **水色**: 中程度。バランスを考慮。</li>
-                <li><span class="color-box weight-weak"></span> **青**: 穴目/最弱。薄く購入、または見送り推奨。</li>
-            </ul>
-
-            <h3>4. 🏛️ バンク特性フィードバック</h3>
-            <p>例: 「🚨 **弥彦バンクの特性:** 脚質補正が最も高いのは **捲り** の傾向があります。」<br>
-            設定されているバンクのデータに基づき、**最も有利な脚質**を明示します。ユーザーがどの展開シナリオを重視すべきかのヒントとなります。</p>
-        </div>
-    </div>
-    <div class="control-group">
-        <label for="bank-select">バンク選択</label>
-        <select id="bank-select">
-            <option value="">データ読み込み中...</option>
-        </select>
-    </div>
-
-    <div class="control-group">
-        <div style="display: flex; gap: 10px;">
-            <div style="flex: 1;">
-                <label for="time-select">時間帯</label>
-                <select id="time-select">
-                    <option value="モーニング">モーニング</option>
-                    <option value="デイ" selected>デイ</option>
-                    <option value="ナイター">ナイター</option>
-                    <option value="ミッドナイト">ミッドナイト</option>
-                </select>
-            </div>
-            <div style="flex: 1;">
-                <label for="wind-select">風向き</label>
-                <select id="wind-select">
-                    <option value="東">東</option>
-                    <option value="西">西</option>
-                    <option value="南">南</option>
-                    <option value="北">北</option>
-                </select>
-                <div style="text-align: right; margin-top: 3px;">
-                    <a href="https://www.kazekeirin.info/" target="_blank" 
-                       style="font-size: 0.75rem; color: #555; text-decoration: none;">
-                        風競輪.info
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <h2>選手データ入力</h2>
-    <table class="player-table">
+    <h2>🚴 レース基本情報入力</h2>
+    <p>※ 選手情報はID順に入力してください。</p>
+    <table>
         <thead>
             <tr>
-                <th style="width:5%">ID</th>
-                <th style="width:15%">脚質</th>
-                <th style="width:20%">競走得点</th>
-                <th style="width:15%">W印</th>
-                <th style="width:25%">直近3走着順 (例: 372)</th> 
+                <th>ID</th>
+                <th>脚質<br>(S/M/K/O)</th>
+                <th>競走得点</th>
+                <th>直近着順<br>(過去3走平均)</th>
+                <th>W印<br>(◎/〇/△/✕)</th>
+                <th>S回数1位</th>
+                <th>B回数1位</th>
             </tr>
         </thead>
-        <tbody id="player-inputs">
+        <tbody id="riderInputBody">
             </tbody>
     </table>
 
-    <div class="control-group" style="margin-top: 15px;">
-        <label for="overall-lineup">全体並び（例: 153,24,6,7 または ガールズ追走: 3,2,1,5,6,7）</label>
-        <input type="text" id="overall-lineup" placeholder="ラインごとにコンマ区切りで入力してください" value="47,15,36,2">
-    </div>
-
-    <button class="btn" onclick="calculate()">全パターン自動生成</button>
-
-    <div id="result-area">
-        <div id="bank-feedback" style="margin-bottom: 20px; padding: 10px; border: 1px solid #0056b3; background-color: #eaf4ff; border-radius: 5px; font-weight: bold; text-align: center; display: none;">
-            </div>
-        
-        <div id="combined-ranking" style="display:none;">
-            <h2>☀️ 晴天令</h2> 
-            <p style="font-size: 0.75rem; margin-top: -5px; margin-bottom: 10px; color: #555; text-align: center;">
-                (おすすめ3連単3点と補助3連複2点の合計5点 - W印重視)
-            </p>
-
-            <h4>三連単 (3点)</h4>
-            <ul id="combined-sanrentan-list" class="kaime-list"></ul>
-            <h4>三連複 (2点) - 三連単3点を補完</h4>
-            <ul id="combined-sanrenpuku-list" class="kaime-list"></ul>
+    <p>
+        <strong>ライン並び:</strong> <input type="text" id="lineup" placeholder="例: 1-2-3, 4-5, 6, 7" style="width: 250px;">
+        <strong>展開シナリオ:</strong> <select id="scenario">
+            <option value="default">中立</option>
+            <option value="senko">先行有利</option>
+            <option value="makuri">捲り有利</option>
+            <option value="sashi">差し有利</option>
+        </select>
+        <strong>バンク脚質補正:</strong> <input type="number" id="bankBias" value="1.00" step="0.01">
+        <strong>レース種別:</strong> <select id="raceType">
+            <option value="man">男子（S/A級）</option>
+            <option value="girl">ガールズ</option>
+        </select>
+    </p>
+    
+    <div id="raceLevelInfo" style="margin-top: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
         </div>
-        
-        <div id="mujirushi-anamae-ranking" style="display:none;"> 
-            <h2>⛈️ 荒天令</h2> 
-            <p style="font-size: 0.75rem; margin-top: -5px; margin-bottom: 10px; color: #555; text-align: center;">
-                (W印を排除し、勢いと実力で抽出した3連単3点と補助3連複2点)
-            </p>
-            <h4>三連単 (3点)</h4>
-            <ul id="mujirushi-anamae-list" class="kaime-list"></ul>
-            <h4>三連複 (2点) - 三連単3点を補完</h4>
-            <ul id="mujirushi-sanrenpuku-list" class="kaime-list"></ul>
-        </div>
-        
+
+    <button onclick="calculateScore('normal')">予想スコア計算 (晴天令)</button>
+    <button onclick="calculateScore('filter')">予想スコア計算 (荒天令W印フィルタ)</button>
+
+    <div id="resultsArea" style="margin-top: 30px;">
+
         <hr>
-
+        <div id="lineRankingArea">
+            <h3>🏆 ライン総合評価（連係信頼度）</h3>
+        </div>
+        <hr>
+        
         <h2>📊 スコア・買い目シミュレーション結果</h2>
-        <div id="scenario-results-container">
-            </div>
+        <p id="currentMode"></p>
+        <table id="scoreTable"></table>
+
+
+        <h3>🛒 予想買い目（三連単フォーメーション）</h3>
+        <table id="predictionTable"></table>
     </div>
+
+    <div class="debug-info">
+        <h3>🔧 デバッグ/検証情報</h3>
+        <pre id="debugOutput"></pre>
+    </div>
+
 </div>
 
 <script>
-    // グローバル変数
-    let bankData = {};
-    const PLAYER_COUNT = 7; 
-    let playerWinticketMap = {};
-    let playerRawScores = {}; // 選手の素点をIDごとに保持
-    let isGirlsMode = false; 
-    let singleRiders = []; 
+    // ====================================================================
+    // 1. 定数と初期データ設定
+    // ====================================================================
 
-    // --- 係数定義 ---
-    const COMMON_WIND_MAP = { "東": "バック追い風", "西": "バック向かい風", "南": "横風", "北": "バンク特有の風なし" };
-    const COMMON_TIME_BIAS = { "モーニング": 1.0, "デイ": 1.0, "ナイター": 1.02, "ミッドナイト": 0.98 };
-
-    // ライン戦（ポジション補正）
-    const POSITION_BONUS = {
-        'second': 1.06, 
-        'third_or_later': 1.02 
-    };
+    const RIDER_COUNT = 7;
     
-    // 直近着順の寄与率を調整
-    const RECENT_BIAS_CONTRIBUTION = 1.05; // 勢いを重視
+    // W印係数（最終確定値：◎:1.10, 〇:1.07, △:1.03, ✕/無:1.01）
+    const W_MARK_COEFS = { '◎': 1.10, '〇': 1.07, '△': 1.03, '✕': 1.01, '無': 1.01 }; 
 
-    // 追い込み脚質の静的補正
-    const MARK_SASHI_STATIC_BIAS = 1.015;
+    // ポジションボーナス (基本的な有利性: 2番手が最大)
+    const POSITION_BONUS = { 1: 1.00, 2: 1.06, 3: 1.03, 4: 1.00, 5: 0.98, 6: 0.97, 7: 0.96 };
+    // 脚質分類
+    const JIRIKI_LEGS = ['S', 'M']; 
+    const OIKOMI_LEGS = ['K', 'O']; 
 
-    // WINTICKETの予想印によるスコア補正係数 (晴天令/通常シナリオ用)
-    const WINTICKET_BIAS = {
-        '◎': 1.10, // 抑制
-        '◯': 1.07, // 抑制
-        '△': 1.04, // 抑制
-        '×': 1.01, // 抑制
-        '▲': 1.04, // (既存の▲は△と同じ係数として残存)
-        '注': 1.00,
-        'なし': 1.00,
-    };
-    const WINTICKET_COEFFICIENTS = WINTICKET_BIAS; 
-
-    const RECENT_RANK_WEIGHTS = {
-        '1': 0.5, '2': 0.3, '3': 0.2 
-    };
-    const RANK_BASE_COEFFICIENTS = {
-        1: 1.15, 2: 1.10, 3: 1.05, 4: 1.00, 5: 0.98,
-        6: 0.96, 7: 0.94, 8: 0.92, 9: 0.90,
-        'default': 1.00
-    };
-    const DEVELOPMENT_BIAS = {
-        "A. 先行有利": { "先行": 1.05, "捲り": 1.0, "差し": 0.95, "マーク": 1.0 },
-        "B. 捲り有利": { "先行": 0.98, "捲り": 1.05, "差し": 1.0, "マーク": 1.0 },
-        "C. 差し有利": { "先行": 0.95, "捲り": 1.0, "差し": 1.05, "マーク": 1.0 }
-    };
-    // --- 係数定義終了 ---
-
-    window.addEventListener('DOMContentLoaded', () => {
-        initPlayerTable();
-        loadBankData();
-    });
+    // 単騎ボーナス (自由度ボーナス)
+    const SOLO_BONUS = 1.02; 
     
-    function initPlayerTable() {
-        const tbody = document.getElementById('player-inputs');
-        if (!tbody) return;
-        
-        tbody.innerHTML = '';
-        const legOptions = ['先行', '捲り', '差し', 'マーク']; 
-        
-        // W印の選択肢を新しい順序で生成
-        const orderedMarks = ['◎', '◯', '△', '×', '▲', '注', 'なし'];
-        const markOptions = orderedMarks.map(mark => `<option value="${mark}">${mark}</option>`).join('');
-        
-        for (let i = 1; i <= PLAYER_COUNT; i++) {
-            const tr = document.createElement('tr');
-            tr.className = 'player-row';
-            
-            let selectOptions = legOptions.map(leg => `<option value="${leg}">${leg}</option>`).join('');
+    // S/Bボーナス係数 (軽め)
+    const S_BONUS = 1.005; 
+    const B_BONUS = 1.005;
 
-            tr.innerHTML = `
-                <td>${i}</td>
-                <td>
-                    <select id="leg-${i}">
-                        ${selectOptions}
-                    </select>
-                </td>
-                <td><input type="number" id="score-${i}" placeholder="得点" step="0.01" value="90.00"></td> <td>
-                    <select id="winticket-mark-${i}">
-                        ${markOptions}
-                    </select>
-                </td> 
-                <td>
-                    <input type="text" id="recent-ranks-${i}" placeholder="3桁 (例: 372)" value="137" maxlength="3" style="width: 100%; text-align: center;"> </td> 
-            `;
-            tbody.appendChild(tr);
-        }
-    }
-
-    async function loadBankData() { 
-        const bankSelect = document.getElementById('bank-select');
-        bankSelect.innerHTML = '<option value="">データ読み込み中...</option>';
-        
-        try {
-            const response = await fetch('bankdata.json');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            bankData = await response.json();
-            
-            bankSelect.innerHTML = '<option value="">選択してください</option>';
-            Object.keys(bankData).forEach(bankName => {
-                const option = document.createElement('option');
-                option.value = bankName;
-                option.textContent = bankName;
-                bankSelect.appendChild(option);
-            });
-            if (Object.keys(bankData).length > 0) {
-                bankSelect.value = Object.keys(bankData)[0];
-            }
-        } catch (error) {
-            console.error("Bank data loading error:", error);
-            bankSelect.innerHTML = '<option value="">🚨 データ読み込み失敗 (bankdata.jsonが未配置/エラー)</option>';
-            bankData = {}; 
-            document.getElementById('bank-feedback').innerHTML = "🚨 **警告:** bankdata.jsonの読み込みに失敗しました。脚質・風補正なしで計算されます。";
-            document.getElementById('bank-feedback').style.display = 'block';
-        }
-    }
-
-    // --- 連係・ライン判定ロジック ---
-    function parseLineupAndDetermineMode(lineupStr, players) {
-        if (!lineupStr) {
-            isGirlsMode = true; 
-            return { lineupPlayers: new Set(), singleRiders: Array.from({ length: PLAYER_COUNT }, (_, i) => i + 1) };
-        }
-
-        const allRiders = Array.from({ length: PLAYER_COUNT }, (_, i) => i + 1);
-        const lineupPlayers = new Set();
-        let hasMultiPlayerLine = false;
-
-        lineupStr.split(',').map(line => line.trim()).forEach(line => {
-            if (line.length > 1) {
-                hasMultiPlayerLine = true;
-            }
-            line.split('').forEach(idStr => {
-                const id = parseInt(idStr, 10);
-                if (!isNaN(id)) {
-                    lineupPlayers.add(id);
-                }
-            });
-        });
-
-        isGirlsMode = !hasMultiPlayerLine; 
-
-        let determinedSingleRiders = [];
-        if (hasMultiPlayerLine) {
-            determinedSingleRiders = allRiders.filter(id => !lineupPlayers.has(id));
-        } else {
-            determinedSingleRiders = allRiders;
-        }
-
-        return { lineupPlayers, singleRiders: determinedSingleRiders };
-    }
-
-    function calculateCoopBias(playerId, players) {
-        let coopBias = 1.0;
-        const lineupStr = document.getElementById('overall-lineup').value.trim();
-        
-        if (!lineupStr) return 1.0;
-
-        const lines = lineupStr.split(',').map(line => line.trim());
-        const hasMultiPlayerLine = lines.some(line => line.length > 1);
-
-        if (hasMultiPlayerLine) {
-            lines.forEach(line => {
-                const linePlayers = line.split('').map(Number);
-                const index = linePlayers.indexOf(playerId);
-                
-                if (index === 1) {
-                    coopBias = POSITION_BONUS['second']; 
-                } else if (index >= 2) {
-                    coopBias = POSITION_BONUS['third_or_later']; 
-                }
-            });
-            return coopBias;
-        } 
-        
-        return 1.0;
-    }
-    // --- 連係・ライン判定ロジック終了 ---
-
-
-    // --- メイン計算ロジック ---
-    function calculate() {
-        const selectedBankName = document.getElementById('bank-select').value;
-        const currentBank = bankData[selectedBankName] || { "keirin_bias": { "先行": 1.0, "捲り": 1.0, "差し": 1.0, "マーク": 1.0 }, "wind_or_position": {} };
-
-        const timeZone = document.getElementById('time-select').value;
-        const windDir = document.getElementById('wind-select').value;
-        const lineupStr = document.getElementById('overall-lineup').value.trim();
-        
-        const timeBiasVal = COMMON_TIME_BIAS[timeZone] || 1.0;
-        
-        let windBiasVal = 1.0;
-        const commonWindCondition = COMMON_WIND_MAP[windDir]; 
-        if (commonWindCondition && currentBank.wind_or_position && currentBank.wind_or_position[commonWindCondition]) {
-            windBiasVal = currentBank.wind_or_position[commonWindCondition];
-        }
-        
-        let rawPlayers = [];
-        playerWinticketMap = {}; 
-        playerRawScores = {}; 
-
-        for (let i = 1; i <= PLAYER_COUNT; i++) {
-            const leg = document.getElementById(`leg-${i}`)?.value;
-            const rawScoreStr = document.getElementById(`score-${i}`)?.value;
-            const winticketMark = document.getElementById(`winticket-mark-${i}`)?.value; 
-            const recentRanksStr = document.getElementById(`recent-ranks-${i}`)?.value.trim();
-
-            if (!rawScoreStr || isNaN(parseFloat(rawScoreStr)) || !leg || !recentRanksStr || recentRanksStr.length === 0) continue;
-
-            const rawScore = parseFloat(rawScoreStr);
-            const winticketBias = WINTICKET_COEFFICIENTS[winticketMark] || 1.0;
-            
-            playerWinticketMap[i] = winticketMark; 
-            playerRawScores[i] = rawScore; 
-
-            const rankInputs = recentRanksStr.split('').slice(0, 3); 
-            const rankKeys = ['1', '2', '3']; 
-            
-            let totalWeightedBias = 0;
-            let totalWeight = 0;
-            
-            rankInputs.forEach((rankStr, index) => {
-                const rank = parseInt(rankStr);
-                const weight = RECENT_RANK_WEIGHTS[rankKeys[index]]; 
-                
-                if (!isNaN(rank) && rank >= 1 && rank <= 9) {
-                    const baseBias = RANK_BASE_COEFFICIENTS[rank] || RANK_BASE_COEFFICIENTS['default'];
-                    totalWeightedBias += baseBias * weight;
-                    totalWeight += weight;
-                }
-            });
-
-            // 勢いの寄与率適用を含めた最終的な Meeting Rank Bias を計算 (1.05に強化)
-            const meetingRankBias = (totalWeight > 0 ? (totalWeightedBias / totalWeight) : 1.0) * RECENT_BIAS_CONTRIBUTION;
-            
-            let legStaticBias = 1.0;
-            if (leg === '差し' || leg === 'マーク') {
-                legStaticBias = MARK_SASHI_STATIC_BIAS;
-            }
-
-            let legKey = (leg === 'マーク') ? '差し' : leg;
-            const legBias = currentBank.keirin_bias[legKey] || 1.0; 
-            
-            const staticBias = legBias * windBiasVal * timeBiasVal * legStaticBias; 
-
-            rawPlayers.push({
-                id: i,
-                leg: leg, 
-                rawScore: rawScore,
-                winticketBias: winticketBias,
-                staticBias: staticBias,
-                legKey: legKey,
-                meetingRankBias: meetingRankBias,
-            });
-        }
-        
-        if (rawPlayers.length < 3) {
-            alert("計算を行うには最低3名分の選手データを正しく入力してください。");
-            return;
-        }
-
-        // 連係補正の計算と適用
-        rawPlayers = rawPlayers.map(p => {
-            p.coopBias = calculateCoopBias(p.id, rawPlayers);
-            return p;
-        });
-        
-        // 単騎選手の特定とモード設定
-        const { singleRiders: determinedSingleRiders } = parseLineupAndDetermineMode(lineupStr, rawPlayers);
-        singleRiders = determinedSingleRiders; 
-
-        displayBankFeedback(selectedBankName, currentBank.keirin_bias);
-        
-        const allScenarioResults = [];
-        const allSanrentanCombinations = {}; 
-        
-        // --- 荒天令 (W印無効化) 用のスコア計算 ---
-        const calculateScoreHighRisk = (p) => {
-             // WINTICKET BIAS (W印補正) を除外して計算
-             return p.rawScore * p.staticBias * p.meetingRankBias * p.coopBias; 
-        };
-
-        const highRiskRawPlayers = rawPlayers.map(p => ({
-            ...p,
-            score: calculateScoreHighRisk(p),
-            isSingle: !p.coopBias > 1.0 && singleRiders.includes(p.id)
-        }));
-        highRiskRawPlayers.sort((a, b) => b.score - a.score);
-
-
-        // --- 晴天令 (通常シナリオ) の計算 ---
-        Object.keys(DEVELOPMENT_BIAS).forEach(scenarioName => {
-            const developBiasMap = DEVELOPMENT_BIAS[scenarioName];
-            
-            let scenarioPlayers = rawPlayers.map(p => {
-                const developBiasVal = developBiasMap[p.legKey] || 1.0;
-                
-                // 最終スコア計算 (WINTICKET BIASを使用)
-                let finalScore = p.rawScore * p.winticketBias * p.staticBias * developBiasVal * p.meetingRankBias * p.coopBias; 
-
-                const isSingle = !p.coopBias > 1.0 && singleRiders.includes(p.id);
-
-                return { id: p.id, leg: p.leg, score: finalScore, isSingle: isSingle, coopBias: p.coopBias };
-            });
-            
-            scenarioPlayers.sort((a, b) => b.score - a.score);
-
-            const playersWithRating = applyTenScaleRating(scenarioPlayers);
-
-            const sanrentanDetails = generateSanrentanDetails(playersWithRating);
-
-            sanrentanDetails.forEach(c => {
-                if (!allSanrentanCombinations[c.nums]) {
-                    allSanrentanCombinations[c.nums] = { count: 0, totalVal: 0, combinations: [], hasSingle: c.hasSingle };
-                }
-                allSanrentanCombinations[c.nums].count++;
-                allSanrentanCombinations[c.nums].totalVal += c.val;
-                if (c.hasSingle) {
-                    allSanrentanCombinations[c.nums].hasSingle = true;
-                }
-            });
-
-            allScenarioResults.push({
-                scenario: scenarioName,
-                players: playersWithRating, 
-                sanrentanDetails: sanrentanDetails 
-            });
-        });
-        
-        displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations, highRiskRawPlayers);
-    }
-    // --- メイン計算ロジック終了 ---
-    
-    // ... (既存の applyTenScaleRating, displayBankFeedback, generateSanrentanDetails 関数は変更なし) ...
-
-    function analyzeHighRiskCandidates(highRiskRawPlayers) {
-        // W印無効化後のスコア順で三連単トップ3を抽出する (新しい荒天令ロジック)
-        
-        // 1. W印無効化スコアに基づいた三連単組み合わせを生成
-        let combinations = generateSanrentanDetails(highRiskRawPlayers);
-        
-        // 2. 期待値順にソート
-        combinations.sort((a, b) => b.val - a.val);
-
-        // 3. トップ3を返却
-        return combinations.slice(0, 3); 
-    }
-
-    // 三連単 BEST3を補完する三連複2点を生成 (かため推奨用 - 晴天令)
-    function generateCombinedSanrenpukuHtml(combinedSanrentanList) {
-        let sanrenpukuSet = new Set();
-        const top3Sanrentan = combinedSanrentanList.slice(0, 3);
-        if (top3Sanrentan.length === 0) return "<li>データ不足</li>";
-
-        const best3SanrentanSets = new Set();
-        top3Sanrentan.forEach(c => {
-            const parts = c.nums.split(' - ').map(n => parseInt(n));
-            best3SanrentanSets.add(parts.sort((a, b) => a - b).join('='));
-        });
-
-        const allIDs = top3Sanrentan.flatMap(c => c.nums.split(' - ').map(n => parseInt(n)));
-        const idCounts = allIDs.reduce((acc, id) => {
-            acc[id] = (acc[id] || 0) + 1;
-            return acc;
-        }, {});
-        const top4IDs = Object.keys(idCounts).sort((a, b) => idCounts[b] - idCounts[a]).slice(0, 4).map(Number).sort((a, b) => a - b);
-        
-        if (top4IDs.length < 3) return "<li>データ不足（軸選手不足）</li>";
-
-        const candidates = [
-            [top4IDs[0], top4IDs[1], top4IDs[2]],
-            [top4IDs[0], top4IDs[1], top4IDs[3]],
-            [top4IDs[0], top4IDs[2], top4IDs[3]],
-            [top4IDs[1], top4IDs[2], top4IDs[3]]
-        ];
-
-        let sanrenpukuCandidates = [];
-        candidates.forEach(comb => {
-            const combStr = comb.sort((a,b)=>a-b).join('=');
-            if (!best3SanrentanSets.has(combStr) && !sanrenpukuSet.has(combStr)) {
-                sanrenpukuCandidates.push(combStr);
-                sanrenpukuSet.add(combStr);
-            }
-        });
-
-        const finalPuku = sanrenpukuCandidates.slice(0, 2); 
-        
-        let html = '';
-        if (finalPuku.length > 0) {
-            html = finalPuku.map(p => `<li>${p}</li>`).join('');
-        } else {
-            const allPuku = candidates.map(c => c.sort((a,b)=>a-b).join('='));
-            html = Array.from(new Set(allPuku)).slice(0, 2).map(p => `<li>${p}</li>`).join('');
-        }
-        
-        return html;
-    }
-
-    // 三連単 BEST3を補完する三連複2点を生成 (荒天令用)
-    function generateHighRiskSanrenpukuHtml(sanrentanList) {
-        if (sanrentanList.length === 0) return "<li>-</li>";
-        
-        const top3Sanrentan = sanrentanList.slice(0, 3);
-
-        const allIDs = top3Sanrentan.flatMap(c => c.nums.split(' - ').map(n => parseInt(n)));
-        const idCounts = allIDs.reduce((acc, id) => {
-            acc[id] = (acc[id] || 0) + 1;
-            return acc;
-        }, {});
-        
-        const top4IDs = Object.keys(idCounts).sort((a, b) => idCounts[b] - idCounts[a]).slice(0, 4).map(Number).sort((a, b) => a - b);
-        
-        if (top4IDs.length < 3) return "<li>-</li>";
-
-        let combinations = [];
-        for (let i = 0; i < top4IDs.length; i++) {
-            for (let j = i + 1; j < top4IDs.length; j++) {
-                for (let k = j + 1; k < top4IDs.length; k++) {
-                    combinations.push([top4IDs[i], top4IDs[j], top4IDs[k]]);
-                }
-            }
-        }
-        
-        const finalPuku = combinations.map(c => c.sort((a,b)=>a-b).join('='));
-        const uniqueFinalPuku = Array.from(new Set(finalPuku)).slice(0, 2);
-
-        if (uniqueFinalPuku.length === 0) {
-            const top3IDs = top4IDs.slice(0,3);
-            if(top3IDs.length === 3) {
-                return `<li class="weight-strong">${top3IDs.join('=')}</li>`;
-            }
-            return "<li>-</li>";
-        }
-        
-        return uniqueFinalPuku.map(p => `<li class="weight-strong">${p}</li>`).join('');
-    }
-
-
-    function displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations, highRiskRawPlayers) {
-        document.getElementById('result-area').style.display = 'block';
-        const container = document.getElementById('scenario-results-container');
-        container.innerHTML = '';
-        
-        // --- 1. 晴天令 (W印使用) のランキング処理 ---
-        const combinedList = Object.keys(allSanrentanCombinations).map(nums => {
-            const data = allSanrentanCombinations[nums];
-            return {
-                nums: nums,
-                count: data.count, 
-                avgVal: data.totalVal / data.count,
-                hasSingle: data.hasSingle 
-            };
-        });
-
-        combinedList.sort((a, b) => {
-            if (b.count !== a.count) {
-                return b.count - a.count; 
-            }
-            return b.avgVal - a.avgVal; 
-        });
-
-        const top3Combined = combinedList.slice(0, 3);
-        const combinedSanrentanList = document.getElementById('combined-sanrentan-list');
-        const combinedSanrenpukuList = document.getElementById('combined-sanrenpuku-list'); 
-        
-        combinedSanrentanList.innerHTML = '';
-        combinedSanrenpukuList.innerHTML = '';
-
-        if (top3Combined.length > 0) {
-            top3Combined.forEach(c => {
-                const li = document.createElement('li');
-                li.textContent = c.nums;
-                combinedSanrentanList.appendChild(li);
-            });
-            
-            const sanrenpukuHtml = generateCombinedSanrenpukuHtml(combinedList);
-            combinedSanrenpukuList.innerHTML = sanrenpukuHtml;
-
-            document.getElementById('combined-ranking').style.display = 'block';
-        } else {
-            document.getElementById('combined-ranking').style.display = 'none';
-        }
-        
-        // --- 2. 荒天令 (W印無効化) のランキング処理 ---
-        const highRiskCandidates = analyzeHighRiskCandidates(highRiskRawPlayers); 
-        const highRiskAnamaeListDiv = document.getElementById('mujirushi-anamae-list');
-        const highRiskSanrenpukuListDiv = document.getElementById('mujirushi-sanrenpuku-list');
-        
-        highRiskAnamaeListDiv.innerHTML = '';
-        highRiskSanrenpukuListDiv.innerHTML = '';
-        
-        document.getElementById('mujirushi-anamae-ranking').style.display = 'block'; 
-
-        if (highRiskCandidates.length > 0) {
-            highRiskCandidates.forEach(c => {
-                const li = document.createElement('li');
-                li.textContent = c.nums;
-                highRiskAnamaeListDiv.appendChild(li);
-            });
-            
-            const anamaePukuHtml = generateHighRiskSanrenpukuHtml(highRiskCandidates);
-            highRiskSanrenpukuListDiv.innerHTML = anamaePukuHtml;
-        } else {
-            highRiskAnamaeListDiv.innerHTML = '<li>候補となる高期待値の穴目の組み合わせはありませんでした。</li>';
-            highRiskSanrenpukuListDiv.innerHTML = '<li>-</li>';
-        }
-
-        // --- 3. シナリオ別結果の表示 (W印使用) ---
-        allScenarioResults.forEach(result => {
-            const resultDiv = document.createElement('div');
-            resultDiv.className = 'scenario-result';
-            
-            const players = result.players; 
-            const rankingTable = generateRankingTable(players);
-            const top12Kaime = result.sanrentanDetails.sort((a,b) => b.val - a.val).slice(0, 12);
-            
-            const sanrentanHtml = top12Kaime.map((c, index) => {
-                let weightClass = 'weight-weak'; 
-                if (index === 0) {
-                    weightClass = 'weight-strong'; 
-                } else if (index === 1) {
-                    weightClass = 'weight-high'; 
-                } else if (index === 2) {
-                    weightClass = 'weight-medium'; 
-                } else if (index >= 3 && index <= 5) {
-                    weightClass = 'weight-low'; 
-                }
-                return `<li class="${weightClass}">${c.nums}</li>`;
-            }).join('');
-
-            const kaimeHtml = generateSanrenpukuHtml(players); 
-
-            resultDiv.innerHTML = `
-                <h3>${result.scenario} の予想</h3>
-                <div style="display: flex; gap: 20px;">
-                    <div style="flex: 1;">
-                        <h4>補正後スコア順位 (10段階評価)</h4>
-                        ${rankingTable}
-                    </div>
-                    <div style="flex: 1;">
-                        <h4>買い目</h4>
-                        <h5>三連単 (12点)</h5>
-                        <ul class="kaime-list">${sanrentanHtml}</ul>
-                        <h5>三連複 (4点)</h5>
-                        <ul class="kaime-list">${kaimeHtml.sanrenpuku}</ul>
-                    </div>
-                </div>
-            `;
-            container.appendChild(resultDiv);
-        });
-    }
-
-    function generateRankingTable(players) {
-        let html = '<table class="player-table"><thead><tr><th>順位</th><th>ID</th><th>得点</th><th>W印</th><th>評価</th></tr></thead><tbody>';
-        players.forEach((p, index) => {
-            html += `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${p.id}</td>
-                    <td>${playerRawScores[p.id].toFixed(2)}</td>
-                    <td>${playerWinticketMap[p.id]}</td>
-                    <td class="score-rank">${p.tenScaleRating}/10 ${p.rating.slice(-1)}</td>
+    // 画面生成
+    document.addEventListener('DOMContentLoaded', () => {
+        const inputBody = document.getElementById('riderInputBody');
+        for (let i = 1; i <= RIDER_COUNT; i++) {
+            inputBody.innerHTML += `
+                <tr data-rider-id="${i}">
+                    <td>${i}</td>
+                    <td><input type="text" class="leg-type" data-id="${i}" value="" style="width: 30px;"></td>
+                    <td><input type="number" class="score" data-id="${i}" value="90.00" step="0.01"></td>
+                    <td><input type="number" class="recent-rank" data-id="${i}" value="3.5" step="0.1"></td>
+                    <td><input type="text" class="w-mark" data-id="${i}" value="無" style="width: 30px;"></td>
+                    <td><input type="checkbox" class="s-rank-1" data-id="${i}"></td>
+                    <td><input type="checkbox" class="b-rank-1" data-id="${i}"></td>
                 </tr>
             `;
-        });
-        html += '</tbody></table>';
-        return html;
+        }
+    });
+
+    // ====================================================================
+    // 2. ロジック計算ヘルパー関数
+    // ====================================================================
+
+    /**
+     * レースの平均得点に基づき、動的な結束力係数 k を決定する。
+     */
+    function getDynamicEnduranceK(allScores) {
+        if (allScores.length === 0) return { k: 0.005, level: 'データ不足' };
+        
+        const sum = allScores.reduce((a, b) => a + b, 0);
+        const meanScore = sum / allScores.length;
+
+        let k;
+        let level;
+
+        if (meanScore < 85.00) {
+            k = 0.003; // A級チャレンジ想定 (緩い)
+            level = 'A級チャレンジレベル (k=0.003)';
+        } else if (meanScore < 100.00) {
+            k = 0.005; // A級/S級予選想定 (標準)
+            level = 'A級/S級予選レベル (k=0.005)';
+        } else {
+            k = 0.007; // S級特選想定 (厳しい)
+            level = 'S級特選レベル (k=0.007)';
+        }
+        
+        return { k: k, level: level, mean: meanScore.toFixed(2) };
     }
 
-    function generateSanrenpukuHtml(sortedPlayers) {
-        const top3IDs = sortedPlayers.slice(0, 3).map(p => p.id);
-        const top4IDs = sortedPlayers.slice(0, 4).map(p => p.id);
-        
-        let sanrenpuku = [];
-        let pukuSet = new Set();
-        
-        if (top3IDs.length === 3) {
-            const base = top3IDs.sort((a, b) => a - b).join('=');
-            sanrenpuku.push(`<li class="weight-strong">${base}</li>`);
-            pukuSet.add(base);
-        }
 
-        if (top4IDs.length === 4) {
-            const candidates = [
-                [top4IDs[0], top4IDs[1], top4IDs[2]],
-                [top4IDs[0], top4IDs[1], top4IDs[3]],
-                [top4IDs[0], top4IDs[2], top4IDs[3]],
-                [top4IDs[1], top4IDs[2], top4IDs[3]],
-            ];
+    /**
+     * ラインの得点バラツキに基づき、結束力係数 C_End を計算する。
+     */
+    function calculateEnduranceCoef(scores, k) {
+        if (scores.length <= 1) return 1.00;
+
+        const sum = scores.reduce((a, b) => a + b, 0);
+        const mean = sum / scores.length;
+        
+        const variance = scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / scores.length;
+        const stdDev = Math.sqrt(variance);
+
+        let C_End = 1.05 - k * stdDev;
+        return Math.max(0.95, C_End); 
+    }
+
+    /**
+     * ラインの脚質構成に基づき、整合性係数 C_Leg を計算する。
+     */
+    function calculateLegIntegrity(legs) {
+        if (legs.length <= 1) return 1.00;
+
+        const jirikiCount = legs.filter(l => JIRIKI_LEGS.includes(l.toUpperCase())).length;
+        const total = legs.length;
+
+        if (total === 3) {
+            if (jirikiCount === 1) return 1.03; 
+            if (jirikiCount === 2) return 1.01; 
+            if (jirikiCount === 3) return 0.97; 
+            if (jirikiCount === 0) return 0.98;
+        } else if (total === 2) {
+            if (jirikiCount === 1) return 1.02;
+            if (jirikiCount === 2) return 0.99; 
+            if (jirikiCount === 0) return 1.00;
+        }
+        return 1.00;
+    }
+
+    /**
+     * ライン総合評価 (色と文字) を計算する。
+     */
+    function getLineGrade(avgScore, C_End, C_Leg) {
+        const totalScore = avgScore * C_End * C_Leg;
+        
+        const baseScore = 95.00 * 1.02 * 1.02; 
+        const delta = totalScore - baseScore;
+
+        let grade = 5; 
+        if (delta > 7.0) grade = 10;
+        else if (delta > 5.0) grade = 9;
+        else if (delta > 3.0) grade = 8;
+        else if (delta > 1.0) grade = 7;
+        else if (delta > -1.0) grade = 6;
+        else if (delta > -3.0) grade = 5;
+        else if (delta > -5.0) grade = 4;
+        else if (delta > -7.0) grade = 3;
+        else if (delta > -9.0) grade = 2;
+        else grade = 1;
+
+        if (grade >= 9) return { className: 'line-strongest', label: '超特級' };
+        if (grade === 8) return { className: 'line-strong', label: '特級' };
+        if (grade === 7) return { className: 'line-high', label: '上級' };
+        if (grade === 6) return { className: 'line-medium-high', label: '中上級' };
+        if (grade === 5) return { className: 'line-medium', label: '標準' };
+        if (grade === 4) return { className: 'line-medium-low', label: '中下級' };
+        if (grade === 3) return { className: 'line-low', label: '下級' };
+        if (grade === 2) return { className: 'line-weak', label: '劣級' };
+        return { className: 'line-weakest', label: '最劣級' };
+    }
+
+
+    // ====================================================================
+    // 3. メイン計算関数
+    // ====================================================================
+
+    function calculateScore(mode) {
+        const riders = [];
+        const debug = [];
+        const isGirls = document.getElementById('raceType').value === 'girl';
+
+        // 1. データ取得
+        for (let i = 1; i <= RIDER_COUNT; i++) {
+            const score = parseFloat(document.querySelector(`.score[data-id="${i}"]`).value) || 0;
+            const recent = parseFloat(document.querySelector(`.recent-rank[data-id="${i}"]`).value) || 0;
+            const legType = document.querySelector(`.leg-type[data-id="${i}"]`).value.toUpperCase();
+            const wMark = document.querySelector(`.w-mark[data-id="${i}"]`).value.toUpperCase();
+            const isSRank1 = document.querySelector(`.s-rank-1[data-id="${i}"]`).checked;
+            const isBRank1 = document.querySelector(`.b-rank-1[data-id="${i}"]`).checked;
+
+            riders.push({
+                id: i, score, recent, leg: legType, wMark, isSRank1, isBRank1,
+                finalScore: 0, baseCoef: 1.00
+            });
+        }
+        
+        // 動的k係数を決定
+        const allScores = riders.map(r => r.score).filter(s => s > 0); 
+        const kInfo = getDynamicEnduranceK(allScores);
+        const dynamicK = kInfo.k;
+
+        document.getElementById('raceLevelInfo').innerHTML = `
+            <strong>レースレベル推定:</strong> ${kInfo.level} (平均得点: ${kInfo.mean})<br>
+            <strong>適用される結束力係数 (k):</strong> <code>${dynamicK}</code>
+        `;
+
+        const lineupText = document.getElementById('lineup').value.replace(/\s/g, '');
+        const lines = lineupText.split(',').map(l => l.split('-').map(id => parseInt(id)));
+        const scenario = document.getElementById('scenario').value;
+        const bankBias = parseFloat(document.getElementById('bankBias').value) || 1.00;
+
+        // 2. ライン情報の整理とライン評価の準備
+        const lineData = [];
+        lines.forEach((line, lineIndex) => {
+            const lineScores = line.map(id => riders[id - 1].score);
+            const lineLegs = line.map(id => riders[id - 1].leg);
+
+            if (line.length > 1) { 
+                const C_End = calculateEnduranceCoef(lineScores, dynamicK); 
+                const C_Leg = calculateLegIntegrity(lineLegs);
+                const avgScore = lineScores.reduce((a, b) => a + b, 0) / lineScores.length;
+                
+                const lineGrade = getLineGrade(avgScore, C_End, C_Leg);
+                
+                lineData.push({
+                    riders: line, C_End, C_Leg, avgScore, grade: lineGrade
+                });
+                debug.push(`Line L${lineIndex + 1} (${line.join('-')}) Debug: K=${dynamicK}, C_End=${C_End.toFixed(3)}, C_Leg=${C_Leg.toFixed(3)}`);
+            }
+        });
+
+
+        // 3. スコア計算と補正適用
+        riders.forEach(rider => {
+            let baseCoef = 1.00;
+            let currentLine = lineData.find(l => l.riders.includes(rider.id));
+            let riderPosition = currentLine ? currentLine.riders.indexOf(rider.id) + 1 : 0;
             
-            let count = 0;
-            candidates.forEach(c => {
-                const key = c.sort((a, b) => a - b).join('=');
-                if (!pukuSet.has(key) && count < 3) {
-                    sanrenpuku.push(`<li class="weight-medium">${key}</li>`);
-                    pukuSet.add(key);
-                    count++;
-                }
-            });
-        }
-        
-        return { sanrenpuku: sanrenpuku.join('') };
-    }
+            // A. 基本補正 (直近着順、バンク脚質、展開シナリオ)
+            baseCoef *= (1 + (4.0 - rider.recent) * 0.05); 
+            if (JIRIKI_LEGS.includes(rider.leg)) baseCoef *= bankBias;
+            if (scenario === 'senko' && rider.leg === 'S') baseCoef *= 1.05;
+            if (scenario === 'makuri' && rider.leg === 'M') baseCoef *= 1.05;
+            if (scenario === 'sashi' && (rider.leg === 'K' || rider.leg === 'O')) baseCoef *= 1.03;
 
-    function applyTenScaleRating(sortedPlayers) {
-        if (sortedPlayers.length === 0) return [];
-        const scores = sortedPlayers.map(p => p.score);
-        const maxScore = scores[0]; 
-        const minScore = scores[scores.length - 1];
-        const range = maxScore - minScore;
 
-        if (range === 0) {
-            return sortedPlayers.map(p => ({ ...p, rating: '10↑', rawScore: p.score.toFixed(4), tenScaleRating: 10 }));
-        }
-
-        const step = range / 10;
-        
-        let ratedPlayers = sortedPlayers.map(p => {
-            let ratingIndex = Math.floor((p.score - minScore) / step);
-            if (p.score === maxScore) ratingIndex = 9; 
-            p.tenScaleRating = ratingIndex + 1;
-            p.rawScore = p.score.toFixed(4); 
-            return p;
-        });
-
-        const arrowMap = ['↑', '↗', '→', '↘', '↓']; 
-        let groupedByRating = ratedPlayers.reduce((acc, player) => {
-            if (!acc[player.tenScaleRating]) {
-                acc[player.tenScaleRating] = [];
-            }
-            acc[player.tenScaleRating].push(player);
-            return acc;
-        }, {});
-
-        let finalRatedPlayers = [];
-        Object.keys(groupedByRating).sort((a, b) => b - a).forEach(ratingKey => {
-            let group = groupedByRating[ratingKey];
-            group.forEach((player, index) => {
-                const arrow = arrowMap[Math.min(index, arrowMap.length - 1)]; 
-                player.rating = `${ratingKey}${arrow}`;
-                finalRatedPlayers.push(player);
-            });
-        });
-
-        finalRatedPlayers.sort((a, b) => b.score - a.score);
-        return finalRatedPlayers;
-    }
-
-    function generateSanrentanDetails(sortedPlayers) {
-        let combinations = [];
-        const topN = sortedPlayers.slice(0, Math.min(sortedPlayers.length, 5)); 
-        if (topN.length < 3) return combinations; 
-
-        for (let i = 0; i < topN.length; i++) {
-            for (let j = 0; j < topN.length; j++) {
-                if (i === j) continue;
-                for (let k = 0; k < topN.length; k++) {
-                    if (k === i || k === j) continue;
-                    
-                    const players = [topN[i], topN[j], topN[k]];
-                    const expectedVal = players[0].score + players[1].score + players[2].score;
-                    
-                    const hasSingle = players.some(p => p.isSingle); 
-                    
-                    combinations.push({
-                        nums: `${topN[i].id} - ${topN[j].id} - ${topN[k].id}`,
-                        val: expectedVal, 
-                        hasSingle: hasSingle 
-                    });
+            // B. 連係・単騎ロジック (ポジション、結束力、整合性、単騎ボーナス)
+            if (currentLine) {
+                let C_Pos = POSITION_BONUS[riderPosition] || 1.00;
+                C_Pos *= currentLine.C_End;
+                C_Pos *= currentLine.C_Leg;
+                baseCoef *= C_Pos;
+            } else {
+                if (!isGirls) {
+                    baseCoef *= SOLO_BONUS;
                 }
             }
-        }
-        return combinations;
-    }
 
-    function displayBankFeedback(bankName, keirinBias) {
-        const feedbackDiv = document.getElementById('bank-feedback');
-        if (!bankName || !keirinBias || Object.keys(keirinBias).length === 0) {
-            feedbackDiv.style.display = 'none';
-            return;
-        }
 
-        let maxBias = 0;
-        let strongestLeg = 'なし';
-        
-        Object.keys(keirinBias).forEach(leg => {
-            if (keirinBias[leg] > maxBias) {
-                maxBias = keirinBias[leg];
-                strongestLeg = leg;
+            // C. W印補正 (モード分岐)
+            let wMarkCoef = W_MARK_COEFS[rider.wMark] || 1.00;
+
+            if (mode === 'normal') {
+                baseCoef *= wMarkCoef;
+            } else if (mode === 'filter') {
+                if (rider.wMark === '◎' || rider.wMark === '〇') {
+                    baseCoef *= 1.05;
+                } else {
+                    baseCoef *= 1.00; 
+                }
             }
+            
+            // D. S/B トップ選手ボーナス
+            if (rider.isSRank1) {
+                baseCoef *= S_BONUS;
+            }
+            if (rider.isBRank1) {
+                baseCoef *= B_BONUS;
+            }
+
+            rider.baseCoef = baseCoef;
+            rider.finalScore = rider.score * baseCoef;
         });
 
-        if (maxBias > 1.0) {
-            feedbackDiv.innerHTML = `🚨 **${bankName}バンクの特性:** 脚質補正が最も高いのは **${strongestLeg}** の傾向があります。`;
-            feedbackDiv.style.display = 'block';
-        } else {
-            feedbackDiv.style.display = 'none';
-        }
+
+        // 4. 結果出力
+        displayResults(riders, lineData, mode);
+        document.getElementById('debugOutput').textContent = debug.join('\n');
     }
 
-    function toggleManual() {
-        const content = document.getElementById('manual-content');
-        const icon = document.getElementById('toggle-icon');
-        if (content.classList.contains('manual-content-hidden')) {
-            content.classList.remove('manual-content-hidden');
-            icon.textContent = '▲';
-        } else {
-            content.classList.add('manual-content-hidden');
-            icon.textContent = '▼';
-        }
-    }
+    // ====================================================================
+    // 4. 結果表示関数
+    // ====================================================================
 
+    function displayResults(riders, lineData, mode) {
+        const sortedRiders = [...riders].sort((a, b) => b.finalScore - a.finalScore);
+        
+        const modeText = mode === 'normal' ? '【晴天令 (W印重視) モード】' : '【荒天令W印フィルタ (穴目重視) モード】';
+        document.getElementById('currentMode').textContent = modeText;
+
+        // スコアテーブル
+        let tableHTML = '<thead><tr><th>順位</th><th>ID</th><th>脚質</th><th>素点</th><th>補正係数</th><th>最終スコア</th></tr></thead><tbody>';
+        sortedRiders.forEach((r, index) => {
+            const positionClass = index < 3 ? 'result-best' : '';
+            tableHTML += `<tr class="${positionClass}">
+                <td>${index + 1}</td>
+                <td>${r.id}</td>
+                <td>${r.leg}</td>
+                <td>${r.score.toFixed(2)}</td>
+                <td>${r.baseCoef.toFixed(3)}</td>
+                <td>${r.finalScore.toFixed(2)}</td>
+            </tr>`;
+        });
+        document.getElementById('scoreTable').innerHTML = tableHTML;
+
+        // ライン総合評価テーブル
+        let lineHTML = '<table><thead><tr><th>ライン</th><th>構成選手</th><th>平均素点</th><th>評価</th></tr></thead><tbody>';
+        const singleRiders = riders.filter(r => !lineData.some(l => l.riders.includes(r.id))).map(r => r.id);
+        
+        lineData.forEach((line, index) => {
+            const grade = line.grade;
+            lineHTML += `<tr>
+                <td>L${index + 1}</td>
+                <td>${line.riders.join('-')}</td>
+                <td>${line.avgScore.toFixed(2)}</td>
+                <td class="${grade.className}">${grade.label}</td>
+            </tr>`;
+        });
+        
+        if (singleRiders.length > 0) {
+             lineHTML += `<tr>
+                <td colspan="4" class="single-rider">単騎選手 (自由度ボーナス適用*): ${singleRiders.join(', ')}</td>
+            </tr>`;
+        }
+        document.getElementById('lineRankingArea').innerHTML = lineHTML;
+
+
+        // 買い目シミュレーション (上位3名からフォーメーション)
+        const top3 = sortedRiders.slice(0, 3).map(r => r.id);
+        const top4 = sortedRiders.slice(0, 4).map(r => r.id);
+
+        let predHTML = '<thead><tr><th>着順</th><th>1着候補</th><th>2着候補</th><th>3着候補</th></tr></thead><tbody>';
+        
+        const set1 = new Set();
+        for (const p1 of top3) {
+            for (const p2 of top3) {
+                if (p1 === p2) continue;
+                for (const p3 of top4) {
+                    if (p3 === p1 || p3 === p2) continue;
+                    set1.add(`${p1}-${p2}-${p3}`);
+                }
+            }
+        }
+        
+        predHTML += `<tr class="result-best">
+            <td>推奨</td>
+            <td>${top3.join(', ')}</td>
+            <td>${top3.join(', ')}</td>
+            <td>${top4.join(', ')}</td>
+        </tr>`;
+        predHTML += `<tr><td colspan="4" style="text-align: left; font-size: 0.9em;">合計 ${set1.size}点: ${Array.from(set1).join(', ')}</td></tr>`;
+        document.getElementById('predictionTable').innerHTML = predHTML;
+    }
 </script>
 
 </body>
