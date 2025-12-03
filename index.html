@@ -475,12 +475,11 @@ function initPlayerTable() {
     } 
 } 
 
-// JSONデータの読み込み (変更なし)
+// JSONデータの読み込み (修正なし)
 async function loadBankData() { 
     const bankSelect = document.getElementById('bank-select'); 
     bankSelect.innerHTML = '<option value="">データ読み込み中...</option>'; 
     try { 
-        // 開発環境用のダミーデータ (bankdata.jsonがない場合を想定)
         const dummyBankData = {
             "標準バンク": { "keirin_bias": { "先行": 1.00, "捲り": 1.00, "差し": 1.00, "マーク": 1.00 }, "wind_or_position": {} },
             "弥彦": { "keirin_bias": { "先行": 1.02, "捲り": 1.05, "差し": 1.00, "マーク": 1.00 }, "wind_or_position": {} },
@@ -558,21 +557,42 @@ function calculateLineCohesion(rawPlayers, lineupStr) {
         const stdDevRating = Math.sqrt(variance);
         
         let C_End = 1.00;
-        if (stdDevRating < 2.0) { C_End = 1.05; } 
-        else if (stdDevRating < 4.0) { C_End = 1.03; } 
-        else if (stdDevRating > 6.0) { C_End = 0.95; } 
+        let C_End_Eval = '標準';
+        if (stdDevRating < 2.0) { 
+            C_End = 1.05; 
+            C_End_Eval = '高(得点差小)';
+        } 
+        else if (stdDevRating < 4.0) { 
+            C_End = 1.03; 
+            C_End_Eval = '中';
+        } 
+        else if (stdDevRating > 6.0) { 
+            C_End = 0.95; 
+            C_End_Eval = '低(得点差大)';
+        }
 
         // --- 3. 脚質整合性係数 C_Leg (脚質構成) ---
         const stylesCount = { '先行': 0, '捲り': 0, '差し': 0, 'マーク': 0 };
         line.members.forEach(m => stylesCount[m.leg]++);
         
         let C_Leg = 1.00;
+        let C_Leg_Eval = '標準';
         const numJiriki = stylesCount['先行'] + stylesCount['捲り'];
         const numOikomi = stylesCount['差し'] + stylesCount['マーク'];
         
-        if (numJiriki === 0) { C_Leg = 0.90; } // 自力不在
-        else if (numOikomi / N >= 0.75) { C_Leg = 0.97; } // 追込過多
-        else if (numJiriki >= 2 && numOikomi === 0) { C_Leg = 1.03; } // 自力特化
+        if (numJiriki === 0) { 
+            C_Leg = 0.90; 
+            C_Leg_Eval = '低(自力不在)';
+        } 
+        else if (numOikomi / N >= 0.75) { 
+            C_Leg = 0.97; 
+            C_Leg_Eval = 'やや低(追込過多)';
+        } 
+        else if (numJiriki >= 2 && numOikomi === 0) { 
+            C_Leg = 1.03; 
+            C_Leg_Eval = '高(自力特化)';
+        }
+
 
         // --- 4. 最終評価と色付け ---
         const totalBiasFactor = C_End * C_Leg;
@@ -605,7 +625,7 @@ function calculateLineCohesion(rawPlayers, lineupStr) {
             <h3>ライン (${lineNames[lineId]}) - 総合評価: ${evaluationText}</h3>
             <p><strong>メンバー:</strong> ${line.members.map(p => `${p.id}番(${p.leg})`).join(', ')}</p>
             <p><strong>平均得点:</strong> ${avgRating.toFixed(2)} / **基本結束力(k):** ${k}</p>
-            <p><strong>結束力($C_{\text{End}}$):</strong> ${C_End.toFixed(3)} (得点差評価) / **整合性($C_{\text{Leg}}$):** ${C_Leg.toFixed(3)} (脚質構成評価)</p>
+            <p><strong>結束力($C_{\text{End}}$):</strong> ${C_End.toFixed(3)} (${C_End_Eval}) / **整合性($C_{\text{Leg}}$):** ${C_Leg.toFixed(3)} (${C_Leg_Eval})</p>
             <p style="font-weight: bold;">**総合補正係数:** ${totalBiasFactor.toFixed(3)}</p>
         `;
         container.appendChild(lineResult);
@@ -616,12 +636,11 @@ function calculateLineCohesion(rawPlayers, lineupStr) {
 
 // 連係補正値の計算ロジック（S/Bボーナス、結束力統合）
 function calculateCoopBias(playerId, rawScore, players, lineupStr, lineCohesionResults) { 
-    if (!lineupStr) { return 1.0; } // 並びなしは補正なし
+    if (!lineupStr) { return 1.0; } 
 
     const lines = lineupStr.split(',').map(line => line.trim());
     const hasMultiPlayerLine = lines.some(line => line.length > 1);
     
-    // --- 1. ライン戦 (通常競輪) の補正 --- 
     if (hasMultiPlayerLine) { 
         let lineIndex = -1;
         let positionIndex = -1;
@@ -635,9 +654,9 @@ function calculateCoopBias(playerId, rawScore, players, lineupStr, lineCohesionR
         });
 
         if (lineIndex !== -1 && lineCohesionResults[lineIndex]) {
-            const { C_End, C_Leg, k, N, totalBiasFactor } = lineCohesionResults[lineIndex];
+            const { k, N, totalBiasFactor } = lineCohesionResults[lineIndex];
             
-            // ポジションバイアス: 2番手1.06、3番手以降1.02、先頭1.0
+            // ポジションバイアス: 先頭: 1.0, 2番手: 1.06, 3番手以降: 1.02
             let posBias = 1.0;
             if (positionIndex === 1) {
                 posBias = POSITION_BONUS['second'];
@@ -645,35 +664,35 @@ function calculateCoopBias(playerId, rawScore, players, lineupStr, lineCohesionR
                 posBias = POSITION_BONUS['third_or_later'];
             }
 
-            // V3.1: 結束力・整合性係数を統合した最終的なライン補正
-            // coopBias = k * (N-1) * C_End * C_Leg * PosBias
             const baseCoop = (N - 1) * k;
             return baseCoop * totalBiasFactor * posBias;
         }
 
-        // 並びに入っていない選手は単騎扱い (CoopBiasは1.0のまま) 
-        return 1.0; 
+        return 1.0; // 並びに入っていない選手は単騎扱い
     } 
 
     // --- 2. 単騎戦 (ガールズケイリン) の補正 --- 
-    // ... (ガールズ追走ロジックは根幹のデザインから変更なし) ...
-    if (lines.every(line => line.length <= 1)) { return 1.0; } 
-    const playerScores = players.map(p => ({ id: p.id, score: p.rawScore })); 
-    playerScores.sort((a, b) => b.score - a.score); 
-    const topScoreId = playerScores[0]?.id; 
-    if (!topScoreId) return 1.0; 
-    const fullLine = lines.join(''); 
-    const targetIndex = fullLine.indexOf(String(topScoreId)); 
-    if (targetIndex !== -1 && targetIndex < fullLine.length - 1) { 
-        const chaserId = parseInt(fullLine[targetIndex + 1], 10); 
-        if (chaserId === playerId) { return GIRLS_CHASER_BONUS; } 
-    } 
+    if (lines.every(line => line.length <= 1)) { 
+        const playerScores = players.map(p => ({ id: p.id, score: p.rawScore })); 
+        playerScores.sort((a, b) => b.score - a.score); 
+        const topScoreId = playerScores[0]?.id; 
+        if (!topScoreId) return 1.0; 
+        const fullLine = lines.join(''); 
+        const targetIndex = fullLine.indexOf(String(topScoreId)); 
+        if (targetIndex !== -1 && targetIndex < fullLine.length - 1) { 
+            const chaserId = parseInt(fullLine[targetIndex + 1], 10); 
+            if (chaserId === playerId) { return GIRLS_CHASER_BONUS; } 
+        } 
+    }
     return 1.0; 
 } 
 
-// メイン計算ロジック (S/Bボーナスロジック統合)
+// メイン計算ロジック (予想表示ロジックを復元)
 function calculate() { 
-    // ... (省略: バンクデータ読み込みと初期化処理は変更なし) ...
+    // --- 1. 入力値の取得と事前計算 ---
+    const resultArea = document.getElementById('result-area');
+    if (resultArea) { resultArea.style.display = 'block'; } // 🚨 修正点1: 結果エリアを表示
+
     const selectedBankName = document.getElementById('bank-select').value; 
     const currentBank = bankData[selectedBankName] || { keirin_bias: {}, wind_or_position: {} };
     const timeZone = document.getElementById('time-select').value; 
@@ -694,7 +713,6 @@ function calculate() {
         const rawScoreStr = document.getElementById(`score-${i}`)?.value; 
         const winticketMark = document.getElementById(`winticket-mark-${i}`)?.value; 
         const recentRanksStr = document.getElementById(`recent-ranks-${i}`)?.value.trim(); 
-        // V3.1: S/B回数1位チェックボックスの値を取得
         const s1st = document.getElementById(`s1st-${i}`)?.checked || false;
         const b1st = document.getElementById(`b1st-${i}`)?.checked || false;
 
@@ -704,7 +722,6 @@ function calculate() {
         playerWinticketMap[i] = winticketMark; 
         playerRawScores[i] = rawScore; 
         
-        // ... (直近着順ロジックは省略) ...
         const rankInputs = recentRanksStr.split('').slice(0, 3);
         const rankKeys = ['1', '2', '3'];
         let totalWeightedBias = 0;
@@ -728,31 +745,33 @@ function calculate() {
         
         rawPlayers.push({ 
             id: i, leg: leg, rawScore: rawScore, winticketBias: winticketBias, staticBias: staticBias, 
-            legKey: legKey, meetingRankBias: meetingRankBias, s1st: s1st, b1st: b1st // V3.1追加
+            legKey: legKey, meetingRankBias: meetingRankBias, s1st: s1st, b1st: b1st 
         }); 
     } 
 
-    if (rawPlayers.length < 3) { alert("計算を行うには最低3名分の選手データを正しく入力してください。"); return; } 
+    if (rawPlayers.length < 3) { 
+        alert("計算を行うには最低3名分の選手データを正しく入力してください。"); 
+        resultArea.style.display = 'none'; 
+        return; 
+    } 
 
-    // V3.1: ライン結束力・整合性の評価とUI表示
+    // --- 2. V3.1 ライン結束力・整合性の評価とUI表示 ---
     const lineCohesionResults = calculateLineCohesion(rawPlayers, lineupStr);
 
-    // 連係補正の計算と適用 (CoopBiasはライン結束力の結果を含む)
+    // --- 3. 連係補正の計算と適用 ---
     rawPlayers = rawPlayers.map(p => { 
-        // V3.1: S/Bボーナスを先に適用
         let sBBonus = 1.0;
         if (p.s1st) sBBonus *= S_BONUS;
         if (p.b1st) sBBonus *= B_BONUS;
 
         p.coopBias = calculateCoopBias(p.id, p.rawScore, rawPlayers, lineupStr, lineCohesionResults); 
 
-        // 最終スコア計算
-        let finalScore = p.rawScore * p.winticketBias * p.staticBias * p.meetingRankBias * p.coopBias * sBBonus; // S/Bボーナスを乗算
-        return { ...p, score: finalScore, sBBonus: sBBonus }; // ボーナス値を結果に含める
+        let finalScore = p.rawScore * p.winticketBias * p.staticBias * p.meetingRankBias * p.coopBias * sBBonus; 
+        return { ...p, score: finalScore, sBBonus: sBBonus }; 
     }); 
     
-    // ... (以下のスコア計算、ソート、UI表示ロジックは、rawPlayersのscore, sBBonusを使って実行されます) ...
-    const { lineupPlayers, singleRiders: determinedSingleRiders } = parseLineupAndDetermineMode(lineupStr, rawPlayers); 
+    // --- 4. 展開別スコア計算と集計 ---
+    const { singleRiders: determinedSingleRiders } = parseLineupAndDetermineMode(lineupStr, rawPlayers); 
     singleRiders = determinedSingleRiders; 
     displayBankFeedback(selectedBankName, currentBank.keirin_bias); 
 
@@ -763,7 +782,6 @@ function calculate() {
         const developBiasMap = DEVELOPMENT_BIAS[scenarioName]; 
         let scenarioPlayers = rawPlayers.map(p => { 
             const developBiasVal = developBiasMap[p.legKey] || 1.0; 
-            // 展開補正を適用したスコアを再計算
             let scenarioScore = p.score * developBiasVal; 
             
             const isSingle = !p.coopBias > 1.0 && singleRiders.includes(p.id); 
@@ -774,37 +792,256 @@ function calculate() {
         const sanrentanDetails = generateSanrentanDetails(playersWithRating); 
         
         sanrentanDetails.forEach(c => { 
-            if (!allSanrentanCombinations[c.nums]) { 
-                allSanrentanCombinations[c.nums] = { count: 0, totalVal: 0, combinations: [], hasSingle: c.hasSingle }; 
+            const key = c.nums;
+            if (!allSanrentanCombinations[key]) { 
+                allSanrentanCombinations[key] = { count: 0, totalVal: 0, combinations: [], hasSingle: c.hasSingle }; 
             } 
-            allSanrentanCombinations[c.nums].count++; 
-            allSanrentanCombinations[c.nums].totalVal += c.val; 
-            allSanrentanCombinations[c.nums].combinations.push(c.nums); 
+            allSanrentanCombinations[key].count++; 
+            allSanrentanCombinations[key].totalVal += c.val; 
+            allSanrentanCombinations[key].combinations.push(key); 
             if (c.hasSingle) { 
-                allSanrentanCombinations[c.nums].hasSingle = true; 
+                allSanrentanCombinations[key].hasSingle = true; 
             } 
         }); 
         allScenarioResults.push({ scenario: scenarioName, players: playersWithRating, sanrentanDetails: sanrentanDetails }); 
     }); 
     
+    // --- 5. 結果表示 ---
     displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations); 
 } 
 
+// ----------------------------------------------------------------------
+// 🚨 復元された予想生成・表示ヘルパー関数
+// ----------------------------------------------------------------------
 
-// ... (その他のヘルパー関数は変更なし、または省略) ...
+function parseLineupAndDetermineMode(lineupStr, players) {
+    const lines = lineupStr.split(',').map(l => l.trim()).filter(l => l.length > 0);
+    const lineupPlayers = new Set();
+    lines.forEach(line => line.split('').map(Number).forEach(id => lineupPlayers.add(id)));
+    const allPlayerIds = players.map(p => p.id);
+    const singleRiders = allPlayerIds.filter(id => !lineupPlayers.has(id));
+    return { lineupPlayers, singleRiders };
+}
 
-function parseLineupAndDetermineMode(lineupStr, players) { /* ... 変更なし ... */ return { lineupPlayers: new Set(), singleRiders: Array.from({ length: PLAYER_COUNT }, (_, i) => i + 1) }; }
-function analyzeHighRiskCandidates(combinedList) { /* ... 変更なし ... */ }
-function applyTenScaleRating(sortedPlayers) { /* ... 変更なし ... */ }
-function displayBankFeedback(bankName, biasMap) { /* ... 変更なし ... */ }
-function generateSanrentanDetails(sortedPlayers) { /* ... 変更なし ... */ }
-function generateCombinedSanrenpukuHtml(combinedSanrentanList) { /* ... 変更なし ... */ return "<li>...</li>"; }
-function generateHighRiskSanrenpukuHtml(sanrentanList) { /* ... 変更なし ... */ return "<li>...</li>"; }
-function displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations) { /* ... 変更なし ... */ }
-function generateRankingTable(players) { /* ... 変更なし ... */ }
-function generateSanrenpukuHtml(sortedPlayers) { /* ... 変更なし ... */ return { sanrenpuku: "<li>...</li>" }; }
-function toggleManual() { /* ... 変更なし ... */ }
+function displayBankFeedback(bankName, biasMap) {
+    const feedbackDiv = document.getElementById('bank-feedback');
+    if (!feedbackDiv) return;
+    
+    const sortedBiases = Object.entries(biasMap)
+        .sort(([, biasA], [, biasB]) => biasB - biasA)
+        .filter(([, bias]) => bias > 1.0);
+    
+    let feedbackHtml = `🏛️ **${bankName} バンク特性:** `;
+    if (sortedBiases.length > 0) {
+        feedbackHtml += `脚質補正が最も高いのは **${sortedBiases[0][0]}** の傾向があります (補正: ${sortedBiases[0][1].toFixed(2)})。`;
+    } else {
+        feedbackHtml += `顕著な脚質補正は見られません。`;
+    }
+    feedbackDiv.innerHTML = feedbackHtml;
+    feedbackDiv.style.display = 'block';
+}
 
+function applyTenScaleRating(sortedPlayers) {
+    if (sortedPlayers.length === 0) return [];
+    
+    const scores = sortedPlayers.map(p => p.score);
+    const minScore = Math.min(...scores);
+    const maxScore = Math.max(...scores);
+    const scoreRange = maxScore - minScore;
+    
+    if (scoreRange === 0) {
+        return sortedPlayers.map(p => ({ ...p, rating: 5, rankIcon: '→' }));
+    }
+    
+    // 10段階評価を付与
+    const playersWithRating = sortedPlayers.map(p => {
+        const normalized = (p.score - minScore) / scoreRange;
+        // 1-10 の評価点を付与
+        let rating = Math.max(1, Math.min(10, Math.ceil(normalized * 10))); 
+        return { ...p, rating };
+    });
+
+    // 矢印レーティングを付与
+    let currentRating = -1;
+    let rankCounter = 0;
+    
+    return playersWithRating.map((p, index) => {
+        if (p.rating !== currentRating) {
+            currentRating = p.rating;
+            rankCounter = 0;
+        }
+        rankCounter++;
+        let rankIcon = '→';
+        if (rankCounter === 1) {
+            rankIcon = '↑';
+        } else if (index === playersWithRating.length - 1 || playersWithRating[index + 1].rating !== p.rating) {
+            rankIcon = '↓';
+        }
+        return { ...p, rankIcon };
+    });
+}
+
+function generateSanrentanDetails(sortedPlayers) {
+    const details = [];
+    // 1着 3名 (1-3位)、2着 3名 (1-3位)、3着 7名 (1-7位)
+    for (let i = 0; i < 3 && i < sortedPlayers.length; i++) {
+        for (let j = 0; j < 3 && j < sortedPlayers.length; j++) {
+            if (i === j) continue;
+            for (let k = 0; k < 7 && k < sortedPlayers.length; k++) {
+                if (k === i || k === j) continue;
+                
+                const p1 = sortedPlayers[i];
+                const p2 = sortedPlayers[j];
+                const p3 = sortedPlayers[k];
+                
+                // 簡易的な期待値の積算 (順位の重み付け)
+                const val = p1.score * 0.5 + p2.score * 0.3 + p3.score * 0.2; 
+                
+                details.push({
+                    nums: `${p1.id}-${p2.id}-${p3.id}`,
+                    val: val,
+                    hasSingle: p1.isSingle || p2.isSingle || p3.isSingle,
+                    p1Score: p1.score,
+                    p2Score: p2.score,
+                    p3Score: p3.score,
+                });
+            }
+        }
+    }
+    details.sort((a, b) => b.val - a.val);
+    return details;
+}
+
+function generateCombinedSanrenpukuHtml(combinedSanrentanList) {
+    const sanrenpukuSet = new Set();
+    combinedSanrentanList.slice(0, 3).forEach(item => {
+        const [p1, p2, p3] = item.nums.split('-').map(Number).sort((a, b) => a - b);
+        sanrenpukuSet.add(`${p1}-${p2}-${p3}`);
+    });
+    
+    // 三連複の候補を最大2点に絞る (三連単3点からの組み合わせ)
+    const sanrenpukuList = Array.from(sanrenpukuSet).slice(0, 2);
+
+    return sanrenpukuList.map(nums => `<li class="weight-medium">${nums} (補完)</li>`).join('');
+}
+
+function generateHighRiskSanrenpukuHtml(sanrentanList) {
+    const sanrenpukuSet = new Set();
+    sanrentanList.slice(0, 3).forEach(item => {
+        const [p1, p2, p3] = item.nums.split('-').map(Number).sort((a, b) => a - b);
+        sanrenpukuSet.add(`${p1}-${p2}-${p3}`);
+    });
+    
+    const sanrenpukuList = Array.from(sanrenpukuSet).slice(0, 2);
+
+    return sanrenpukuList.map(nums => `<li class="weight-medium">${nums} (補完)</li>`).join('');
+}
+
+function analyzeHighRiskCandidates(combinedList) {
+    // 総合ランキングリストから、単騎を含む三連単を抽出し、高リスク候補とする
+    const highRiskList = combinedList.filter(item => item.hasSingle);
+    return highRiskList.slice(0, 3);
+}
+
+function getWeightClass(index, totalCount) {
+    if (index === 0) return 'weight-strong';
+    if (index === 1) return 'weight-high';
+    if (index === 2) return 'weight-medium';
+    if (index >= 3 && index < 6) return 'weight-low';
+    return 'weight-weak';
+}
+
+function generateRankingTable(players) {
+    return players.map(p => {
+        return `
+            <tr>
+                <td>${p.id}</td>
+                <td>${p.leg}</td>
+                <td><span class="score-rank">${p.rating}/10 ${p.rankIcon}</span></td>
+                <td>${p.score.toFixed(3)}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function generateSanrenpukuHtml(sortedPlayers) {
+    const sanrenpukuSet = new Set();
+    // 1-3位を軸にした三連複
+    for (let i = 0; i < 3 && i < sortedPlayers.length; i++) {
+        for (let j = i + 1; j < 4 && j < sortedPlayers.length; j++) {
+            for (let k = j + 1; k < 5 && k < sortedPlayers.length; k++) {
+                const nums = [sortedPlayers[i].id, sortedPlayers[j].id, sortedPlayers[k].id].sort((a, b) => a - b).join('-');
+                sanrenpukuSet.add(nums);
+            }
+        }
+    }
+    return { sanrenpuku: Array.from(sanrenpukuSet).map(nums => `<li class="weight-medium">${nums}</li>`).join('') };
+}
+
+function displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations) {
+    const container = document.getElementById('scenario-results-container');
+    const combinedSanrentanListElement = document.getElementById('combined-sanrentan-list');
+    const combinedSanrenpukuListElement = document.getElementById('combined-sanrenpuku-list');
+    const mujirushiSanrentanListElement = document.getElementById('mujirushi-anamae-list');
+    const mujirushiSanrenpukuListElement = document.getElementById('mujirushi-sanrenpuku-list');
+
+    // 展開別シミュレーション結果を表示
+    container.innerHTML = allScenarioResults.map(res => `
+        <div class="scenario-result">
+            <h3>${res.scenario}</h3>
+            <table class="player-table">
+                <thead><tr><th>ID</th><th>脚質</th><th>評価</th><th>スコア</th></tr></thead>
+                <tbody>${generateRankingTable(res.players)}</tbody>
+            </table>
+            <h4 style="margin-top: 15px;">三連単 (上位5点)</h4>
+            <ul class="kaime-list">
+                ${res.sanrentanDetails.slice(0, 5).map((d, i) => `<li class="${getWeightClass(i, 5)}">${d.nums}</li>`).join('')}
+            </ul>
+        </div>
+    `).join('');
+
+    // --- 総合ランキング (晴天令) ---
+    const combinedList = Object.values(allSanrentanCombinations)
+        .sort((a, b) => b.totalVal - a.totalVal)
+        .slice(0, 10); 
+    
+    // 晴天令 三連単 (3点)
+    combinedSanrentanListElement.innerHTML = combinedList.slice(0, 3).map((item, i) => 
+        `<li class="${getWeightClass(i, 3)}">${item.combinations[0]}</li>`
+    ).join('');
+
+    // 晴天令 三連複 (2点)
+    combinedSanrenpukuListElement.innerHTML = generateCombinedSanrenpukuHtml(combinedList);
+    
+    // 晴天令エリアの表示
+    document.getElementById('combined-ranking').style.display = 'block';
+
+    // --- 荒天令 (高リスク穴目) ---
+    const highRiskList = analyzeHighRiskCandidates(combinedList);
+
+    // 荒天令 三連単 (3点)
+    mujirushiSanrentanListElement.innerHTML = highRiskList.slice(0, 3).map((item, i) => 
+        `<li class="weight-strong">${item.combinations[0]}</li>`
+    ).join('');
+
+    // 荒天令 三連複 (2点)
+    mujirushiSanrenpukuListElement.innerHTML = generateHighRiskSanrenpukuHtml(highRiskList);
+
+    // 荒天令エリアの表示
+    document.getElementById('mujirushi-anamae-ranking').style.display = 'block';
+}
+
+function toggleManual() {
+    const content = document.getElementById('manual-content');
+    const icon = document.getElementById('toggle-icon');
+    if (content.classList.contains('manual-content-hidden')) {
+        content.classList.remove('manual-content-hidden');
+        icon.textContent = '▲';
+    } else {
+        content.classList.add('manual-content-hidden');
+        icon.textContent = '▼';
+    }
+}
 </script> 
 </body> 
 </html>
