@@ -90,23 +90,26 @@
         .manual-content table { width: 100%; border-collapse: collapse; margin-top: 5px; }
         .manual-content th, .manual-content td { border: 1px solid #eee; padding: 5px; text-align: left; vertical-align: top; font-size: 0.85em; }
         .manual-content th { background-color: #f7f7f7; width: 30%; }
+        
+        /* マニュアル内の箇条書きのパディング調整 */
+        .manual-content ul { padding-left: 20px; margin-top: 5px; margin-bottom: 5px;}
+        .manual-content li { margin-bottom: 2px; }
 
 
         /* ------------------------------------------- */
-        /* ★修正点: デバッグログのヘッダーサイズを縮小し、色を薄く */
+        /* デバッグログのヘッダーサイズを縮小し、色を薄く */
         /* ------------------------------------------- */
         
         .debug-log-header {
-            font-size: 1.0em; /* サイズを縮小 */
-            color: #888; /* 色も暗く */
-            border-bottom: 1px solid #e0e0e0; /* 線を細く */
+            font-size: 1.0em; 
+            color: #888; 
+            border-bottom: 1px solid #e0e0e0; 
             padding: 10px 15px 5px 15px; 
             margin-top: 15px; 
             cursor: pointer; 
             user-select: none; 
         }
         
-        /* ログ本体のスタイルは維持しつつ、位置だけ調整 */
         .debug-log { 
             display: none; 
             background-color: #384e38; 
@@ -117,7 +120,6 @@
             font-family: 'Courier New', Courier, monospace; 
             border-radius: 5px; 
             font-size: 0.75em; 
-            /* marginの調整はHTMLの配置で対応 */
             max-width: 600px;
             margin: 0 auto 15px auto; 
         }
@@ -348,8 +350,13 @@
                 <td>直近3レースの着順を**最新の着順から**入力します（例: `111`、`231`）。</td>
             </tr>
             <tr>
-                <td>**W印**</td>
-                <td>専門紙の◎、〇、△などの評価を入力します。</td>
+                <td>**予想印**</td>
+                <td>専門紙や予想サイトなどの**評価（◎、〇、△など）**を入力します。
+                    <ul>
+                        <li>客観的な得点に**プロの視点**や**市場の期待値**を加味します。</li>
+                        <li>より**洗練された**、**実戦的な予想**の精度向上に繋がります。</li>
+                    </ul>
+                </td>
             </tr>
         </table>
         
@@ -709,7 +716,6 @@
             logElement.style.display = 'none';
             iconElement.textContent = '▶';
         } else {
-            // スクロールバーが表示されるため block を使用
             logElement.style.display = 'block'; 
             iconElement.textContent = '▼';
         }
