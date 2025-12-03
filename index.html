@@ -16,30 +16,28 @@
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             margin: 0; 
-            padding: 0; /* ★修正点1: bodyからpaddingを削除 */
+            padding: 0; 
             padding-bottom: 30px; 
             background-color: #f4f4f9; 
             color: #333; 
         }
         
         .container { 
-            width: calc(100% - 20px); /* 100%から左右マージン20pxを引いた幅 */
+            width: calc(100% - 20px); 
             max-width: 600px; 
-            margin: 10px auto; /* ★修正点2: 左右10pxマージン、中央配置 */
+            margin: 10px auto; 
             background-color: #fff; 
-            padding: 0; /* ★修正点3: containerの内側のpaddingを削除 */
+            padding: 0; 
             border-radius: 0; 
             box-shadow: none; 
             box-sizing: border-box; 
         }
         
-        /* 以降の要素は、containerの内側で左右に余白が必要な場合、個別にpaddingを設定する */
-
-        h1 { font-size: 1.5em; color: #2c3e50; border-bottom: 3px solid #3498db; padding: 10px 10px 5px 10px; /* ★内側padding調整 */ margin-top: 0; }
-        h2 { font-size: 1.2em; color: #2c3e50; border-bottom: 2px solid #3498db; padding: 10px 10px 3px 10px; /* ★内側padding調整 */ margin-top: 20px; }
+        h1 { font-size: 1.5em; color: #2c3e50; border-bottom: 3px solid #3498db; padding: 10px 10px 5px 10px; margin-top: 0; }
+        h2 { font-size: 1.2em; color: #2c3e50; border-bottom: 2px solid #3498db; padding: 10px 10px 3px 10px; margin-top: 20px; }
         
         .input-group, .result-section { 
-            margin: 0 10px 15px 10px; /* ★左右10pxのmarginを設定して、containerの端から離す */
+            margin: 0 10px 15px 10px; 
             padding: 10px; 
             border: 1px solid #ccc; 
             border-radius: 6px; 
@@ -63,28 +61,52 @@
 
         /* 選手データ入力リストのスタイル（横スクロール回避の徹底） */
         .player-input-list { margin-top: 10px; }
-        .player-row { border: 1px solid #ddd; padding: 6px; margin-bottom: 8px; border-radius: 5px; background-color: #fff; }
-        .player-header { font-weight: bold; font-size: 1.0em; color: #3498db; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;}
         
-        /* 選手情報のフィールドを4列表示 (得点を優先し、W印をコンパクトに) */
+        /* 選手行の基本スタイル */
+        .player-row { border: 1px solid #ddd; padding: 0; /* paddingをHeaderとFieldsに移す */ margin-bottom: 8px; border-radius: 5px; background-color: #fff; overflow: hidden; }
+
+        /* ★修正点: 選手ヘッダーに背景色を適用し、paddingを移す */
+        .player-header { 
+            font-weight: bold; 
+            font-size: 1.0em; 
+            color: #333; 
+            padding: 6px; 
+            margin-bottom: 0; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* ★新規追加: 枠番色に合わせた非常に薄い背景色 */
+        .id-1 .player-header { background-color: #ffffff; color: #2c3e50; } /* 白 */
+        .id-2 .player-header { background-color: #f0f0f0; color: #2c3e50; } /* 非常に薄い黒 */
+        .id-3 .player-header { background-color: #fff0f0; color: #2c3e50; } /* 非常に薄い赤 */
+        .id-4 .player-header { background-color: #f0f8ff; color: #2c3e50; } /* 非常に薄い青 */
+        .id-5 .player-header { background-color: #fffaf0; color: #2c3e50; } /* 非常に薄い黄 */
+        .id-6 .player-header { background-color: #f0fff0; color: #2c3e50; } /* 非常に薄い緑 */
+        .id-7 .player-header { background-color: #fff5ee; color: #2c3e50; } /* 非常に薄いオレンジ */
+
+
+        /* 選手フィールドは引き続きpaddingを持つ */
         .player-fields { 
             display: flex; 
             flex-wrap: wrap; 
-            gap: 2px; /* ギャップを極小化 */
+            gap: 2px; 
+            padding: 6px; /* 以前player-rowにあったpaddingを移動 */
         }
         
         /* 選手情報のフィールド幅の調整 */
         .player-field { 
-            /* 理想: 脚質(23%) / 得点(27%) / W印(20%) / 直近3走(25%) */
             flex: 1 1 23%; 
             min-width: 50px; 
             box-sizing: border-box; 
         }
 
-        .player-field:nth-child(1) { flex: 1 1 23%; } /* 脚質 */
-        .player-field:nth-child(2) { flex: 1 1 27%; } /* 得点 (重要度高) */
-        .player-field:nth-child(3) { flex: 1 1 20%; } /* W印 (コンパクトに) */
-        .player-field:nth-child(4) { flex: 1 1 25%; } /* 直近3走 */
+        .player-field:nth-child(1) { flex: 1 1 23%; } 
+        .player-field:nth-child(2) { flex: 1 1 27%; } 
+        .player-field:nth-child(3) { flex: 1 1 20%; } 
+        .player-field:nth-child(4) { flex: 1 1 25%; } 
         
         .player-field label { display: block; font-size: 0.75em; color: #555; margin-bottom: 1px;}
         .player-field input, .player-field select { 
@@ -99,7 +121,7 @@
         .sb-group label { display: inline-flex; align-items: center; font-weight: normal; color: #555; }
         .sb-group input[type="radio"] { width: auto; margin-left: 2px; }
         
-        /* ライン強度用CSS */
+        /* ライン強度用CSS (変更なし) */
         #line-strength { padding: 8px 0; font-size: 1.1em; }
         .line-display { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
         .line-box { 
@@ -111,17 +133,17 @@
             margin-right: 5px; 
             font-size: 0.9em;
         }
-        .line-color-1 { background-color: #e74c3c; /* 赤 */ }
-        .line-color-2 { background-color: #3498db; /* 青 */ }
-        .line-color-3 { background-color: #2ecc71; /* 緑 */ }
-        .line-color-4 { background-color: #9b59b6; /* 紫 */ }
-        .line-solo { background-color: #95a5a6; /* 灰色 */ }
+        .line-color-1 { background-color: #e74c3c; } 
+        .line-color-2 { background-color: #3498db; } 
+        .line-color-3 { background-color: #2ecc71; } 
+        .line-color-4 { background-color: #9b59b6; } 
+        .line-solo { background-color: #95a5a6; } 
         
-        /* バンク展開傾向 */
+        /* バンク展開傾向 (変更なし) */
         #bank-tendency-display { margin-top: 5px; margin-bottom: 10px; padding: 5px 0; font-size: 0.95em; color: #3498db; font-weight: bold;}
 
 
-        /* 結果テーブルの横スクロール回避 */
+        /* 結果テーブルの横スクロール回避 (変更なし) */
         .scenario-detail table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         .scenario-detail th, .scenario-detail td { 
             border: 1px solid #ddd; 
@@ -131,11 +153,10 @@
             word-break: break-all; 
         }
         
-        /* スコアと順位を非表示にするためのクラス */
+        /* スコアと順位を非表示にするためのクラス (変更なし) */
         .hide-score-rank { display: none !important; }
 
-        /* その他UI要素 */
-        /* debug-logはinput-groupの外にあるため、個別に左右paddingを設定 */
+        /* その他UI要素 (変更なし) */
         .debug-log { 
             background-color: #2c3e50; 
             color: #ecf0f1; 
@@ -145,18 +166,17 @@
             font-family: 'Courier New', Courier, monospace; 
             border-radius: 5px; 
             font-size: 0.75em; 
-            margin: 0 10px; /* ★左右10pxのmarginを設定 */
+            margin: 0 10px; 
         }
         .recommendation { padding: 10px; border-radius: 5px; font-weight: bold; margin-top: 10px; font-size: 0.9em; }
-        #seitenrei-output { background-color: #e8f8f5; border-left: 5px solid #1abc9c; /* 緑 */ }
-        #koutenrei-output { background-color: #fbecec; border-left: 5px solid #e74c3c; /* 赤 */ }
+        #seitenrei-output { background-color: #e8f8f5; border-left: 5px solid #1abc9c; } 
+        #koutenrei-output { background-color: #fbecec; border-left: 5px solid #e74c3c; } 
         .scenario-detail { border: 1px dashed #95a5a6; padding: 10px; margin-top: 15px; border-radius: 5px; }
         .scenario-detail h4 { font-size: 1em; margin: 0 0 10px 0; border-bottom: 1px solid #ccc; padding-bottom: 5px;}
         
-        /* buttonはinput-group内にあり、100%幅で十分 */
         button { width: 100%; padding: 12px; background-color: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; font-size: 1em; }
 
-        /* フッターCSS */
+        /* フッターCSS (変更なし) */
         .copyright-footer {
             text-align: center;
             font-size: 0.7em;
@@ -165,7 +185,7 @@
             width: 100%;
         }
 
-        /* 実行前の結果セクションを非表示にしてがたつきを解消 */
+        /* 実行前の結果セクションを非表示にしてがたつきを解消 (変更なし) */
         #results-container {
             display: none;
             opacity: 0;
@@ -210,7 +230,7 @@
         <p><strong>選手データ入力 (7名)</strong></p>
         <div class="player-input-list" id="player-data">
             
-            <div class="player-row" data-id="1">
+            <div class="player-row id-1" data-id="1">
                 <div class="player-header">
                     <span>選手ID 1</span>
                     <div class="sb-group">
@@ -248,7 +268,7 @@
                 </div>
             </div>
 
-            <div class="player-row" data-id="2">
+            <div class="player-row id-2" data-id="2">
                 <div class="player-header">
                     <span>選手ID 2</span>
                     <div class="sb-group">
@@ -286,7 +306,7 @@
                 </div>
             </div>
 
-            <div class="player-row" data-id="3">
+            <div class="player-row id-3" data-id="3">
                 <div class="player-header">
                     <span>選手ID 3</span>
                     <div class="sb-group">
@@ -324,7 +344,7 @@
                 </div>
             </div>
             
-            <div class="player-row" data-id="4">
+            <div class="player-row id-4" data-id="4">
                 <div class="player-header">
                     <span>選手ID 4</span>
                     <div class="sb-group">
@@ -362,7 +382,7 @@
                 </div>
             </div>
 
-            <div class="player-row" data-id="5">
+            <div class="player-row id-5" data-id="5">
                 <div class="player-header">
                     <span>選手ID 5</span>
                     <div class="sb-group">
@@ -400,7 +420,7 @@
                 </div>
             </div>
 
-            <div class="player-row" data-id="6">
+            <div class="player-row id-6" data-id="6">
                 <div class="player-header">
                     <span>選手ID 6</span>
                     <div class="sb-group">
@@ -438,7 +458,7 @@
                 </div>
             </div>
 
-            <div class="player-row" data-id="7">
+            <div class="player-row id-7" data-id="7">
                 <div class="player-header">
                     <span>選手ID 7</span>
                     <div class="sb-group">
