@@ -6,7 +6,7 @@
     <title>華耀天輪 真・自在律 V6.0 - Mobile</title>
     <style>
         /* 🎨 以前の色味（青、緑、赤）を基調としたCSS */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px; background-color: #f4f4f9; color: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px 10px 30px 10px; /* フッター分のスペースを確保 */ background-color: #f4f4f9; color: #333; }
         .container { width: 100%; max-width: 600px; margin: auto; background-color: #fff; padding: 15px; border-radius: 0; box-shadow: none; }
         h1 { font-size: 1.5em; color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 5px; margin-top: 10px; }
         h2 { font-size: 1.2em; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 3px; margin-top: 20px; }
@@ -15,25 +15,25 @@
         /* 縦積み化の基本スタイル */
         .input-item { margin-bottom: 15px; }
         .input-item label { display: block; font-weight: bold; margin-bottom: 5px; }
-        select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #bdc3c7; border-radius: 3px; }
+        /* 横スクロール対策として、input/selectのpaddingを微調整し、幅を100%に固定 */
+        select, input[type="number"], input[type="text"] { width: 100%; padding: 7px; box-sizing: border-box; border: 1px solid #bdc3c7; border-radius: 3px; font-size: 1em; }
 
         /* 選手データ入力リストのスタイル（横スクロール回避） */
         .player-input-list { margin-top: 10px; }
-        .player-row { border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; border-radius: 5px; background-color: #fff; }
-        .player-header { font-weight: bold; font-size: 1.1em; color: #3498db; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;}
-        .player-fields { display: flex; flex-wrap: wrap; gap: 8px; }
-        .player-field { flex: 1 1 45%; /* 2列表示を基本とする */ min-width: 100px; }
-        .player-field label { display: block; font-size: 0.85em; color: #555; }
-        .player-field input, .player-field select { width: 100%; padding: 5px; box-sizing: border-box; font-size: 1em; }
+        .player-row { border: 1px solid #ddd; padding: 8px; margin-bottom: 8px; border-radius: 5px; background-color: #fff; }
+        .player-header { font-weight: bold; font-size: 1.0em; color: #3498db; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;}
+        .player-fields { display: flex; flex-wrap: wrap; gap: 4px; /* ギャップを小さく */ }
+        /* 選手情報のフィールドを3列表示に挑戦 */
+        .player-field { flex: 1 1 30%; /* 3列表示を基本とする */ min-width: 80px; }
+        .player-field label { display: block; font-size: 0.8em; color: #555; }
+        .player-field input, .player-field select { width: 100%; padding: 4px; box-sizing: border-box; font-size: 0.9em; }
 
         /* S/B 1位のラジオボタン用レイアウト */
-        .sb-group { display: flex; gap: 10px; font-size: 0.9em; }
+        .sb-group { display: flex; gap: 8px; font-size: 0.85em; }
         .sb-group label { display: inline-flex; align-items: center; font-weight: normal; color: #555; }
-        .sb-group input[type="radio"] { width: auto; margin-left: 5px; }
+        .sb-group input[type="radio"] { width: auto; margin-left: 3px; }
         
-        /* ------------------------------------- */
-        /* ★★★ 新規追加：ライン強度用CSS ★★★ */
-        /* ------------------------------------- */
+        /* ライン強度用CSS */
         #line-strength { padding: 8px 0; font-size: 1.1em; }
         .line-display { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
         .line-box { 
@@ -45,26 +45,41 @@
             margin-right: 5px; 
             font-size: 0.9em;
         }
-        /* ラインカラー定義 */
         .line-color-1 { background-color: #e74c3c; /* 赤 */ }
         .line-color-2 { background-color: #3498db; /* 青 */ }
         .line-color-3 { background-color: #2ecc71; /* 緑 */ }
         .line-color-4 { background-color: #9b59b6; /* 紫 */ }
         .line-solo { background-color: #95a5a6; /* 灰色 */ }
-        /* ------------------------------------- */
+        
+        /* バンク展開傾向 */
+        #bank-tendency-display { margin-top: -10px; margin-bottom: 10px; padding: 5px 0; font-size: 0.95em; color: #3498db; font-weight: bold;}
+
 
         /* 結果テーブルの横スクロール回避 */
         .scenario-detail table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        /* 最終スコアを非表示にするため、セル幅を調整 */
         .scenario-detail th, .scenario-detail td { border: 1px solid #ddd; padding: 6px 4px; text-align: center; font-size: 0.8em; word-break: break-all; }
         
+        /* スコアと順位を非表示にするためのクラス */
+        .hide-score-rank { display: none !important; }
+
         /* その他UI要素 */
-        .debug-log { background-color: #2c3e50; color: #ecf0f1; padding: 10px; height: 120px; overflow-y: scroll; font-family: 'Courier New', Courier, monospace; border-radius: 5px; font-size: 0.75em; }
+        .debug-log { background-color: #2c3e50; color: #ecf0f1; padding: 10px; height: 100px; overflow-y: scroll; font-family: 'Courier New', Courier, monospace; border-radius: 5px; font-size: 0.75em; }
         .recommendation { padding: 10px; border-radius: 5px; font-weight: bold; margin-top: 10px; font-size: 0.9em; }
         #seitenrei-output { background-color: #e8f8f5; border-left: 5px solid #1abc9c; /* 緑 */ }
         #koutenrei-output { background-color: #fbecec; border-left: 5px solid #e74c3c; /* 赤 */ }
         .scenario-detail { border: 1px dashed #95a5a6; padding: 10px; margin-top: 15px; border-radius: 5px; }
         .scenario-detail h4 { font-size: 1em; margin: 0 0 10px 0; border-bottom: 1px solid #ccc; padding-bottom: 5px;}
         button { width: 100%; padding: 12px; background-color: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; font-size: 1em; }
+
+        /* ★★★ 新規追加：フッターCSS ★★★ */
+        .copyright-footer {
+            text-align: center;
+            font-size: 0.7em;
+            color: #aaa; /* 薄いグレー */
+            margin-top: 20px;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -93,7 +108,8 @@
 
         <div class="input-item">
             <label for="bank-name">バンク名:</label>
-            <select id="bank-name"></select>
+            <select id="bank-name" onchange="displayBankTendency()"></select>
+            <div id="bank-tendency-display"></div>
         </div>
 
         <p><strong>選手データ入力 (7名)</strong></p>
@@ -376,6 +392,7 @@
         <div id="line-display" class="line-display">
             計算結果待ち...
         </div>
+
         <h3>☀️ 晴天令 (安定推奨)</h3>
         <div class="recommendation" id="seitenrei-output">
             計算結果待ち...
@@ -393,6 +410,10 @@
 
     </div>
 </div>
+
+<footer class="copyright-footer">
+    (C)2025 Eysyum
+</footer>
 
 <script src="keirin_logic_v6.0.js"></script>
 </body>
