@@ -664,6 +664,11 @@
         </div>
         
         <button onclick="calculatePrediction()">🚀 予想を計算 (実行)</button>
+        
+        <button onclick="postToX()" id="post-to-x-button" style="background-color: #1DA1F2; margin-top: 10px;" disabled>
+            🐦 X (旧Twitter) に予想を投稿
+        </button>
+        
     </div>
 
     <div id="results-container">
@@ -692,12 +697,10 @@
             <div id="scenario-output">
                 </div>
 
-            <button id="post-to-x-button" onclick="postToX()" disabled style="background-color: #1DA1F2;">
-                🐦 予想をXにポストする
-            </button>
-            </div>
+        </div>
     </div>
 </div>
+<textarea id="x-post-text-storage" style="display: none;"></textarea>
 
 <div class="debug-log-header" onclick="toggleDebugLog()">
     <span id="log-toggle-icon">▶</span> 🛠️ デバッグ・処理ログ
