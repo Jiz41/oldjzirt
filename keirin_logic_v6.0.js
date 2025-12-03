@@ -1,4 +1,6 @@
-// --- 華耀天輪 真・自在律 V6.0 ロジック ---
+// ----------------------------------------------------
+// 華耀天輪 真・自在律 V6.0 - 競輪予測ロジック (統合版)
+// ----------------------------------------------------
 
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
@@ -14,8 +16,22 @@ const C_MARK_VALUES = {
     LOW: 1.03
 };
 
+// W印の係数 (乗算係数として再定義)
+const W_MARK_COEFFICIENT = {
+    '◎': 1.04,
+    '〇': 1.02,
+    '✕': 1.015,
+    '△': 1.01,
+    '無': 1.0
+};
+
+
 // バンクデータを格納するグローバル変数
 let BANK_DATA = {};
+
+// ----------------------------------------------------
+// 2. ログおよびUI操作関数
+// ----------------------------------------------------
 
 // ロギング関数
 function logMessage(message) {
@@ -25,36 +41,6 @@ function logMessage(message) {
         logArea.innerHTML += `[${timestamp}] ${message}<br>`;
         logArea.scrollTop = logArea.scrollHeight;
     }
-}
-
-function getPlayerData() {
-    const players = [];
-    const playerRows = document.querySelectorAll('.player-row');
-    
-    const s1Leader = document.querySelector('input[name="s-leader"]:checked');
-    const b1Leader = document.querySelector('input[name="b-leader"]:checked');
-    const s1Id = s1Leader ? parseInt(s1Leader.getAttribute('data-id')) : null;
-    const b1Id = b1Leader ? parseInt(b1Leader.getAttribute('data-id')) : null;
-
-    playerRows.forEach(row => {
-        const id = parseInt(row.getAttribute('data-id'));
-        if (isNaN(id)) return;
-
-        players.push({
-            id: id,
-            score: parseFloat(row.querySelector('.score').value) || 0,
-            style: row.querySelector('.style').value,
-            wmark: row.querySelector('.wmark').value.trim(), 
-            recent: row.querySelector('.recent').value.trim(),
-            
-            is_s1: id === s1Id,
-            is_b1: id === b1Id,
-
-            c_score_adj: 1.0, c_recent: 1.0, c_wmark: 1.0, c_s1: 1.0, c_b1: 1.0, c_l: 1.0, c_e: 1.0,
-            final_score: 0
-        });
-    });
-    return players;
 }
 
 // 銀行データの非同期読み込み
@@ -137,19 +123,53 @@ function displayBankTendency() {
         message = `ℹ️ **${bankName}**は脚質による大きな傾向差は**ありません**。`;
     }
     
-    // 計算実行後にも結果エリアに表示されるため、ここではHTMLタグは付けない
-    // ※ 実行後の表示は displayResults() の中で更新します
     displayArea.innerHTML = message;
     logMessage(`[BANK] ${bankName} の展開傾向: ${message.replace(/<[^>]*>?/gm, '')}`);
 }
 
-// ページロード時にデータ読み込みを実行
-(async function() {
-    await loadBankData();
-})();
+
+// ----------------------------------------------------
+// 3. データ処理・ロジック関数
+// ----------------------------------------------------
+
+function getPlayerData() {
+    const players = [];
+    const playerRows = document.querySelectorAll('.player-row');
+    
+    const s1Leader = document.querySelector('input[name="s-leader"]:checked');
+    const b1Leader = document.querySelector('input[name="b-leader"]:checked');
+    const s1Id = s1Leader ? parseInt(s1Leader.getAttribute('data-id')) : null;
+    const b1Id = b1Leader ? parseInt(b1Leader.getAttribute('data-id')) : null;
+
+    if (!s1Leader || !b1Leader) {
+        logMessage("[ERROR] S 1位 および B 1位 の選手を必ず選択してください。");
+        return null;
+    }
 
 
-// ライン強度を視覚的に表示するロジック
+    playerRows.forEach(row => {
+        const id = parseInt(row.getAttribute('data-id'));
+        if (isNaN(id)) return;
+
+        players.push({
+            id: id,
+            score: parseFloat(row.querySelector('.score').value) || 0,
+            style: row.querySelector('.style').value,
+            wmark: row.querySelector('.wmark').value.trim(), 
+            recent: row.querySelector('.recent').value.trim(),
+            
+            is_s1: id === s1Id,
+            is_b1: id === b1Id,
+
+            c_score_adj: 1.0, c_recent: 1.0, c_wmark: 1.0, c_s1: 1.0, c_b1: 1.0, c_l: 1.0, c_e: 1.0,
+            final_score: 0
+        });
+    });
+    return players;
+}
+
+
+// ライン強度を計算し、視覚的に表示するロジック
 function calculateLineCoeffs(players, settings) {
     const lineInput = document.getElementById('line-input').value;
     const lines = []; 
@@ -157,6 +177,7 @@ function calculateLineCoeffs(players, settings) {
     const allPlayerIds = new Set(players.map(p => p.id));
     let assignedPlayerIds = new Set();
     
+    // 1. ライン構成をパースし、playerToLineMapを生成
     if (lineInput && lineInput.includes(',')) {
         let lineCounter = 1;
         lineInput.split(',').forEach(lineStr => {
@@ -173,9 +194,9 @@ function calculateLineCoeffs(players, settings) {
     }
 
     const soloPlayers = Array.from(allPlayerIds).filter(id => !assignedPlayerIds.has(id));
-    soloPlayers.forEach(id => playerToLineMap[id] = 0); 
+    soloPlayers.forEach(id => playerToLineMap[id] = 0); // 0は単騎ライン
 
-    // C_L係数計算 (省略)
+    // 2. C_L係数計算
     if (settings.IS_GIRLS) {
         logMessage(`[C_L] ガールズ競輪モード。エースマーク係数 $C_{mark}$ を評価。`);
         const ace = players.reduce((max, p) => (p.score > max.score ? p : max), { score: -Infinity });
@@ -184,7 +205,7 @@ function calculateLineCoeffs(players, settings) {
         lines.forEach(line => {
             const aceIndex = line.indexOf(ace.id);
             if (aceIndex !== -1 && aceIndex < line.length - 1) {
-                const markerId = line[aceIndex + 1];
+                const markerId = line[aceIndex + 1]; // 2番手がマーク
                 aceMarkPlayers.add(markerId);
             }
         });
@@ -208,12 +229,14 @@ function calculateLineCoeffs(players, settings) {
         const coopWeight = settings.COOP_WEIGHT; 
         
         lines.forEach(line => {
+            // 2番手
             const p2Id = line[1];
             const p2 = players.find(p => p.id === p2Id);
             if (p2) {
                 p2.c_l = 1.0 + (0.06 * coopWeight); 
             }
 
+            // 3番手以降
             for (let i = 2; i < line.length; i++) {
                 const pNId = line[i];
                 const pN = players.find(p => p.id === pNId);
@@ -224,7 +247,7 @@ function calculateLineCoeffs(players, settings) {
         });
     }
 
-    // ライン強度の視覚化出力
+    // 3. ライン強度の視覚化出力
     const lineDisplay = document.getElementById('line-display');
     if (lineDisplay) {
         let displayHtml = '';
@@ -233,6 +256,7 @@ function calculateLineCoeffs(players, settings) {
         allPlayerIdsSorted.forEach(id => {
             const lineId = playerToLineMap[id];
             let className = '';
+            // ラインID (1, 2, 3...) を使って色を割り当て
             if (lineId === 0) {
                 className = 'line-solo';
             } else {
@@ -268,7 +292,7 @@ function generateScenarioWagers(results) {
     const top4 = results.slice(0, 4).map(p => p.id);
     const trifuku = [
         `${top4[0]}=${top4[1]}=${top4[2]}`,
-        `${top4[0]}=${top4[1]}=${top4[3]}`
+        `${top4[0]}=${top4[1]}=${top4[3] ? top4[3] : 'X'}` // 4位がない場合はXを仮に入れる
     ].join(', ');
 
     return { tritan, trifuku };
@@ -285,6 +309,7 @@ function assignFinalGrades(scenarioPlayers) {
     scenarioPlayers.forEach(p => {
         let grade = 1;
         if (range > 0) {
+            // スコアを0-10に正規化し、四捨五入してグレードを決定 (1-10)
             grade = Math.ceil(1 + 9 * (p.final_score - minScore) / range);
         }
         p.grade = Math.min(10, Math.max(1, grade)); 
@@ -300,9 +325,10 @@ function assignFinalGrades(scenarioPlayers) {
         if (p.grade === nextPlayer.grade) {
             const scoreDiff = p.final_score - nextPlayer.final_score;
             
-            if (scoreDiff >= (range / 1000) * 1) { 
+            // スコア差を全体のレンジのパーセンテージと比較して強弱を決定
+            if (scoreDiff >= (range / 1000) * 1) { // 0.1%以上の差
                 p.strength_mark = '↑';
-            } else if (scoreDiff >= (range / 1000) * 0.1) { 
+            } else if (scoreDiff >= (range / 1000) * 0.1) { // 0.01%以上の差
                 p.strength_mark = '↗';
             } else { 
                 p.strength_mark = '→';
@@ -311,104 +337,7 @@ function assignFinalGrades(scenarioPlayers) {
     });
 }
 
-
-// メイン計算関数
-async function calculatePrediction() {
-    
-    // 【修正点1】計算開始時にX投稿ボタンを無効化
-    document.getElementById('post-to-x-button').disabled = true;
-
-    if (Object.keys(BANK_DATA).length === 0) {
-        logMessage("[WAIT] バンクデータの読み込みを待機します...");
-        await loadBankData(); 
-        if (Object.keys(BANK_DATA).length === 0) {
-            logMessage("[FATAL] バンクデータが利用できません。計算を中止します。");
-            return;
-        }
-    }
-
-    const raceType = document.getElementById('race-type').value;
-    const settings = COEFFICIENT_SETTINGS[raceType];
-    const bankName = document.getElementById('bank-name').value; 
-    
-    const bankData = BANK_DATA[bankName]; 
-    if (!bankData) {
-        logMessage(`[ERROR] バンク名 "${bankName}" のデータが見つかりません。計算を中止します。`);
-        return;
-    }
-
-    let players = getPlayerData();
-    
-    logMessage(`[CALC START] ${raceType} / バンク: ${bankName} で計算開始。`);
-
-    // --- I. C_L (ライン・連係係数) の計算とライン強度の表示 ---
-    calculateLineCoeffs(players, settings);
-
-    // --- II. 選手固有係数 C_W, C_R, C_S1, C_B1 & C_E の計算 (W印の修正を含む) ---
-    players.forEach(p => {
-        p.c_score_adj = 1.0 + (p.score / 100 - 1) * settings.R_BIAS; 
-        const recentScores = p.recent.split('').map(Number);
-        const avgRank = recentScores.length > 0 ? recentScores.reduce((a, b) => a + b, 0) / recentScores.length : 4.0; 
-        p.c_recent = (1.0 + (4 - avgRank) * 0.05) * settings.RECENT_WEIGHT; 
-
-        // W印の係数
-        if (p.wmark === '◎') p.c_wmark = 1.04;
-        else if (p.wmark === '〇') p.c_wmark = 1.02;
-        else if (p.wmark === '✕') p.c_wmark = 1.015; 
-        else if (p.wmark === '△') p.c_wmark = 1.01;
-        else p.c_wmark = 1.0; // 無
-
-        p.c_s1 = p.is_s1 ? 1.005 : 1.0; 
-        p.c_b1 = p.is_b1 ? 1.015 : 1.0; 
-
-        let c_e = 1.0;
-        let biasKey = '';
-        if (p.style === '自') biasKey = '先行';
-        else if (p.style === '両') biasKey = '捲り'; 
-        else if (p.style === '追') biasKey = '差し'; 
-
-        const keirinBias = bankData.keirin_bias[biasKey] || 1.0;
-        c_e *= keirinBias;
-        p.c_e = c_e;
-    });
-
-    // --- III. 展開別シミュレーションと最終スコア算出 ---
-    const scenarios = ['先行有利', '捲り有利', '差し有利'];
-    const allScenarioResults = [];
-
-    scenarios.forEach(scenario => {
-        const cDCoeffs = getScenarioCoeffs(scenario);
-        
-        let scenarioPlayers = JSON.parse(JSON.stringify(players));
-        
-        scenarioPlayers.forEach(p => {
-            const cD = cDCoeffs[p.style] || 1.0;
-            p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e * cD;
-        });
-
-        scenarioPlayers.sort((a, b) => b.final_score - a.final_score);
-        
-        assignFinalGrades(scenarioPlayers);
-
-        allScenarioResults.push({ scenario, results: scenarioPlayers });
-    });
-
-    // --- IV. 最終結果の統合と表示 ---
-    displayResults(allScenarioResults, players, bankName); 
-    
-    // ★修正点2: 計算完了後、結果コンテナを表示する
-    const resultsContainer = document.getElementById('results-container');
-    if (resultsContainer) {
-        resultsContainer.classList.add('visible');
-    }
-    
-    // 【修正点2】計算完了後、X投稿ボタンを有効化
-    document.getElementById('post-to-x-button').disabled = false;
-    
-    logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
-}
-
-// 最終スコアと順位の表示を削除
+// 最終スコアと順位の表示とX投稿テキストの準備
 function displayResults(allScenarioResults, players, bankName) { 
     
     // バンク展開傾向の再表示（実行結果エリアの先頭）
@@ -426,12 +355,12 @@ function displayResults(allScenarioResults, players, bankName) {
                     <p><strong>三連複 (2点):</strong> ${wagers.trifuku}</p>
                     <table>
                         <tr><th>選手ID</th><th>評価</th><th class="hide-score-rank">スコア</th><th class="hide-score-rank">順位</th></tr>
-                        ${s.results.map((p) => `
+                        ${s.results.map((p, index) => `
                             <tr>
                                 <td>${p.id}</td>
                                 <td><strong>${p.grade}${p.strength_mark}</strong></td>
                                 <td class="hide-score-rank">${p.final_score.toFixed(3)}</td>
-                                <td class="hide-score-rank">${p.id === s.results[0].id ? '1位' : ''}</td>
+                                <td class="hide-score-rank">${index + 1}位</td>
                             </tr>
                         `).join('')}
                     </table>
@@ -440,7 +369,7 @@ function displayResults(allScenarioResults, players, bankName) {
         }).join('');
     }
 
-    // 総合評価の計算 (買い目生成に必要なため維持)
+    // 総合評価の計算
     const integratedScores = {};
     players.forEach(p => integratedScores[p.id] = 0);
     allScenarioResults.forEach(s => s.results.forEach((p) => {
@@ -457,20 +386,23 @@ function displayResults(allScenarioResults, players, bankName) {
 
     // 晴天令 (安定推奨)
     const seitenreiOutput = document.getElementById('seitenrei-output');
-    if (seitenreiOutput) {
-        const seitenTritan = [
+    let seitenTritan = 'N/A';
+    let seitenTrifuku = 'N/A';
+    if (top3.length === 3) {
+        seitenTritan = [
             `${top3[0].id}-${top3[1].id}-${top3[2].id}`,
             `${top3[0].id}-${top3[2].id}-${top3[1].id}`,
             `${top3[1].id}-${top3[0].id}-${top3[2].id}`
         ].join(', ');
         
-        const seitenTrifuku = [
+        seitenTrifuku = [
             `${top4[0].id}=${top4[1].id}=${top4[2].id}`,
-            `${top4[0].id}=${top4[1].id}=${top4[3] ? top4[3].id : 'X'}`
+            `${top4[0].id}=${top4[1].id}=${top4[3] ? top4[3].id : top4[2].id}`
         ].join(', ');
-        
-        // 【修正点3】X投稿のため、ヘッダー情報とHTMLタグを追加
-        seitenreiOutput.innerHTML = `☀️ 晴天令 (安定推奨) <br>
+    }
+    
+    if (seitenreiOutput) {
+        seitenreiOutput.innerHTML = `
             三連単 (3点): <strong>${seitenTritan}</strong><br>
             三連複 (2点): <strong>${seitenTrifuku}</strong>
         `;
@@ -478,104 +410,186 @@ function displayResults(allScenarioResults, players, bankName) {
 
     // 荒天令 (高配当狙い) - 三連複3点を表示
     const koutenreiOutput = document.getElementById('koutenrei-output');
-    if (koutenreiOutput) {
+    let koutenTrifuku = 'N/A';
+    const koutenLeader = top4.length >= 4 ? top4[3].id : null; 
         
-        // 荒天令の軸 (通常4位)
-        const koutenLeader = top4[3] ? top4[3].id : null; 
-        
-        let koutenTrifuku = '';
-        if (koutenLeader) {
-            // 荒天令 三連複 3点: 4=1=2, 4=1=3, 4=2=3 (軸4位、相手1,2,3位)
-            koutenTrifuku = [
-                `${koutenLeader}=${top3[0].id}=${top3[1].id}`, 
-                `${koutenLeader}=${top3[0].id}=${top3[2].id}`,
-                `${koutenLeader}=${top3[1].id}=${top3[2].id}` 
-            ].join(', ');
-        } else {
-            koutenTrifuku = 'データ不足のため生成不可';
-        }
+    if (koutenLeader && top3.length === 3) {
+        // 荒天令 三連複 3点: 4=1=2, 4=1=3, 4=2=3 (軸4位、相手1,2,3位)
+        koutenTrifuku = [
+            `${koutenLeader}=${top3[0].id}=${top3[1].id}`, 
+            `${koutenLeader}=${top3[0].id}=${top3[2].id}`,
+            `${koutenLeader}=${top3[1].id}=${top3[2].id}` 
+        ].join(', ');
+    } else {
+        koutenTrifuku = 'データ不足または上位不足のため生成不可';
+    }
 
-        // 【修正点3】X投稿のため、ヘッダー情報とHTMLタグを追加
-        koutenreiOutput.innerHTML = `⛈️ 荒天令 (高配当狙い) <br>
+    if (koutenreiOutput) {
+        koutenreiOutput.innerHTML = `
             推奨軸 (4位): **${koutenLeader ? koutenLeader : 'N/A'}**<br>
             三連複 (3点): <strong>${koutenTrifuku}</strong>
         `;
     }
+    
+    // ----------------------------------------------------
+    // V. X投稿用テキストの格納とボタンの有効化
+    // ----------------------------------------------------
+    const postText = formatPostText(seitenTritan, seitenTrifuku, koutenLeader, koutenTrifuku, bankName);
+    document.getElementById('x-post-text-storage').value = postText;
+    document.getElementById('post-to-x-button').disabled = false;
+    
+    logMessage('[UI] 予想結果の表示とX投稿テキストの準備が完了しました。');
 }
 
-// -------------------------------------------------------------------------
-// 5. X (旧Twitter) 投稿機能 (新規追加)
-// -------------------------------------------------------------------------
-function postToX() {
-    logMessage('[ACTION] X投稿ボタンが押されました。');
+/**
+ * X投稿用のテキストを整形する
+ * @returns {string} 投稿用テキスト
+ */
+function formatPostText(seitenTritan, seitenTrifuku, koutenLeader, koutenTrifuku, bankName) {
+    const raceType = document.getElementById('race-type').value.toUpperCase();
     
-    // 1. 各データの取得
-    const bankName = document.getElementById('bank-name').value;
-    const seitenreiOutput = document.getElementById('seitenrei-output').textContent.trim();
-    const koutenreiOutput = document.getElementById('koutenrei-output').textContent.trim();
+    let text = `#華耀天輪_真自在律 V6.0 予想\n`;
+    text += `レース: ${bankName} (${raceType})\n\n`;
+    text += `☀️【晴天令 (安定推奨)】\n`;
+    text += `  三連単(3点): ${seitenTritan}\n`;
+    text += `  三連複(2点): ${seitenTrifuku}\n\n`;
+    text += `⛈️【荒天令 (高配当狙い)】\n`;
+    text += `  推奨軸(4位): ${koutenLeader ? koutenLeader : 'N/A'}\n`;
+    text += `  三連複(3点): ${koutenTrifuku}\n\n`;
+    text += `#競輪予想 #競輪 #AI予想`;
     
-    // 結果が未計算の場合は投稿を中止
-    if (seitenreiOutput.includes('計算中...') || koutenreiOutput.includes('計算中...')) {
-        alert('先に予想計算を実行してください。');
+    return text;
+}
+
+
+// ----------------------------------------------------
+// 4. メイン処理と初期化
+// ----------------------------------------------------
+
+// メイン計算関数
+async function calculatePrediction() {
+    
+    // ログをクリアし、ボタンを無効化
+    const log = document.getElementById('debug-log');
+    log.innerHTML = "[INFO] 予想計算を開始します...\n";
+    document.getElementById('post-to-x-button').disabled = true;
+
+    // バンクデータの読み込み待機と確認
+    if (Object.keys(BANK_DATA).length === 0) {
+        logMessage("[WAIT] バンクデータの読み込みを待機します...");
+        await loadBankData(); 
+        if (Object.keys(BANK_DATA).length === 0 || document.getElementById('bank-name').value === 'ダミーバンク') {
+            logMessage("[FATAL] バンクデータが利用できません。計算を中止します。");
+            return;
+        }
+    }
+
+    const raceType = document.getElementById('race-type').value;
+    const settings = COEFFICIENT_SETTINGS[raceType];
+    const bankName = document.getElementById('bank-name').value; 
+    
+    const bankData = BANK_DATA[bankName]; 
+    if (!bankData) {
+        logMessage(`[ERROR] バンク名 "${bankName}" のデータが見つかりません。計算を中止します。`);
         return;
     }
 
-    // 2. 投稿テキストの組み立て
-    
-    // ★★★ 改行制御ロジック (点数と買い目の間に改行を挿入) ★★★
-    
-    // displayResults() の output にヘッダーが含まれる前提で処理を簡略化
+    let players = getPlayerData();
+    if (!players) { // S1/B1未選択エラー
+        const resultsContainer = document.getElementById('results-container');
+        if (resultsContainer) resultsContainer.classList.remove('visible');
+        return;
+    }
 
-    const cleanAndFormat = (text) => {
-        // 1. 全ての空白文字を単一スペースに置換
-        let cleaned = text.replace(/(\s\s*|\n|\r|\t)/g, ' ').trim();
+    logMessage(`[CALC START] ${raceType} / バンク: ${bankName} で計算開始。`);
+
+    // --- I. C_L (ライン・連係係数) の計算とライン強度の表示 ---
+    calculateLineCoeffs(players, settings);
+
+    // --- II. 選手固有係数 C_W, C_R, C_S1, C_B1 & C_E の計算 (W印の修正を含む) ---
+    players.forEach(p => {
+        // C_score_adj (競走得点調整)
+        p.c_score_adj = 1.0 + (p.score / 100 - 1) * settings.R_BIAS; 
+
+        // C_recent (直近3走)
+        const recentScores = p.recent.split('').map(Number).filter(r => !isNaN(r) && r >= 1 && r <= 7);
+        const avgRank = recentScores.length > 0 ? recentScores.reduce((a, b) => a + b, 0) / recentScores.length : 4.0; 
+        p.c_recent = (1.0 + (4 - avgRank) * 0.05) * settings.RECENT_WEIGHT; 
+
+        // C_wmark (W印) - 乗算係数を使用
+        p.c_wmark = W_MARK_COEFFICIENT[p.wmark] || 1.0;
+
+        // C_s1 / C_b1 (S/B 1位係数)
+        p.c_s1 = p.is_s1 ? 1.005 : 1.0; 
+        p.c_b1 = p.is_b1 ? 1.015 : 1.0; 
+
+        // C_e (バンク展開係数)
+        let biasKey = '';
+        if (p.style === '自') biasKey = '先行';
+        else if (p.style === '両') biasKey = '捲り'; 
+        else if (p.style === '追') biasKey = '差し'; 
+
+        const keirinBias = bankData.keirin_bias[biasKey] || 1.0;
+        p.c_e = keirinBias;
+    });
+
+    // --- III. 展開別シミュレーションと最終スコア算出 ---
+    const scenarios = ['先行有利', '捲り有利', '差し有利'];
+    const allScenarioResults = [];
+
+    scenarios.forEach(scenario => {
+        const cDCoeffs = getScenarioCoeffs(scenario);
         
-        // 2. ヘッダーを整形 (例: "☀️ 晴天令 (安定推奨) 三連単" -> "☀️ 晴天令:\n三連単")
-        cleaned = cleaned
-            .replace(/\s(安定推奨|高配当狙い)/, ' (安定推奨):') // 説明タグを保持しコロンを追加
-            .replace(/\:\s*三連単/g, ':\n三連単') // 三連単の前に改行
-            .replace(/\:\s*推奨軸/g, ':\n推奨軸'); // 推奨軸の前に改行
-
-        // 3. 点数表記の閉じ括弧 ")" の直後に改行を挿入
-        cleaned = cleaned.replace(/\) /g, ')\n');
+        let scenarioPlayers = JSON.parse(JSON.stringify(players));
         
-        // 4. 推奨軸の買い目の前（**5**の前）に改行を挿入（太字**がある場合）
-        // 推奨軸 (4位)\n**3**三連複... -> 推奨軸 (4位)\n**3**\n三連複...
-        cleaned = cleaned.replace(/\*\*\s*三連複/g, '**\n三連複');
-
-        // 5. 不要な(安定推奨)や(高配当狙い)を削除
-        cleaned = cleaned.replace(/\s\(安定推奨\)/, '').replace(/\s\(高配当狙い\)/, '');
+        scenarioPlayers.forEach(p => {
+            const cD = cDCoeffs[p.style] || 1.0;
             
-        return cleaned.trim();
-    };
+            // 最終スコア算出ロジック: 得点 * 各種係数の乗算
+            p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e * cD;
+            
+        });
+
+        scenarioPlayers.sort((a, b) => b.final_score - a.final_score);
+        
+        assignFinalGrades(scenarioPlayers);
+
+        allScenarioResults.push({ scenario, results: scenarioPlayers });
+    });
+
+    // --- IV. 最終結果の統合と表示 ---
+    displayResults(allScenarioResults, players, bankName); 
     
-    const seitenreiContent = cleanAndFormat(seitenreiOutput);
-    const koutenreiContent = cleanAndFormat(koutenreiOutput);
-
-    const toolURL = 'https://huggingface.co/spaces/Jiz41/Jiz41r1t5u';
-
-    // テンプレートに沿ってテキストを組み立てる
-    const postText = 
-`${bankName} [ここにレース番号R]
-
-${seitenreiContent}
-
-${koutenreiContent}
+    // 計算完了後、結果コンテナを表示する
+    const resultsContainer = document.getElementById('results-container');
+    if (resultsContainer) {
+        resultsContainer.classList.add('visible');
+    }
     
-#華耀天輪真自在律 
-#卦有中亦有不中
-    
-${toolURL}`;
-
-    // ★★★ 改行制御ロジック終了 ★★★
-
-    logMessage(`[INFO] 生成された投稿テキスト: ${postText.substring(0, 50).replace(/\n/g, '\\n')}...`);
-
-    // 3. URLエンコードと投稿ウィンドウのオープン
-    const encodedText = encodeURIComponent(postText);
-    const tweetURL = `https://twitter.com/intent/tweet?text=${encodedText}`;
-    
-    // 新しいウィンドウで投稿画面を開く
-    window.open(tweetURL, '_blank');
+    logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
 }
-// -------------------------------------------------------------------------
+
+
+/**
+ * X (旧Twitter) に投稿するためのウィンドウを開く
+ */
+function postToX() {
+    const postText = document.getElementById('x-post-text-storage').value;
+    if (!postText) {
+        alert('投稿内容が準備されていません。先に「予想を計算」を実行してください。');
+        return;
+    }
+    
+    // URLエンコード
+    const encodedText = encodeURIComponent(postText);
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
+
+    // 新しいウィンドウ/タブで開く
+    window.open(twitterUrl, '_blank');
+}
+
+
+// ページロード時にデータ読み込みを実行
+(async function() {
+    await loadBankData();
+})();
