@@ -52,7 +52,7 @@
         .line-solo { background-color: #95a5a6; /* 灰色 */ }
         
         /* バンク展開傾向 */
-        #bank-tendency-display { margin-top: -10px; margin-bottom: 10px; padding: 5px 0; font-size: 0.95em; color: #3498db; font-weight: bold;}
+        #bank-tendency-display { margin-top: 5px; margin-bottom: 10px; padding: 5px 0; font-size: 0.95em; color: #3498db; font-weight: bold;}
 
 
         /* 結果テーブルの横スクロール回避 */
@@ -72,7 +72,7 @@
         .scenario-detail h4 { font-size: 1em; margin: 0 0 10px 0; border-bottom: 1px solid #ccc; padding-bottom: 5px;}
         button { width: 100%; padding: 12px; background-color: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; font-size: 1em; }
 
-        /* ★★★ 新規追加：フッターCSS ★★★ */
+        /* フッターCSS */
         .copyright-footer {
             text-align: center;
             font-size: 0.7em;
@@ -109,7 +109,6 @@
         <div class="input-item">
             <label for="bank-name">バンク名:</label>
             <select id="bank-name" onchange="displayBankTendency()"></select>
-            <div id="bank-tendency-display"></div>
         </div>
 
         <p><strong>選手データ入力 (7名)</strong></p>
@@ -142,7 +141,7 @@
                             <option value="◎">◎</option>
                             <option value="〇">〇</option>
                             <option value="△">△</option>
-                            <option value="無" selected>無</option>
+                            <option value="✕">✕</option> <option value="無" selected>無</option>
                         </select>
                     </div>
                     <div class="player-field">
@@ -179,7 +178,7 @@
                             <option value="◎">◎</option>
                             <option value="〇">〇</option>
                             <option value="△">△</option>
-                            <option value="無" selected>無</option>
+                            <option value="✕">✕</option> <option value="無" selected>無</option>
                         </select>
                     </div>
                     <div class="player-field">
@@ -216,7 +215,7 @@
                             <option value="◎">◎</option>
                             <option value="〇">〇</option>
                             <option value="△" selected>△</option>
-                            <option value="無">無</option>
+                            <option value="✕">✕</option> <option value="無">無</option>
                         </select>
                     </div>
                     <div class="player-field">
@@ -253,7 +252,7 @@
                             <option value="◎">◎</option>
                             <option value="〇">〇</option>
                             <option value="△">△</option>
-                            <option value="無" selected>無</option>
+                            <option value="✕">✕</option> <option value="無" selected>無</option>
                         </select>
                     </div>
                     <div class="player-field">
@@ -290,7 +289,7 @@
                             <option value="◎">◎</option>
                             <option value="〇">〇</option>
                             <option value="△">△</option>
-                            <option value="無" selected>無</option>
+                            <option value="✕">✕</option> <option value="無" selected>無</option>
                         </select>
                     </div>
                     <div class="player-field">
@@ -327,7 +326,7 @@
                             <option value="◎">◎</option>
                             <option value="〇">〇</option>
                             <option value="△">△</option>
-                            <option value="無" selected>無</option>
+                            <option value="✕">✕</option> <option value="無" selected>無</option>
                         </select>
                     </div>
                     <div class="player-field">
@@ -364,7 +363,7 @@
                             <option value="◎">◎</option>
                             <option value="〇">〇</option>
                             <option value="△">△</option>
-                            <option value="無" selected>無</option>
+                            <option value="✕">✕</option> <option value="無" selected>無</option>
                         </select>
                     </div>
                     <div class="player-field">
@@ -388,6 +387,8 @@
     <h2>📊 予想結果・推奨買い目</h2>
     <div class="result-section">
         
+        <div id="bank-tendency-display"></div>
+
         <h3>🔗 ライン強度</h3>
         <div id="line-display" class="line-display">
             計算結果待ち...
