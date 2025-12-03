@@ -271,14 +271,6 @@
             transition: background-color 0.3s;
         }
         button:hover { background-color: #557755; }
-        
-        /* X投稿ボタン用のスタイル調整 */
-        #post-to-x-button {
-            background-color: #1DA1F2; 
-            margin-top: 10px;
-        }
-        #post-to-x-button:hover { background-color: #0c85d0; }
-
 
         /* フッターCSS */
         .copyright-footer {
@@ -672,14 +664,9 @@
         </div>
         
         <button onclick="calculatePrediction()">🚀 予想を計算 (実行)</button>
-        
     </div>
 
     <div id="results-container">
-        <button onclick="postToX()" id="post-to-x-button" style="margin-top: 10px;" disabled>
-            🐦 X (旧Twitter) に予想を投稿
-        </button>
-        
         <h2>📊 予想結果・推奨買い目</h2>
         <div class="result-section">
             
@@ -708,8 +695,6 @@
         </div>
     </div>
 </div>
-<textarea id="x-post-text-storage" style="display: none;"></textarea>
-
 <div class="debug-log-header" onclick="toggleDebugLog()">
     <span id="log-toggle-icon">▶</span> 🛠️ デバッグ・処理ログ
 </div>
