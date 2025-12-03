@@ -17,7 +17,7 @@
             margin: 0; 
             padding: 0; 
             padding-bottom: 30px; 
-            background-color: #fbf8f5; /* ★基調色: 非常に薄いグリーン/ベージュ */
+            background-color: #fbf8f5; 
             color: #333; 
         }
         
@@ -25,40 +25,103 @@
             width: calc(100% - 20px); 
             max-width: 600px; 
             margin: 10px auto; 
-            background-color: #ffffff; /* コンテンツ背景 */
+            background-color: #ffffff; 
             padding: 0; 
-            border-radius: 8px; /* 角を丸く */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* 影を優しく */
+            border-radius: 8px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); 
             box-sizing: border-box; 
         }
         
         /* ヘッダー/タイトル */
         h1 { 
             font-size: 1.5em; 
-            color: #698b69; /* 落ち着いたグリーン */
-            border-bottom: 3px solid #98b498; /* セージグリーン */
-            padding: 15px 15px 10px 15px; /* 内側paddingを調整 */ 
+            color: #698b69; 
+            border-bottom: 3px solid #98b498; 
+            padding: 15px 15px 10px 15px; 
             margin-top: 0; 
-            border-radius: 8px 8px 0 0; /* 上の角だけ丸く */
+            border-radius: 8px 8px 0 0; 
         }
         
         h2 { 
             font-size: 1.2em; 
             color: #698b69; 
-            border-bottom: 2px solid #b3c7b3; /* さらに薄いグリーン */
+            border-bottom: 2px solid #b3c7b3; 
             padding: 15px 15px 5px 15px; 
             margin-top: 20px; 
         }
         
         /* グループボックス（入力・結果） */
         .input-group, .result-section { 
-            margin: 0 15px 20px 15px; /* 左右マージンを15pxに拡大 */
+            margin: 0 15px 20px 15px; 
             padding: 15px; 
             border: 1px solid #e0e0e0; 
             border-radius: 8px; 
-            background-color: #fcfcf0; /* ★情報ボックスの薄いクリーム色 */
+            background-color: #fcfcf0; 
             box-sizing: border-box; 
         }
+
+        /* ------------------------------------------- */
+        /* ★新規: マニュアル/デバッグログのトグルヘッダー共通スタイル */
+        /* ------------------------------------------- */
+        .manual-header, .debug-log-header {
+            font-size: 1.05em; /* ログより少し大きめ */
+            color: #698b69; 
+            padding: 10px 15px; 
+            margin-top: 10px; 
+            cursor: pointer; 
+            user-select: none; 
+            font-weight: bold;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .manual-content {
+            display: none; /* ★初期状態で非表示 */
+            padding: 15px; 
+            margin: 0 15px 15px 15px;
+            background-color: #ffffff;
+            border-left: 3px solid #b3c7b3;
+            border-right: 3px solid #b3c7b3;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .manual-content h3 { font-size: 1.1em; color: #557755; border-bottom: 1px solid #e0e0e0; padding-bottom: 3px; margin-top: 15px; }
+        .manual-content table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        .manual-content th, .manual-content td { border: 1px solid #eee; padding: 5px; text-align: left; vertical-align: top; font-size: 0.85em; }
+        .manual-content th { background-color: #f7f7f7; width: 30%; }
+
+
+        /* ------------------------------------------- */
+        /* デバッグログの初期状態を非表示に */
+        /* ------------------------------------------- */
+        
+        .debug-log-header {
+            font-size: 1.05em; 
+            color: #698b69; 
+            border-bottom: 2px solid #b3c7b3; 
+            padding: 15px 15px 5px 15px; 
+            margin-top: 20px; 
+            cursor: pointer; 
+            user-select: none; 
+        }
+        
+        .debug-log { 
+            display: none; 
+            background-color: #384e38; 
+            color: #f0fff0; 
+            padding: 10px; 
+            height: 100px; 
+            overflow-y: scroll; 
+            font-family: 'Courier New', Courier, monospace; 
+            border-radius: 5px; 
+            font-size: 0.75em; 
+            margin: 0 15px 15px 15px; 
+        }
+        
+        /* ------------------------------------------- */
+        /* その他のスタイル（変更なし） */
+        /* ------------------------------------------- */
 
         /* 縦積み化の基本スタイル */
         .input-item { margin-bottom: 15px; }
@@ -90,7 +153,7 @@
             display: flex; 
             justify-content: space-between; 
             align-items: center;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* 境界線も薄く */
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05); 
         }
 
         /* 枠番色：非常に薄い色を維持 */
@@ -106,7 +169,7 @@
         .player-fields { 
             display: flex; 
             flex-wrap: wrap; 
-            gap: 4px; /* ギャップを少し広げる */
+            gap: 4px; 
             padding: 8px 10px; 
         }
         
@@ -138,7 +201,7 @@
         #line-strength { padding: 8px 0; font-size: 1.1em; }
         .line-display { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
         
-        /* ラインカラーは以前の強い色を維持 (枠番とは別の意味合いのため) */
+        /* ラインカラーは以前の強い色を維持 */
         .line-box { 
             display: inline-block; 
             padding: 2px 6px; 
@@ -161,7 +224,7 @@
         /* 結果テーブル */
         .scenario-detail table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 10px; }
         .scenario-detail th, .scenario-detail td { 
-            border: 1px solid #efefef; /* 罫線も薄く */
+            border: 1px solid #efefef; 
             padding: 6px 3px; 
             text-align: center; 
             font-size: 0.85em; 
@@ -172,29 +235,18 @@
         .hide-score-rank { display: none !important; }
 
         /* その他UI要素 */
-        .debug-log { 
-            background-color: #384e38; /* ダークグリーン系 */
-            color: #f0fff0; 
-            padding: 10px; 
-            height: 100px; 
-            overflow-y: scroll; 
-            font-family: 'Courier New', Courier, monospace; 
-            border-radius: 5px; 
-            font-size: 0.75em; 
-            margin: 0 15px 15px 15px; /* マージン調整 */
-        }
         
         .recommendation { padding: 12px; border-radius: 6px; font-weight: bold; margin-top: 10px; font-size: 0.95em; line-height: 1.6; }
         
         /* 晴天令・荒天令の色味を優しく調整 */
         #seitenrei-output { 
             background-color: #e6f5e6; 
-            border-left: 5px solid #698b69; /* 落ち着いた緑 */ 
+            border-left: 5px solid #698b69; 
             color: #444; 
         }
         #koutenrei-output { 
             background-color: #fcf0f0; 
-            border-left: 5px solid #c07777; /* 落ち着いた赤 */ 
+            border-left: 5px solid #c07777; 
             color: #444; 
         }
         
@@ -204,7 +256,7 @@
         button { 
             width: 100%; 
             padding: 14px; 
-            background-color: #698b69; /* 落ち着いた緑 */
+            background-color: #698b69; 
             color: white; 
             border: none; 
             border-radius: 5px; 
@@ -242,7 +294,73 @@
 <div class="container">
     <h1>華耀天輪 真・自在律 V6.0</h1>
 
-    <h2>🛠️ デバッグ・処理ログ</h2>
+    <div class="manual-header" onclick="toggleManual()">
+        <span id="manual-toggle-icon">▶</span> 📖 操作説明書・マニュアル
+    </div>
+    <div class="manual-content" id="manual-content">
+        
+        <h2>⚙️ ツールの全体構成と基本操作</h2>
+        <p>このツールは、入力されたレース情報と選手データに基づき、複数の展開パターンをシミュレーションし、独自ロジックで評価した予想結果（晴天令/荒天令）を提供するモバイル向け競輪予想支援ツールです。</p>
+
+        <h3>🎛️ レース/選手情報入力エリア</h3>
+        <table>
+            <tr>
+                <th>項目</th>
+                <th>目的</th>
+            </tr>
+            <tr>
+                <td>**レースタイプ/級班**</td>
+                <td>計算係数の調整（S級、A級、ガールズなど）を行います。</td>
+            </tr>
+            <tr>
+                <td>**バンク名**</td>
+                <td>開催バンクを選択します。展開傾向が自動で結果エリアに表示されます。</td>
+            </tr>
+            <tr>
+                <td>**全体並び**</td>
+                <td>確定したライン構成をカンマ区切りで入力します（例: `123,45,67`）。</td>
+            </tr>
+        </table>
+
+        <h3>📝 選手個別データの入力</h3>
+        <table>
+            <tr>
+                <th>項目</th>
+                <th>説明</th>
+            </tr>
+            <tr>
+                <td>**S 1位 / B 1位**</td>
+                <td>**S（上がり）**と**B（バック）**の1着候補を、それぞれ1名選択します。展開パターン生成に影響します。</td>
+            </tr>
+            <tr>
+                <td>**脚質**</td>
+                <td>選手の脚質を選択（`逃先`、`差マ`、`捲り`）。</td>
+            </tr>
+            <tr>
+                <td>**得点 (R)**</td>
+                <td>競走得点を入力します。予測の根幹となる最重要データです。</td>
+            </tr>
+            <tr>
+                <td>**直近3走**</td>
+                <td>直近3レースの着順を**最新の着順から**入力します（例: `111`、`231`）。</td>
+            </tr>
+            <tr>
+                <td>**W印**</td>
+                <td>専門紙の◎、〇、△などの評価を入力します。</td>
+            </tr>
+        </table>
+        
+        <h3>📊 予想結果・推奨買い目エリア</h3>
+        <ul>
+            <li>**晴天令 (安定推奨):** 最も安定し、堅い決着が予想される展開パターンを重視した推奨買い目です。</li>
+            <li>**荒天令 (高配当狙い):** 波乱の可能性が高く、高配当が期待できる展開パターンを重視した推奨買い目です。</li>
+        </ul>
+
+    </div>
+    
+    <div class="debug-log-header" onclick="toggleDebugLog()">
+        <span id="log-toggle-icon">▶</span> 🛠️ デバッグ・処理ログ
+    </div>
     <div class="debug-log" id="debug-log">
         [TOOL START] ツール起動。すべての係数とロジックを読み込みました。<br>
         [INFO] bankdata.jsonの読み込みを待機しています...
@@ -543,7 +661,7 @@
             <input type="text" id="line-input" value="1,2,3,4,5,6,7">
         </div>
         
-        <button onclick="calculatePrediction()">🚀 予想を計算 (実行)</option>
+        <button onclick="calculatePrediction()">🚀 予想を計算 (実行)</button>
     </div>
 
     <div id="results-container">
@@ -579,6 +697,35 @@
 <footer class="copyright-footer">
     (C)2025 Eysyum
 </footer>
+
+<script>
+    function toggleDebugLog() {
+        const logElement = document.getElementById('debug-log');
+        const iconElement = document.getElementById('log-toggle-icon');
+        
+        if (logElement.style.display === 'block') {
+            logElement.style.display = 'none';
+            iconElement.textContent = '▶';
+        } else {
+            logElement.style.display = 'block';
+            iconElement.textContent = '▼';
+        }
+    }
+    
+    // ★新規: マニュアル開閉トグル関数
+    function toggleManual() {
+        const manualElement = document.getElementById('manual-content');
+        const iconElement = document.getElementById('manual-toggle-icon');
+        
+        if (manualElement.style.display === 'block') {
+            manualElement.style.display = 'none';
+            iconElement.textContent = '▶';
+        } else {
+            manualElement.style.display = 'block';
+            iconElement.textContent = '▼';
+        }
+    }
+</script>
 
 <script src="keirin_logic_v6.0.js"></script>
 </body>
