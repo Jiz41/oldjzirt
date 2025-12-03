@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>競輪予想ツール 華耀天輪 真・自在律 V4.8 (デバッグログ有効版)</title>
+<title>競輪予想ツール 華耀天輪 真・自在律 V4.9 (最終安定版)</title>
 <style>
-/* 🎨 V4.8 スタイル (V4.7.1から変更なし) */ 
+/* 🎨 V4.9 スタイル (V4.7.1から変更なし) */ 
 :root { 
     --primary-color: #4682B4; 
     --accent-color: #FFD700; 
@@ -325,7 +325,7 @@ select, input[type="number"], input[type="text"] {
         <p style="text-align: center; margin: 0;">🛠️ **デバッグログ:** 計算処理のステップが表示されます。</p>
     </div>
 
-    <h1>華耀天輪 真・自在律 V4.8 (デバッグログ有効版)</h1> 
+    <h1>華耀天輪 真・自在律 V4.9 (最終安定版)</h1> 
     <div class="manual-container"> 
         <h2 id="manual-toggle" onclick="toggleManual()"> 📜 説明書・評価ロジック解説 <span id="toggle-icon">▼</span> </h2> 
         <div id="manual-content" class="manual-content-hidden"> 
@@ -502,7 +502,7 @@ select, input[type="number"], input[type="text"] {
 </div> 
 <script> 
 // ----------------------------------------------------------------------
-// 🚨 V4.8 定数定義: 係数は一切変更なし
+// 🚨 V4.9 定数定義: 係数は一切変更なし
 // ----------------------------------------------------------------------
 let bankData = {}; 
 const PLAYER_COUNT = 7; 
@@ -1021,9 +1021,9 @@ function calculate() {
         const windDir = document.getElementById('wind-select').value; 
         const lineupStr = document.getElementById('overall-lineup').value.trim(); 
         
-        // 🚨 V4.8 修正箇所：timeBiasValとwindBiasValの初期化とスコープを保証
+        // V4.8 修正箇所：timeBiasValとwindBiasValの初期化とスコープを保証
         const timeBiasVal = COMMON_TIME_BIAS[timeZone] || 1.0; 
-        let windBiasVal = 1.0; // <-- 確実に初期化 (letで宣言)
+        let windBiasVal = 1.0; 
         
         const commonWindCondition = COMMON_WIND_MAP[windDir]; 
         
@@ -1037,13 +1037,16 @@ function calculate() {
              debugLog.innerHTML += `<p>✅ **風補正不適用:** 該当する風補正データがないため windBiasVal=${windBiasVal.toFixed(2)} (初期値) を適用</p>`;
         }
         
-        const parsedLines = getParsedLines(lineupStr);
+        // 🚨 V4.9 修正点: ライン解析結果から**単騎（長さ1の文字列）**を確実に除外
+        const allParsedLines = getParsedLines(lineupStr);
+        const multiPlayerLines = allParsedLines.filter(line => line.length > 1);
+        
         debugLog.innerHTML += `<p>✅ **並び入力:** **${lineupStr.length > 0 ? lineupStr : '空欄 (全員単騎)'}**</p>`;
-        debugLog.innerHTML += `<p>✅ **ライン解析結果:** **${parsedLines.length} ライン** (構成: [${parsedLines.join(', ')}])</p>`;
+        debugLog.innerHTML += `<p>✅ **ライン解析結果 (計算対象):** **${multiPlayerLines.length} ライン** (構成: [${multiPlayerLines.join(', ')}])</p>`;
 
 
-        // 1. ライン強度と結束力の計算
-        const lineCohesionResults = calculateLineCohesion(rawPlayers, lineupStr);
+        // 1. ライン強度と結束力の計算 (計算対象は multiPlayerLines のみ)
+        const lineCohesionResults = calculateLineCohesion(rawPlayers, multiPlayerLines);
 
         // 2. 最終期待値スコアの計算
         let finalPlayers = rawPlayers.map(p => { 
@@ -1051,12 +1054,12 @@ function calculate() {
             if (p.s1st) sBBonus *= S_BONUS;
             if (p.b1st) sBBonus *= B_BONUS;
             
-            p.coopBias = calculateCoopBias(p.id, rawPlayers, lineupStr, lineCohesionResults); 
+            // calculateCoopBiasにも multiPlayerLines を渡し、単騎の協力補正を 1.0 に保証
+            p.coopBias = calculateCoopBias(p.id, rawPlayers, multiPlayerLines, lineCohesionResults); 
 
             let legStaticBias = (p.leg === '差し' || p.leg === 'マーク') ? MARK_SASHI_STATIC_BIAS : 1.0; 
             const legBias = currentBank.keirin_bias[p.legKey] || 1.0; 
             
-            // windBiasVal, timeBiasVal, legStaticBias はここで使用される
             const staticBias = legBias * windBiasVal * timeBiasVal * legStaticBias; 
             
             let finalScore = p.rawScore * p.winticketBias * staticBias * p.meetingRankBias * p.coopBias * sBBonus; 
@@ -1066,7 +1069,7 @@ function calculate() {
         
         debugLog.innerHTML += `<p>✅ **スコア計算完了:** ${finalPlayers.length}名の選手スコアを算出しました。</p>`;
 
-        // 3. 単騎判定と環境フィードバック
+        // 3. 単騎判定と環境フィードバック (単騎判定は元のラインアップ文字列を使用)
         const { singleRiders } = parseLineupAndDetermineMode(lineupStr, rawPlayers); 
         displayBankFeedback(selectedBankName, currentBank.keirin_bias); 
 
@@ -1080,7 +1083,8 @@ function calculate() {
                 const developBiasVal = developBiasMap[p.legKey] || 1.0; 
                 let scenarioScore = p.score * developBiasVal; 
                 
-                const isSingle = !p.coopBias > 1.0 && singleRiders.includes(p.id); 
+                // 単騎判定
+                const isSingle = singleRiders.includes(p.id); 
                 return { id: p.id, leg: p.leg, score: scenarioScore, isSingle: isSingle, coopBias: p.coopBias }; 
             }); 
             scenarioPlayers.sort((a, b) => b.score - a.score); 
@@ -1131,7 +1135,7 @@ function calculate() {
 } 
 
 // ----------------------------------------------------------------------
-// ヘルパー関数群 (V4.8 変更なし)
+// ヘルパー関数群 (V4.9 変更点: getParsedLines の厳密化)
 // ----------------------------------------------------------------------
 
 function getParsedLines(lineupStr) {
@@ -1139,17 +1143,18 @@ function getParsedLines(lineupStr) {
         return [];
     }
     // V4.7で実装済みのサニタイズ処理
+    // 戻り値には単騎のIDも含まれる可能性がある
     return lineupStr.split(',').map(l => l.trim()).filter(l => l.length > 0);
 }
 
-function calculateLineCohesion(rawPlayers, lineupStr) {
+function calculateLineCohesion(rawPlayers, multiPlayerLines) {
     const container = document.getElementById('line-evaluation-container');
     if (!container) return {}; 
     
     container.innerHTML = '';
     
-    // V4.7 サニタイズされたライン解析結果を使用
-    const lineNames = getParsedLines(lineupStr);
+    // 🚨 V4.9 変更点: 引数 multiPlayerLines は既に長さ2以上のラインのみ
+    const lineNames = multiPlayerLines;
 
     if (lineNames.length === 0) {
         container.style.display = 'none';
@@ -1162,7 +1167,9 @@ function calculateLineCohesion(rawPlayers, lineupStr) {
     const classMap = { 'A': 'line-strong', 'B': 'line-medium', 'C': 'line-medium', 'D': 'line-weak' };
 
     lineNames.forEach((lineStr, index) => {
+        // lineStr は必ず長さ2以上が保証されているため、split('') でクラッシュしない
         const lineMembers = lineStr.split('').map(idStr => parseInt(idStr)).filter(id => !isNaN(id)); 
+        // 念の為のチェック
         if (lineMembers.length < 2) return; 
 
         const line = { members: [], totalRating: 0 };
@@ -1211,41 +1218,38 @@ function calculateLineCohesion(rawPlayers, lineupStr) {
     return lineCohesionResults;
 }
 
-function calculateCoopBias(playerId, players, lineupStr, lineCohesionResults) { 
-    if (!lineupStr || lineupStr.trim().length === 0) { 
+function calculateCoopBias(playerId, players, multiPlayerLines, lineCohesionResults) { 
+    // 🚨 V4.9 変更点: multiPlayerLines を使用し、ライン計算に単騎が混入しないことを保証
+    if (multiPlayerLines.length === 0) { 
         return 1.0; 
     } 
 
-    const lines = getParsedLines(lineupStr);
-    const hasMultiPlayerLine = lines.some(line => line.length > 1);
-    
-    if (hasMultiPlayerLine) { 
-        let lineIndex = -1;
-        let positionIndex = -1;
-        lines.forEach((line, index) => {
-            const linePlayers = line.split('').map(Number);
-            const foundIndex = linePlayers.indexOf(playerId);
-            if (foundIndex !== -1) {
-                lineIndex = index;
-                positionIndex = foundIndex;
-            }
-        });
-
-        if (lineIndex !== -1 && lineCohesionResults[lineIndex]) {
-            const { k, N, totalBiasFactor } = lineCohesionResults[lineIndex];
-            
-            let posBias = 1.0;
-            if (positionIndex === 1) {
-                posBias = POSITION_BONUS['second'];
-            } else if (positionIndex >= 2) {
-                posBias = POSITION_BONUS['third_or_later'];
-            }
-            
-            const baseCoop = (N - 1) * k; 
-            return baseCoop * totalBiasFactor * posBias;
+    let lineIndex = -1;
+    let positionIndex = -1;
+    multiPlayerLines.forEach((line, index) => {
+        const linePlayers = line.split('').map(Number);
+        const foundIndex = linePlayers.indexOf(playerId);
+        if (foundIndex !== -1) {
+            lineIndex = index;
+            positionIndex = foundIndex;
         }
-        return 1.0;
-    } 
+    });
+
+    if (lineIndex !== -1 && lineCohesionResults[lineIndex]) {
+        const { k, N, totalBiasFactor } = lineCohesionResults[lineIndex];
+        
+        let posBias = 1.0;
+        if (positionIndex === 1) {
+            posBias = POSITION_BONUS['second'];
+        } else if (positionIndex >= 2) {
+            posBias = POSITION_BONUS['third_or_later'];
+        }
+        
+        const baseCoop = (N - 1) * k; 
+        return baseCoop * totalBiasFactor * posBias;
+    }
+    
+    // ラインに含まれない選手 (単騎) の協力補正は 1.0
     return 1.0; 
 } 
 
