@@ -31,6 +31,28 @@
         .sb-group label { display: inline-flex; align-items: center; font-weight: normal; color: #555; }
         .sb-group input[type="radio"] { width: auto; margin-left: 5px; }
         
+        /* ------------------------------------- */
+        /* ★★★ 新規追加：ライン強度用CSS ★★★ */
+        /* ------------------------------------- */
+        #line-strength { padding: 8px 0; font-size: 1.1em; }
+        .line-display { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+        .line-box { 
+            display: inline-block; 
+            padding: 2px 4px; 
+            border-radius: 3px; 
+            font-weight: bold; 
+            color: white; 
+            margin-right: 5px; 
+            font-size: 0.9em;
+        }
+        /* ラインカラー定義 */
+        .line-color-1 { background-color: #e74c3c; /* 赤 */ }
+        .line-color-2 { background-color: #3498db; /* 青 */ }
+        .line-color-3 { background-color: #2ecc71; /* 緑 */ }
+        .line-color-4 { background-color: #9b59b6; /* 紫 */ }
+        .line-solo { background-color: #95a5a6; /* 灰色 */ }
+        /* ------------------------------------- */
+
         /* 結果テーブルの横スクロール回避 */
         .scenario-detail table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         .scenario-detail th, .scenario-detail td { border: 1px solid #ddd; padding: 6px 4px; text-align: center; font-size: 0.8em; word-break: break-all; }
@@ -350,8 +372,10 @@
     <h2>📊 予想結果・推奨買い目</h2>
     <div class="result-section">
         
-        <p><strong>連係評価:</strong> <span id="line-strength">計算結果待ち...</span></p>
-
+        <h3>🔗 ライン強度</h3>
+        <div id="line-display" class="line-display">
+            計算結果待ち...
+        </div>
         <h3>☀️ 晴天令 (安定推奨)</h3>
         <div class="recommendation" id="seitenrei-output">
             計算結果待ち...
