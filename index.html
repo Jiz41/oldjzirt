@@ -141,6 +141,26 @@
             font-size: 1em; 
             background-color: #ffffff;
         }
+        /* 地元スイッチのチェックボックス調整 */
+        .local-switch-group {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            margin-bottom: 5px;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 1em;
+            color: #698b69;
+        }
+
+        .local-switch-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            margin-left: 0;
+            transform: scale(1.2); /* チェックボックスを少し大きく */
+            vertical-align: middle;
+        }
+
 
         /* 選手データ入力リスト */
         .player-input-list { margin-top: 10px; }
@@ -179,15 +199,16 @@
         }
         
         .player-field { 
-            flex: 1 1 23%; 
+            flex: 1 1 20%; 
             min-width: 50px; 
             box-sizing: border-box; 
         }
-
-        .player-field:nth-child(1) { flex: 1 1 23%; } 
-        .player-field:nth-child(2) { flex: 1 1 27%; } 
-        .player-field:nth-child(3) { flex: 1 1 20%; } 
-        .player-field:nth-child(4) { flex: 1 1 25%; } 
+        /* フィールド幅の調整 */
+        .player-field:nth-child(1) { flex: 1 1 20%; } /* 脚質 */
+        .player-field:nth-child(2) { flex: 1 1 25%; } /* 得点 */
+        .player-field:nth-child(3) { flex: 1 1 18%; } /* W印 */
+        .player-field:nth-child(4) { flex: 1 1 22%; } /* 直近3走 */
+        .player-field:nth-child(5) { flex: 1 1 8%; }  /* 地元 */
         
         .player-field label { display: block; font-size: 0.7em; color: #666; margin-bottom: 2px;}
         .player-field input, .player-field select { 
@@ -195,6 +216,14 @@
             padding: 3px 5px; 
             box-sizing: border-box; 
             font-size: 0.85em; 
+        }
+        
+        /* 地元チェックボックスの特殊調整 */
+        .player-field input[type="checkbox"] {
+            width: auto;
+            display: block;
+            margin: 5px auto 0 auto;
+            transform: scale(1.1);
         }
 
         /* S/B 1位のラジオボタン用レイアウト */
@@ -325,6 +354,10 @@
                 <td>**全体並び**</td>
                 <td>確定したライン構成をカンマ区切りで入力します（例: `123,45,67`）。</td>
             </tr>
+            <tr>
+                <td>**地元スイッチ**</td>
+                <td>**地元選手**がいる場合にONにすることで、**地元利（恩義や番組配慮）**を加味した補正係数（$C_{local}$）が適用されます。</td>
+            </tr>
         </table>
 
         <h3>📝 選手個別データの入力</h3>
@@ -346,17 +379,16 @@
                 <td>競走得点を入力します。予測の根幹となる最重要データです。</td>
             </tr>
             <tr>
+                <td>**W印**</td>
+                <td>専門紙や予想サイトなどの**評価（◎、〇、△など）**を入力します。</td>
+            </tr>
+            <tr>
                 <td>**直近3走**</td>
                 <td>直近3レースの着順を**最新の着順から**入力します（例: `111`、`231`）。</td>
             </tr>
             <tr>
-                <td>**予想印**</td>
-                <td>専門紙や予想サイトなどの**評価（◎、〇、△など）**を入力します。
-                    <ul>
-                        <li>客観的な得点に**プロの視点**や**市場の期待値**を加味します。</li>
-                        <li>より**洗練された**、**実戦的な予想**の精度向上に繋がります。</li>
-                    </ul>
-                </td>
+                <td>**地元**</td>
+                <td>その選手が**開催バンクの地元選手**である場合にチェックを入れます。</td>
             </tr>
         </table>
         
@@ -424,6 +456,10 @@
                         <label>直近3走</label>
                         <input type="text" class="recent" value="111">
                     </div>
+                    <div class="player-field">
+                        <label>地元</label>
+                        <input type="checkbox" class="is-local">
+                    </div>
                 </div>
             </div>
 
@@ -461,6 +497,10 @@
                     <div class="player-field">
                         <label>直近3走</label>
                         <input type="text" class="recent" value="211">
+                    </div>
+                    <div class="player-field">
+                        <label>地元</label>
+                        <input type="checkbox" class="is-local">
                     </div>
                 </div>
             </div>
@@ -500,6 +540,10 @@
                         <label>直近3走</label>
                         <input type="text" class="recent" value="444">
                     </div>
+                    <div class="player-field">
+                        <label>地元</label>
+                        <input type="checkbox" class="is-local">
+                    </div>
                 </div>
             </div>
             
@@ -537,6 +581,10 @@
                     <div class="player-field">
                         <label>直近3走</label>
                         <input type="text" class="recent" value="333">
+                    </div>
+                    <div class="player-field">
+                        <label>地元</label>
+                        <input type="checkbox" class="is-local">
                     </div>
                 </div>
             </div>
@@ -576,6 +624,10 @@
                         <label>直近3走</label>
                         <input type="text" class="recent" value="555">
                     </div>
+                    <div class="player-field">
+                        <label>地元</label>
+                        <input type="checkbox" class="is-local">
+                    </div>
                 </div>
             </div>
 
@@ -613,6 +665,10 @@
                     <div class="player-field">
                         <label>直近3走</label>
                         <input type="text" class="recent" value="666">
+                    </div>
+                    <div class="player-field">
+                        <label>地元</label>
+                        <input type="checkbox" class="is-local">
                     </div>
                 </div>
             </div>
@@ -652,6 +708,10 @@
                         <label>直近3走</label>
                         <input type="text" class="recent" value="777">
                     </div>
+                    <div class="player-field">
+                        <label>地元</label>
+                        <input type="checkbox" class="is-local">
+                    </div>
                 </div>
             </div>
             
@@ -661,6 +721,11 @@
         <div class="input-item">
             <label for="line-input">全体並び: (例: 123,45,67 または 1,2,3,4,5,6,7)</label>
             <input type="text" id="line-input" value="1,2,3,4,5,6,7">
+        </div>
+        
+        <div class="local-switch-group">
+            <input type="checkbox" id="local-switch">
+            <label for="local-switch">🎌 **地元スイッチ** (地元選手への恩義・配慮を加味)</label>
         </div>
         
         <button onclick="calculatePrediction()">🚀 予想を計算 (実行)</button>
