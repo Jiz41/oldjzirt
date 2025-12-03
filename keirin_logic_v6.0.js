@@ -40,6 +40,10 @@ function getPlayerData() {
         const id = parseInt(row.getAttribute('data-id'));
         if (isNaN(id)) return;
 
+        // ★修正点1: 地元 (is_local) フラグの読み込み準備
+        const isLocalCheckbox = row.querySelector('.is-local');
+        const isLocal = isLocalCheckbox ? isLocalCheckbox.checked : false;
+
         players.push({
             id: id,
             score: parseFloat(row.querySelector('.score').value) || 0,
@@ -49,6 +53,7 @@ function getPlayerData() {
             
             is_s1: id === s1Id,
             is_b1: id === b1Id,
+            is_local: isLocal, // ★追加
 
             c_score_adj: 1.0, c_recent: 1.0, c_wmark: 1.0, c_s1: 1.0, c_b1: 1.0, c_l: 1.0, c_e: 1.0,
             final_score: 0
@@ -228,26 +233,25 @@ function calculateLineCoeffs(players, settings) {
                 }
             }
 
-            // ★★★ ここから連係波及補正ロジックの追記 ★★★
+            // ★★★ ここから連係波及補正ロジックの追記 (5-6-1対応) ★★★
             if (leadPlayer && markPlayer && line.length >= 2) {
                 const scoreDiff = leadPlayer.score - markPlayer.score;
+                // 得点最下位の選手を正確に判断するため、minScoreを使用
                 const isMarkLowest = markPlayer.score <= minScore + 0.01;
 
-                if (isMarkLowest) {
+                if (isMarkLowest && scoreDiff > 0) { // 自力が高得点でマークが得点最下位の場合
                     // 1. 📉 自力選手への減点: C_risk_pull (共倒れリスク係数)
-                    // (得点最下位の選手をマークにつけた自力選手は、力負けリスクで減点)
                     const C_risk_pull = 0.97;
                     leadPlayer.c_l *= C_risk_pull;
                     logMessage(`[C_L_ADJ] ${leadPlayer.id}番 (自力/${leadPlayer.score.toFixed(2)}) に共倒れリスク ${C_risk_pull.toFixed(2)} を適用。`);
 
                     // 2. 📈 マーク選手への加点: C_Tri_Benefit (番手利得係数)
-                    // (格上の自力選手の頑張りが報われるボーナス)
                     const C_Tri_Benefit = 1.03;
                     markPlayer.c_l *= C_Tri_Benefit;
                     logMessage(`[C_L_ADJ] ${markPlayer.id}番 (マーク/${markPlayer.score.toFixed(2)}) に番手利得 ${C_Tri_Benefit.toFixed(2)} を適用。`);
 
                 } else if (scoreDiff > 2.0 && markPlayer.style === '追') {
-                    // (玉野11Rのケースではないが、得点差が大きいマーク選手への一般的な補正)
+                    // 得点差が大きいマーク選手への一般的な補正（低得点最下位ではないケース）
                     const C_Large_Benefit = 1.015;
                     markPlayer.c_l *= C_Large_Benefit;
                     logMessage(`[C_L_ADJ] ${markPlayer.id}番 (マーク/${markPlayer.score.toFixed(2)}) に大得点差マーク補正 ${C_Large_Benefit.toFixed(3)} を適用。`);
@@ -372,7 +376,7 @@ async function calculatePrediction() {
     logMessage(`[CALC START] ${raceType} / バンク: ${bankName} で計算開始。`);
 
     // --- I. C_L (ライン・連係係数) の計算とライン強度の表示 ---
-    calculateLineCoeffs(players, settings);
+    const lines = calculateLineCoeffs(players, settings); // 修正: linesを返すように
 
     // --- II. 選手固有係数 C_W, C_R, C_S1, C_B1 & C_E の計算 (W印の修正を含む) ---
     players.forEach(p => {
@@ -402,6 +406,50 @@ async function calculatePrediction() {
         p.c_e = c_e;
     });
 
+    // ★★★ [NEW] 地元スイッチ C_local の計算 ★★★
+    const localSwitchOn = document.getElementById('local-switch') ? document.getElementById('local-switch').checked : false;
+
+    if (localSwitchOn) {
+        logMessage('[C_LOCAL] 地元スイッチがONです。地元補正を適用します。');
+
+        const localPlayerIds = players.filter(p => p.is_local).map(p => p.id);
+        const coopBoost = 1.008; // 協力ラインへの補正
+        const antiBoost = 0.995; // 他地区エースへの減点
+
+        // 地元選手へのメイン補正 (1.025)
+        players.forEach(p => {
+            if (p.is_local) {
+                p.c_l *= 1.025; 
+                logMessage(`[C_LOCAL] ${p.id}番 (地元) にメイン補正 1.025 を適用。`);
+            }
+        });
+
+        // ライン協力選手への補正 (1.008)
+        lines.forEach(line => {
+            const isLocalLine = line.some(id => localPlayerIds.includes(id));
+            if (isLocalLine) {
+                line.forEach(id => {
+                    const p = players.find(player => player.id === id);
+                    // 地元選手ではない、協力ラインの選手に加点
+                    if (p && !p.is_local) {
+                        p.c_l *= coopBoost; 
+                        logMessage(`[C_LOCAL] ${p.id}番 (協力) に協力補正 ${coopBoost} を適用。`);
+                    }
+                });
+            }
+        });
+
+        // 他地区の最高得点選手への微減点 (0.995)
+        const highestScorePlayer = players.reduce((max, p) => (p.score > max.score ? p : max), { score: -Infinity });
+        if (highestScorePlayer && !highestScorePlayer.is_local) {
+            // 地元選手ではない最高得点選手に減点
+            highestScorePlayer.c_l *= antiBoost; 
+            logMessage(`[C_LOCAL] ${highestScorePlayer.id}番 (他地区エース) に牽制減点 ${antiBoost} を適用。`);
+        }
+    }
+    // ★★★ 地元スイッチ C_local の計算 ここまで ★★★
+
+
     // --- III. 展開別シミュレーションと最終スコア算出 ---
     const scenarios = ['先行有利', '捲り有利', '差し有利'];
     const allScenarioResults = [];
@@ -413,7 +461,7 @@ async function calculatePrediction() {
         
         scenarioPlayers.forEach(p => {
             const cD = cDCoeffs[p.style] || 1.0;
-            // ★最終スコア計算の確認★
+            // ★最終スコア計算★
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e * cD;
         });
 
@@ -427,7 +475,7 @@ async function calculatePrediction() {
     // --- IV. 最終結果の統合と表示 ---
     displayResults(allScenarioResults, players, bankName); 
     
-    // ★修正点2: 計算完了後、結果コンテナを表示する
+    // ★計算完了後、結果コンテナを表示する
     const resultsContainer = document.getElementById('results-container');
     if (resultsContainer) {
         resultsContainer.classList.add('visible');
