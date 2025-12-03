@@ -2,18 +2,19 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>真・自在律 v3.1（最終版）</title>
+    <title>真・自在律 v3.4（オリジナルデザイン維持・外部JSON対応）</title>
     <style>
-        /* 基本スタイル */
+        /* 基本スタイル（変更なし） */
         body { font-family: sans-serif; margin: 20px; background-color: #f4f4f9; }
         .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
         h1, h2, h3 { color: #333; border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background-color: #e9e9e9; }
-        input[type="number"], input[type="text"] { width: 60px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        /* input[type="number"], input[type="text"] の幅を統一し、selectにも適用 */
+        input[type="number"], input[type="text"], select { width: 60px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         input[type="checkbox"] { width: 20px; height: 20px; } 
-        /* ライン評価のカラースタイル */
+        /* ライン評価のカラースタイル（変更なし） */
         .line-strongest { background-color: #D9534F; color: white; font-weight: bold; } /* 超特級 */
         .line-strong { background-color: #F0AD4E; color: white; font-weight: bold; } /* 特級 */
         .line-high { background-color: #F0AD4E; color: black; } /* 上級 */
@@ -34,7 +35,7 @@
 <body>
 
 <div class="container">
-    <h1>真・自在律 v3.1</h1>
+    <h1>真・自在律 v3.4</h1>
     <p>競走得点、ライン連係、W印、展開、S/B積極性から総合スコアを算出します。</p>
 
     <h2>🚴 レース基本情報入力</h2>
@@ -63,7 +64,12 @@
             <option value="makuri">捲り有利</option>
             <option value="sashi">差し有利</option>
         </select>
-        <strong>バンク脚質補正:</strong> <input type="number" id="bankBias" value="1.00" step="0.01">
+        
+        <strong>競輪場:</strong> 
+        <select id="keirinJyo" onchange="displayBankInfo()" style="width: 100px;">
+            <option value="" disabled selected>JSON読み込み中...</option>
+        </select>
+        
         <strong>レース種別:</strong> <select id="raceType">
             <option value="man">男子（S/A級）</option>
             <option value="girl">ガールズ</option>
@@ -71,7 +77,8 @@
     </p>
     
     <div id="raceLevelInfo" style="margin-top: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-        </div>
+        <strong>ステータス:</strong> 競輪場データ (bankdata.json) を読み込んでいます...
+    </div>
 
     <button onclick="calculateScore('normal')">予想スコア計算 (晴天令)</button>
     <button onclick="calculateScore('filter')">予想スコア計算 (荒天令W印フィルタ)</button>
@@ -102,29 +109,97 @@
 
 <script>
     // ====================================================================
-    // 1. 定数と初期データ設定
+    // 1. 定数とグローバル変数設定
     // ====================================================================
 
     const RIDER_COUNT = 7;
     
-    // W印係数（最終確定値：◎:1.10, 〇:1.07, △:1.03, ✕/無:1.01）
-    const W_MARK_COEFS = { '◎': 1.10, '〇': 1.07, '△': 1.03, '✕': 1.01, '無': 1.01 }; 
-
-    // ポジションボーナス (基本的な有利性: 2番手が最大)
-    const POSITION_BONUS = { 1: 1.00, 2: 1.06, 3: 1.03, 4: 1.00, 5: 0.98, 6: 0.97, 7: 0.96 };
-    // 脚質分類
-    const JIRIKI_LEGS = ['S', 'M']; 
-    const OIKOMI_LEGS = ['K', 'O']; 
-
-    // 単騎ボーナス (自由度ボーナス)
-    const SOLO_BONUS = 1.02; 
+    // グローバル変数: 読み込まれたJSONデータが格納されます
+    let BANK_DATA = null; 
     
-    // S/Bボーナス係数 (軽め)
+    // 係数定義（変更なし）
+    const W_MARK_COEFS = { '◎': 1.10, '〇': 1.07, '△': 1.03, '✕': 1.01, '無': 1.01 }; 
+    const POSITION_BONUS = { 1: 1.00, 2: 1.06, 3: 1.03, 4: 1.00, 5: 0.98, 6: 0.97, 7: 0.96 };
+    const JIRIKI_LEGS = ['S', 'M']; 
+    const SOLO_BONUS = 1.02; 
     const S_BONUS = 1.005; 
     const B_BONUS = 1.005;
 
+
+    // ====================================================================
+    // 2. JSONデータ読み込みとUI生成
+    // ====================================================================
+
+    /**
+     * 外部 JSONファイル (bankdata.json) を非同期で読み込む
+     */
+    async function fetchBankData() {
+        try {
+            const response = await fetch('bankdata.json');
+            if (!response.ok) {
+                // ファイルが見つからない、またはネットワークエラー
+                throw new Error(`HTTP error! status: ${response.status} - File not found or network issue.`);
+            }
+            BANK_DATA = await response.json();
+            
+            // 読み込み成功後、プルダウンメニューを生成する
+            generateKeirinJyoSelect();
+            displayBankInfo(); // 初期バンク情報を表示
+            
+        } catch (error) {
+            console.error("Failed to fetch bankdata.json:", error);
+            document.getElementById('raceLevelInfo').innerHTML = 
+                `<strong>エラー:</strong> bankdata.jsonの読み込みに失敗しました。ファイルが同一ディレクトリにあるか確認してください。デフォルト設定を使用します。`;
+            
+            // エラー時、標準バンクデータで計算を可能にする
+            BANK_DATA = { 
+                "標準バンク": { "name": "標準バンク", "bias": 1.00, "desc": "データ読み込みエラーのためデフォルト補正を使用" } 
+            };
+            generateKeirinJyoSelect();
+            displayBankInfo();
+        }
+    }
+
+    /**
+     * 読み込んだデータに基づき、競輪場選択プルダウンを生成する
+     */
+    function generateKeirinJyoSelect() {
+        const keirinJyoSelect = document.getElementById('keirinJyo');
+        keirinJyoSelect.innerHTML = ''; // 既存のオプションをクリア
+        
+        for (const key in BANK_DATA) {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = BANK_DATA[key].name;
+            keirinJyoSelect.appendChild(option);
+        }
+    }
+
+    /**
+     * バンク補正係数と説明を raceLevelInfo に表示する
+     */
+    function displayBankInfo() {
+        if (!BANK_DATA) return;
+
+        const selectedJyo = document.getElementById('keirinJyo').value;
+        const bankData = BANK_DATA[selectedJyo];
+        
+        // k係数情報がまだ計算されていない場合の初期表示
+        let currentKInfo = document.getElementById('raceLevelInfo').innerHTML;
+        if (!currentKInfo.includes('適用される結束力係数')) {
+             currentKInfo = `<strong>ステータス:</strong> ${bankData ? 'データ読み込み完了' : 'データエラー'}`;
+        }
+        
+        document.getElementById('raceLevelInfo').innerHTML = `
+            ${currentKInfo}<br>
+            <strong>選択バンク:</strong> ${bankData ? bankData.name : 'N/A'} (補正係数: ${bankData ? bankData.bias.toFixed(2) : '1.00'})<br>
+            <span style="font-size: 0.9em; color: #555;">${bankData ? bankData.desc : '競輪場データを読み込めません。'}</span>
+        `;
+    }
+
     // 画面生成
     document.addEventListener('DOMContentLoaded', () => {
+        // 選手入力行の生成
         const inputBody = document.getElementById('riderInputBody');
         for (let i = 1; i <= RIDER_COUNT; i++) {
             inputBody.innerHTML += `
@@ -139,15 +214,16 @@
                 </tr>
             `;
         }
+        
+        // JSONデータの非同期読み込みを開始
+        fetchBankData();
     });
 
+
     // ====================================================================
-    // 2. ロジック計算ヘルパー関数
+    // 3. ロジック計算ヘルパー関数
     // ====================================================================
 
-    /**
-     * レースの平均得点に基づき、動的な結束力係数 k を決定する。
-     */
     function getDynamicEnduranceK(allScores) {
         if (allScores.length === 0) return { k: 0.005, level: 'データ不足' };
         
@@ -158,13 +234,13 @@
         let level;
 
         if (meanScore < 85.00) {
-            k = 0.003; // A級チャレンジ想定 (緩い)
+            k = 0.003; 
             level = 'A級チャレンジレベル (k=0.003)';
         } else if (meanScore < 100.00) {
-            k = 0.005; // A級/S級予選想定 (標準)
+            k = 0.005; 
             level = 'A級/S級予選レベル (k=0.005)';
         } else {
-            k = 0.007; // S級特選想定 (厳しい)
+            k = 0.007; 
             level = 'S級特選レベル (k=0.007)';
         }
         
@@ -172,9 +248,6 @@
     }
 
 
-    /**
-     * ラインの得点バラツキに基づき、結束力係数 C_End を計算する。
-     */
     function calculateEnduranceCoef(scores, k) {
         if (scores.length <= 1) return 1.00;
 
@@ -188,9 +261,6 @@
         return Math.max(0.95, C_End); 
     }
 
-    /**
-     * ラインの脚質構成に基づき、整合性係数 C_Leg を計算する。
-     */
     function calculateLegIntegrity(legs) {
         if (legs.length <= 1) return 1.00;
 
@@ -210,9 +280,6 @@
         return 1.00;
     }
 
-    /**
-     * ライン総合評価 (色と文字) を計算する。
-     */
     function getLineGrade(avgScore, C_End, C_Leg) {
         const totalScore = avgScore * C_End * C_Leg;
         
@@ -244,15 +311,26 @@
 
 
     // ====================================================================
-    // 3. メイン計算関数
+    // 4. メイン計算関数
     // ====================================================================
 
     function calculateScore(mode) {
+        if (!BANK_DATA) {
+            alert('競輪場データ (bankdata.json) の読み込みが完了していません。しばらく待ってから再度試すか、ファイルを確認してください。');
+            return;
+        }
+        
         const riders = [];
         const debug = [];
         const isGirls = document.getElementById('raceType').value === 'girl';
+        
+        // 1. バンク補正係数の取得（JSONから自動取得）
+        const selectedJyo = document.getElementById('keirinJyo').value;
+        const bankData = BANK_DATA[selectedJyo];
+        // データが存在しない場合も考慮してデフォルト値1.00を適用
+        const bankBias = bankData ? bankData.bias : 1.00;
 
-        // 1. データ取得
+        // 2. 選手データとS/Bチェックボックス状態の取得
         for (let i = 1; i <= RIDER_COUNT; i++) {
             const score = parseFloat(document.querySelector(`.score[data-id="${i}"]`).value) || 0;
             const recent = parseFloat(document.querySelector(`.recent-rank[data-id="${i}"]`).value) || 0;
@@ -261,10 +339,7 @@
             const isSRank1 = document.querySelector(`.s-rank-1[data-id="${i}"]`).checked;
             const isBRank1 = document.querySelector(`.b-rank-1[data-id="${i}"]`).checked;
 
-            riders.push({
-                id: i, score, recent, leg: legType, wMark, isSRank1, isBRank1,
-                finalScore: 0, baseCoef: 1.00
-            });
+            riders.push({ id: i, score, recent, leg: legType, wMark, isSRank1, isBRank1, finalScore: 0, baseCoef: 1.00 });
         }
         
         // 動的k係数を決定
@@ -272,17 +347,18 @@
         const kInfo = getDynamicEnduranceK(allScores);
         const dynamicK = kInfo.k;
 
+        // raceLevelInfoの更新（k係数とバンク情報を統合）
         document.getElementById('raceLevelInfo').innerHTML = `
             <strong>レースレベル推定:</strong> ${kInfo.level} (平均得点: ${kInfo.mean})<br>
-            <strong>適用される結束力係数 (k):</strong> <code>${dynamicK}</code>
+            <strong>選択バンク:</strong> ${bankData.name} (補正係数: ${bankBias.toFixed(2)})<br>
+            <span style="font-size: 0.9em; color: #555;">${bankData.desc}</span>
         `;
 
         const lineupText = document.getElementById('lineup').value.replace(/\s/g, '');
         const lines = lineupText.split(',').map(l => l.split('-').map(id => parseInt(id)));
         const scenario = document.getElementById('scenario').value;
-        const bankBias = parseFloat(document.getElementById('bankBias').value) || 1.00;
 
-        // 2. ライン情報の整理とライン評価の準備
+        // 3. ライン情報の整理とライン評価の準備
         const lineData = [];
         lines.forEach((line, lineIndex) => {
             const lineScores = line.map(id => riders[id - 1].score);
@@ -303,7 +379,7 @@
         });
 
 
-        // 3. スコア計算と補正適用
+        // 4. スコア計算と補正適用
         riders.forEach(rider => {
             let baseCoef = 1.00;
             let currentLine = lineData.find(l => l.riders.includes(rider.id));
@@ -311,7 +387,10 @@
             
             // A. 基本補正 (直近着順、バンク脚質、展開シナリオ)
             baseCoef *= (1 + (4.0 - rider.recent) * 0.05); 
-            if (JIRIKI_LEGS.includes(rider.leg)) baseCoef *= bankBias;
+            
+            // バンク補正の適用 (自力系のみ)
+            if (JIRIKI_LEGS.includes(rider.leg)) baseCoef *= bankBias; 
+            
             if (scenario === 'senko' && rider.leg === 'S') baseCoef *= 1.05;
             if (scenario === 'makuri' && rider.leg === 'M') baseCoef *= 1.05;
             if (scenario === 'sashi' && (rider.leg === 'K' || rider.leg === 'O')) baseCoef *= 1.03;
@@ -356,13 +435,13 @@
         });
 
 
-        // 4. 結果出力
+        // 5. 結果出力
         displayResults(riders, lineData, mode);
         document.getElementById('debugOutput').textContent = debug.join('\n');
     }
 
     // ====================================================================
-    // 4. 結果表示関数
+    // 5. 結果表示関数
     // ====================================================================
 
     function displayResults(riders, lineData, mode) {
