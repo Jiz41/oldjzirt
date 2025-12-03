@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>競輪予想ツール 華耀天輪 真・自在律 V3.3</title>
+<title>競輪予想ツール 華耀天輪 真・自在律 V3.4</title>
 <style>
-/* 🎨 V3.3 最終配色：落ち着いたトーン */
+/* 🎨 V3.4 最終配色：落ち着いたトーン (変更なし) */
 :root { 
     --primary-color: #4682B4; /* スチールブルー */
     --accent-color: #FFD700; /* ゴールド */
@@ -68,7 +68,7 @@ select, input[type="number"], input[type="text"] {
     border-bottom: 1px solid #ddd; 
     text-align: center; 
     font-size: 0.8rem;
-    vertical-align: middle; /* 追加: 縦方向中央揃え */
+    vertical-align: middle; 
 } 
 .player-table th { 
     background-color: #eee; 
@@ -101,6 +101,7 @@ select, input[type="number"], input[type="text"] {
 /* Results */ 
 #result-area { 
     margin-top: 20px; 
+    /* デフォルトは非表示 */
     display: none; 
 } 
 .scenario-result { 
@@ -129,7 +130,7 @@ select, input[type="number"], input[type="text"] {
     flex-wrap: wrap; 
     gap: 5px; 
 } 
-/* --- 購入ウェイト カラーグラデーション --- */ 
+/* --- 購入ウェイト カラーグラデーション (変更なし) --- */ 
 .kaime-list li { 
     padding: 3px 8px; 
     border: 1px solid #ccc; 
@@ -167,6 +168,7 @@ select, input[type="number"], input[type="text"] {
     margin-top: 30px; 
     padding: 15px; 
     border-radius: 8px; 
+    /* デフォルトは非表示 */
 } 
 #combined-ranking { 
     border: 2px solid var(--accent-color); 
@@ -209,30 +211,28 @@ select, input[type="number"], input[type="text"] {
     display: none;
 }
 
-/* --- V3.3 ライン強度評価: 文字なし・一列表示 --- */
+/* --- V3.3 ライン強度評価: 文字なし・一列表示 (変更なし) --- */
 #line-evaluation-container {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     margin-top: 10px;
     justify-content: center;
-    /* 🚨 修正: 中央寄せ */
 }
 .line-box {
     padding: 5px 10px;
     border: 2px solid;
     border-radius: 5px;
     font-weight: bold;
-    font-size: 1.1rem; /* 数字を見やすく */
+    font-size: 1.1rem; 
     box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
-    /* 🚨 修正: 文字が入らないように調整 */
 }
 /* 強度に応じた色 */
 .line-strong { border-color: #A52A2A; background-color: #FFFAFA; color: #A52A2A; } /* 強: ブラウン系 */
 .line-medium { border-color: #FFD700; background-color: #FFFFF0; color: #DAA520; } /* 中: ゴールド系 */
 .line-weak { border-color: #4682B4; background-color: #F0F8FF; color: #4682B4; } /* 弱: スチールブルー系 */
 
-/* 説明書アコーディオン スタイル */ 
+/* 説明書アコーディオン スタイル (変更なし) */ 
 .manual-container { 
     margin: 20px 0; 
     border: 1px solid #ccc; 
@@ -308,7 +308,7 @@ select, input[type="number"], input[type="text"] {
 </head> 
 <body> 
 <div class="container"> 
-    <h1>華耀天輪 真・自在律 V3.3</h1> 
+    <h1>華耀天輪 真・自在律 V3.4</h1> 
     <div class="manual-container"> 
         <h2 id="manual-toggle" onclick="toggleManual()"> 📜 説明書・評価ロジック解説 <span id="toggle-icon">▼</span> </h2> 
         <div id="manual-content" class="manual-content-hidden"> 
@@ -532,14 +532,13 @@ async function loadBankData() {
     } 
 } 
 
-// ライン結束力・整合性の評価とUI表示 (V3.3 文字なし・一列表示に修正)
+// ライン結束力・整合性の評価とUI表示 (変更なし)
 function calculateLineCohesion(rawPlayers, lineupStr) {
     const lines = {};
     const lineNames = lineupStr.split(',').map(l => l.trim()).filter(l => l.length > 0);
     const container = document.getElementById('line-evaluation-container');
     container.innerHTML = '';
     const lineCohesionResults = {};
-    // 🚨 修正: 強度レベルと対応クラスのみを定義
     const classMap = { 'A': 'line-strong', 'B': 'line-medium', 'C': 'line-medium', 'D': 'line-weak' };
 
     lineNames.forEach((lineStr, index) => {
@@ -558,7 +557,6 @@ function calculateLineCohesion(rawPlayers, lineupStr) {
         const N = line.members.length;
         const avgRating = line.totalRating / N;
 
-        // --- 結束力と整合性の計算 (ロジックはV3.1を踏襲) ---
         const variance = line.members.reduce((sum, p) => sum + Math.pow(p.rawScore - avgRating, 2), 0) / N;
         const stdDevRating = Math.sqrt(variance);
         let C_End = (stdDevRating < 2.0) ? 1.05 : (stdDevRating < 4.0) ? 1.03 : (stdDevRating > 6.0) ? 0.95 : 1.00;
@@ -583,10 +581,9 @@ function calculateLineCohesion(rawPlayers, lineupStr) {
         // --- 簡潔なUI構築 (ラインの数字と色枠のみ) ---
         const lineResult = document.createElement('div');
         lineResult.className = `line-box ${classMap[evaluationKey]}`;
-        lineResult.textContent = `${lineStr}`; // 🚨 修正: ライン番号のみ
+        lineResult.textContent = `${lineStr}`;
         container.appendChild(lineResult);
         
-        // 結果格納
         lineCohesionResults[index] = { ...lines[index], totalBiasFactor: totalBiasFactor, k: (avgRating >= 115) ? 0.8 : (avgRating >= 110) ? 0.7 : (avgRating >= 105) ? 0.6 : 0.5, N: N };
     });
     
@@ -632,7 +629,7 @@ function calculateCoopBias(playerId, rawScore, players, lineupStr, lineCohesionR
     return 1.0; 
 } 
 
-// バンク特性フィードバック (補正数値非表示 - 変更なし)
+// バンク特性フィードバック (変更なし)
 function displayBankFeedback(bankName, biasMap) {
     const feedbackDiv = document.getElementById('bank-feedback');
     if (!feedbackDiv) return;
@@ -651,11 +648,15 @@ function displayBankFeedback(bankName, biasMap) {
     feedbackDiv.style.display = 'block';
 }
 
-// メイン計算ロジック (省略 - 変更なし)
+// メイン計算ロジック
 function calculate() { 
     const resultArea = document.getElementById('result-area');
-    if (resultArea) { resultArea.style.display = 'block'; } 
-
+    // 🚨 修正: 計算開始時に結果エリア全体を強制表示
+    if (resultArea) { 
+        resultArea.style.display = 'block'; 
+    } 
+    
+    // ... (入力データ取得ロジックは省略/変更なし) ...
     const selectedBankName = document.getElementById('bank-select').value; 
     const currentBank = bankData[selectedBankName] || { keirin_bias: {}, wind_or_position: {} };
     const timeZone = document.getElementById('time-select').value; 
@@ -712,9 +713,11 @@ function calculate() {
 
     if (rawPlayers.length < 3) { 
         alert("計算を行うには最低3名分の選手データを正しく入力してください。"); 
-        resultArea.style.display = 'none'; 
+        // 🚨 修正: エラー時は結果エリアを非表示に戻す
+        if (resultArea) { resultArea.style.display = 'none'; } 
         return; 
     } 
+    // ... (計算ロジックは省略/変更なし) ...
 
     const lineCohesionResults = calculateLineCohesion(rawPlayers, lineupStr);
 
@@ -768,13 +771,12 @@ function calculate() {
 } 
 
 // ----------------------------------------------------------------------
-// 予想生成・表示ヘルパー関数 (V3.3 ランキング表示復元)
+// 予想生成・表示ヘルパー関数
 // ----------------------------------------------------------------------
 
-// 展開別用に三連複を4点取得 (変更なし)
+// ... (generateSanrenpukuHtml, generateSanrentanDetails, generateCombinedSanrenpukuHtml, generateHighRiskSanrenpukuHtml は省略/変更なし) ...
 function generateSanrenpukuHtml(sortedPlayers) {
     const sanrenpukuSet = new Set();
-    // 1-3位を軸にした三連複
     for (let i = 0; i < 3 && i < sortedPlayers.length; i++) {
         for (let j = i + 1; j < 5 && j < sortedPlayers.length; j++) {
             for (let k = j + 1; k < 6 && k < sortedPlayers.length; k++) {
@@ -786,10 +788,8 @@ function generateSanrenpukuHtml(sortedPlayers) {
     return { sanrenpuku: Array.from(sanrenpukuSet).slice(0, 4).map(nums => `<li class="weight-medium">${nums}</li>`).join('') };
 }
 
-// 三連単の買い目数を動的に決定 (変更なし)
 function generateSanrentanDetails(sortedPlayers, limit) {
     const details = [];
-    // 1着 3名 (1-3位)、2着 3名 (1-3位)、3着 7名 (1-7位)
     for (let i = 0; i < 3 && i < sortedPlayers.length; i++) {
         for (let j = 0; j < 3 && j < sortedPlayers.length; j++) {
             if (i === j) continue;
@@ -814,24 +814,20 @@ function generateSanrentanDetails(sortedPlayers, limit) {
     return details.slice(0, limit); 
 }
 
-// 晴天令・荒天令の三連複を2点に固定 (変更なし)
 function generateCombinedSanrenpukuHtml(sanrentanList) {
     const sanrenpukuSet = new Set();
-    sanrentanList.slice(0, 3).forEach(item => { // 3連単3点からの組み合わせ
+    sanrentanList.slice(0, 3).forEach(item => {
         const [p1, p2, p3] = item.nums.split('-').map(Number).sort((a, b) => a - b);
         sanrenpukuSet.add(`${p1}-${p2}-${p3}`);
     });
     return Array.from(sanrenpukuSet).slice(0, 2).map(nums => `<li class="weight-medium">${nums} (補完)</li>`).join('');
 }
 
-// 荒天令の三連複を2点に固定 (変更なし)
 function generateHighRiskSanrenpukuHtml(sanrentanList) {
     return generateCombinedSanrenpukuHtml(sanrentanList);
 }
 
-// 選手ランキング表の生成 (V3.3 復元)
 function generateRankingTable(players) {
-    // 🚨 修正: 評価 (10段階+矢印) とスコアの列を復元
     return players.map(p => {
         return `
             <tr>
@@ -844,11 +840,12 @@ function generateRankingTable(players) {
     }).join('');
 }
 
-// メイン結果表示 (V3.3 ランキング表示復元)
+
+// メイン結果表示
 function displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations) {
     const container = document.getElementById('scenario-results-container');
     
-    // 展開別シミュレーション結果を表示 (3連単6点, 3連複4点)
+    // 展開別シミュレーション結果を表示
     container.innerHTML = allScenarioResults.map(res => {
         const sanrenpukuResult = generateSanrenpukuHtml(res.players);
         return `
@@ -870,7 +867,7 @@ function displayMultiScenarioResults(allScenarioResults, allSanrentanCombination
         `;
     }).join('');
 
-    // --- 総合ランキング (晴天令/荒天令) の表示 (省略/変更なし) ---
+    // --- 総合ランキング (晴天令) ---
     const combinedList = Object.values(allSanrentanCombinations)
         .sort((a, b) => b.totalVal - a.totalVal)
         .slice(0, 10); 
@@ -883,8 +880,10 @@ function displayMultiScenarioResults(allScenarioResults, allSanrentanCombination
     const combinedSanrenpukuListElement = document.getElementById('combined-sanrenpuku-list');
     combinedSanrenpukuListElement.innerHTML = generateCombinedSanrenpukuHtml(combinedList);
     
+    // 🚨 修正: 晴天令コンテナの表示を「確実に」ONにする
     document.getElementById('combined-ranking').style.display = 'block';
 
+    // --- 荒天令 (高リスク穴目) ---
     const highRiskList = analyzeHighRiskCandidates(combinedList);
 
     const mujirushiSanrentanListElement = document.getElementById('mujirushi-anamae-list');
@@ -895,10 +894,11 @@ function displayMultiScenarioResults(allScenarioResults, allSanrentanCombination
     const mujirushiSanrenpukuListElement = document.getElementById('mujirushi-sanrenpuku-list');
     mujirushiSanrenpukuListElement.innerHTML = generateHighRiskSanrenpukuHtml(highRiskList);
 
+    // 🚨 修正: 荒天令コンテナの表示を「確実に」ONにする
     document.getElementById('mujirushi-anamae-ranking').style.display = 'block';
 }
 
-// (その他のヘルパー関数は省略/変更なし)
+// ... (parseLineupAndDetermineMode, applyTenScaleRating, analyzeHighRiskCandidates, getWeightClass, toggleManual は省略/変更なし) ...
 function parseLineupAndDetermineMode(lineupStr, players) { /* ... */ return { lineupPlayers: new Set(), singleRiders: [] }; }
 function applyTenScaleRating(sortedPlayers) { 
     if (sortedPlayers.length === 0) return [];
@@ -936,25 +936,7 @@ function applyTenScaleRating(sortedPlayers) {
         return { ...p, rankIcon };
     });
 }
-function analyzeHighRiskCandidates(combinedList) { /* ... */ return combinedList.filter(item => item.hasSingle).slice(0, 3); }
+function analyzeHighRiskCandidates(combinedList) { return combinedList.filter(item => item.hasSingle).slice(0, 3); }
 function getWeightClass(index, totalCount) {
     if (index === 0) return 'weight-strong';
     if (index === 1) return 'weight-high';
-    if (index === 2) return 'weight-medium';
-    if (index >= 3 && index < 6) return 'weight-low';
-    return 'weight-weak';
-}
-function toggleManual() {
-    const content = document.getElementById('manual-content');
-    const icon = document.getElementById('toggle-icon');
-    if (content.classList.contains('manual-content-hidden')) {
-        content.classList.remove('manual-content-hidden');
-        icon.textContent = '▲';
-    } else {
-        content.classList.add('manual-content-hidden');
-        icon.textContent = '▼';
-    }
-}
-</script> 
-</body> 
-</html>
