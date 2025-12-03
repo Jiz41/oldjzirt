@@ -97,7 +97,7 @@ async function loadBankData() {
     }
 }
 
-// ★★★ 修正点2: バンク展開傾向の表示関数 ★★★
+// バンク展開傾向の表示関数 (実行前にも表示可能)
 function displayBankTendency() {
     const bankName = document.getElementById('bank-name').value;
     const displayArea = document.getElementById('bank-tendency-display');
@@ -114,11 +114,9 @@ function displayBankTendency() {
         '差し': bias['差し'] || 1.0
     };
 
-    // 最大バイアスの脚質を特定
     let maxBias = -Infinity;
     let strongestTendency = '';
 
-    // 脚質名は、短縮名と対応させる
     const styleMap = { '先行': '逃先', '捲り': '捲り', '差し': '差マ' };
     
     Object.keys(biasMap).forEach(key => {
@@ -128,18 +126,19 @@ function displayBankTendency() {
         }
     });
     
-    // 傾向メッセージの生成
     let message = '';
-    if (maxBias > 1.03) { // 3%以上のバイアスがある場合を「出やすい」とする
+    if (maxBias > 1.03) { 
         const displayedStyle = styleMap[strongestTendency];
-        message = `⚠️ ${bankName}は**${displayedStyle}**が**出やすい**傾向があります。 (バイアス ${maxBias.toFixed(2)})`;
-    } else if (maxBias < 0.97) { // 3%以下のバイアスがある場合を「決まりにくい」とする（参考情報）
+        message = `⚠️ **${bankName}**は**${displayedStyle}**が**出やすい**傾向があります。 (バイアス ${maxBias.toFixed(2)})`;
+    } else if (maxBias < 0.97) { 
         const displayedStyle = styleMap[strongestTendency];
-        message = `✅ ${bankName}は${displayedStyle}が最も低い傾向です。`;
+        message = `✅ **${bankName}**は**${displayedStyle}**が最も低い傾向です。`;
     } else {
-        message = `${bankName}は脚質による大きな傾向差は**ありません**。`;
+        message = `ℹ️ **${bankName}**は脚質による大きな傾向差は**ありません**。`;
     }
     
+    // 計算実行後にも結果エリアに表示されるため、ここではHTMLタグは付けない
+    // ※ 実行後の表示は displayResults() の中で更新します
     displayArea.innerHTML = message;
     logMessage(`[BANK] ${bankName} の展開傾向: ${message.replace(/<[^>]*>?/gm, '')}`);
 }
@@ -342,17 +341,19 @@ async function calculatePrediction() {
     // --- I. C_L (ライン・連係係数) の計算とライン強度の表示 ---
     calculateLineCoeffs(players, settings);
 
-    // --- II. 選手固有係数 C_W, C_R, C_S1, C_B1 & C_E の計算 (省略) ---
+    // --- II. 選手固有係数 C_W, C_R, C_S1, C_B1 & C_E の計算 (W印の修正を含む) ---
     players.forEach(p => {
         p.c_score_adj = 1.0 + (p.score / 100 - 1) * settings.R_BIAS; 
         const recentScores = p.recent.split('').map(Number);
         const avgRank = recentScores.length > 0 ? recentScores.reduce((a, b) => a + b, 0) / recentScores.length : 4.0; 
         p.c_recent = (1.0 + (4 - avgRank) * 0.05) * settings.RECENT_WEIGHT; 
 
+        // ★修正点: W印の係数を「✕」は「△」と「無」の間、1.015に設定
         if (p.wmark === '◎') p.c_wmark = 1.04;
         else if (p.wmark === '〇') p.c_wmark = 1.02;
+        else if (p.wmark === '✕') p.c_wmark = 1.015; // ✕: 穴目推奨（△と無の間）
         else if (p.wmark === '△') p.c_wmark = 1.01;
-        else p.c_wmark = 1.0;
+        else p.c_wmark = 1.0; // 無
 
         p.c_s1 = p.is_s1 ? 1.005 : 1.0; 
         p.c_b1 = p.is_b1 ? 1.015 : 1.0; 
@@ -390,12 +391,16 @@ async function calculatePrediction() {
     });
 
     // --- IV. 最終結果の統合と表示 ---
-    displayResults(allScenarioResults, players);
+    displayResults(allScenarioResults, players, bankName); 
     logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
 }
 
-// ★★★ 修正点1: 最終スコアと順位の表示を削除 ★★★
-function displayResults(allScenarioResults, players) {
+// 最終スコアと順位の表示を削除
+function displayResults(allScenarioResults, players, bankName) { 
+    
+    // バンク展開傾向の再表示（実行結果エリアの先頭）
+    displayBankTendency();
+
     const scenarioOutput = document.getElementById('scenario-output');
     if (scenarioOutput) {
         scenarioOutput.innerHTML = allScenarioResults.map(s => {
@@ -436,6 +441,7 @@ function displayResults(allScenarioResults, players) {
 
     const top3 = finalRanking.slice(0, 3);
     const top4 = finalRanking.slice(0, 4);
+    // const top5 = finalRanking.slice(0, 5); // 荒天令で5位まで使用
 
     // 晴天令 (安定推奨)
     const seitenreiOutput = document.getElementById('seitenrei-output');
@@ -457,11 +463,28 @@ function displayResults(allScenarioResults, players) {
         `;
     }
 
-    // 荒天令 (高配当狙い)
+    // 荒天令 (高配当狙い) - 三連複3点を表示
     const koutenreiOutput = document.getElementById('koutenrei-output');
     if (koutenreiOutput) {
+        
+        // 荒天令の軸 (通常4位)
+        const koutenLeader = top4[3] ? top4[3].id : null; 
+        
+        let koutenTrifuku = '';
+        if (koutenLeader) {
+            // 荒天令 三連複 3点: 4=1=2, 4=1=3, 4=2=3 (軸4位、相手1,2,3位)
+            koutenTrifuku = [
+                `${koutenLeader}=${top3[0].id}=${top3[1].id}`, 
+                `${koutenLeader}=${top3[0].id}=${top3[2].id}`,
+                `${koutenLeader}=${top3[1].id}=${top3[2].id}` 
+            ].join(', ');
+        } else {
+            koutenTrifuku = 'データ不足のため生成不可';
+        }
+
         koutenreiOutput.innerHTML = `
-            穴狙い (期待値): **${top4[3] ? top4[3].id : 'N/A'}** を軸とした買い目（例: ${top4[3] ? top4[3].id : 'X'}-${top3[0].id}-${top3[1].id} など）。
+            推奨軸 (4位): **${koutenLeader ? koutenLeader : 'N/A'}**<br>
+            三連複 (3点): <strong>${koutenTrifuku}</strong>
         `;
     }
 }
