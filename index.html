@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>競輪予想ツール 華耀天輪 真・自在律 V4.8 (最終安定版)</title>
+<title>競輪予想ツール 華耀天輪 真・自在律 V4.8 (デバッグログ有効版)</title>
 <style>
 /* 🎨 V4.8 スタイル (V4.7.1から変更なし) */ 
 :root { 
@@ -31,7 +31,7 @@ h2 {
     font-size: 1.2rem; 
     margin-bottom: 10px; 
 } 
-/* 🚨 デバッグログ専用スタイル (非表示化) */
+/* 🚨 デバッグログ専用スタイル */
 #debug-log {
     border: 3px dashed #CD5C5C;
     padding: 10px;
@@ -40,7 +40,7 @@ h2 {
     font-size: 0.9rem;
     color: #8B0000;
     font-weight: bold;
-    display: none; /* 恒久版では非表示に戻す */
+    display: block; /* デバッグ版では常に表示 */
 }
 #debug-log p {
     margin: 3px 0;
@@ -321,10 +321,11 @@ select, input[type="number"], input[type="text"] {
 <body> 
 <div class="container"> 
     
-    <div id="debug-log" style="display: none;">
+    <div id="debug-log">
+        <p style="text-align: center; margin: 0;">🛠️ **デバッグログ:** 計算処理のステップが表示されます。</p>
     </div>
 
-    <h1>華耀天輪 真・自在律 V4.8 (最終安定版)</h1> 
+    <h1>華耀天輪 真・自在律 V4.8 (デバッグログ有効版)</h1> 
     <div class="manual-container"> 
         <h2 id="manual-toggle" onclick="toggleManual()"> 📜 説明書・評価ロジック解説 <span id="toggle-icon">▼</span> </h2> 
         <div id="manual-content" class="manual-content-hidden"> 
@@ -577,20 +578,352 @@ async function loadBankData() {
 
     bankSelect.innerHTML = '<option value="">データ読み込み中...</option>'; 
     try { 
-        const dummyBankData = {
-            "標準バンク": { "keirin_bias": { "先行": 1.00, "捲り": 1.00, "差し": 1.00, "マーク": 1.00 }, "wind_or_position": {} },
-            "弥彦": { "keirin_bias": { "先行": 1.02, "捲り": 1.05, "差し": 1.00, "マーク": 1.00 }, "wind_or_position": {} },
-            "小田原": { "keirin_bias": { "先行": 0.98, "捲り": 1.00, "差し": 1.00, "マーク": 1.00 }, "wind_or_position": {} }
+        // ユーザー提供のJSONをダミーデータとして使用
+        const bankDataJSON = {
+            "函館": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.05,
+                    "差し": 1.0
+                },
+                "wind_or_position": {
+                    "バック追い風": 1.05
+                }
+            },
+            "青森": {
+                "length": 333,
+                "keirin_bias": {
+                    "先行": 1.05,
+                    "捲り": 1.0,
+                    "差し": 0.95
+                },
+                "wind_or_position": {}
+            },
+            "いわき平": {
+                "length": 333,
+                "keirin_bias": {
+                    "先行": 0.95,
+                    "捲り": 1.05,
+                    "差し": 1.05
+                },
+                "wind_or_position": {}
+            },
+            "取手": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 0.95,
+                    "捲り": 1.05,
+                    "差し": 1.05
+                },
+                "wind_or_position": {
+                    "向かい風": 0.95
+                }
+            },
+            "宇都宮": {
+                "length": 500,
+                "keirin_bias": {
+                    "先行": 1.05,
+                    "捲り": 1.0,
+                    "差し": 0.95
+                },
+                "wind_or_position": {}
+            },
+            "西武園": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.05,
+                    "捲り": 1.0,
+                    "差し": 0.95
+                },
+                "wind_or_position": {
+                    "競りイン優勢": 1.05
+                }
+            },
+            "京王閣": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 0.95,
+                    "差し": 1.05
+                },
+                "wind_or_position": {
+                    "風向き変化": 1.0
+                }
+            },
+            "立川": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 0.95,
+                    "捲り": 1.0,
+                    "差し": 1.05
+                },
+                "wind_or_position": {
+                    "バック向かい風": 0.9
+                }
+            },
+            "松戸": {
+                "length": 333,
+                "keirin_bias": {
+                    "先行": 1.05,
+                    "捲り": 1.05,
+                    "差し": 0.95
+                },
+                "wind_or_position": {}
+            },
+            "平塚": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.05,
+                    "差し": 1.0
+                },
+                "wind_or_position": {}
+            },
+            "川崎": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.05,
+                    "差し": 1.0
+                },
+                "wind_or_position": {
+                    "バック追い風": 1.05,
+                    "4コーナー外伸び": 1.05
+                }
+            },
+            "小田原": {
+                "length": 333,
+                "keirin_bias": {
+                    "先行": 1.1,
+                    "捲り": 0.9,
+                    "差し": 1.0
+                },
+                "wind_or_position": {}
+            },
+            "伊東": {
+                "length": 333,
+                "keirin_bias": {
+                    "先行": 0.95,
+                    "捲り": 1.05,
+                    "差し": 1.05
+                },
+                "wind_or_position": {}
+            },
+            "静岡": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.05,
+                    "差し": 1.0
+                },
+                "wind_or_position": {
+                    "16時以降風向き変化": 1.05
+                }
+            },
+            "富山": {
+                "length": 333,
+                "keirin_bias": {
+                    "先行": 1.05,
+                    "捲り": 1.0,
+                    "差し": 1.0
+                },
+                "wind_or_position": {
+                    "夏追い風": 1.05
+                }
+            },
+            "大垣": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.05,
+                    "差し": 1.0
+                },
+                "wind_or_position": {}
+            },
+            "岐阜": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.05,
+                    "差し": 1.0
+                },
+                "wind_or_position": {}
+            },
+            "名古屋": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.05,
+                    "差し": 1.0
+                },
+                "wind_or_position": {}
+            },
+            "豊橋": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.05,
+                    "差し": 1.0
+                },
+                "wind_or_position": {}
+            },
+            "松阪": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 0.95,
+                    "捲り": 1.05,
+                    "差し": 1.0
+                },
+                "wind_or_position": {}
+            },
+            "四日市": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.0,
+                    "差し": 1.05
+                },
+                "wind_or_position": {
+                    "第4コーナー外伸び": 1.05
+                }
+            },
+            "福井": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.0,
+                    "差し": 1.0
+                },
+                "wind_or_position": {}
+            },
+            "奈良": {
+                "length": 333,
+                "keirin_bias": {
+                    "先行": 1.05,
+                    "捲り": 1.0,
+                    "差し": 0.95
+                },
+                "wind_or_position": {
+                    "バック向かい風": 0.95
+                }
+            },
+            "岸和田": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.0,
+                    "差し": 1.0
+                },
+                "wind_or_position": {
+                    "横風": 0.95
+                }
+            },
+            "玉野": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.05,
+                    "差し": 1.0
+                },
+                "wind_or_position": {
+                    "バック向かい風": 0.95
+                }
+            },
+            "防府": {
+                "length": 333,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.0,
+                    "差し": 1.0
+                },
+                "wind_or_position": {
+                    "西風": 0.95
+                }
+            },
+            "小松島": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.05,
+                    "差し": 1.0
+                },
+                "wind_or_position": {
+                    "バック風": 0.95
+                }
+            },
+            "高知": {
+                "length": 500,
+                "keirin_bias": {
+                    "先行": 1.05,
+                    "捲り": 1.0,
+                    "差し": 0.95
+                },
+                "wind_or_position": {}
+            },
+            "小倉": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.05,
+                    "差し": 1.05
+                },
+                "wind_or_position": {}
+            },
+            "久留米": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.05,
+                    "差し": 1.0
+                },
+                "wind_or_position": {}
+            },
+            "別府": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 0.95,
+                    "捲り": 1.05,
+                    "差し": 1.05
+                },
+                "wind_or_position": {
+                    "バック向かい風": 0.9
+                }
+            },
+            "武雄": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.05,
+                    "差し": 1.0
+                },
+                "wind_or_position": {
+                    "追い風ホーム側": 1.05
+                }
+            },
+            "佐世保": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.05,
+                    "捲り": 1.0,
+                    "差し": 1.0
+                },
+                "wind_or_position": {
+                    "海風": 0.95
+                }
+            },
+            "熊本": {
+                "length": 400,
+                "keirin_bias": {
+                    "先行": 1.0,
+                    "捲り": 1.05,
+                    "差し": 1.0
+                },
+                "wind_or_position": {}
+            }
         };
-        
-        let response;
-        try {
-            response = await fetch('bankdata.json');
-            if (!response.ok) throw new Error("Fetch failed, using dummy data.");
-            bankData = await response.json();
-        } catch (e) {
-             bankData = dummyBankData;
-        }
+
+        bankData = bankDataJSON;
         
         bankSelect.innerHTML = '<option value="">選択してください</option>'; 
         Object.keys(bankData).forEach(bankName => { 
@@ -666,17 +999,17 @@ function calculate() {
     const resultArea = document.getElementById('result-area');
     const debugLog = document.getElementById('debug-log');
     
-    // デバッグログエリアは非表示のまま
-    // debugLog.style.display = 'block'; 
+    // デバッグログをクリア
+    debugLog.innerHTML = `<p style="text-align: center; margin: 0;">🛠️ **デバッグログ:** 計算処理のステップが表示されます。</p>`;
 
     try {
         const rawPlayers = getValidatedPlayerInputs();
         
         // デバッグログ出力 1: 有効な選手数
-        // debugLog.innerHTML = `<p>✅ 有効な選手数 (スコア>0 & 着順3桁): **${rawPlayers.length} / ${PLAYER_COUNT}**</p>`;
+        debugLog.innerHTML += `<p>✅ **有効な選手数 (スコア>0 & 着順3桁):** **${rawPlayers.length} / ${PLAYER_COUNT}**</p>`;
         
         if (rawPlayers.length < 3) { 
-            // debugLog.innerHTML += `<p style="color:red;">🚨 **エラー:** 計算に必要な有効選手数 (3名) を満たしていません。処理を停止します。</p>`;
+            debugLog.innerHTML += `<p style="color:red;">🚨 **エラー:** 計算に必要な有効選手数 (3名) を満たしていません。処理を停止します。</p>`;
             if (resultArea) { resultArea.style.display = 'none'; } 
             alert("計算を行うには最低3名分の選手データを正しく入力してください。"); 
             return; 
@@ -693,14 +1026,20 @@ function calculate() {
         let windBiasVal = 1.0; // <-- 確実に初期化 (letで宣言)
         
         const commonWindCondition = COMMON_WIND_MAP[windDir]; 
+        
+        // デバッグログ出力 2: 環境設定
+        debugLog.innerHTML += `<p>✅ **環境設定:** バンク=${selectedBankName}, 時間=${timeZone} (${timeBiasVal.toFixed(2)}), 風=${windDir} (${commonWindCondition})</p>`;
+
         if (commonWindCondition && currentBank.wind_or_position && currentBank.wind_or_position[commonWindCondition]) { 
             windBiasVal = currentBank.wind_or_position[commonWindCondition]; 
-        } 
-
-        // デバッグログ出力 2: 並びの解析結果
-        // const parsedLines = getParsedLines(lineupStr);
-        // debugLog.innerHTML += `<p>✅ 並び入力: **${lineupStr.length > 0 ? lineupStr : '空欄 (全員単騎)'}**</p>`;
-        // debugLog.innerHTML += `<p>✅ プログラム解析ライン数: **${parsedLines.length}** (ライン: [${parsedLines.join(', ')}])</p>`;
+            debugLog.innerHTML += `<p>✅ **風補正適用:** ${commonWindCondition} に基づき windBiasVal=${windBiasVal.toFixed(2)} を適用</p>`;
+        } else {
+             debugLog.innerHTML += `<p>✅ **風補正不適用:** 該当する風補正データがないため windBiasVal=${windBiasVal.toFixed(2)} (初期値) を適用</p>`;
+        }
+        
+        const parsedLines = getParsedLines(lineupStr);
+        debugLog.innerHTML += `<p>✅ **並び入力:** **${lineupStr.length > 0 ? lineupStr : '空欄 (全員単騎)'}**</p>`;
+        debugLog.innerHTML += `<p>✅ **ライン解析結果:** **${parsedLines.length} ライン** (構成: [${parsedLines.join(', ')}])</p>`;
 
 
         // 1. ライン強度と結束力の計算
@@ -725,6 +1064,8 @@ function calculate() {
             return { ...p, score: finalScore, staticBias: staticBias }; 
         }); 
         
+        debugLog.innerHTML += `<p>✅ **スコア計算完了:** ${finalPlayers.length}名の選手スコアを算出しました。</p>`;
+
         // 3. 単騎判定と環境フィードバック
         const { singleRiders } = parseLineupAndDetermineMode(lineupStr, rawPlayers); 
         displayBankFeedback(selectedBankName, currentBank.keirin_bias); 
@@ -761,6 +1102,8 @@ function calculate() {
             allScenarioResults.push({ scenario: scenarioName, players: playersWithRating, sanrentanDetails: sanrentanDetails }); 
         }); 
         
+        debugLog.innerHTML += `<p>✅ **シミュレーション完了:** 全展開パターンでの順位付けと買い目生成が完了しました。</p>`;
+
         // 5. 結果の表示
         displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations); 
 
@@ -773,7 +1116,7 @@ function calculate() {
         if (resultArea) {
             resultArea.style.display = 'block'; 
             // 🚨 デバッグログ出力 3: エラー内容
-            // debugLog.innerHTML += `<p style="color:red;">❌ **クラッシュ:** 計算処理中に致命的なエラーが発生しました。</p><p style="color:red;">エラーメッセージ: **${e.message}**</p>`;
+            debugLog.innerHTML += `<p style="color:red;">❌ **クラッシュ:** 計算処理中に致命的なエラーが発生しました。</p><p style="color:red;">エラーメッセージ: **${e.message}**</p>`;
             resultArea.innerHTML = `
                 <div style="color: red; padding: 20px; border: 2px solid red;">
                     <h2>致命的なエラーが発生しました</h2>
