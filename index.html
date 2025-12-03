@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>競輪予想ツール 華耀天輪 真・自在律 V4.7.1 (デバッグ版)</title>
+<title>競輪予想ツール 華耀天輪 真・自在律 V4.8 (最終安定版)</title>
 <style>
-/* 🎨 V4.7.1 スタイル (ベースはV4.7から変更なし) */ 
+/* 🎨 V4.8 スタイル (V4.7.1から変更なし) */ 
 :root { 
     --primary-color: #4682B4; 
     --accent-color: #FFD700; 
@@ -31,7 +31,7 @@ h2 {
     font-size: 1.2rem; 
     margin-bottom: 10px; 
 } 
-/* 🚨 デバッグログ専用スタイル */
+/* 🚨 デバッグログ専用スタイル (非表示化) */
 #debug-log {
     border: 3px dashed #CD5C5C;
     padding: 10px;
@@ -40,7 +40,7 @@ h2 {
     font-size: 0.9rem;
     color: #8B0000;
     font-weight: bold;
-    display: none; /* 初期は非表示 */
+    display: none; /* 恒久版では非表示に戻す */
 }
 #debug-log p {
     margin: 3px 0;
@@ -321,11 +321,10 @@ select, input[type="number"], input[type="text"] {
 <body> 
 <div class="container"> 
     
-    <div id="debug-log">
-        デバッグ情報
+    <div id="debug-log" style="display: none;">
     </div>
 
-    <h1>華耀天輪 真・自在律 V4.7.1</h1> 
+    <h1>華耀天輪 真・自在律 V4.8 (最終安定版)</h1> 
     <div class="manual-container"> 
         <h2 id="manual-toggle" onclick="toggleManual()"> 📜 説明書・評価ロジック解説 <span id="toggle-icon">▼</span> </h2> 
         <div id="manual-content" class="manual-content-hidden"> 
@@ -502,7 +501,7 @@ select, input[type="number"], input[type="text"] {
 </div> 
 <script> 
 // ----------------------------------------------------------------------
-// 🚨 V4.7.1 定数定義: 係数は一切変更なし
+// 🚨 V4.8 定数定義: 係数は一切変更なし
 // ----------------------------------------------------------------------
 let bankData = {}; 
 const PLAYER_COUNT = 7; 
@@ -667,17 +666,17 @@ function calculate() {
     const resultArea = document.getElementById('result-area');
     const debugLog = document.getElementById('debug-log');
     
-    // エラーが起きる前にログエリアを表示
-    debugLog.style.display = 'block';
+    // デバッグログエリアは非表示のまま
+    // debugLog.style.display = 'block'; 
 
     try {
         const rawPlayers = getValidatedPlayerInputs();
         
-        // 🚨 デバッグログ出力 1: 有効な選手数
-        debugLog.innerHTML = `<p>✅ 有効な選手数 (スコア>0 & 着順3桁): **${rawPlayers.length} / ${PLAYER_COUNT}**</p>`;
+        // デバッグログ出力 1: 有効な選手数
+        // debugLog.innerHTML = `<p>✅ 有効な選手数 (スコア>0 & 着順3桁): **${rawPlayers.length} / ${PLAYER_COUNT}**</p>`;
         
         if (rawPlayers.length < 3) { 
-            debugLog.innerHTML += `<p style="color:red;">🚨 **エラー:** 計算に必要な有効選手数 (3名) を満たしていません。処理を停止します。</p>`;
+            // debugLog.innerHTML += `<p style="color:red;">🚨 **エラー:** 計算に必要な有効選手数 (3名) を満たしていません。処理を停止します。</p>`;
             if (resultArea) { resultArea.style.display = 'none'; } 
             alert("計算を行うには最低3名分の選手データを正しく入力してください。"); 
             return; 
@@ -689,14 +688,24 @@ function calculate() {
         const windDir = document.getElementById('wind-select').value; 
         const lineupStr = document.getElementById('overall-lineup').value.trim(); 
         
+        // 🚨 V4.8 修正箇所：timeBiasValとwindBiasValの初期化とスコープを保証
+        const timeBiasVal = COMMON_TIME_BIAS[timeZone] || 1.0; 
+        let windBiasVal = 1.0; // <-- 確実に初期化 (letで宣言)
+        
+        const commonWindCondition = COMMON_WIND_MAP[windDir]; 
+        if (commonWindCondition && currentBank.wind_or_position && currentBank.wind_or_position[commonWindCondition]) { 
+            windBiasVal = currentBank.wind_or_position[commonWindCondition]; 
+        } 
+
+        // デバッグログ出力 2: 並びの解析結果
+        // const parsedLines = getParsedLines(lineupStr);
+        // debugLog.innerHTML += `<p>✅ 並び入力: **${lineupStr.length > 0 ? lineupStr : '空欄 (全員単騎)'}**</p>`;
+        // debugLog.innerHTML += `<p>✅ プログラム解析ライン数: **${parsedLines.length}** (ライン: [${parsedLines.join(', ')}])</p>`;
+
+
         // 1. ライン強度と結束力の計算
         const lineCohesionResults = calculateLineCohesion(rawPlayers, lineupStr);
 
-        // 🚨 デバッグログ出力 2: 並びの解析結果
-        const parsedLines = getParsedLines(lineupStr);
-        debugLog.innerHTML += `<p>✅ 並び入力: **${lineupStr.length > 0 ? lineupStr : '空欄 (全員単騎)'}**</p>`;
-        debugLog.innerHTML += `<p>✅ プログラム解析ライン数: **${parsedLines.length}** (ライン: [${parsedLines.join(', ')}])</p>`;
-        
         // 2. 最終期待値スコアの計算
         let finalPlayers = rawPlayers.map(p => { 
             let sBBonus = 1.0;
@@ -707,6 +716,8 @@ function calculate() {
 
             let legStaticBias = (p.leg === '差し' || p.leg === 'マーク') ? MARK_SASHI_STATIC_BIAS : 1.0; 
             const legBias = currentBank.keirin_bias[p.legKey] || 1.0; 
+            
+            // windBiasVal, timeBiasVal, legStaticBias はここで使用される
             const staticBias = legBias * windBiasVal * timeBiasVal * legStaticBias; 
             
             let finalScore = p.rawScore * p.winticketBias * staticBias * p.meetingRankBias * p.coopBias * sBBonus; 
@@ -762,7 +773,7 @@ function calculate() {
         if (resultArea) {
             resultArea.style.display = 'block'; 
             // 🚨 デバッグログ出力 3: エラー内容
-            debugLog.innerHTML += `<p style="color:red;">❌ **クラッシュ:** 計算処理中に致命的なエラーが発生しました。</p><p style="color:red;">エラーメッセージ: **${e.message}**</p>`;
+            // debugLog.innerHTML += `<p style="color:red;">❌ **クラッシュ:** 計算処理中に致命的なエラーが発生しました。</p><p style="color:red;">エラーメッセージ: **${e.message}**</p>`;
             resultArea.innerHTML = `
                 <div style="color: red; padding: 20px; border: 2px solid red;">
                     <h2>致命的なエラーが発生しました</h2>
@@ -777,10 +788,9 @@ function calculate() {
 } 
 
 // ----------------------------------------------------------------------
-// ヘルパー関数群 (V4.7.1 修正箇所)
+// ヘルパー関数群 (V4.8 変更なし)
 // ----------------------------------------------------------------------
 
-// 🚨 V4.7.1 追加: 並びの解析結果を返すための関数
 function getParsedLines(lineupStr) {
     if (!lineupStr || lineupStr.trim().length === 0) {
         return [];
