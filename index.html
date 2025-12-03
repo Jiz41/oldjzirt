@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>競輪予想ツール 華耀天輪 真・自在律 V3.9</title>
+<title>競輪予想ツール 華耀天輪 真・自在律 V4.0</title>
 <style>
-/* 🎨 V3.9 スタイル */
+/* 🎨 V4.0 スタイル (V3.9から変更なし) */
 :root { 
     --primary-color: #4682B4; 
     --accent-color: #FFD700; 
@@ -101,7 +101,7 @@ select, input[type="number"], input[type="text"] {
 /* Results */ 
 #result-area { 
     margin-top: 20px; 
-    /* 🚨 修正: 親要素のみ display: none; で制御 */
+    /* 親要素のみ display: none; で制御 */
     display: none; 
 } 
 .scenario-result { 
@@ -168,7 +168,6 @@ select, input[type="number"], input[type="text"] {
     margin-top: 30px; 
     padding: 15px; 
     border-radius: 8px; 
-    /* 🚨 修正: 子要素からは display: none; を削除 */
 } 
 #combined-ranking { 
     border: 2px solid var(--accent-color); 
@@ -308,7 +307,7 @@ select, input[type="number"], input[type="text"] {
 </head> 
 <body> 
 <div class="container"> 
-    <h1>華耀天輪 真・自在律 V3.9</h1> 
+    <h1>華耀天輪 真・自在律 V4.0</h1> 
     <div class="manual-container"> 
         <h2 id="manual-toggle" onclick="toggleManual()"> 📜 説明書・評価ロジック解説 <span id="toggle-icon">▼</span> </h2> 
         <div id="manual-content" class="manual-content-hidden"> 
@@ -484,7 +483,7 @@ select, input[type="number"], input[type="text"] {
     </div> 
 </div> 
 <script> 
-// グローバル変数/定数 (V3.9から変更なし)
+// グローバル変数/定数 (V4.0から変更なし)
 let bankData = {}; 
 const PLAYER_COUNT = 7; 
 let playerWinticketMap = {}; 
@@ -516,7 +515,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('result-area').style.display = 'none';
 }); 
 
-// 選手入力欄の生成 + 排他制御のイベントリスナー設定 (V3.9から変更なし)
+// 選手入力欄の生成 + 排他制御のイベントリスナー設定 (V4.0から変更なし)
 function initPlayerTable() { 
     const tbody = document.getElementById('player-inputs'); 
     if (!tbody) { 
@@ -527,6 +526,7 @@ function initPlayerTable() {
     const legOptions = ['先行', '捲り', '差し', 'マーク']; 
     const markOptions = Object.keys(WINTICKET_COEFFICIENTS).map(mark => `<option value="${mark}">${mark}</option>`).join(''); 
     
+    // 🚨 修正: 競走得点の初期値を現実的な値 (100.00) に修正し、計算が成立するようにする
     for (let i = 1; i <= PLAYER_COUNT; i++) { 
         const tr = document.createElement('tr'); 
         tr.className = 'player-row'; 
@@ -534,7 +534,7 @@ function initPlayerTable() {
         tr.innerHTML = ` 
             <td>${i}</td> 
             <td> <select id="leg-${i}"> ${selectOptions} </select> </td> 
-            <td><input type="number" id="score-${i}" placeholder="得点" step="0.01" value="110.00"></td> 
+            <td><input type="number" id="score-${i}" placeholder="得点" step="0.01" value="100.00"></td> 
             <td> <select id="winticket-mark-${i}"> ${markOptions} </select> </td> 
             <td> <input type="text" id="recent-ranks-${i}" placeholder="3桁 (例: 372)" value="444" maxlength="3" style="width: 100%; text-align: center;"> </td> 
             <td> <input type="checkbox" id="s1st-${i}" class="s1st-checkbox"> </td>
@@ -569,7 +569,7 @@ function initPlayerTable() {
     });
 } 
 
-// JSONデータの読み込み (V3.9から変更なし)
+// JSONデータの読み込み (V4.0から変更なし)
 async function loadBankData() { 
     const bankSelect = document.getElementById('bank-select'); 
     bankSelect.innerHTML = '<option value="">データ読み込み中...</option>'; 
@@ -609,7 +609,7 @@ async function loadBankData() {
     } 
 } 
 
-// ライン結束力・整合性の評価とUI表示 (V3.9から変更なし)
+// ライン結束力・整合性の評価とUI表示 (V4.0から変更なし)
 function calculateLineCohesion(rawPlayers, lineupStr) {
     const lines = {};
     const lineNames = lineupStr.split(',').map(l => l.trim()).filter(l => l.length > 0);
@@ -668,7 +668,7 @@ function calculateLineCohesion(rawPlayers, lineupStr) {
 }
 
 
-// 連係補正値の計算ロジック (V3.9から変更なし)
+// 連係補正値の計算ロジック (V4.0から変更なし)
 function calculateCoopBias(playerId, rawScore, players, lineupStr, lineCohesionResults) { 
     if (!lineupStr) { return 1.0; } 
 
@@ -706,7 +706,7 @@ function calculateCoopBias(playerId, rawScore, players, lineupStr, lineCohesionR
     return 1.0; 
 } 
 
-// バンク特性フィードバック (V3.9から変更なし)
+// バンク特性フィードバック (V4.0から変更なし)
 function displayBankFeedback(bankName, biasMap) {
     const feedbackDiv = document.getElementById('bank-feedback');
     if (!feedbackDiv) return;
@@ -729,132 +729,151 @@ function displayBankFeedback(bankName, biasMap) {
 function calculate() { 
     const resultArea = document.getElementById('result-area');
     
-    const selectedBankName = document.getElementById('bank-select').value; 
-    const currentBank = bankData[selectedBankName] || { keirin_bias: {}, wind_or_position: {} };
-    const timeZone = document.getElementById('time-select').value; 
-    const windDir = document.getElementById('wind-select').value; 
-    const lineupStr = document.getElementById('overall-lineup').value.trim(); 
-    const timeBiasVal = COMMON_TIME_BIAS[timeZone] || 1.0; 
-    let windBiasVal = 1.0; 
-    const commonWindCondition = COMMON_WIND_MAP[windDir]; 
-    if (commonWindCondition && currentBank.wind_or_position && currentBank.wind_or_position[commonWindCondition]) { 
-        windBiasVal = currentBank.wind_or_position[commonWindCondition]; 
-    } 
-    let rawPlayers = []; 
-    playerWinticketMap = {}; 
-    playerRawScores = {}; 
+    try {
+        const selectedBankName = document.getElementById('bank-select').value; 
+        const currentBank = bankData[selectedBankName] || { keirin_bias: {}, wind_or_position: {} };
+        const timeZone = document.getElementById('time-select').value; 
+        const windDir = document.getElementById('wind-select').value; 
+        const lineupStr = document.getElementById('overall-lineup').value.trim(); 
+        const timeBiasVal = COMMON_TIME_BIAS[timeZone] || 1.0; 
+        let windBiasVal = 1.0; 
+        const commonWindCondition = COMMON_WIND_MAP[windDir]; 
+        if (commonWindCondition && currentBank.wind_or_position && currentBank.wind_or_position[commonWindCondition]) { 
+            windBiasVal = currentBank.wind_or_position[commonWindCondition]; 
+        } 
+        let rawPlayers = []; 
+        playerWinticketMap = {}; 
+        playerRawScores = {}; 
 
-    for (let i = 1; i <= PLAYER_COUNT; i++) { 
-        const leg = document.getElementById(`leg-${i}`)?.value; 
-        const rawScoreStr = document.getElementById(`score-${i}`)?.value; 
-        const winticketMark = document.getElementById(`winticket-mark-${i}`)?.value; 
-        const recentRanksStr = document.getElementById(`recent-ranks-${i}`)?.value.trim(); 
-        const s1st = document.getElementById(`s1st-${i}`)?.checked || false;
-        const b1st = document.getElementById(`b1st-${i}`)?.checked || false;
+        for (let i = 1; i <= PLAYER_COUNT; i++) { 
+            const leg = document.getElementById(`leg-${i}`)?.value; 
+            const rawScoreStr = document.getElementById(`score-${i}`)?.value; 
+            const winticketMark = document.getElementById(`winticket-mark-${i}`)?.value; 
+            const recentRanksStr = document.getElementById(`recent-ranks-${i}`)?.value.trim(); 
+            const s1st = document.getElementById(`s1st-${i}`)?.checked || false;
+            const b1st = document.getElementById(`b1st-${i}`)?.checked || false;
 
-        if (!rawScoreStr || isNaN(parseFloat(rawScoreStr)) || !leg || !recentRanksStr) { continue; } 
-        const rawScore = parseFloat(rawScoreStr); 
-        const winticketBias = WINTICKET_COEFFICIENTS[winticketMark] || 1.0; 
-        
-        const rankInputs = recentRanksStr.split('').slice(0, 3);
-        const rankKeys = ['1', '2', '3'];
-        let totalWeightedBias = 0;
-        let totalWeight = 0;
-        rankInputs.forEach((rankStr, index) => {
-            const rank = parseInt(rankStr);
-            const weight = RECENT_RANK_WEIGHTS[rankKeys[index]];
-            if (!isNaN(rank) && rank >= 1 && rank <= 9) {
-                const baseBias = RANK_BASE_COEFFICIENTS[rank] || RANK_BASE_COEFFICIENTS['default'];
-                totalWeightedBias += baseBias * weight;
-                totalWeight += weight;
-            }
-        });
-        const meetingRankBias = (totalWeight > 0 ? (totalWeightedBias / totalWeight) : 1.0) * RECENT_BIAS_CONTRIBUTION;
-        
-        let legStaticBias = 1.0; 
-        if (leg === '差し' || leg === 'マーク') { legStaticBias = MARK_SASHI_STATIC_BIAS; } 
-        let legKey = (leg === 'マーク') ? '差し' : leg; 
-        const legBias = currentBank.keirin_bias[legKey] || 1.0; 
-        const staticBias = legBias * windBiasVal * timeBiasVal * legStaticBias; 
-        
-        rawPlayers.push({ 
-            id: i, leg: leg, rawScore: rawScore, winticketBias: winticketBias, staticBias: staticBias, 
-            legKey: legKey, meetingRankBias: meetingRankBias, s1st: s1st, b1st: b1st 
-        }); 
-    } 
+            // 🚨 必須チェックの強化: 競走得点がNaNやゼロ、または未入力の場合はスキップ
+            const rawScore = parseFloat(rawScoreStr); 
+            if (isNaN(rawScore) || rawScore <= 0 || !leg || !recentRanksStr) { continue; } 
 
-    if (rawPlayers.length < 3) { 
-        alert("計算を行うには最低3名分の選手データを正しく入力してください。"); 
-        if (resultArea) { resultArea.style.display = 'none'; } 
-        return; 
-    } 
-
-    const lineCohesionResults = calculateLineCohesion(rawPlayers, lineupStr);
-
-    rawPlayers = rawPlayers.map(p => { 
-        let sBBonus = 1.0;
-        if (p.s1st) sBBonus *= S_BONUS;
-        if (p.b1st) sBBonus *= B_BONUS;
-
-        p.coopBias = calculateCoopBias(p.id, p.rawScore, rawPlayers, lineupStr, lineCohesionResults); 
-
-        let finalScore = p.rawScore * p.winticketBias * p.staticBias * p.meetingRankBias * p.coopBias * sBBonus; 
-        return { ...p, score: finalScore, sBBonus: sBBonus }; 
-    }); 
-    
-    const { singleRiders: determinedSingleRiders } = parseLineupAndDetermineMode(lineupStr, rawPlayers); 
-    singleRiders = determinedSingleRiders; 
-    displayBankFeedback(selectedBankName, currentBank.keirin_bias); 
-
-    const allScenarioResults = []; 
-    const allSanrentanCombinations = {}; 
-    
-    Object.keys(DEVELOPMENT_BIAS).forEach(scenarioName => { 
-        const developBiasMap = DEVELOPMENT_BIAS[scenarioName]; 
-        let scenarioPlayers = rawPlayers.map(p => { 
-            const developBiasVal = developBiasMap[p.legKey] || 1.0; 
-            let scenarioScore = p.score * developBiasVal; 
+            const winticketBias = WINTICKET_COEFFICIENTS[winticketMark] || 1.0; 
             
-            const isSingle = !p.coopBias > 1.0 && singleRiders.includes(p.id); 
-            return { id: p.id, leg: p.leg, score: scenarioScore, isSingle: isSingle, coopBias: p.coopBias }; 
-        }); 
-        scenarioPlayers.sort((a, b) => b.score - a.score); 
-        const playersWithRating = applyTenScaleRating(scenarioPlayers); 
-        const sanrentanDetails = generateSanrentanDetails(playersWithRating, 6); 
-        
-        sanrentanDetails.forEach(c => { 
-            const key = c.nums;
-            if (!allSanrentanCombinations[key]) { 
-                allSanrentanCombinations[key] = { count: 0, totalVal: 0, combinations: [], hasSingle: c.hasSingle }; 
-            } 
-            allSanrentanCombinations[key].count++; 
-            allSanrentanCombinations[key].totalVal += c.val; 
-            allSanrentanCombinations[key].combinations.push(key); 
-            if (c.hasSingle) { 
-                allSanrentanCombinations[key].hasSingle = true; 
-            } 
-        }); 
-        allScenarioResults.push({ scenario: scenarioName, players: playersWithRating, sanrentanDetails: sanrentanDetails }); 
-    }); 
-    
-    displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations); 
+            const rankInputs = recentRanksStr.split('').slice(0, 3);
+            const rankKeys = ['1', '2', '3'];
+            let totalWeightedBias = 0;
+            let totalWeight = 0;
+            rankInputs.forEach((rankStr, index) => {
+                const rank = parseInt(rankStr);
+                const weight = RECENT_RANK_WEIGHTS[rankKeys[index]];
+                if (!isNaN(rank) && rank >= 1 && rank <= 9) {
+                    const baseBias = RANK_BASE_COEFFICIENTS[rank] || RANK_BASE_COEFFICIENTS['default'];
+                    totalWeightedBias += baseBias * weight;
+                    totalWeight += weight;
+                }
+            });
+            const meetingRankBias = (totalWeight > 0 ? (totalWeightedBias / totalWeight) : 1.0) * RECENT_BIAS_CONTRIBUTION;
+            
+            let legStaticBias = 1.0; 
+            if (leg === '差し' || leg === 'マーク') { legStaticBias = MARK_SASHI_STATIC_BIAS; } 
+            let legKey = (leg === 'マーク') ? '差し' : leg; 
+            const legBias = currentBank.keirin_bias[legKey] || 1.0; 
+            const staticBias = legBias * windBiasVal * timeBiasVal * legStaticBias; 
+            
+            rawPlayers.push({ 
+                id: i, leg: leg, rawScore: rawScore, winticketBias: winticketBias, staticBias: staticBias, 
+                legKey: legKey, meetingRankBias: meetingRankBias, s1st: s1st, b1st: b1st 
+            }); 
+        } 
 
-    // 🚨 修正: 計算完了後、親要素を確実に表示する
-    document.getElementById('result-area').style.display = 'block'; 
+        if (rawPlayers.length < 3) { 
+            alert("計算を行うには最低3名分の選手データを正しく入力してください。得点が0や未入力の選手はカウントされません。"); 
+            if (resultArea) { resultArea.style.display = 'none'; } 
+            return; 
+        } 
+
+        const lineCohesionResults = calculateLineCohesion(rawPlayers, lineupStr);
+
+        rawPlayers = rawPlayers.map(p => { 
+            let sBBonus = 1.0;
+            if (p.s1st) sBBonus *= S_BONUS;
+            if (p.b1st) sBBonus *= B_BONUS;
+
+            p.coopBias = calculateCoopBias(p.id, p.rawScore, rawPlayers, lineupStr, lineCohesionResults); 
+
+            let finalScore = p.rawScore * p.winticketBias * p.staticBias * p.meetingRankBias * p.coopBias * sBBonus; 
+            return { ...p, score: finalScore, sBBonus: sBBonus }; 
+        }); 
+        
+        const { singleRiders: determinedSingleRiders } = parseLineupAndDetermineMode(lineupStr, rawPlayers); 
+        singleRiders = determinedSingleRiders; 
+        displayBankFeedback(selectedBankName, currentBank.keirin_bias); 
+
+        const allScenarioResults = []; 
+        const allSanrentanCombinations = {}; 
+        
+        Object.keys(DEVELOPMENT_BIAS).forEach(scenarioName => { 
+            const developBiasMap = DEVELOPMENT_BIAS[scenarioName]; 
+            let scenarioPlayers = rawPlayers.map(p => { 
+                const developBiasVal = developBiasMap[p.legKey] || 1.0; 
+                let scenarioScore = p.score * developBiasVal; 
+                
+                const isSingle = !p.coopBias > 1.0 && singleRiders.includes(p.id); 
+                return { id: p.id, leg: p.leg, score: scenarioScore, isSingle: isSingle, coopBias: p.coopBias }; 
+            }); 
+            scenarioPlayers.sort((a, b) => b.score - a.score); 
+            const playersWithRating = applyTenScaleRating(scenarioPlayers); 
+            const sanrentanDetails = generateSanrentanDetails(playersWithRating, 6); 
+            
+            sanrentanDetails.forEach(c => { 
+                const key = c.nums;
+                if (!allSanrentanCombinations[key]) { 
+                    allSanrentanCombinations[key] = { count: 0, totalVal: 0, combinations: [], hasSingle: c.hasSingle }; 
+                } 
+                allSanrentanCombinations[key].count++; 
+                allSanrentanCombinations[key].totalVal += c.val; 
+                allSanrentanCombinations[key].combinations.push(key); 
+                if (c.hasSingle) { 
+                    allSanrentanCombinations[key].hasSingle = true; 
+                } 
+            }); 
+            allScenarioResults.push({ scenario: scenarioName, players: playersWithRating, sanrentanDetails: sanrentanDetails }); 
+        }); 
+        
+        displayMultiScenarioResults(allScenarioResults, allSanrentanCombinations); 
+
+        // 🚨 修正: 計算完了後、親要素を確実に表示する
+        document.getElementById('result-area').style.display = 'block';
+    
+    } catch (e) {
+        // 🚨 予期せぬエラーが発生した場合の表示
+        console.error("Critical calculation error:", e);
+        if (resultArea) {
+            resultArea.style.display = 'block'; 
+            resultArea.innerHTML = `
+                <div style="color: red; padding: 20px; border: 2px solid red;">
+                    <h2>致命的なエラーが発生しました</h2>
+                    <p>予想の計算処理中に予期せぬエラーが発生し、結果を表示できませんでした。</p>
+                    <p>エラーメッセージ: **${e.message}**</p>
+                    <p>入力データ（特に競走得点やライン並び）が正しいかご確認ください。</p>
+                </div>
+            `;
+        }
+        return;
+    }
 } 
 
 // ----------------------------------------------------------------------
-// 予想生成・表示ヘルパー関数
+// 予想生成・表示ヘルパー関数 (V4.0から変更なし)
 // ----------------------------------------------------------------------
 
-// ... (helper functions - V3.9から変更なし) ...
 function generateSanrenpukuHtml(sortedPlayers) {
     const sanrenpukuSet = new Set();
     for (let i = 0; i < 3 && i < sortedPlayers.length; i++) {
         for (let j = i + 1; j < 5 && j < sortedPlayers.length; j++) {
             for (let k = j + 1; k < 6 && k < sortedPlayers.length; k++) {
                 const nums = [sortedPlayers[i].id, sortedPlayers[j].id, sortedPlayers[k].id].sort((a, b) => a - b).join('-');
-                sanrenpukuSet.add(nums);
+                sanrenpukuSet.add(`${p1}-${p2}-${p3}`);
             }
         }
     }
@@ -929,7 +948,8 @@ function displayMultiScenarioResults(allScenarioResults, allSanrentanCombination
                 </table>
                 <h4 style="margin-top: 15px;">三連単 (6点)</h4>
                 <ul class="kaime-list">
-                    ${res.sanrentanDetails.map((d, i) => `<li class="${getWeightClass(i, 6)}">${d.nums}</li>`).join('')}
+                    ${res.sanrentanDetails.map((d, i) => `<li class="${getWeightClass(i, 6)}">${d.nums}</li>`
+                    ).join('')}
                 </ul>
                 <h4 style="margin-top: 15px;">三連複 (4点)</h4>
                 <ul class="kaime-list">
@@ -964,8 +984,23 @@ function displayMultiScenarioResults(allScenarioResults, allSanrentanCombination
     mujirushiSanrenpukuListElement.innerHTML = generateHighRiskSanrenpukuHtml(highRiskList);
 }
 
-// ... (その他のヘルパー関数 - V3.9から変更なし) ...
-function parseLineupAndDetermineMode(lineupStr, players) { /* ... */ return { lineupPlayers: new Set(), singleRiders: [] }; }
+function parseLineupAndDetermineMode(lineupStr, players) {
+    const lines = lineupStr.split(',').map(line => line.trim()).filter(line => line.length > 0);
+    const lineupPlayers = new Set();
+    const allPlayerIds = players.map(p => p.id);
+    
+    lines.forEach(line => {
+        line.split('').map(Number).forEach(id => {
+            lineupPlayers.add(id);
+        });
+    });
+    
+    const singleRiders = allPlayerIds.filter(id => !lineupPlayers.has(id));
+    
+    return { lineupPlayers: lineupPlayers, singleRiders: singleRiders };
+}
+
+
 function applyTenScaleRating(sortedPlayers) { 
     if (sortedPlayers.length === 0) return [];
     
