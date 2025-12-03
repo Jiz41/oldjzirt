@@ -331,22 +331,22 @@
     };
     
     // 直近着順の寄与率を調整
-    const RECENT_BIAS_CONTRIBUTION = 1.05; // 0.95から強化 (勢いを重視)
+    const RECENT_BIAS_CONTRIBUTION = 1.05; // 勢いを重視
 
     // 追い込み脚質の静的補正
     const MARK_SASHI_STATIC_BIAS = 1.015;
 
     // WINTICKETの予想印によるスコア補正係数 (晴天令/通常シナリオ用)
     const WINTICKET_BIAS = {
-        '◎': 1.10, // 1.15から抑制
-        '◯': 1.07, // 1.10から抑制
-        '▲': 1.04, // 1.05から抑制
-        '△': 1.01, // 1.02から抑制
+        '◎': 1.10, // 抑制
+        '◯': 1.07, // 抑制
+        '△': 1.04, // 抑制
+        '×': 1.01, // 抑制
+        '▲': 1.04, // (既存の▲は△と同じ係数として残存)
         '注': 1.00,
-        '×': 1.00,
         'なし': 1.00,
     };
-    const WINTICKET_COEFFICIENTS = WINTICKET_BIAS; // 既存の変数名を維持
+    const WINTICKET_COEFFICIENTS = WINTICKET_BIAS; 
 
     const RECENT_RANK_WEIGHTS = {
         '1': 0.5, '2': 0.3, '3': 0.2 
@@ -374,7 +374,10 @@
         
         tbody.innerHTML = '';
         const legOptions = ['先行', '捲り', '差し', 'マーク']; 
-        const markOptions = Object.keys(WINTICKET_COEFFICIENTS).map(mark => `<option value="${mark}">${mark}</option>`).join('');
+        
+        // W印の選択肢を新しい順序で生成
+        const orderedMarks = ['◎', '◯', '△', '×', '▲', '注', 'なし'];
+        const markOptions = orderedMarks.map(mark => `<option value="${mark}">${mark}</option>`).join('');
         
         for (let i = 1; i <= PLAYER_COUNT; i++) {
             const tr = document.createElement('tr');
@@ -389,15 +392,13 @@
                         ${selectOptions}
                     </select>
                 </td>
-                <td><input type="number" id="score-${i}" placeholder="得点" step="0.01" value="83.00"></td>
-                <td>
+                <td><input type="number" id="score-${i}" placeholder="得点" step="0.01" value="90.00"></td> <td>
                     <select id="winticket-mark-${i}">
                         ${markOptions}
                     </select>
                 </td> 
                 <td>
-                    <input type="text" id="recent-ranks-${i}" placeholder="3桁 (例: 372)" value="444" maxlength="3" style="width: 100%; text-align: center;">
-                </td> 
+                    <input type="text" id="recent-ranks-${i}" placeholder="3桁 (例: 372)" value="137" maxlength="3" style="width: 100%; text-align: center;"> </td> 
             `;
             tbody.appendChild(tr);
         }
@@ -523,7 +524,7 @@
             const winticketMark = document.getElementById(`winticket-mark-${i}`)?.value; 
             const recentRanksStr = document.getElementById(`recent-ranks-${i}`)?.value.trim();
 
-            if (!rawScoreStr || isNaN(parseFloat(rawScoreStr)) || !leg || !recentRanksStr) continue;
+            if (!rawScoreStr || isNaN(parseFloat(rawScoreStr)) || !leg || !recentRanksStr || recentRanksStr.length === 0) continue;
 
             const rawScore = parseFloat(rawScoreStr);
             const winticketBias = WINTICKET_COEFFICIENTS[winticketMark] || 1.0;
@@ -594,7 +595,7 @@
         
         // --- 荒天令 (W印無効化) 用のスコア計算 ---
         const calculateScoreHighRisk = (p) => {
-             // 展開バイアスを除外した純粋なスコアを荒天令のベースとする
+             // WINTICKET BIAS (W印補正) を除外して計算
              return p.rawScore * p.staticBias * p.meetingRankBias * p.coopBias; 
         };
 
@@ -868,7 +869,57 @@
         });
     }
 
-    // ... (generateRankingTable, generateSanrenpukuHtml, toggleManual 関数は変更なし) ...
+    function generateRankingTable(players) {
+        let html = '<table class="player-table"><thead><tr><th>順位</th><th>ID</th><th>得点</th><th>W印</th><th>評価</th></tr></thead><tbody>';
+        players.forEach((p, index) => {
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${p.id}</td>
+                    <td>${playerRawScores[p.id].toFixed(2)}</td>
+                    <td>${playerWinticketMap[p.id]}</td>
+                    <td class="score-rank">${p.tenScaleRating}/10 ${p.rating.slice(-1)}</td>
+                </tr>
+            `;
+        });
+        html += '</tbody></table>';
+        return html;
+    }
+
+    function generateSanrenpukuHtml(sortedPlayers) {
+        const top3IDs = sortedPlayers.slice(0, 3).map(p => p.id);
+        const top4IDs = sortedPlayers.slice(0, 4).map(p => p.id);
+        
+        let sanrenpuku = [];
+        let pukuSet = new Set();
+        
+        if (top3IDs.length === 3) {
+            const base = top3IDs.sort((a, b) => a - b).join('=');
+            sanrenpuku.push(`<li class="weight-strong">${base}</li>`);
+            pukuSet.add(base);
+        }
+
+        if (top4IDs.length === 4) {
+            const candidates = [
+                [top4IDs[0], top4IDs[1], top4IDs[2]],
+                [top4IDs[0], top4IDs[1], top4IDs[3]],
+                [top4IDs[0], top4IDs[2], top4IDs[3]],
+                [top4IDs[1], top4IDs[2], top4IDs[3]],
+            ];
+            
+            let count = 0;
+            candidates.forEach(c => {
+                const key = c.sort((a, b) => a - b).join('=');
+                if (!pukuSet.has(key) && count < 3) {
+                    sanrenpuku.push(`<li class="weight-medium">${key}</li>`);
+                    pukuSet.add(key);
+                    count++;
+                }
+            });
+        }
+        
+        return { sanrenpuku: sanrenpuku.join('') };
+    }
 
     function applyTenScaleRating(sortedPlayers) {
         if (sortedPlayers.length === 0) return [];
@@ -878,7 +929,7 @@
         const range = maxScore - minScore;
 
         if (range === 0) {
-            return sortedPlayers.map(p => ({ ...p, rating: '10↑', rawScore: p.score.toFixed(4) }));
+            return sortedPlayers.map(p => ({ ...p, rating: '10↑', rawScore: p.score.toFixed(4), tenScaleRating: 10 }));
         }
 
         const step = range / 10;
@@ -941,6 +992,42 @@
         return combinations;
     }
 
+    function displayBankFeedback(bankName, keirinBias) {
+        const feedbackDiv = document.getElementById('bank-feedback');
+        if (!bankName || !keirinBias || Object.keys(keirinBias).length === 0) {
+            feedbackDiv.style.display = 'none';
+            return;
+        }
+
+        let maxBias = 0;
+        let strongestLeg = 'なし';
+        
+        Object.keys(keirinBias).forEach(leg => {
+            if (keirinBias[leg] > maxBias) {
+                maxBias = keirinBias[leg];
+                strongestLeg = leg;
+            }
+        });
+
+        if (maxBias > 1.0) {
+            feedbackDiv.innerHTML = `🚨 **${bankName}バンクの特性:** 脚質補正が最も高いのは **${strongestLeg}** の傾向があります。`;
+            feedbackDiv.style.display = 'block';
+        } else {
+            feedbackDiv.style.display = 'none';
+        }
+    }
+
+    function toggleManual() {
+        const content = document.getElementById('manual-content');
+        const icon = document.getElementById('toggle-icon');
+        if (content.classList.contains('manual-content-hidden')) {
+            content.classList.remove('manual-content-hidden');
+            icon.textContent = '▲';
+        } else {
+            content.classList.add('manual-content-hidden');
+            icon.textContent = '▼';
+        }
+    }
 
 </script>
 
