@@ -5,10 +5,7 @@
 * ======================================================
 */
 
-// -------------------------------------------------------------------------
 // 1. 🗃️ 係数設定オブジェクトの分離
-// -------------------------------------------------------------------------
-
 const COEFFICIENT_SETTINGS = {
     's-kyu': { R_BIAS: 1.15, RECENT_WEIGHT: 0.90, COOP_WEIGHT: 1.20, IS_GIRLS: false },
     'a-kyu': { R_BIAS: 1.00, RECENT_WEIGHT: 1.00, COOP_WEIGHT: 1.00, IS_GIRLS: false },
@@ -25,10 +22,6 @@ const C_MARK_VALUES = {
 // バンクデータを格納するグローバル変数
 let BANK_DATA = {};
 
-// -------------------------------------------------------------------------
-// 2. ログおよびUIヘルパー関数
-// -------------------------------------------------------------------------
-
 // ロギング関数
 function logMessage(message) {
     const logArea = document.getElementById('debug-log');
@@ -38,10 +31,6 @@ function logMessage(message) {
         logArea.scrollTop = logArea.scrollHeight;
     }
 }
-
-// -------------------------------------------------------------------------
-// 3. データ構造と取得関数
-// -------------------------------------------------------------------------
 
 function getPlayerData() {
     const players = [];
@@ -158,6 +147,12 @@ function displayBankTendency() {
     displayArea.innerHTML = message;
     logMessage(`[BANK] ${bankName} の展開傾向: ${message.replace(/<[^>]*>?/gm, '')}`);
 }
+
+// ページロード時にデータ読み込みを実行
+(async function() {
+    await loadBankData();
+})();
+
 
 // ライン強度を視覚的に表示するロジック
 function calculateLineCoeffs(players, settings) {
@@ -322,14 +317,10 @@ function assignFinalGrades(scenarioPlayers) {
 }
 
 
-// -------------------------------------------------------------------------
-// 4. メイン計算関数 (calculatePrediction)
-// -------------------------------------------------------------------------
-
 // メイン計算関数
 async function calculatePrediction() {
     
-    // ★修正点1: 計算開始時にX投稿ボタンを無効化
+    // 【追加】計算開始時にX投稿ボタンを無効化
     document.getElementById('post-to-x-button').disabled = true;
 
     if (Object.keys(BANK_DATA).length === 0) {
@@ -415,8 +406,8 @@ async function calculatePrediction() {
     if (resultsContainer) {
         resultsContainer.classList.add('visible');
     }
-    
-    // ★修正点3: 計算完了後、X投稿ボタンを有効化
+
+    // 【追加】計算完了後、X投稿ボタンを有効化
     document.getElementById('post-to-x-button').disabled = false;
     logMessage('[CALC END] 予想計算が完了し、結果が表示されました。X投稿ボタンを有効化しました。');
 }
@@ -482,7 +473,7 @@ function displayResults(allScenarioResults, players, bankName) {
             `${top4[0].id}=${top4[1].id}=${top4[3] ? top4[3].id : 'X'}`
         ].join(', ');
         
-        // HTMLタグを付けて、X投稿用にtextContentで読み取りやすくする
+        // 【修正】X投稿時に内容を取得しやすいようヘッダーとHTMLタグを追加
         seitenreiOutput.innerHTML = `☀️ 晴天令 (安定推奨) <br>
             三連単 (3点): <strong>${seitenTritan}</strong><br>
             三連複 (2点): <strong>${seitenTrifuku}</strong>
@@ -508,14 +499,13 @@ function displayResults(allScenarioResults, players, bankName) {
             koutenTrifuku = 'データ不足のため生成不可';
         }
 
-        // HTMLタグを付けて、X投稿用にtextContentで読み取りやすくする
+        // 【修正】X投稿時に内容を取得しやすいようヘッダーとHTMLタグを追加
         koutenreiOutput.innerHTML = `⛈️ 荒天令 (高配当狙い) <br>
             推奨軸 (4位): **${koutenLeader ? koutenLeader : 'N/A'}**<br>
             三連複 (3点): <strong>${koutenTrifuku}</strong>
         `;
     }
 }
-
 
 // -------------------------------------------------------------------------
 // 5. X (旧Twitter) 投稿機能 (新規追加)
@@ -525,7 +515,6 @@ function postToX() {
     
     // 1. 各データの取得
     const bankName = document.getElementById('bank-name').value;
-    // HTMLの内容全体を取得
     const seitenreiOutput = document.getElementById('seitenrei-output').textContent.trim();
     const koutenreiOutput = document.getElementById('koutenrei-output').textContent.trim();
     
@@ -537,25 +526,44 @@ function postToX() {
 
     // 2. 投稿テキストの組み立て
     
-    // 不要なヘッダー部分を削除し、買い目のみを取得する
-    const seitenreiContent = seitenreiOutput
-        .replace('☀️ 晴天令 (安定推奨)', '☀️ 晴天令:')
-        .replace(/\n/g, '') // 改行を削除
-        .trim();
-        
-    const koutenreiContent = koutenreiOutput
-        .replace('⛈️ 荒天令 (高配当狙い)', '⛈️ 荒天令:')
-        .replace(/\n/g, '') // 改行を削除
-        .trim();
+    // ★★★ 改行制御ロジック (点数と買い目の間に改行を挿入) ★★★
+    
+    const cleanAndFormat = (text, prefix) => {
+        // 1. ヘッダーを必要な形に置換し、全ての空白文字を単一のスペースに統一
+        let cleaned = text
+            .replace(prefix, prefix.split(' ')[0] + ':') // "☀️ 晴天令 (安定推奨)" -> "☀️ 晴天令:"
+            .replace(/(\s\s*|\n|\r|\t)/g, ' ') // 全ての空白文字を単一スペースに置換
+            .trim();
+
+        // 2. 目的の項目の前に改行、そして点数表記の直後（閉じ括弧 ")" の後）に改行を挿入して整形
+        cleaned = cleaned
+            // ヘッダー直後を改行
+            .replace(/: /, ':\n') 
+            // 三連単/三連複/推奨軸の前に改行
+            .replace(/三連単/g, '\n三連単')
+            .replace(/三連複/g, '\n三連複')
+            .replace(/推奨軸/g, '\n推奨軸')
+            // 点数表記の閉じ括弧 ")" の直後に改行を挿入 (例: (3点) の後に \n)
+            .replace(/\) /g, ')\n')
+            // 推奨軸のコロン ":" の後にも改行を挿入（買い目が次行に来るように）
+            .replace(/\*\*\: /g, '**\n') 
+            // 行頭のスペースを削除
+            .trim();
+            
+        return cleaned;
+    };
+    
+    const seitenreiContent = cleanAndFormat(seitenreiOutput, '☀️ 晴天令 (安定推奨)');
+    const koutenreiContent = cleanAndFormat(koutenreiOutput, '⛈️ 荒天令 (高配当狙い)');
 
     const toolURL = 'https://huggingface.co/spaces/Jiz41/Jiz41r1t5u';
 
     // テンプレートに沿ってテキストを組み立てる
     const postText = 
 `${bankName} [ここにレース番号R]
-    
+
 ${seitenreiContent}
-    
+
 ${koutenreiContent}
     
 #華耀天輪真自在律 
@@ -563,7 +571,7 @@ ${koutenreiContent}
     
 ${toolURL}`;
 
-    logMessage(`[INFO] 生成された投稿テキスト: ${postText.substring(0, 50)}...`);
+    logMessage(`[INFO] 生成された投稿テキスト: ${postText.substring(0, 50).replace(/\n/g, '\\n')}...`);
 
     // 3. URLエンコードと投稿ウィンドウのオープン
     const encodedText = encodeURIComponent(postText);
@@ -573,9 +581,3 @@ ${toolURL}`;
     window.open(tweetURL, '_blank');
 }
 // -------------------------------------------------------------------------
-
-
-// ページロード時にデータ読み込みを実行
-(async function() {
-    await loadBankData();
-})();
