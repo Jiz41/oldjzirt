@@ -175,7 +175,11 @@ function calculateLineCoeffs(players, settings) {
     const soloPlayers = Array.from(allPlayerIds).filter(id => !assignedPlayerIds.has(id));
     soloPlayers.forEach(id => playerToLineMap[id] = 0); 
 
-    // C_L係数計算 (省略)
+    // 全選手の得点リストを取得
+    const allScores = players.map(p => p.score);
+    const minScore = Math.min(...allScores);
+    
+    // C_L係数計算 (既存ロジック)
     if (settings.IS_GIRLS) {
         logMessage(`[C_L] ガールズ競輪モード。エースマーク係数 $C_{mark}$ を評価。`);
         const ace = players.reduce((max, p) => (p.score > max.score ? p : max), { score: -Infinity });
@@ -208,12 +212,14 @@ function calculateLineCoeffs(players, settings) {
         const coopWeight = settings.COOP_WEIGHT; 
         
         lines.forEach(line => {
-            const p2Id = line[1];
-            const p2 = players.find(p => p.id === p2Id);
-            if (p2) {
-                p2.c_l = 1.0 + (0.06 * coopWeight); 
-            }
+            // 先頭選手 (自力) と番手選手 (マーク) の情報を取得
+            const leadPlayer = players.find(p => p.id === line[0]);
+            const markPlayer = players.find(p => p.id === line[1]);
 
+            // 既存の基本C_Lを設定
+            if (markPlayer) {
+                markPlayer.c_l = 1.0 + (0.06 * coopWeight); 
+            }
             for (let i = 2; i < line.length; i++) {
                 const pNId = line[i];
                 const pN = players.find(p => p.id === pNId);
@@ -221,6 +227,33 @@ function calculateLineCoeffs(players, settings) {
                     pN.c_l = 1.0 + (0.02 * coopWeight);
                 }
             }
+
+            // ★★★ ここから連係波及補正ロジックの追記 ★★★
+            if (leadPlayer && markPlayer && line.length >= 2) {
+                const scoreDiff = leadPlayer.score - markPlayer.score;
+                const isMarkLowest = markPlayer.score <= minScore + 0.01;
+
+                if (isMarkLowest) {
+                    // 1. 📉 自力選手への減点: C_risk_pull (共倒れリスク係数)
+                    // (得点最下位の選手をマークにつけた自力選手は、力負けリスクで減点)
+                    const C_risk_pull = 0.97;
+                    leadPlayer.c_l *= C_risk_pull;
+                    logMessage(`[C_L_ADJ] ${leadPlayer.id}番 (自力/${leadPlayer.score.toFixed(2)}) に共倒れリスク ${C_risk_pull.toFixed(2)} を適用。`);
+
+                    // 2. 📈 マーク選手への加点: C_Tri_Benefit (番手利得係数)
+                    // (格上の自力選手の頑張りが報われるボーナス)
+                    const C_Tri_Benefit = 1.03;
+                    markPlayer.c_l *= C_Tri_Benefit;
+                    logMessage(`[C_L_ADJ] ${markPlayer.id}番 (マーク/${markPlayer.score.toFixed(2)}) に番手利得 ${C_Tri_Benefit.toFixed(2)} を適用。`);
+
+                } else if (scoreDiff > 2.0 && markPlayer.style === '追') {
+                    // (玉野11Rのケースではないが、得点差が大きいマーク選手への一般的な補正)
+                    const C_Large_Benefit = 1.015;
+                    markPlayer.c_l *= C_Large_Benefit;
+                    logMessage(`[C_L_ADJ] ${markPlayer.id}番 (マーク/${markPlayer.score.toFixed(2)}) に大得点差マーク補正 ${C_Large_Benefit.toFixed(3)} を適用。`);
+                }
+            }
+            // ★★★ 連係波及補正ロジックの追記ここまで ★★★
         });
     }
 
@@ -380,6 +413,7 @@ async function calculatePrediction() {
         
         scenarioPlayers.forEach(p => {
             const cD = cDCoeffs[p.style] || 1.0;
+            // ★最終スコア計算の確認★
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e * cD;
         });
 
