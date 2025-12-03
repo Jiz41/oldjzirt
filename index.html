@@ -940,3 +940,22 @@ function analyzeHighRiskCandidates(combinedList) { return combinedList.filter(it
 function getWeightClass(index, totalCount) {
     if (index === 0) return 'weight-strong';
     if (index === 1) return 'weight-high';
+    if (index === 2) return 'weight-medium';
+    if (index >= 3 && index < 6) return 'weight-low';
+    return 'weight-weak';
+}
+function toggleManual() {
+    const content = document.getElementById('manual-content');
+    const icon = document.getElementById('toggle-icon');
+    if (content.classList.contains('manual-content-hidden')) {
+        content.classList.remove('manual-content-hidden');
+        icon.textContent = '▲';
+    } else {
+        content.classList.add('manual-content-hidden');
+        icon.textContent = '▼';
+    }
+}
+
+</script> 
+</body> 
+</html>
