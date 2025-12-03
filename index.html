@@ -1,4 +1,75 @@
-<p><strong>選手データ入力 (7名)</strong></p>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>華耀天輪 真・自在律 V6.0 - Mobile</title>
+    <style>
+        /* 🎨 以前の色味（青、緑、赤）を基調としたCSS */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px; background-color: #f4f4f9; color: #333; }
+        .container { width: 100%; max-width: 600px; margin: auto; background-color: #fff; padding: 15px; border-radius: 0; box-shadow: none; }
+        h1 { font-size: 1.5em; color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 5px; margin-top: 10px; }
+        h2 { font-size: 1.2em; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 3px; margin-top: 20px; }
+        .input-group, .result-section { margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; background-color: #fafafa; }
+        
+        /* 縦積み化の基本スタイル */
+        .input-item { margin-bottom: 15px; }
+        .input-item label { display: block; font-weight: bold; margin-bottom: 5px; }
+        select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #bdc3c7; border-radius: 3px; }
+
+        /* 選手データ入力リストのスタイル（横スクロール回避） */
+        .player-input-list { margin-top: 10px; }
+        .player-row { border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; border-radius: 5px; background-color: #fff; }
+        .player-header { font-weight: bold; font-size: 1.1em; color: #3498db; margin-bottom: 5px; display: flex; justify-content: space-between; }
+        .player-fields { display: flex; flex-wrap: wrap; gap: 8px; }
+        .player-field { flex: 1 1 45%; /* 2列表示を基本とする */ min-width: 100px; }
+        .player-field label { display: block; font-size: 0.85em; color: #555; }
+        .player-field input, .player-field select { width: 100%; padding: 5px; box-sizing: border-box; font-size: 1em; }
+        
+        /* 結果テーブルの横スクロール回避 */
+        .scenario-detail table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .scenario-detail th, .scenario-detail td { border: 1px solid #ddd; padding: 6px 4px; text-align: center; font-size: 0.8em; word-break: break-all; }
+        
+        /* その他UI要素 */
+        .debug-log { background-color: #2c3e50; color: #ecf0f1; padding: 10px; height: 120px; overflow-y: scroll; font-family: 'Courier New', Courier, monospace; border-radius: 5px; font-size: 0.75em; }
+        .recommendation { padding: 10px; border-radius: 5px; font-weight: bold; margin-top: 10px; font-size: 0.9em; }
+        #seitenrei-output { background-color: #e8f8f5; border-left: 5px solid #1abc9c; /* 緑 */ }
+        #koutenrei-output { background-color: #fbecec; border-left: 5px solid #e74c3c; /* 赤 */ }
+        .scenario-detail { border: 1px dashed #95a5a6; padding: 10px; margin-top: 15px; border-radius: 5px; }
+        .scenario-detail h4 { font-size: 1em; margin: 0 0 10px 0; border-bottom: 1px solid #ccc; padding-bottom: 5px;}
+        button { width: 100%; padding: 12px; background-color: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; font-size: 1em; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>華耀天輪 真・自在律 V6.0</h1>
+
+    <h2>🛠️ デバッグ・処理ログ</h2>
+    <div class="debug-log" id="debug-log">
+        [TOOL START] ツール起動。すべての係数とロジックを読み込みました。<br>
+        [INFO] bankdata.jsonの読み込みを待機しています...
+    </div>
+
+    <h2>🎛️ レース/選手情報入力</h2>
+    <div class="input-group">
+        
+        <div class="input-item">
+            <label for="race-type"><strong>レースタイプ/級班:</strong></label>
+            <select id="race-type">
+                <option value="girls">🚴‍♀️ ガールズ競輪</option>
+                <option value="s-kyu">🏆 S級</option>
+                <option value="a-kyu">A級</option>
+                <option value="a-chal">A級チャレンジ</option>
+            </select>
+        </div>
+
+        <div class="input-item">
+            <label for="bank-name">バンク名:</label>
+            <select id="bank-name"></select>
+        </div>
+
+        <p><strong>選手データ入力 (7名)</strong></p>
         <div class="player-input-list" id="player-data">
             
             <div class="player-row" data-id="1">
@@ -19,7 +90,15 @@
                         <label>得点 (R)</label>
                         <input type="number" class="score" value="105.50">
                     </div>
+                    <div class="player-field">
+                        <label>W印</label>
+                        <input type="text" class="wmark" value="◎">
                     </div>
+                    <div class="player-field">
+                        <label>直近3走</label>
+                        <input type="text" class="recent" value="111">
+                    </div>
+                </div>
             </div>
 
             <div class="player-row" data-id="2">
@@ -40,7 +119,15 @@
                         <label>得点 (R)</label>
                         <input type="number" class="score" value="103.20">
                     </div>
+                    <div class="player-field">
+                        <label>W印</label>
+                        <input type="text" class="wmark" value="〇">
                     </div>
+                    <div class="player-field">
+                        <label>直近3走</label>
+                        <input type="text" class="recent" value="211">
+                    </div>
+                </div>
             </div>
 
             <div class="player-row" data-id="3">
@@ -61,7 +148,15 @@
                         <label>得点 (R)</label>
                         <input type="number" class="score" value="101.80">
                     </div>
+                    <div class="player-field">
+                        <label>W印</label>
+                        <input type="text" class="wmark" value="△">
                     </div>
+                    <div class="player-field">
+                        <label>直近3走</label>
+                        <input type="text" class="recent" value="444">
+                    </div>
+                </div>
             </div>
             
             <div class="player-row" data-id="4">
@@ -82,7 +177,15 @@
                         <label>得点 (R)</label>
                         <input type="number" class="score" value="99.50">
                     </div>
+                    <div class="player-field">
+                        <label>W印</label>
+                        <input type="text" class="wmark" value="無">
                     </div>
+                    <div class="player-field">
+                        <label>直近3走</label>
+                        <input type="text" class="recent" value="333">
+                    </div>
+                </div>
             </div>
 
             <div class="player-row" data-id="5">
@@ -103,7 +206,15 @@
                         <label>得点 (R)</label>
                         <input type="number" class="score" value="98.00">
                     </div>
+                    <div class="player-field">
+                        <label>W印</label>
+                        <input type="text" class="wmark" value="無">
                     </div>
+                    <div class="player-field">
+                        <label>直近3走</label>
+                        <input type="text" class="recent" value="555">
+                    </div>
+                </div>
             </div>
 
             <div class="player-row" data-id="6">
@@ -124,7 +235,15 @@
                         <label>得点 (R)</label>
                         <input type="number" class="score" value="97.20">
                     </div>
+                    <div class="player-field">
+                        <label>W印</label>
+                        <input type="text" class="wmark" value="無">
                     </div>
+                    <div class="player-field">
+                        <label>直近3走</label>
+                        <input type="text" class="recent" value="666">
+                    </div>
+                </div>
             </div>
 
             <div class="player-row" data-id="7">
@@ -145,8 +264,51 @@
                         <label>得点 (R)</label>
                         <input type="number" class="score" value="95.10">
                     </div>
+                    <div class="player-field">
+                        <label>W印</label>
+                        <input type="text" class="wmark" value="無">
                     </div>
+                    <div class="player-field">
+                        <label>直近3走</label>
+                        <input type="text" class="recent" value="777">
+                    </div>
+                </div>
             </div>
             
         </div>
 
+
+        <div class="input-item">
+            <label for="line-input"><strong>全体並び:</strong> (例: 123,45,67 または 1,2,3,4,5,6,7)</label>
+            <input type="text" id="line-input" value="1,2,3,4,5,6,7">
+        </div>
+        
+        <button onclick="calculatePrediction()">🚀 予想を計算 (実行)</button>
+    </div>
+
+    <h2>📊 予想結果・推奨買い目</h2>
+    <div class="result-section">
+        
+        <p><strong>連係評価:</strong> <span id="line-strength">計算結果待ち...</span></p>
+
+        <h3>☀️ 晴天令 (安定推奨)</h3>
+        <div class="recommendation" id="seitenrei-output">
+            計算結果待ち...
+        </div>
+
+        <h3>⛈️ 荒天令 (高配当狙い)</h3>
+        <div class="recommendation" id="koutenrei-output">
+            計算結果待ち...
+        </div>
+
+        <h3>展開別シミュレーション詳細</h3>
+        
+        <div id="scenario-output">
+            </div>
+
+    </div>
+</div>
+
+<script src="keirin_logic_v6.0.js"></script>
+</body>
+</html>
