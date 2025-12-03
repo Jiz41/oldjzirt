@@ -16,35 +16,37 @@
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             margin: 0; 
-            padding: 10px; /* 左右の余白を固定 */
-            padding-bottom: 30px; /* フッター分のスペースを確保 */ 
+            padding: 0; /* ★修正点1: bodyからpaddingを削除 */
+            padding-bottom: 30px; 
             background-color: #f4f4f9; 
             color: #333; 
         }
         
         .container { 
-            width: 100%; 
-            max-width: 600px; /* PCでの表示上限 */
-            margin: auto; 
+            width: calc(100% - 20px); /* 100%から左右マージン20pxを引いた幅 */
+            max-width: 600px; 
+            margin: 10px auto; /* ★修正点2: 左右10pxマージン、中央配置 */
             background-color: #fff; 
-            padding: 15px; 
+            padding: 0; /* ★修正点3: containerの内側のpaddingを削除 */
             border-radius: 0; 
             box-shadow: none; 
-            box-sizing: border-box; /* paddingを含めて幅100%とする */
+            box-sizing: border-box; 
         }
         
-        h1 { font-size: 1.5em; color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 5px; margin-top: 10px; }
-        h2 { font-size: 1.2em; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 3px; margin-top: 20px; }
+        /* 以降の要素は、containerの内側で左右に余白が必要な場合、個別にpaddingを設定する */
+
+        h1 { font-size: 1.5em; color: #2c3e50; border-bottom: 3px solid #3498db; padding: 10px 10px 5px 10px; /* ★内側padding調整 */ margin-top: 0; }
+        h2 { font-size: 1.2em; color: #2c3e50; border-bottom: 2px solid #3498db; padding: 10px 10px 3px 10px; /* ★内側padding調整 */ margin-top: 20px; }
         
         .input-group, .result-section { 
-            margin-bottom: 15px; 
+            margin: 0 10px 15px 10px; /* ★左右10pxのmarginを設定して、containerの端から離す */
             padding: 10px; 
             border: 1px solid #ccc; 
             border-radius: 6px; 
             background-color: #fafafa; 
-            box-sizing: border-box; /* 横幅100%内で収める */
+            box-sizing: border-box; 
         }
-        
+
         /* 縦積み化の基本スタイル */
         .input-item { margin-bottom: 15px; }
         .input-item label { display: block; font-weight: bold; margin-bottom: 5px; }
@@ -61,7 +63,7 @@
 
         /* 選手データ入力リストのスタイル（横スクロール回避の徹底） */
         .player-input-list { margin-top: 10px; }
-        .player-row { border: 1px solid #ddd; padding: 6px; /* 縦横のpaddingを小さく */ margin-bottom: 8px; border-radius: 5px; background-color: #fff; }
+        .player-row { border: 1px solid #ddd; padding: 6px; margin-bottom: 8px; border-radius: 5px; background-color: #fff; }
         .player-header { font-weight: bold; font-size: 1.0em; color: #3498db; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;}
         
         /* 選手情報のフィールドを4列表示 (得点を優先し、W印をコンパクトに) */
@@ -73,9 +75,9 @@
         
         /* 選手情報のフィールド幅の調整 */
         .player-field { 
-            /* 理想: 脚質(25%) / 得点(25%) / W印(20%) / 直近3走(30%) */
-            flex: 1 1 25%; /* デフォルトは25% */
-            min-width: 50px; /* 最小幅を設定 */
+            /* 理想: 脚質(23%) / 得点(27%) / W印(20%) / 直近3走(25%) */
+            flex: 1 1 23%; 
+            min-width: 50px; 
             box-sizing: border-box; 
         }
 
@@ -84,16 +86,16 @@
         .player-field:nth-child(3) { flex: 1 1 20%; } /* W印 (コンパクトに) */
         .player-field:nth-child(4) { flex: 1 1 25%; } /* 直近3走 */
         
-        .player-field label { display: block; font-size: 0.75em; /* フォントを小さく */ color: #555; margin-bottom: 1px;}
+        .player-field label { display: block; font-size: 0.75em; color: #555; margin-bottom: 1px;}
         .player-field input, .player-field select { 
             width: 100%; 
-            padding: 3px; /* input/selectのpaddingを極小化 */ 
+            padding: 3px; 
             box-sizing: border-box; 
             font-size: 0.85em; 
         }
 
         /* S/B 1位のラジオボタン用レイアウト */
-        .sb-group { display: flex; gap: 4px; font-size: 0.75em; /* さらに小さく */ }
+        .sb-group { display: flex; gap: 4px; font-size: 0.75em; }
         .sb-group label { display: inline-flex; align-items: center; font-weight: normal; color: #555; }
         .sb-group input[type="radio"] { width: auto; margin-left: 2px; }
         
@@ -123,7 +125,7 @@
         .scenario-detail table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         .scenario-detail th, .scenario-detail td { 
             border: 1px solid #ddd; 
-            padding: 4px 2px; /* セルpaddingを極小化 */
+            padding: 4px 2px; 
             text-align: center; 
             font-size: 0.8em; 
             word-break: break-all; 
@@ -133,24 +135,37 @@
         .hide-score-rank { display: none !important; }
 
         /* その他UI要素 */
-        .debug-log { background-color: #2c3e50; color: #ecf0f1; padding: 10px; height: 100px; overflow-y: scroll; font-family: 'Courier New', Courier, monospace; border-radius: 5px; font-size: 0.75em; }
+        /* debug-logはinput-groupの外にあるため、個別に左右paddingを設定 */
+        .debug-log { 
+            background-color: #2c3e50; 
+            color: #ecf0f1; 
+            padding: 10px; 
+            height: 100px; 
+            overflow-y: scroll; 
+            font-family: 'Courier New', Courier, monospace; 
+            border-radius: 5px; 
+            font-size: 0.75em; 
+            margin: 0 10px; /* ★左右10pxのmarginを設定 */
+        }
         .recommendation { padding: 10px; border-radius: 5px; font-weight: bold; margin-top: 10px; font-size: 0.9em; }
         #seitenrei-output { background-color: #e8f8f5; border-left: 5px solid #1abc9c; /* 緑 */ }
         #koutenrei-output { background-color: #fbecec; border-left: 5px solid #e74c3c; /* 赤 */ }
         .scenario-detail { border: 1px dashed #95a5a6; padding: 10px; margin-top: 15px; border-radius: 5px; }
         .scenario-detail h4 { font-size: 1em; margin: 0 0 10px 0; border-bottom: 1px solid #ccc; padding-bottom: 5px;}
+        
+        /* buttonはinput-group内にあり、100%幅で十分 */
         button { width: 100%; padding: 12px; background-color: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; font-size: 1em; }
 
         /* フッターCSS */
         .copyright-footer {
             text-align: center;
             font-size: 0.7em;
-            color: #aaa; /* 薄いグレー */
+            color: #aaa; 
             margin-top: 20px;
             width: 100%;
         }
 
-        /* ★修正点1: 実行前の結果セクションを非表示にしてがたつきを解消 */
+        /* 実行前の結果セクションを非表示にしてがたつきを解消 */
         #results-container {
             display: none;
             opacity: 0;
@@ -173,7 +188,7 @@
         [TOOL START] ツール起動。すべての係数とロジックを読み込みました。<br>
         [INFO] bankdata.jsonの読み込みを待機しています...
     </div>
-
+    
     <h2>🎛️ レース/選手情報入力</h2>
     <div class="input-group">
         
