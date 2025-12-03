@@ -61,10 +61,10 @@
         }
 
         /* ------------------------------------------- */
-        /* ★新規: マニュアル/デバッグログのトグルヘッダー共通スタイル */
+        /* マニュアル/デバッグログのトグルヘッダー共通スタイル */
         /* ------------------------------------------- */
         .manual-header, .debug-log-header {
-            font-size: 1.05em; /* ログより少し大きめ */
+            font-size: 1.05em; 
             color: #698b69; 
             padding: 10px 15px; 
             margin-top: 10px; 
@@ -76,7 +76,7 @@
         }
         
         .manual-content {
-            display: none; /* ★初期状態で非表示 */
+            display: none; 
             padding: 15px; 
             margin: 0 15px 15px 15px;
             background-color: #ffffff;
@@ -93,19 +93,20 @@
 
 
         /* ------------------------------------------- */
-        /* デバッグログの初期状態を非表示に */
+        /* ★修正点: デバッグログのヘッダーサイズを縮小し、色を薄く */
         /* ------------------------------------------- */
         
         .debug-log-header {
-            font-size: 1.05em; 
-            color: #698b69; 
-            border-bottom: 2px solid #b3c7b3; 
-            padding: 15px 15px 5px 15px; 
-            margin-top: 20px; 
+            font-size: 1.0em; /* サイズを縮小 */
+            color: #888; /* 色も暗く */
+            border-bottom: 1px solid #e0e0e0; /* 線を細く */
+            padding: 10px 15px 5px 15px; 
+            margin-top: 15px; 
             cursor: pointer; 
             user-select: none; 
         }
         
+        /* ログ本体のスタイルは維持しつつ、位置だけ調整 */
         .debug-log { 
             display: none; 
             background-color: #384e38; 
@@ -116,7 +117,9 @@
             font-family: 'Courier New', Courier, monospace; 
             border-radius: 5px; 
             font-size: 0.75em; 
-            margin: 0 15px 15px 15px; 
+            /* marginの調整はHTMLの配置で対応 */
+            max-width: 600px;
+            margin: 0 auto 15px auto; 
         }
         
         /* ------------------------------------------- */
@@ -356,14 +359,6 @@
             <li>**荒天令 (高配当狙い):** 波乱の可能性が高く、高配当が期待できる展開パターンを重視した推奨買い目です。</li>
         </ul>
 
-    </div>
-    
-    <div class="debug-log-header" onclick="toggleDebugLog()">
-        <span id="log-toggle-icon">▶</span> 🛠️ デバッグ・処理ログ
-    </div>
-    <div class="debug-log" id="debug-log">
-        [TOOL START] ツール起動。すべての係数とロジックを読み込みました。<br>
-        [INFO] bankdata.jsonの読み込みを待機しています...
     </div>
     
     <h2>🎛️ レース/選手情報入力</h2>
@@ -693,6 +688,13 @@
         </div>
     </div>
 </div>
+<div class="debug-log-header" onclick="toggleDebugLog()">
+    <span id="log-toggle-icon">▶</span> 🛠️ デバッグ・処理ログ
+</div>
+<div class="debug-log" id="debug-log">
+    [TOOL START] ツール起動。すべての係数とロジックを読み込みました。<br>
+    [INFO] bankdata.jsonの読み込みを待機しています...
+</div>
 
 <footer class="copyright-footer">
     (C)2025 Eysyum
@@ -707,12 +709,12 @@
             logElement.style.display = 'none';
             iconElement.textContent = '▶';
         } else {
-            logElement.style.display = 'block';
+            // スクロールバーが表示されるため block を使用
+            logElement.style.display = 'block'; 
             iconElement.textContent = '▼';
         }
     }
     
-    // ★新規: マニュアル開閉トグル関数
     function toggleManual() {
         const manualElement = document.getElementById('manual-content');
         const iconElement = document.getElementById('manual-toggle-icon');
