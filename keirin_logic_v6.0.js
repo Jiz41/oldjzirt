@@ -582,60 +582,6 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores) {
 
 
 // ----------------------------------------------------------------------
-// ★ 新規ヘルパー関数: runScenarioSimulation (計算ロジックの本体) ★
-// ----------------------------------------------------------------------
-/**
- * 展開シミュレーションを実行し、結果と統合スコアを返す。
- * @param {Array<Object>} basePlayers - 基礎係数適用済みの選手データ
- * @param {Array<Array<number>>} lines - ライン構成
- * @param {Object} settings - 級班設定
- * @param {Object} bankData - バンクデータ
- * @param {boolean} applyKoutenrei - 荒天令バイアス (C係数) を適用するかどうか
- * @returns {{allScenarioResults: Array, integratedScores: Object}}
- */
-function runScenarioSimulation(basePlayers, lines, settings, bankData, applyKoutenrei) {
-    
-    const scenarios = ['先行有利', '捲り有利', '差し有利'];
-    const allScenarioResults = [];
-    const integratedScores = {}; 
-
-    basePlayers.forEach(p => integratedScores[p.id] = 0);
-
-    scenarios.forEach(scenario => {
-        const cDCoeffs = getScenarioCoeffs(scenario);
-        
-        let scenarioPlayers = JSON.parse(JSON.stringify(basePlayers));
-
-        // 基礎スコア (C係数適用前のスコア)
-        scenarioPlayers.forEach(p => {
-            p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e;
-        });
-
-        // 荒天令モードの場合、C係数バイアスを適用
-        if (applyKoutenrei) {
-            scenarioPlayers = calculate_koutenrei_bias(scenarioPlayers, lines, scenario, bankData);
-        }
-
-        scenarioPlayers.forEach(p => {
-            // C係数適用後の final_score に cDCoeffs (展開係数) を乗算する
-            const cD = cDCoeffs[p.style] || 1.0;
-            p.final_score = p.final_score * cD; 
-            
-            integratedScores[p.id] += p.final_score; 
-        });
-
-        scenarioPlayers.sort((a, b) => b.final_score - a.final_score);
-        
-        assignFinalGrades(scenarioPlayers);
-
-        allScenarioResults.push({ scenario, results: scenarioPlayers });
-    });
-
-    return { allScenarioResults, integratedScores };
-}
-
-
-// ----------------------------------------------------------------------
 // ★ 3. メイン計算関数: calculatePrediction の置換 (両モード実行ロジックへ) ★
 // ----------------------------------------------------------------------
 // メイン計算関数
@@ -841,8 +787,12 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     
     const koutenreiRanking = Object.keys(koutenreiIntegratedScores).map(id => ({
         id: Number(id),
-        score: koutenreiIntegratedScores[id] / detailedScenarioResults.length
+        score: koutenreiIntegratedScores[id] / detailedScenarioResults.length,
+        rank: 0 // 順位情報格納用
     })).sort((a, b) => b.score - a.score); 
+    
+    // 順位情報を付与 (後の5位/6位特定に使用)
+    koutenreiRanking.forEach((p, index) => p.rank = index + 1);
 
     const koutenTop3 = koutenreiRanking.slice(0, 3).map(p => p.id);
     const koutenTop4 = koutenreiRanking.slice(0, 4).map(p => p.id);
@@ -850,23 +800,53 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // 荒天令の軸 (C係数適用後のランキングで4位)
     const koutenLeader = koutenTop4.length >= 4 ? koutenTop4[3] : null; 
     
-    let koutenTrifuku = '';
+    let koutenTrifuku = [];
+    
+    // --- 従来の荒天令買い目 (P1: 4位軸の3点) ---
+    // 4位 (koutenLeader) とトップ3を絡めた3点。
     if (koutenLeader) {
-        // ★修正: 荒天令の三連複3点の組み合わせをそれぞれ昇順ソートする
-        const koutenComb1 = [koutenLeader, koutenTop3[0], koutenTop3[1]].sort((a, b) => a - b).join('='); // 4=1=2
-        const koutenComb2 = [koutenLeader, koutenTop3[0], koutenTop3[2]].sort((a, b) => a - b).join('='); // 4=1=3
-        const koutenComb3 = [koutenLeader, koutenTop3[1], koutenTop3[2]].sort((a, b) => a - b).join('='); // 4=2=3
+        // 4位軸とトップ3の組み合わせを昇順ソート
+        koutenTrifuku.push([koutenLeader, koutenTop3[0], koutenTop3[1]].sort((a, b) => a - b).join('=')); // 4=1=2
+        koutenTrifuku.push([koutenLeader, koutenTop3[0], koutenTop3[2]].sort((a, b) => a - b).join('=')); // 4=1=3
+        koutenTrifuku.push([koutenLeader, koutenTop3[1], koutenTop3[2]].sort((a, b) => a - b).join('=')); // 4=2=3
+    }
+    
+    // --- 拡張ロジック: 評価中位（5位・6位）の強制組み込み (P2: 2点追加) ---
+    // 1. 中位波乱軸（評価5位または6位の選手）を特定
+    // ※ 7車立て未満の場合は生成しない
+    const middleWaveRiders = koutenreiRanking.filter(p => p.rank === 5 || p.rank === 6).map(p => p.id);
+    
+    if (middleWaveRiders.length > 0) {
+        // 今回のレースで7番が該当したポジションの選手を「波乱の主役」とする
+        const mainWaveRider = middleWaveRiders[0]; // 5位の選手を優先
 
-        koutenTrifuku = [koutenComb1, koutenComb2, koutenComb3].join(', ');
-    } else {
-        koutenTrifuku = 'データ不足のため生成不可';
+        // 軸（1位, 2位）と堅い紐（4位）から、最適な2車を選定
+        const axis1 = koutenTop3[0]; // 1位選手
+        const axis2 = koutenTop3.length >= 2 ? koutenTop3[1] : null; // 2位選手
+        const firmHimo = koutenLeader; // 4位選手を堅い紐として採用
+
+        if (axis1 && firmHimo && mainWaveRider) {
+            // 1点目: 中位軸 + トップ軸 + 堅紐 (例: 7=1=4) -> 今回の7-5-1パターンを狙う
+            if (koutenTrifuku.length < 6) { // 6点制限
+                koutenTrifuku.push([mainWaveRider, axis1, firmHimo].sort((a, b) => a - b).join('='));
+            }
+            
+            // 2点目: 中位軸 + 2番目の軸 + 堅紐 (例: 7=3=4)
+            if (axis2 && koutenTrifuku.length < 6) { // 6点制限
+                koutenTrifuku.push([mainWaveRider, axis2, firmHimo].sort((a, b) => a - b).join('='));
+            }
+        }
     }
 
+    // 最終的に6点に制限
+    const finalKoutenTrifuku = koutenTrifuku.slice(0, 6).join(', ');
+    
+    // 特異点メッセージは4位選手のものを使用
     const koutenreiOutput = document.getElementById('koutenrei-output');
     if (koutenreiOutput) {
         koutenreiOutput.innerHTML = `
             ⚫ 特異点 : **${koutenLeader ? koutenLeader : 'N/A'}**<br>
-            三連複 (3点): <strong>${koutenTrifuku}</strong>
+            三連複 (${koutenTrifuku.slice(0, 6).length}点): <strong>${finalKoutenTrifuku}</strong>
         `;
     }
 }
