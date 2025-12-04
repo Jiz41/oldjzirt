@@ -759,15 +759,13 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     else if (tenunIndex === 67) messageClass = 'tenun-alert';
     else if (tenunIndex === 100) messageClass = 'tenun-severe';
 
-    // 2. 占い師メッセージの生成 (数値は小さく表示)
-    // 既存の天雲指数計算ロジック（scoreDiffに基づくもの）を完全に削除しました。
+    // 2. 占い師メッセージの生成 (内部スコアの表示を削除)
     const tenunHtml = `
         <div class="tenun-index-container ${messageClass}">
             <h4>⚫ 天雲指数（てんうんしすう）</h4>
             <p class="fortune-teller-message">
                 <strong>🔮🐢</strong>＜${oracleMessage}＞
             </p>
-            <p class="index-value-small">（内部スコア: ${tenunIndex}）</p>
         </div>
     `;
 
