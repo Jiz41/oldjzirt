@@ -776,14 +776,12 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     }
 
     // 3. 占い師メッセージの生成
+    // ★修正: 「（最大値100）」と「（傾向詳細）」を削除
     const tenunHtml = `
         <div class="tenun-index-container">
             <h4>⚫ 天雲指数（てんうんしすう）</h4>
             <p class="fortune-teller-message">
-                <strong>🔮🐢</strong>＜波乱の兆しを占う天雲指数は**${tenunIndex100}**（最大値100）、このレースは**${tendencyText}**と出ておるぞ。＞
-            </p>
-            <p class="tenun-description">
-                <small>（傾向詳細: ${tenunIndexData.description}）</small>
+                <strong>🔮🐢</strong>＜波乱の兆しを占う天雲指数は**${tenunIndex100}**、このレースは**${tendencyText}**と出ておるぞ。＞
             </p>
         </div>
     `;
