@@ -554,33 +554,30 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores) {
     const scoreDiff = scoreRange > 0 ? (top4SeitenAvg - top4KoutenAvg) / scoreRange : 0;
     
     // 5. 1～9のインジケーター位置に変換 (5が中央)
-    // scoreDiffの範囲は理論上 0 ～ (約0.2程度) 程度
     // 荒天信頼度が上がるほど (scoreDiff > 0)、位置は右 (5より大) へ
     
     let position = 5;
     
-    // 正規化された差を線形的に 5 から 1-9 の範囲にマッピング
     // 閾値を設定して、差が小さい場合は中央に固定する
-    const ABSOLUTE_DIFF_THRESHOLD = 0.0005; // わずかな差は中央とみなす
+    const ABSOLUTE_DIFF_THRESHOLD = 0.0005; 
     
     if (Math.abs(scoreDiff) < ABSOLUTE_DIFF_THRESHOLD) {
         position = 5; // 中央固定
     } else if (scoreDiff > 0) {
         // 荒天令スコアが晴天令スコアより低い (リスク減点された) -> 荒天令の信頼度アップ (右へ)
-        const maxExpectedDiff = 0.08; // ★修正箇所: 感度を鈍化 (0.05 -> 0.08)
+        const maxExpectedDiff = 0.08; 
         let normalized = Math.min(1.0, scoreDiff / maxExpectedDiff);
         
-        // 5 から 9 の範囲にマッピング (5 + 1～4)
-        position = 5 + Math.round(normalized * 4); // ★修正箇所: Math.ceil -> Math.round
+        // 5 から 9 の範囲にマッピング (四捨五入でなめらかに)
+        position = 5 + Math.round(normalized * 4); 
         position = Math.min(9, position);
     } else {
-        // 荒天令スコアが晴天令スコアより高い (稀だが、ロジックの逆転) -> 晴天令の信頼度アップ (左へ)
-        // 今回のロジックではほとんど発生しないが、発生したら左へ傾ける
+        // 荒天令スコアが晴天令スコアより高い (晴天令の信頼度アップ (左へ))
         const maxExpectedDiff = 0.05; 
         let normalized = Math.min(1.0, Math.abs(scoreDiff) / maxExpectedDiff);
         
-        // 5 から 1 の範囲にマッピング (5 - 1～4)
-        position = 5 - Math.round(normalized * 4); // ★修正箇所: Math.ceil -> Math.round
+        // 5 から 1 の範囲にマッピング (四捨五入でなめらかに)
+        position = 5 - Math.round(normalized * 4); 
         position = Math.max(1, position);
     }
     
@@ -593,6 +590,60 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores) {
 
     logMessage(`[TENUN] 晴天/荒天スコア差: ${scoreDiff.toFixed(5)}。インデックス位置: ${position}`);
     return { position, description };
+}
+
+
+// ----------------------------------------------------------------------
+// ★ 新規ヘルパー関数: runScenarioSimulation (計算ロジックの本体) ★
+// ----------------------------------------------------------------------
+/**
+ * 展開シミュレーションを実行し、結果と統合スコアを返す。
+ * @param {Array<Object>} basePlayers - 基礎係数適用済みの選手データ
+ * @param {Array<Array<number>>} lines - ライン構成
+ * @param {Object} settings - 級班設定
+ * @param {Object} bankData - バンクデータ
+ * @param {boolean} applyKoutenrei - 荒天令バイアス (C係数) を適用するかどうか
+ * @returns {{allScenarioResults: Array, integratedScores: Object}}
+ */
+function runScenarioSimulation(basePlayers, lines, settings, bankData, applyKoutenrei) {
+    
+    const scenarios = ['先行有利', '捲り有利', '差し有利'];
+    const allScenarioResults = [];
+    const integratedScores = {}; 
+
+    basePlayers.forEach(p => integratedScores[p.id] = 0);
+
+    scenarios.forEach(scenario => {
+        const cDCoeffs = getScenarioCoeffs(scenario);
+        
+        let scenarioPlayers = JSON.parse(JSON.stringify(basePlayers));
+
+        // 基礎スコア (C係数適用前のスコア)
+        scenarioPlayers.forEach(p => {
+            p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e;
+        });
+
+        // 荒天令モードの場合、C係数バイアスを適用
+        if (applyKoutenrei) {
+            scenarioPlayers = calculate_koutenrei_bias(scenarioPlayers, lines, scenario, bankData);
+        }
+
+        scenarioPlayers.forEach(p => {
+            // C係数適用後の final_score に cDCoeffs (展開係数) を乗算する
+            const cD = cDCoeffs[p.style] || 1.0;
+            p.final_score = p.final_score * cD; 
+            
+            integratedScores[p.id] += p.final_score; 
+        });
+
+        scenarioPlayers.sort((a, b) => b.final_score - a.final_score);
+        
+        assignFinalGrades(scenarioPlayers);
+
+        allScenarioResults.push({ scenario, results: scenarioPlayers });
+    });
+
+    return { allScenarioResults, integratedScores };
 }
 
 
@@ -697,7 +748,7 @@ async function calculatePrediction() {
 
 
 // ----------------------------------------------------------------------
-// ★ 4. 表示関数: displayResults の置換 (天雲指数生成ロジックを追加) ★
+// ★ 4. 表示関数: displayResults の置換 (占い師テキストロジックを追加) ★
 // ----------------------------------------------------------------------
 // ★修正: 統合スコアを晴天令用と荒天令用の2つ受け取る
 function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName) { 
@@ -706,32 +757,33 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     displayBankTendency();
 
     // ----------------------------------------------------------
-    // ★ 天雲指数 (インジケーター) の計算と表示 ★
+    // ★ 天雲指数 (占い師メッセージ) の計算と表示 ★
     // ----------------------------------------------------------
     const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores);
-    const tenunPosition = tenunIndexData.position;
-    
-    // 10メモリのゲージを作成: ┃││││┃││││┃
-    // 1 (晴天最大) から 9 (荒天最大) の位置を特定。インデックスは 0-8。
-    // position 1 -> index 0, position 5 -> index 4, position 9 -> index 8
-    const gaugeArray = Array(9).fill('│'); 
-    
-    // 🐢の位置を計算: ┃││││┃││││┃ の間に9つの空間がある
-    // 1文字目(🌤️)と最後の1文字(⛈️)を除いた19文字のうち、│の直下の位置に配置
-    const positionMap = [2, 4, 6, 8, 10, 12, 14, 16, 18]; 
-    const index = tenunPosition - 1; 
-    const spaceCount = positionMap[index] || 10; 
-    
-    const turtleLine = ' '.repeat(spaceCount) + '🐢'; 
+    const tenunPosition = tenunIndexData.position; // 1〜9
+
+    // 1. 天雲指数 (1〜9) を 0〜100 に線形変換し、四捨五入
+    const tenunIndex100 = Math.round((tenunPosition - 1) / 8 * 100); 
+
+    // 2. 傾向テキストの定義
+    let tendencyText;
+    if (tenunPosition < 5) {
+        tendencyText = '晴天（安定）に寄る';
+    } else if (tenunPosition > 5) {
+        tendencyText = '荒天（波乱）に寄る';
+    } else {
+        tendencyText = '中立（均衡）に寄る';
+    }
+
+    // 3. 占い師メッセージの生成
     const tenunHtml = `
         <div class="tenun-index-container">
             <h4>⚫ 天雲指数（てんうんしすう）</h4>
-            <pre class="tenun-gauge">
-🌤️┃││││┃││││┃⛈️
-${turtleLine}
-            </pre>
+            <p class="fortune-teller-message">
+                <strong>🔮🐢</strong>＜波乱の兆しを占う天雲指数は**${tenunIndex100}**（最大値100）、このレースは**${tendencyText}**と出ておるぞ。＞
+            </p>
             <p class="tenun-description">
-                <strong>傾向:</strong> ${tenunIndexData.position > 5 ? '荒天寄り' : tenunIndexData.position < 5 ? '晴天寄り' : '中立'} (${tenunIndexData.description})
+                <small>（傾向詳細: ${tenunIndexData.description}）</small>
             </p>
         </div>
     `;
