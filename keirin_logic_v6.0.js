@@ -75,10 +75,11 @@ async function loadBankData() {
         const bankSelect = document.getElementById('bank-name');
         if (bankSelect) { 
             bankSelect.innerHTML = ''; 
-            Object.keys(BANK_DATA).forEach(bankName => {
+            Object.keys(BANK_DATA).forEach(bankId => {
                 const option = document.createElement('option');
-                option.value = bankName;
-                option.textContent = bankName;
+                option.value = bankId;
+                // ★★★ 修正箇所: bankId ではなく name と track を表示する ★★★
+                option.textContent = `[${BANK_DATA[bankId].track}m] ${BANK_DATA[bankId].name}`; 
                 bankSelect.appendChild(option);
             });
             logMessage("[UI] バンク名の選択肢を動的に構築しました。");
@@ -129,12 +130,12 @@ function displayBankTendency() {
     let message = '';
     if (maxBias > 1.03) { 
         const displayedStyle = styleMap[strongestTendency];
-        message = `⚠️ **${bankName}**は**${displayedStyle}**が**出やすい**傾向があります。 (バイアス ${maxBias.toFixed(2)})`;
+        message = `⚠️ **${BANK_DATA[bankName].name}**は**${displayedStyle}**が**出やすい**傾向があります。 (バイアス ${maxBias.toFixed(2)})`;
     } else if (maxBias < 0.97) { 
         const displayedStyle = styleMap[strongestTendency];
-        message = `✅ **${bankName}**は**${displayedStyle}**が最も低い傾向です。`;
+        message = `✅ **${BANK_DATA[bankName].name}**は**${displayedStyle}**が最も低い傾向です。`;
     } else {
-        message = `ℹ️ **${bankName}**は脚質による大きな傾向差は**ありません**。`;
+        message = `ℹ️ **${BANK_DATA[bankName].name}**は脚質による大きな傾向差は**ありません**。`;
     }
     
     // 計算実行後にも結果エリアに表示されるため、ここではHTMLタグは付けない
@@ -627,7 +628,7 @@ async function calculatePrediction() {
 
     let players = getPlayerData();
     
-    logMessage(`[CALC START] ${raceType} / バンク: ${bankName} で計算開始。モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`);
+    logMessage(`[CALC START] ${raceType} / バンク: ${bankData.name} で計算開始。モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`);
 
     // --- I. C_L (ライン・連係係数) の計算とライン強度の表示 ---
     const lines = calculateLineCoeffs(players, settings); 
@@ -716,21 +717,10 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // position 1 -> index 0, position 5 -> index 4, position 9 -> index 8
     const gaugeArray = Array(9).fill('│'); 
     
-    // 🐢の位置を計算: ┃││││┃││││┃ の間に9つの空間がある
-    // positionが1なら最初の│の上、positionが9なら最後の│の上
-    // position = 5 の時、中央の┃の上に来る
-    let index = tenunPosition - 1; 
-
-    // 🐢を配置するための空白を計算 (全21文字。┃││││┃││││┃)
-    // 1文字目(🌤️)と最後の1文字(⛈️)を除いた19文字のうち、│の直下の位置に配置
-    // 1: 🌤️[  1  ]││││┃││││┃⛈️  -> 空白 2
-    // 5: 🌤️││││[ 5 ]┃││││┃⛈️  -> 空白 10
-    // 9: 🌤️││││┃││││[ 9 ]┃⛈️  -> 空白 18
-    
-    // ゲージ文字数 21, インデックス数 9。 
-    // 奇数番目 (1, 3, 5, 7, 9) が │ の下、偶数番目 (2, 4, 6, 8) が ┃ の下
+    // 🐢の位置を計算 (ゲージ文字数 21)
     const positionMap = [2, 4, 6, 8, 10, 12, 14, 16, 18]; // 🌤️┃...┃⛈️の後の空白の数
-    const spaceCount = positionMap[index] || 10; // position=5で10文字分の空白 (┃の直下)
+    const index = tenunPosition - 1;
+    const spaceCount = positionMap[index] || 10; 
     
     const turtleLine = ' '.repeat(spaceCount) + '🐢'; 
     const tenunHtml = `
@@ -842,7 +832,7 @@ ${turtleLine}
     const koutenreiOutput = document.getElementById('koutenrei-output');
     if (koutenreiOutput) {
         koutenreiOutput.innerHTML = `
-            ⚫ 特異点 (シンギュラリティ): **${koutenLeader ? koutenLeader : 'N/A'}**<br>
+            ⚫ 特異点 : **${koutenLeader ? koutenLeader : 'N/A'}**<br>
             三連複 (3点): <strong>${koutenTrifuku}</strong>
         `;
     }
