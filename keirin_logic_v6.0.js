@@ -138,7 +138,7 @@ function displayBankTendency() {
     }
     
     // 計算実行後にも結果エリアに表示されるため、ここではHTMLタグは付けない
-    // ※ 実行後の表示は displayResults() の中で更新します
+    // ※ 実行後の表示は displayResults() の中で更新されます
     displayArea.innerHTML = message;
     logMessage(`[BANK] ${bankName} の展開傾向: ${message.replace(/<[^>]*>?/gm, '')}`);
 }
@@ -264,7 +264,7 @@ function generateScenarioWagers(results) {
         `${top3[1]}-${top3[0]}-${top3[2]}`
     ].join(', ');
     
-    // 三連複 2点: 1=2=3, 1=2=4 (4位も使用)
+    // 三連複 2点: 1=2=4 (4位も使用)
     const top4 = results.slice(0, 4).map(p => p.id);
     const trifuku = [
         `${top4[0]}=${top4[1]}=${top4[2]}`,
@@ -325,9 +325,7 @@ function assignFinalGrades(scenarioPlayers) {
  */
 function calculate_koutenrei_bias(players, lines, scenario, bankData) {
     
-    // --- (0) 荒天令ロジックの実行フラグ (常にON) ---
-    const isKoutenrei = true;
-    if (!isKoutenrei) return players;
+    // NOTE: この関数は applyKoutenrei が true の場合のみ呼び出されます。
 
     logMessage("[KOUTENREI] 荒天令リスクバイアス (C係数) の計算を開始...");
 
@@ -466,7 +464,61 @@ function calculate_koutenrei_bias(players, lines, scenario, bankData) {
 
 
 // ----------------------------------------------------------------------
-// ★ 2. メイン計算関数: calculatePrediction の置換 ★
+// ★ 新規ヘルパー関数: runScenarioSimulation (計算ロジックの本体) ★
+// ----------------------------------------------------------------------
+/**
+ * 展開シミュレーションを実行し、結果と統合スコアを返す。
+ * @param {Array<Object>} basePlayers - 基礎係数適用済みの選手データ
+ * @param {Array<Array<number>>} lines - ライン構成
+ * @param {Object} settings - 級班設定
+ * @param {Object} bankData - バンクデータ
+ * @param {boolean} applyKoutenrei - 荒天令バイアス (C係数) を適用するかどうか
+ * @returns {{allScenarioResults: Array, integratedScores: Object}}
+ */
+function runScenarioSimulation(basePlayers, lines, settings, bankData, applyKoutenrei) {
+    
+    const scenarios = ['先行有利', '捲り有利', '差し有利'];
+    const allScenarioResults = [];
+    const integratedScores = {}; 
+
+    basePlayers.forEach(p => integratedScores[p.id] = 0);
+
+    scenarios.forEach(scenario => {
+        const cDCoeffs = getScenarioCoeffs(scenario);
+        
+        let scenarioPlayers = JSON.parse(JSON.stringify(basePlayers));
+
+        // 基礎スコア (C係数適用前のスコア)
+        scenarioPlayers.forEach(p => {
+            p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e;
+        });
+
+        // 荒天令モードの場合、C係数バイアスを適用
+        if (applyKoutenrei) {
+            scenarioPlayers = calculate_koutenrei_bias(scenarioPlayers, lines, scenario, bankData);
+        }
+
+        scenarioPlayers.forEach(p => {
+            // C係数適用後の final_score に cDCoeffs (展開係数) を乗算する
+            const cD = cDCoeffs[p.style] || 1.0;
+            p.final_score = p.final_score * cD; 
+            
+            integratedScores[p.id] += p.final_score; 
+        });
+
+        scenarioPlayers.sort((a, b) => b.final_score - a.final_score);
+        
+        assignFinalGrades(scenarioPlayers);
+
+        allScenarioResults.push({ scenario, results: scenarioPlayers });
+    });
+
+    return { allScenarioResults, integratedScores };
+}
+
+
+// ----------------------------------------------------------------------
+// ★ 3. メイン計算関数: calculatePrediction の置換 (両モード実行ロジックへ) ★
 // ----------------------------------------------------------------------
 // メイン計算関数
 async function calculatePrediction() {
@@ -490,30 +542,31 @@ async function calculatePrediction() {
         return;
     }
 
-    // ★修正: 荒天令モードのON/OFF判定
+    // UIから現在の選択モードを取得
     const modeSelector = document.getElementById('mode-selector');
-    const koutenreiMode = modeSelector ? modeSelector.value === 'koutenrei' : false;
+    const koutenreiModeSelected = modeSelector ? modeSelector.value === 'koutenrei' : false;
 
     let players = getPlayerData();
     
-    logMessage(`[CALC START] ${raceType} / バンク: ${bankName} で計算開始。モード: ${koutenreiMode ? '荒天令' : '晴天令'}`);
+    logMessage(`[CALC START] ${raceType} / バンク: ${bankName} で計算開始。モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`);
 
     // --- I. C_L (ライン・連係係数) の計算とライン強度の表示 ---
     const lines = calculateLineCoeffs(players, settings); 
 
-    // --- II. 選手固有係数 C_W, C_R, C_S1, C_B1 & C_E の計算 (W印の修正を含む) ---
-    players.forEach(p => {
+    // --- II. 選手固有係数 C_W, C_R, C_S1, C_B1 & C_E の計算 (基礎係数) ---
+    // この係数は両モードで共通して使用される
+    let basePlayers = JSON.parse(JSON.stringify(players));
+    basePlayers.forEach(p => {
         p.c_score_adj = 1.0 + (p.score / 100 - 1) * settings.R_BIAS; 
         const recentScores = p.recent.split('').map(Number);
         const avgRank = recentScores.length > 0 ? recentScores.reduce((a, b) => a + b, 0) / recentScores.length : 4.0; 
         p.c_recent = (1.0 + (4 - avgRank) * 0.05) * settings.RECENT_WEIGHT; 
 
-        // W印の係数
         if (p.wmark === '◎') p.c_wmark = 1.04;
         else if (p.wmark === '〇') p.c_wmark = 1.02;
         else if (p.wmark === '✕') p.c_wmark = 1.015; 
         else if (p.wmark === '△') p.c_wmark = 1.01;
-        else p.c_wmark = 1.0; // 無
+        else p.c_wmark = 1.0; 
 
         p.c_s1 = p.is_s1 ? 1.005 : 1.0; 
         p.c_b1 = p.is_b1 ? 1.015 : 1.0; 
@@ -529,49 +582,32 @@ async function calculatePrediction() {
         p.c_e = c_e;
     });
 
-    // --- III. 展開別シミュレーションと最終スコア算出 ---
-    const scenarios = ['先行有利', '捲り有利', '差し有利'];
-    const allScenarioResults = [];
-    const integratedScores = {}; 
 
-    // ★修正: 統合スコアの初期化
-    players.forEach(p => integratedScores[p.id] = 0);
+    // --- III. シミュレーション実行 (晴天令と荒天令の同時実行) ---
 
-    scenarios.forEach(scenario => {
-        const cDCoeffs = getScenarioCoeffs(scenario);
-        
-        let scenarioPlayers = JSON.parse(JSON.stringify(players));
+    // 1. ☀️ 晴天令シミュレーション (C係数適用なし)
+    const seitenreiResults = runScenarioSimulation(basePlayers, lines, settings, bankData, false);
+    logMessage("[CALC] 晴天令 (安定) シミュレーションが完了しました。");
 
-        // ★分岐点: C係数適用前の基礎スコアを final_score に設定
-        scenarioPlayers.forEach(p => {
-            p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e;
-        });
+    // 2. ⛈️ 荒天令シミュレーション (C係数適用あり)
+    const koutenreiResults = runScenarioSimulation(basePlayers, lines, settings, bankData, true);
+    logMessage("[CALC] 荒天令 (波乱) シミュレーションが完了しました。");
 
-
-        // ★分岐点: 荒天令モードの場合、C係数バイアスを適用
-        if (koutenreiMode) {
-            scenarioPlayers = calculate_koutenrei_bias(scenarioPlayers, lines, scenario, bankData);
-        }
-
-        scenarioPlayers.forEach(p => {
-            // C係数適用後の final_score に cDCoeffs を乗算する
-            const cD = cDCoeffs[p.style] || 1.0;
-            p.final_score = p.final_score * cD; 
-            
-            integratedScores[p.id] += p.final_score; 
-        });
-
-        scenarioPlayers.sort((a, b) => b.final_score - a.final_score);
-        
-        assignFinalGrades(scenarioPlayers);
-
-        allScenarioResults.push({ scenario, results: scenarioPlayers });
-    });
 
     // --- IV. 最終結果の統合と表示 ---
-    displayResults(allScenarioResults, integratedScores, players, bankName, koutenreiMode); 
     
-    // ★修正点2: 計算完了後、結果コンテナを表示する
+    // 詳細テーブル (scenario-output) に表示する結果は、UIで選択されたモードに合わせる
+    const detailedScenarioResults = koutenreiModeSelected ? 
+                                    koutenreiResults.allScenarioResults : 
+                                    seitenreiResults.allScenarioResults;
+
+    displayResults(
+        detailedScenarioResults,
+        seitenreiResults.integratedScores,
+        koutenreiResults.integratedScores,
+        bankName
+    ); 
+    
     const resultsContainer = document.getElementById('results-container');
     if (resultsContainer) {
         resultsContainer.classList.add('visible');
@@ -580,19 +616,19 @@ async function calculatePrediction() {
     logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
 }
 
+
 // ----------------------------------------------------------------------
-// ★ 3. 表示関数: displayResults の置換 ★
+// ★ 4. 表示関数: displayResults の置換 (両モードの結果を表示) ★
 // ----------------------------------------------------------------------
-// 最終スコアと順位の表示を削除
-// ★修正: integratedScoresとkoutenreiModeを受け取る
-function displayResults(allScenarioResults, integratedScores, players, bankName, koutenreiMode) { 
+// ★修正: 統合スコアを晴天令用と荒天令用の2つ受け取る
+function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName) { 
     
     // バンク展開傾向の再表示（実行結果エリアの先頭）
     displayBankTendency();
 
     const scenarioOutput = document.getElementById('scenario-output');
     if (scenarioOutput) {
-        scenarioOutput.innerHTML = allScenarioResults.map(s => {
+        scenarioOutput.innerHTML = detailedScenarioResults.map(s => {
             const wagers = generateScenarioWagers(s.results); 
             
             return `
@@ -616,70 +652,65 @@ function displayResults(allScenarioResults, integratedScores, players, bankName,
         }).join('');
     }
 
-    // 総合評価の計算 (買い目生成)
-    const finalRanking = Object.keys(integratedScores).map(id => ({
+    // --- ☀️ 晴天令 (安定推奨) の表示 ---
+    
+    const seitenreiRanking = Object.keys(seitenreiIntegratedScores).map(id => ({
         id: Number(id),
-        score: integratedScores[id] / allScenarioResults.length
+        score: seitenreiIntegratedScores[id] / detailedScenarioResults.length
     })).sort((a, b) => b.score - a.score); 
 
-    const top3 = finalRanking.slice(0, 3);
-    const top4 = finalRanking.slice(0, 4);
+    const seitenTop3 = seitenreiRanking.slice(0, 3);
+    const seitenTop4 = seitenreiRanking.slice(0, 4);
+
+    const seitenTritan = [
+        `${seitenTop3[0].id}-${seitenTop3[1].id}-${seitenTop3[2].id}`,
+        `${seitenTop3[0].id}-${seitenTop3[2].id}-${seitenTop3[1].id}`,
+        `${seitenTop3[1].id}-${seitenTop3[0].id}-${seitenTop3[2].id}`
+    ].join(', ');
     
-    // 晴天令 (安定推奨)
+    const seitenTrifuku = [
+        `${seitenTop4[0].id}=${seitenTop4[1].id}=${seitenTop4[2].id}`,
+        `${seitenTop4[0].id}=${seitenTop4[1].id}=${seitenTop4[3] ? seitenTop4[3].id : 'X'}`
+    ].join(', ');
+        
     const seitenreiOutput = document.getElementById('seitenrei-output');
     if (seitenreiOutput) {
-        // ★修正: 晴天令と荒天令の結果をモードによって入れ替える
-        let seitenTritan, seitenTrifuku;
-
-        if (koutenreiMode) {
-            seitenTritan = '⚠️ 荒天令モード実行中。スコアはC係数適用済';
-            seitenTrifuku = '⚠️ 荒天令モード実行中。スコアはC係数適用済';
-        } else {
-            seitenTritan = [
-                `${top3[0].id}-${top3[1].id}-${top3[2].id}`,
-                `${top3[0].id}-${top3[2].id}-${top3[1].id}`,
-                `${top3[1].id}-${top3[0].id}-${top3[2].id}`
-            ].join(', ');
-            
-            seitenTrifuku = [
-                `${top4[0].id}=${top4[1].id}=${top4[2].id}`,
-                `${top4[0].id}=${top4[1].id}=${top4[3] ? top4[3].id : 'X'}`
-            ].join(', ');
-        }
-        
         seitenreiOutput.innerHTML = `
             三連単 (3点): <strong>${seitenTritan}</strong><br>
             三連複 (2点): <strong>${seitenTrifuku}</strong>
         `;
     }
 
-    // 荒天令 (高配当狙い) - 三連複3点を表示
+
+    // --- ⛈️ 荒天令 (高配当狙い) の表示 ---
+    
+    const koutenreiRanking = Object.keys(koutenreiIntegratedScores).map(id => ({
+        id: Number(id),
+        score: koutenreiIntegratedScores[id] / detailedScenarioResults.length
+    })).sort((a, b) => b.score - a.score); 
+
+    const koutenTop3 = koutenreiRanking.slice(0, 3);
+    const koutenTop4 = koutenreiRanking.slice(0, 4);
+    
+    // 荒天令の軸 (C係数適用後のランキングで4位)
+    const koutenLeader = koutenTop4[3] ? koutenTop4[3].id : null; 
+    
+    let koutenTrifuku = '';
+    if (koutenLeader) {
+        // 荒天令 三連複 3点: 4=1=2, 4=1=3, 4=2=3 (軸4位、相手1,2,3位)
+        koutenTrifuku = [
+            `${koutenLeader}=${koutenTop3[0].id}=${koutenTop3[1].id}`, 
+            `${koutenLeader}=${koutenTop3[0].id}=${koutenTop3[2].id}`,
+            `${koutenLeader}=${koutenTop3[1].id}=${koutenTop3[2].id}` 
+        ].join(', ');
+    } else {
+        koutenTrifuku = 'データ不足のため生成不可';
+    }
+
     const koutenreiOutput = document.getElementById('koutenrei-output');
     if (koutenreiOutput) {
-        
-        let koutenLeader, koutenTrifuku;
-        if (koutenreiMode) {
-            // 荒天令の軸 (C係数適用後のランキングで4位)
-            koutenLeader = top4[3] ? top4[3].id : null; 
-            
-            if (koutenLeader) {
-                // 荒天令 三連複 3点: 4=1=2, 4=1=3, 4=2=3 (C係数適用後のランキングに基づく)
-                koutenTrifuku = [
-                    `${koutenLeader}=${top3[0].id}=${top3[1].id}`, 
-                    `${koutenLeader}=${top3[0].id}=${top3[2].id}`,
-                    `${koutenLeader}=${top3[1].id}=${top3[2].id}` 
-                ].join(', ');
-            } else {
-                koutenTrifuku = 'データ不足のため生成不可';
-            }
-        } else {
-            koutenLeader = '⚠️ 晴天令モード実行中';
-            koutenTrifuku = '⚠️ 晴天令モード実行中';
-        }
-
-
         koutenreiOutput.innerHTML = `
-            推奨軸 (4位): **${koutenLeader}**<br>
+            推奨軸 (4位): **${koutenLeader ? koutenLeader : 'N/A'}**<br>
             三連複 (3点): <strong>${koutenTrifuku}</strong>
         `;
     }
