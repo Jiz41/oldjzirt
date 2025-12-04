@@ -782,4 +782,66 @@
 🌤️┃││││┃││││┃⛈️
                  🐢
                 </pre>
-                <p class="tenun-description
+                <p class="tenun-description">計算結果待ち...</p>
+            </div>
+            <h3>☀️ 晴天令 (安定推奨)</h3>
+            <div class="recommendation" id="seitenrei-output">
+                計算結果待ち...
+            </div>
+
+            <h3>⛈️ 荒天令 (波乱推奨)</h3>
+            <div class="recommendation" id="koutenrei-output">
+                計算結果待ち...
+            </div>
+
+            <h3>展開別シミュレーション詳細</h3>
+            
+            <div id="scenario-output">
+                </div>
+
+        </div>
+    </div>
+</div>
+<div class="debug-log-header" onclick="toggleDebugLog()">
+    <span id="log-toggle-icon">▶</span> 🛠️ デバッグ・処理ログ
+</div>
+<div class="debug-log" id="debug-log">
+    [TOOL START] ツール起動。すべての係数とロジックを読み込みました。<br>
+    [INFO] bankdata.jsonの読み込みを待機しています...
+</div>
+
+<footer class="copyright-footer">
+    (C)2025 Eysyum
+</footer>
+
+<script>
+    function toggleDebugLog() {
+        const logElement = document.getElementById('debug-log');
+        const iconElement = document.getElementById('log-toggle-icon');
+        
+        if (logElement.style.display === 'block') {
+            logElement.style.display = 'none';
+            iconElement.textContent = '▶';
+        } else {
+            logElement.style.display = 'block'; 
+            iconElement.textContent = '▼';
+        }
+    }
+    
+    function toggleManual() {
+        const manualElement = document.getElementById('manual-content');
+        const iconElement = document.getElementById('manual-toggle-icon');
+        
+        if (manualElement.style.display === 'block') {
+            manualElement.style.display = 'none';
+            iconElement.textContent = '▶';
+        } else {
+            manualElement.style.display = 'block';
+            iconElement.textContent = '▼';
+        }
+    }
+</script>
+
+<script src="keirin_logic_v6.0.js"></script>
+</body>
+</html>
