@@ -257,19 +257,20 @@ function getScenarioCoeffs(scenario) {
 function generateScenarioWagers(results) {
     const top3 = results.slice(0, 3).map(p => p.id); 
     
-    // 三連単 3点: 1-2-3, 1-3-2, 2-1-3
+    // 三連単 3点: 1-2-3, 1-3-2, 2-1-3 (ランキング順)
     const tritan = [
         `${top3[0]}-${top3[1]}-${top3[2]}`,
         `${top3[0]}-${top3[2]}-${top3[1]}`,
         `${top3[1]}-${top3[0]}-${top3[2]}`
     ].join(', ');
     
-    // 三連複 2点: 1=2=4 (4位も使用)
+    // 三連複 2点: 1=2=3, 1=2=4 (昇順ソートを適用)
     const top4 = results.slice(0, 4).map(p => p.id);
-    const trifuku = [
-        `${top4[0]}=${top4[1]}=${top4[2]}`,
-        `${top4[0]}=${top4[1]}=${top4[3]}`
-    ].join(', ');
+    
+    const tri1 = [...top4.slice(0, 3)].sort((a, b) => a - b).join('='); // 1, 2, 3
+    const tri2 = [top4[0], top4[1], top4[3]].sort((a, b) => a - b).join('='); // 1, 2, 4 (4位も使用)
+    
+    const trifuku = [tri1, tri2].join(', ');
 
     return { tritan, trifuku };
 }
@@ -618,7 +619,7 @@ async function calculatePrediction() {
 
 
 // ----------------------------------------------------------------------
-// ★ 4. 表示関数: displayResults の置換 (両モードの結果を表示) ★
+// ★ 4. 表示関数: displayResults の置換 (三連複の昇順ソートを追加) ★
 // ----------------------------------------------------------------------
 // ★修正: 統合スコアを晴天令用と荒天令用の2つ受け取る
 function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName) { 
@@ -626,6 +627,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // バンク展開傾向の再表示（実行結果エリアの先頭）
     displayBankTendency();
 
+    // シナリオ詳細 (三連複は generateScenarioWagers 内でソート済み)
     const scenarioOutput = document.getElementById('scenario-output');
     if (scenarioOutput) {
         scenarioOutput.innerHTML = detailedScenarioResults.map(s => {
@@ -659,19 +661,24 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         score: seitenreiIntegratedScores[id] / detailedScenarioResults.length
     })).sort((a, b) => b.score - a.score); 
 
-    const seitenTop3 = seitenreiRanking.slice(0, 3);
-    const seitenTop4 = seitenreiRanking.slice(0, 4);
-
-    const seitenTritan = [
-        `${seitenTop3[0].id}-${seitenTop3[1].id}-${seitenTop3[2].id}`,
-        `${seitenTop3[0].id}-${seitenTop3[2].id}-${seitenTop3[1].id}`,
-        `${seitenTop3[1].id}-${seitenTop3[0].id}-${seitenTop3[2].id}`
-    ].join(', ');
+    const seitenTop3 = seitenreiRanking.slice(0, 3).map(p => p.id);
+    const seitenTop4 = seitenreiRanking.slice(0, 4).map(p => p.id);
     
-    const seitenTrifuku = [
-        `${seitenTop4[0].id}=${seitenTop4[1].id}=${seitenTop4[2].id}`,
-        `${seitenTop4[0].id}=${seitenTop4[1].id}=${seitenTop4[3] ? seitenTop4[3].id : 'X'}`
+    const seitenTritan = [
+        `${seitenTop3[0]}-${seitenTop3[1]}-${seitenTop3[2]}`,
+        `${seitenTop3[0]}-${seitenTop3[2]}-${seitenTop3[1]}`,
+        `${seitenTop3[1]}-${seitenTop3[0]}-${seitenTop3[2]}`
     ].join(', ');
+
+    // ★修正: 三連複の組み合わせを昇順ソートする
+    const triSeiten1 = [...seitenTop4.slice(0, 3)].sort((a, b) => a - b).join('='); // 1, 2, 3
+    let triSeiten2;
+    if (seitenTop4.length >= 4) {
+        triSeiten2 = [seitenTop4[0], seitenTop4[1], seitenTop4[3]].sort((a, b) => a - b).join('='); // 1, 2, 4
+    } else {
+        triSeiten2 = 'データ不足';
+    }
+    const seitenTrifuku = [triSeiten1, triSeiten2].join(', ');
         
     const seitenreiOutput = document.getElementById('seitenrei-output');
     if (seitenreiOutput) {
@@ -689,20 +696,20 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         score: koutenreiIntegratedScores[id] / detailedScenarioResults.length
     })).sort((a, b) => b.score - a.score); 
 
-    const koutenTop3 = koutenreiRanking.slice(0, 3);
-    const koutenTop4 = koutenreiRanking.slice(0, 4);
+    const koutenTop3 = koutenreiRanking.slice(0, 3).map(p => p.id);
+    const koutenTop4 = koutenreiRanking.slice(0, 4).map(p => p.id);
     
     // 荒天令の軸 (C係数適用後のランキングで4位)
-    const koutenLeader = koutenTop4[3] ? koutenTop4[3].id : null; 
+    const koutenLeader = koutenTop4.length >= 4 ? koutenTop4[3] : null; 
     
     let koutenTrifuku = '';
     if (koutenLeader) {
-        // 荒天令 三連複 3点: 4=1=2, 4=1=3, 4=2=3 (軸4位、相手1,2,3位)
-        koutenTrifuku = [
-            `${koutenLeader}=${koutenTop3[0].id}=${koutenTop3[1].id}`, 
-            `${koutenLeader}=${koutenTop3[0].id}=${koutenTop3[2].id}`,
-            `${koutenLeader}=${koutenTop3[1].id}=${koutenTop3[2].id}` 
-        ].join(', ');
+        // ★修正: 荒天令の三連複3点の組み合わせをそれぞれ昇順ソートする
+        const koutenComb1 = [koutenLeader, koutenTop3[0], koutenTop3[1]].sort((a, b) => a - b).join('='); // 4=1=2
+        const koutenComb2 = [koutenLeader, koutenTop3[0], koutenTop3[2]].sort((a, b) => a - b).join('='); // 4=1=3
+        const koutenComb3 = [koutenLeader, koutenTop3[1], koutenTop3[2]].sort((a, b) => a - b).join('='); // 4=2=3
+
+        koutenTrifuku = [koutenComb1, koutenComb2, koutenComb3].join(', ');
     } else {
         koutenTrifuku = 'データ不足のため生成不可';
     }
