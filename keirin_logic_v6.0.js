@@ -567,11 +567,11 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores) {
         position = 5; // 中央固定
     } else if (scoreDiff > 0) {
         // 荒天令スコアが晴天令スコアより低い (リスク減点された) -> 荒天令の信頼度アップ (右へ)
-        const maxExpectedDiff = 0.05; // 経験的な最大乖離度
+        const maxExpectedDiff = 0.08; // ★修正箇所: 感度を鈍化 (0.05 -> 0.08)
         let normalized = Math.min(1.0, scoreDiff / maxExpectedDiff);
         
         // 5 から 9 の範囲にマッピング (5 + 1～4)
-        position = 5 + Math.ceil(normalized * 4); 
+        position = 5 + Math.round(normalized * 4); // ★修正箇所: Math.ceil -> Math.round
         position = Math.min(9, position);
     } else {
         // 荒天令スコアが晴天令スコアより高い (稀だが、ロジックの逆転) -> 晴天令の信頼度アップ (左へ)
@@ -580,7 +580,7 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores) {
         let normalized = Math.min(1.0, Math.abs(scoreDiff) / maxExpectedDiff);
         
         // 5 から 1 の範囲にマッピング (5 - 1～4)
-        position = 5 - Math.ceil(normalized * 4); 
+        position = 5 - Math.round(normalized * 4); // ★修正箇所: Math.ceil -> Math.round
         position = Math.max(1, position);
     }
     
@@ -717,20 +717,10 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     const gaugeArray = Array(9).fill('│'); 
     
     // 🐢の位置を計算: ┃││││┃││││┃ の間に9つの空間がある
-    // positionが1なら最初の│の上、positionが9なら最後の│の上
-    // position = 5 の時、中央の┃の上に来る
-    let index = tenunPosition - 1; 
-
-    // 🐢を配置するための空白を計算 (全21文字。┃││││┃││││┃)
     // 1文字目(🌤️)と最後の1文字(⛈️)を除いた19文字のうち、│の直下の位置に配置
-    // 1: 🌤️[  1  ]││││┃││││┃⛈️  -> 空白 2
-    // 5: 🌤️││││[ 5 ]┃││││┃⛈️  -> 空白 10
-    // 9: 🌤️││││┃││││[ 9 ]┃⛈️  -> 空白 18
-    
-    // ゲージ文字数 21, インデックス数 9。 
-    // 奇数番目 (1, 3, 5, 7, 9) が │ の下、偶数番目 (2, 4, 6, 8) が ┃ の下
-    const positionMap = [2, 4, 6, 8, 10, 12, 14, 16, 18]; // 🌤️┃...┃⛈️の後の空白の数
-    const spaceCount = positionMap[index] || 10; // position=5で10文字分の空白 (┃の直下)
+    const positionMap = [2, 4, 6, 8, 10, 12, 14, 16, 18]; 
+    const index = tenunPosition - 1; 
+    const spaceCount = positionMap[index] || 10; 
     
     const turtleLine = ' '.repeat(spaceCount) + '🐢'; 
     const tenunHtml = `
