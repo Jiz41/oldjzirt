@@ -330,6 +330,31 @@
             display: block;
             opacity: 1;
         }
+
+        /* ★★★ 天雲指数ゲージの追加CSS ★★★ */
+        .tenun-index-container {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px dashed #d6a300; /* 占い・亀卜のイメージ */
+            border-radius: 8px;
+            background-color: #fff9e6; /* 薄い黄色の背景 */
+            text-align: center;
+        }
+        .tenun-gauge {
+            font-family: monospace;
+            white-space: pre;
+            font-size: 1.3em;
+            line-height: 1.0;
+            margin: 10px 0;
+            overflow-x: auto;
+            display: inline-block; /* 中央揃えのため */
+            color: #698b69; /* 落ち着いた緑系 */
+        }
+        .tenun-description {
+            font-size: 0.95em;
+            color: #a37200;
+        }
+        /* ★★★ 追加CSSここまで ★★★ */
     </style>
 </head>
 <body>
@@ -750,65 +775,11 @@
             <div id="line-display" class="line-display">
                 計算結果待ち...
             </div>
-          
-            <h3>☀️ 晴天令 (安定推奨)</h3>
-            <div class="recommendation" id="seitenrei-output">
-                計算結果待ち...
-            </div>
-
-            <h3>⛈️ 荒天令 (高配当狙い)</h3>
-            <div class="recommendation" id="koutenrei-output">
-                計算結果待ち...
-            </div>
-
-            <h3>展開別シミュレーション詳細</h3>
             
-            <div id="scenario-output">
-                </div>
-
-        </div>
-    </div>
-</div>
-<div class="debug-log-header" onclick="toggleDebugLog()">
-    <span id="log-toggle-icon">▶</span> 🛠️ デバッグ・処理ログ
-</div>
-<div class="debug-log" id="debug-log">
-    [TOOL START] ツール起動。すべての係数とロジックを読み込みました。<br>
-    [INFO] bankdata.jsonの読み込みを待機しています...
-</div>
-
-<footer class="copyright-footer">
-    (C)2025 Eysyum
-</footer>
-
-<script>
-    function toggleDebugLog() {
-        const logElement = document.getElementById('debug-log');
-        const iconElement = document.getElementById('log-toggle-icon');
-        
-        if (logElement.style.display === 'block') {
-            logElement.style.display = 'none';
-            iconElement.textContent = '▶';
-        } else {
-            logElement.style.display = 'block'; 
-            iconElement.textContent = '▼';
-        }
-    }
-    
-    function toggleManual() {
-        const manualElement = document.getElementById('manual-content');
-        const iconElement = document.getElementById('manual-toggle-icon');
-        
-        if (manualElement.style.display === 'block') {
-            manualElement.style.display = 'none';
-            iconElement.textContent = '▶';
-        } else {
-            manualElement.style.display = 'block';
-            iconElement.textContent = '▼';
-        }
-    }
-</script>
-
-<script src="keirin_logic_v6.0.js"></script>
-</body>
-</html>
+            <div class="tenun-index-container" id="tenun-index-output">
+                <h4>⚫ 天雲指数（てんうんしすう）</h4>
+                <pre class="tenun-gauge">
+🌤️┃││││┃││││┃⛈️
+                 🐢
+                </pre>
+                <p class="tenun-description
