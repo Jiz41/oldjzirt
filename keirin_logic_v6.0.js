@@ -1,4 +1,4 @@
-// --- 華耀天輪 真・自在律 V6.0 ロジック ---
+// --- 華耀天輪 真・自在律 V6.0 ロジック (天雲指数実装済み) ---
 
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
@@ -268,9 +268,12 @@ function generateScenarioWagers(results) {
     const top4 = results.slice(0, 4).map(p => p.id);
     
     const tri1 = [...top4.slice(0, 3)].sort((a, b) => a - b).join('='); // 1, 2, 3
-    const tri2 = [top4[0], top4[1], top4[3]].sort((a, b) => a - b).join('='); // 1, 2, 4 (4位も使用)
+    let tri2 = '';
+    if (top4.length >= 4) {
+        tri2 = [top4[0], top4[1], top4[3]].sort((a, b) => a - b).join('='); // 1, 2, 4
+    }
     
-    const trifuku = [tri1, tri2].join(', ');
+    const trifuku = [tri1, tri2].filter(t => t.length > 0).join(', ');
 
     return { tritan, trifuku };
 }
@@ -519,6 +522,81 @@ function runScenarioSimulation(basePlayers, lines, settings, bankData, applyKout
 
 
 // ----------------------------------------------------------------------
+// ★ 新規関数: calculateTenunIndex の追加 ★
+// ----------------------------------------------------------------------
+/**
+ * 晴天令と荒天令のスコア差を計算し、天雲指数 (1～9) を返す。
+ * @param {Object} seitenreiScores - 晴天令の統合スコア
+ * @param {Object} koutenreiScores - 荒天令の統合スコア
+ * @returns {{position: number, description: string}} インジケーター位置と傾向説明
+ */
+function calculateTenunIndex(seitenreiScores, koutenreiScores) {
+    // 1. スコアをランキングに変換
+    const seitenreiRanking = Object.keys(seitenreiScores).map(id => ({ id: Number(id), score: seitenreiScores[id] })).sort((a, b) => b.score - a.score);
+    const koutenreiRanking = Object.keys(koutenreiScores).map(id => ({ id: Number(id), score: koutenreiScores[id] })).sort((a, b) => b.score - a.score);
+    
+    // 7車立て未満の場合は計算をスキップ
+    if (seitenreiRanking.length < 4) {
+        return { position: 5, description: "データ不足" };
+    }
+
+    // 2. 上位4選手の平均スコアを計算
+    const top4SeitenAvg = seitenreiRanking.slice(0, 4).reduce((sum, p) => sum + p.score, 0) / 4;
+    const top4KoutenAvg = koutenreiRanking.slice(0, 4).reduce((sum, p) => sum + p.score, 0) / 4;
+
+    // 3. スコア範囲の計算 (正規化のため)
+    const allScores = seitenreiRanking.map(p => p.score);
+    const scoreRange = Math.max(...allScores) - Math.min(...allScores);
+    
+    // 4. 乖離度の計算 (スコア差)
+    // 差が大きいほど荒天令が機能した（荒天信頼度アップ）
+    // スコア範囲がゼロの場合は差もゼロとして扱う
+    const scoreDiff = scoreRange > 0 ? (top4SeitenAvg - top4KoutenAvg) / scoreRange : 0;
+    
+    // 5. 1～9のインジケーター位置に変換 (5が中央)
+    // scoreDiffの範囲は理論上 0 ～ (約0.2程度) 程度
+    // 荒天信頼度が上がるほど (scoreDiff > 0)、位置は右 (5より大) へ
+    
+    let position = 5;
+    
+    // 正規化された差を線形的に 5 から 1-9 の範囲にマッピング
+    // 閾値を設定して、差が小さい場合は中央に固定する
+    const ABSOLUTE_DIFF_THRESHOLD = 0.0005; // わずかな差は中央とみなす
+    
+    if (Math.abs(scoreDiff) < ABSOLUTE_DIFF_THRESHOLD) {
+        position = 5; // 中央固定
+    } else if (scoreDiff > 0) {
+        // 荒天令スコアが晴天令スコアより低い (リスク減点された) -> 荒天令の信頼度アップ (右へ)
+        const maxExpectedDiff = 0.05; // 経験的な最大乖離度
+        let normalized = Math.min(1.0, scoreDiff / maxExpectedDiff);
+        
+        // 5 から 9 の範囲にマッピング (5 + 1～4)
+        position = 5 + Math.ceil(normalized * 4); 
+        position = Math.min(9, position);
+    } else {
+        // 荒天令スコアが晴天令スコアより高い (稀だが、ロジックの逆転) -> 晴天令の信頼度アップ (左へ)
+        // 今回のロジックではほとんど発生しないが、発生したら左へ傾ける
+        const maxExpectedDiff = 0.05; 
+        let normalized = Math.min(1.0, Math.abs(scoreDiff) / maxExpectedDiff);
+        
+        // 5 から 1 の範囲にマッピング (5 - 1～4)
+        position = 5 - Math.ceil(normalized * 4); 
+        position = Math.max(1, position);
+    }
+    
+    let description = "中立";
+    if (position > 5) {
+        description = "荒天令のロジックが有効に機能し、波乱の信頼度が高い";
+    } else if (position < 5) {
+        description = "荒天令ロジックが機能せず、堅い決着の信頼度が高い";
+    }
+
+    logMessage(`[TENUN] 晴天/荒天スコア差: ${scoreDiff.toFixed(5)}。インデックス位置: ${position}`);
+    return { position, description };
+}
+
+
+// ----------------------------------------------------------------------
 // ★ 3. メイン計算関数: calculatePrediction の置換 (両モード実行ロジックへ) ★
 // ----------------------------------------------------------------------
 // メイン計算関数
@@ -619,7 +697,7 @@ async function calculatePrediction() {
 
 
 // ----------------------------------------------------------------------
-// ★ 4. 表示関数: displayResults の置換 (三連複の昇順ソートを追加) ★
+// ★ 4. 表示関数: displayResults の置換 (天雲指数生成ロジックを追加) ★
 // ----------------------------------------------------------------------
 // ★修正: 統合スコアを晴天令用と荒天令用の2つ受け取る
 function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName) { 
@@ -627,6 +705,53 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // バンク展開傾向の再表示（実行結果エリアの先頭）
     displayBankTendency();
 
+    // ----------------------------------------------------------
+    // ★ 天雲指数 (インジケーター) の計算と表示 ★
+    // ----------------------------------------------------------
+    const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores);
+    const tenunPosition = tenunIndexData.position;
+    
+    // 10メモリのゲージを作成: ┃││││┃││││┃
+    // 1 (晴天最大) から 9 (荒天最大) の位置を特定。インデックスは 0-8。
+    // position 1 -> index 0, position 5 -> index 4, position 9 -> index 8
+    const gaugeArray = Array(9).fill('│'); 
+    
+    // 🐢の位置を計算: ┃││││┃││││┃ の間に9つの空間がある
+    // positionが1なら最初の│の上、positionが9なら最後の│の上
+    // position = 5 の時、中央の┃の上に来る
+    let index = tenunPosition - 1; 
+
+    // 🐢を配置するための空白を計算 (全21文字。┃││││┃││││┃)
+    // 1文字目(🌤️)と最後の1文字(⛈️)を除いた19文字のうち、│の直下の位置に配置
+    // 1: 🌤️[  1  ]││││┃││││┃⛈️  -> 空白 2
+    // 5: 🌤️││││[ 5 ]┃││││┃⛈️  -> 空白 10
+    // 9: 🌤️││││┃││││[ 9 ]┃⛈️  -> 空白 18
+    
+    // ゲージ文字数 21, インデックス数 9。 
+    // 奇数番目 (1, 3, 5, 7, 9) が │ の下、偶数番目 (2, 4, 6, 8) が ┃ の下
+    const positionMap = [2, 4, 6, 8, 10, 12, 14, 16, 18]; // 🌤️┃...┃⛈️の後の空白の数
+    const spaceCount = positionMap[index] || 10; // position=5で10文字分の空白 (┃の直下)
+    
+    const turtleLine = ' '.repeat(spaceCount) + '🐢'; 
+    const tenunHtml = `
+        <div class="tenun-index-container">
+            <h4>⚫ 天雲指数（てんうんしすう）</h4>
+            <pre class="tenun-gauge">
+🌤️┃││││┃││││┃⛈️
+${turtleLine}
+            </pre>
+            <p class="tenun-description">
+                <strong>傾向:</strong> ${tenunIndexData.position > 5 ? '荒天寄り' : tenunIndexData.position < 5 ? '晴天寄り' : '中立'} (${tenunIndexData.description})
+            </p>
+        </div>
+    `;
+
+    const tenunOutput = document.getElementById('tenun-index-output');
+    if (tenunOutput) {
+        tenunOutput.innerHTML = tenunHtml;
+    }
+    // ----------------------------------------------------------
+    
     // シナリオ詳細 (三連複は generateScenarioWagers 内でソート済み)
     const scenarioOutput = document.getElementById('scenario-output');
     if (scenarioOutput) {
@@ -717,7 +842,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     const koutenreiOutput = document.getElementById('koutenrei-output');
     if (koutenreiOutput) {
         koutenreiOutput.innerHTML = `
-            推奨軸 (4位): **${koutenLeader ? koutenLeader : 'N/A'}**<br>
+            ⚫ 特異点 (シンギュラリティ): **${koutenLeader ? koutenLeader : 'N/A'}**<br>
             三連複 (3点): <strong>${koutenTrifuku}</strong>
         `;
     }
