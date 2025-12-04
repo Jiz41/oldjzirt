@@ -522,74 +522,62 @@ function runScenarioSimulation(basePlayers, lines, settings, bankData, applyKout
 
 
 // ----------------------------------------------------------------------
-// ★ 新規関数: calculateTenunIndex の追加 ★
+// ★ 修正後のロジック関数: calculateTenunIndex (一致率に基づく) ★
 // ----------------------------------------------------------------------
 /**
- * 晴天令と荒天令のスコア差を計算し、天雲指数 (1～9) を返す。
+ * 晴天令と荒天令のランキング上位3名の一致率を計算し、天雲指数 (0, 33, 67, 100) とメッセージを返す。
  * @param {Object} seitenreiScores - 晴天令の統合スコア
  * @param {Object} koutenreiScores - 荒天令の統合スコア
- * @returns {{position: number, description: string}} インジケーター位置と傾向説明
+ * @returns {{tenunIndex: number, message: string}} 0〜100の天雲指数と対応するメッセージ
  */
 function calculateTenunIndex(seitenreiScores, koutenreiScores) {
     // 1. スコアをランキングに変換
     const seitenreiRanking = Object.keys(seitenreiScores).map(id => ({ id: Number(id), score: seitenreiScores[id] })).sort((a, b) => b.score - a.score);
     const koutenreiRanking = Object.keys(koutenreiScores).map(id => ({ id: Number(id), score: koutenreiScores[id] })).sort((a, b) => b.score - a.score);
     
-    // 7車立て未満の場合は計算をスキップ
-    if (seitenreiRanking.length < 4) {
-        return { position: 5, description: "データ不足" };
+    // 2. 上位3名の選手IDを取得 (7車立て未満の場合は処理しない)
+    if (seitenreiRanking.length < 3 || koutenreiRanking.length < 3) {
+        return { tenunIndex: 50, message: 'データ不足のため指数算出不可' };
+    }
+    const seitenTop3 = new Set(seitenreiRanking.slice(0, 3).map(p => p.id));
+    const koutenTop3 = koutenreiRanking.slice(0, 3).map(p => p.id); // Setと比較するためArrayのまま
+
+    // 3. 一致選手数をカウント
+    let matchCount = 0;
+    koutenTop3.forEach(id => {
+        if (seitenTop3.has(id)) {
+            matchCount++;
+        }
+    });
+
+    // 4. 一致選手数に基づき天雲指数 (0, 33, 67, 100) とメッセージを算出
+    let tenunIndex;
+    let message = '';
+
+    switch (matchCount) {
+        case 3:
+            tenunIndex = 0; // 絶対安定
+            message = '☀️ **これは稀に見る大安吉日！晴天令の信頼度、揺るぎなしと見ますぞ！**';
+            break;
+        case 2:
+            tenunIndex = 33; // 比較安定
+            message = '🔮 **なるほど、比較的穏やかな気配ですじゃ。軸は堅いが紐は広めに。**';
+            break;
+        case 1:
+            tenunIndex = 67; // 波乱注意
+            message = '⛈️ **天の気配に乱れあり！荒天令の特異点を強く警戒すべきでしょう。**';
+            break;
+        case 0:
+            tenunIndex = 100; // 強い荒天
+            message = '💥 **うむむ…これは強い荒天の気が出ておる…何かが起こりますぞ！**';
+            break;
+        default:
+            tenunIndex = 50;
+            message = '算出ロジックエラー';
     }
 
-    // 2. 上位4選手の平均スコアを計算
-    const top4SeitenAvg = seitenreiRanking.slice(0, 4).reduce((sum, p) => sum + p.score, 0) / 4;
-    const top4KoutenAvg = koutenreiRanking.slice(0, 4).reduce((sum, p) => sum + p.score, 0) / 4;
-
-    // 3. スコア範囲の計算 (正規化のため)
-    const allScores = seitenreiRanking.map(p => p.score);
-    const scoreRange = Math.max(...allScores) - Math.min(...allScores);
-    
-    // 4. 乖離度の計算 (スコア差)
-    // 差が大きいほど荒天令が機能した（荒天信頼度アップ）
-    // スコア範囲がゼロの場合は差もゼロとして扱う
-    const scoreDiff = scoreRange > 0 ? (top4SeitenAvg - top4KoutenAvg) / scoreRange : 0;
-    
-    // 5. 1～9のインジケーター位置に変換 (5が中央)
-    // 荒天信頼度が上がるほど (scoreDiff > 0)、位置は右 (5より大) へ
-    
-    let position = 5;
-    
-    // 閾値を設定して、差が小さい場合は中央に固定する
-    const ABSOLUTE_DIFF_THRESHOLD = 0.0005; 
-    
-    if (Math.abs(scoreDiff) < ABSOLUTE_DIFF_THRESHOLD) {
-        position = 5; // 中央固定
-    } else if (scoreDiff > 0) {
-        // 荒天令スコアが晴天令スコアより低い (リスク減点された) -> 荒天令の信頼度アップ (右へ)
-        const maxExpectedDiff = 0.08; 
-        let normalized = Math.min(1.0, scoreDiff / maxExpectedDiff);
-        
-        // 5 から 9 の範囲にマッピング (四捨五入でなめらかに)
-        position = 5 + Math.round(normalized * 4); 
-        position = Math.min(9, position);
-    } else {
-        // 荒天令スコアが晴天令スコアより高い (晴天令の信頼度アップ (左へ))
-        const maxExpectedDiff = 0.05; 
-        let normalized = Math.min(1.0, Math.abs(scoreDiff) / maxExpectedDiff);
-        
-        // 5 から 1 の範囲にマッピング (四捨五入でなめらかに)
-        position = 5 - Math.round(normalized * 4); 
-        position = Math.max(1, position);
-    }
-    
-    let description = "中立";
-    if (position > 5) {
-        description = "荒天令のロジックが有効に機能し、波乱の信頼度が高い";
-    } else if (position < 5) {
-        description = "荒天令ロジックが機能せず、堅い決着の信頼度が高い";
-    }
-
-    logMessage(`[TENUN] 晴天/荒天スコア差: ${scoreDiff.toFixed(5)}。インデックス位置: ${position}`);
-    return { position, description };
+    logMessage(`[TENUN] 晴天/荒天 上位3名一致数: ${matchCount}名。天雲指数: ${tenunIndex}`);
+    return { tenunIndex, message };
 }
 
 
@@ -748,7 +736,7 @@ async function calculatePrediction() {
 
 
 // ----------------------------------------------------------------------
-// ★ 4. 表示関数: displayResults の置換 (占い師テキストロジックを追加) ★
+// ★ 修正後の表示関数: displayResults (メッセージ出力ロジックを追加) ★
 // ----------------------------------------------------------------------
 // ★修正: 統合スコアを晴天令用と荒天令用の2つ受け取る
 function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName) { 
@@ -759,30 +747,27 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // ----------------------------------------------------------
     // ★ 天雲指数 (占い師メッセージ) の計算と表示 ★
     // ----------------------------------------------------------
+    // ★修正: 新しいロジックで天雲指数とメッセージを取得
     const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores);
-    const tenunPosition = tenunIndexData.position; // 1〜9
+    const tenunIndex = tenunIndexData.tenunIndex; 
+    const oracleMessage = tenunIndexData.message;
 
-    // 1. 天雲指数 (1〜9) を 0〜100 に線形変換し、四捨五入
-    const tenunIndex100 = Math.round((tenunPosition - 1) / 8 * 100); 
+    // 1. メッセージに応じてクラスを割り当ててデザインを分岐させる
+    let messageClass = '';
+    if (tenunIndex === 0) messageClass = 'tenun-stable';
+    else if (tenunIndex === 33) messageClass = 'tenun-mild';
+    else if (tenunIndex === 67) messageClass = 'tenun-alert';
+    else if (tenunIndex === 100) messageClass = 'tenun-severe';
 
-    // 2. 傾向テキストの定義
-    let tendencyText;
-    if (tenunPosition < 5) {
-        tendencyText = '晴天（安定）に寄る';
-    } else if (tenunPosition > 5) {
-        tendencyText = '荒天（波乱）に寄る';
-    } else {
-        tendencyText = '中立（均衡）に寄る';
-    }
-
-    // 3. 占い師メッセージの生成
-    // ★修正: 「（最大値100）」と「（傾向詳細）」を削除
+    // 2. 占い師メッセージの生成 (数値は小さく表示)
+    // 既存の天雲指数計算ロジック（scoreDiffに基づくもの）を完全に削除しました。
     const tenunHtml = `
-        <div class="tenun-index-container">
+        <div class="tenun-index-container ${messageClass}">
             <h4>⚫ 天雲指数（てんうんしすう）</h4>
             <p class="fortune-teller-message">
-                <strong>🔮🐢</strong>＜波乱の兆しを占う天雲指数は**${tenunIndex100}**、このレースは**${tendencyText}**と出ておるぞ。＞
+                <strong>🔮🐢</strong>＜${oracleMessage}＞
             </p>
+            <p class="index-value-small">（内部スコア: ${tenunIndex}）</p>
         </div>
     `;
 
