@@ -317,7 +317,7 @@ function assignFinalGrades(scenarioPlayers) {
 
 
 // ----------------------------------------------------------------------
-// ★ 新規ロジック関数: calculate_koutenrei_bias の追加 ★
+// ★ 修正ロジック関数: calculate_koutenrei_bias の追加 ★
 // ----------------------------------------------------------------------
 /**
  * 荒天令モード専用の非実力リスクバイアス (C係数) を計算し、スコア減点を適用する
@@ -371,11 +371,11 @@ function calculate_koutenrei_bias(players, lines, scenario, bankData) {
             logMessage(`[C_mental] 選手ID ${p.id} はプレッシャー減点適用 (${raceGrade})。`);
         }
 
-        // 4. C_recovery (位置取り回復力)
+        // 4. C_recovery (位置取り回復力)  <--- 修正適用 (閾値 0.8→0.6, 基礎増点 1.03→1.04)
         if (p.style === '両' || p.style === '追') {
              const scoreDiffRatio = (p.score - scoreMin) / scoreRange;
-             if (scoreDiffRatio > 0.8) {
-                 C_TOTAL *= 1.03 + (scoreDiffRatio - 0.8) * 0.1;
+             if (scoreDiffRatio > 0.6) { 
+                 C_TOTAL *= 1.04 + (scoreDiffRatio - 0.6) * 0.1; 
                  logMessage(`[C_recovery] 選手ID ${p.id} は実力回復力で増点 (${scoreDiffRatio.toFixed(2)})。`);
              }
         }
@@ -417,15 +417,15 @@ function calculate_koutenrei_bias(players, lines, scenario, bankData) {
         }
     });
 
-    // 7. C_pace (序盤速度・燃焼リスク)
+    // 7. C_pace (序盤速度・燃焼リスク)  <--- 修正適用 (減点 0.94→0.96 に緩和)
     const leaderPlayer = tempPlayers.find(p => p.style === '自' || p.style === '両');
     if (leaderPlayer) {
         const rivalsCount = lines.length - 1;
         const baseScore = leaderPlayer.score;
 
         if (baseScore >= 105.0 && rivalsCount >= 2) {
-             leaderPlayer.final_score *= 0.94;
-             logMessage(`[C_pace] 逃げ選手ID ${leaderPlayer.id} はライバルが多く燃焼リスクで減点。`);
+             leaderPlayer.final_score *= 0.96; 
+             logMessage(`[C_pace] 逃げ選手ID ${leaderPlayer.id} はライバルが多く燃焼リスクを緩和。`);
         }
     }
 
