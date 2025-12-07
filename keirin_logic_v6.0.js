@@ -1,3 +1,8 @@
+// keirin_logic_v6.0.jsの先頭に追加
+window.onload = function() {
+    logMessage("【TEST】JavaScriptファイルが正常にロードされました。");
+};
+
 // keirin_logic_v6.0.js
 
 // --- 華耀天輪 真・自在律 V6.0 ロジック (天雲指数実装済み) ---
