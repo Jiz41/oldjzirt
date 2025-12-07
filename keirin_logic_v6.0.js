@@ -1,4 +1,4 @@
-// --- 華耀天輪 真・自在律 V6.0 ロジック (天雲指数実装済み + 競りロジック追加) --- //
+// --- 華耀天輪 真・自在律 V6.1 ロジック (競り表示: ボックス維持/カッコ/矢印削除 適用済み) --- //
 
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
@@ -14,13 +14,12 @@ const C_MARK_VALUES = {
     LOW: 1.03
 }; 
 
-// ========== 【追記】競り専用係数 ==========
+// ========== 競り専用係数 ==========
 const SERI_STYLE_BONUS = { // 脚質別競り係数 C_style (追込重視)
     '追': 1.05, 
     '両': 1.00, 
     '自': 0.95  
 };
-// アウト側(競り負け側)を不利とするため、より大きな減点係数を設定
 const SERI_FATIGUE_PENALTY_IN = 0.15;  // 競り勝った側（イン）の体力消耗減点 Δ_in
 const SERI_FATIGUE_PENALTY_OUT = 0.25; // 競り負けた側（アウト）の体力消耗減点 Δ_out
 const SERI_WIN_BONUS = 0.05;           // 競り勝ち選手への微増補正
@@ -71,16 +70,14 @@ function getPlayerData() {
             c_l: 1.0, 
             c_e: 1.0, 
             final_score: 0,
-            // ========== 【追記】競り係数 C_seri の初期計算 ==========
-            // 得点、脚質係数、W印を考慮
+            // 競り係数 C_seri の初期計算
             seri_coef: score * (SERI_STYLE_BONUS[style] || 1.00) * (wmark === '◎' ? 1.04 : 1.0)
-            // ========================================================
         }); 
     }); 
     return players;
 } 
 
-// 銀行データの非同期読み込み
+// 銀行データの非同期読み込み (変更なし)
 async function loadBankData() { 
     try { 
         logMessage("[INIT] bankdata.jsonの読み込みを開始します..."); 
@@ -119,7 +116,7 @@ async function loadBankData() {
     }
 } 
 
-// バンク展開傾向の表示関数 (実行前にも表示可能)
+// バンク展開傾向の表示関数 (実行前にも表示可能) (変更なし)
 function displayBankTendency() { 
     const bankName = document.getElementById('bank-name').value; 
     const displayArea = document.getElementById('bank-tendency-display'); 
@@ -158,24 +155,23 @@ function displayBankTendency() {
         message = `ℹ️ **${bankName}**は脚質による大きな傾向差は**ありません**。`; 
     } 
 
-    // 計算実行後にも結果エリアに表示されるため、ここではHTMLタグは付けない 
-    // ※ 実行後の表示は displayResults() の中で更新されます 
     displayArea.innerHTML = message; 
     logMessage(`[BANK] ${bankName} の展開傾向: ${message.replace(/<[^>]*>?/gm, '')}`);
 } 
 
-// ページロード時にデータ読み込みを実行
+// ページロード時にデータ読み込みを実行 (変更なし)
 (async function() { 
     await loadBankData();
 })(); 
 
 
-// ========== 【追記】競り解析関数 ==========
+// ========== 【修正】競り解析関数 (parseLineInput) ==========
 /**
  * ライン入力文字列を解析し、ライン構成と競り情報を取得する
- * @param {string} lineInput - 例: "12(3)4, 567"
+ * 【修正点】orderedPlayerIds に競り選手の並びを正確に格納するように修正
+ * @param {string} lineInput - 例: "14(3)2, 567"
  * @param {Array<Object>} allPlayers - 全選手データ
- * @returns {Object} { lines: Array<Array<number>>, seriInfo: Object }
+ * @returns {Object} { lines: Array<Array<number>>, seriInfo: Object, orderedPlayerIds: Array<number> }
  */
 function parseLineInput(lineInput, allPlayers) {
     logMessage(`[PARSE] ライン入力解析開始: ${lineInput}`);
@@ -183,16 +179,18 @@ function parseLineInput(lineInput, allPlayers) {
     const segments = processedLineInput.split(',');
     
     const lines = [];
+    // 【新規】表示順を格納する配列
+    const orderedPlayerIds = []; 
     const seriInfo = { exists: false, leader: null, follower: null, contender: null, winner: null, loser: null };
 
     segments.forEach(seg => {
-        // ルール: 12(3)4 形式を解析
+        // ルール: 14(3)2 形式を解析
         const seriMatch = seg.match(/^(\d+)(\d+)\((\d+)\)(.*)$/);
         if (seriMatch) {
             // 競り並び検出
             seriInfo.exists = true;
             seriInfo.leader = parseInt(seriMatch[1]);     // 1: 自力選手
-            seriInfo.follower = parseInt(seriMatch[2]);   // 2: イン側の選手 (番手本線)
+            seriInfo.follower = parseInt(seriMatch[2]);   // 4: イン側の選手 (番手本線)
             seriInfo.contender = parseInt(seriMatch[3]);  // 3: アウト側の選手 (競り選手)
             
             logMessage(`[PARSE] 競り検出: 選手${seriInfo.follower} (イン) vs 選手${seriInfo.contender} (アウト)`);
@@ -201,64 +199,90 @@ function parseLineInput(lineInput, allPlayers) {
             const followerCoef = allPlayers.find(p => p.id === seriInfo.follower)?.seri_coef || 0;
             const contenderCoef = allPlayers.find(p => p.id === seriInfo.contender)?.seri_coef || 0;
 
-            // 競り係数が高い選手が勝者となる
             if (followerCoef >= contenderCoef) {
                 seriInfo.winner = seriInfo.follower;
                 seriInfo.loser = seriInfo.contender;
-                logMessage(`[PARSE] 競り勝者予測: 選手${seriInfo.winner} (イン有利)`);
             } else {
                 seriInfo.winner = seriInfo.contender;
                 seriInfo.loser = seriInfo.follower;
-                logMessage(`[PARSE] 競り勝者予測: 選手${seriInfo.winner} (アウト勝利)`);
             }
+            logMessage(`[PARSE] 競り勝者予測: 選手${seriInfo.winner}`);
 
-            // ライン再構築: 競り勝者はリーダーの後ろにつく
+            // ライン再構築: 競り勝者のみがラインに残り、敗者は単騎扱い
             lines.push([seriInfo.leader, seriInfo.winner]); 
             
-            // 競り負けた選手と、元々競り並びの後ろにいた選手(4)を分離処理
-            const remainingSegment = seriInfo.loser.toString() + seriMatch[4];
-            if (remainingSegment.length > 0) {
-                 lines.push(remainingSegment.split('').map(Number));
+            // 【修正】表示順の構築: 1 -> 4 -> 3 -> 2 -> ... (競り選手も隊列として格納)
+            orderedPlayerIds.push(seriInfo.leader);
+            orderedPlayerIds.push(seriInfo.follower);  // 競られる側 (イン側)
+            orderedPlayerIds.push(seriInfo.contender); // 競り込む側 (アウト側)
+
+            // 競り並びの後ろにいた選手(2)
+            const remainingSegment = seriMatch[4]; 
+            const remainingMembers = remainingSegment.split('').map(Number);
+            
+            // 残りの選手をラインと表示順に追加 (競り負けた選手は lines には入れない)
+            if (remainingMembers.length > 0) {
+                 lines.push(remainingMembers); 
+                 orderedPlayerIds.push(...remainingMembers);
             }
+            // 競り負けた選手を単独ラインとしてラインに追加 (スコア計算用)
+            lines.push([seriInfo.loser]); 
+            // orderedPlayerIdsには既に格納されているのでここでは追加しない (重複防止のため)
+            
         } else {
             // 通常ライン
-            lines.push(seg.split('').map(Number));
+            const members = seg.split('').map(Number);
+            lines.push(members);
+            // 【修正】通常ラインでも隊列順に orderedPlayerIds に格納
+            orderedPlayerIds.push(...members);
         }
     });
     
-    // ラインに含まれていない選手は単騎扱い
-    const allRidersInLines = new Set(lines.flat());
+    // ラインに含まれていない選手は単騎扱いとして、orderedPlayerIdsの最後に追加
+    const allRidersInInput = new Set(orderedPlayerIds);
     allPlayers.forEach(p => {
-        if (!allRidersInLines.has(p.id)) {
+        if (!allRidersInInput.has(p.id)) {
             lines.push([p.id]);
-            allRidersInLines.add(p.id);
+            // 【修正】orderedPlayerIdsにも単騎選手を追加
+            orderedPlayerIds.push(p.id);
         }
     });
 
-    return { lines, seriInfo };
+    // 【新規】重複IDを削除し、隊列順を維持
+    const uniqueOrderedPlayerIds = [];
+    const seenIds = new Set();
+    for (const id of orderedPlayerIds) {
+        if (!seenIds.has(id)) {
+            uniqueOrderedPlayerIds.push(id);
+            seenIds.add(id);
+        }
+    }
+
+    // 【修正】orderedPlayerIdsも戻り値に追加
+    return { lines, seriInfo, orderedPlayerIds: uniqueOrderedPlayerIds };
 }
 // =======================================
 
 
-// ライン強度を視覚的に表示するロジック
-function calculateLineCoeffs(players, settings, seriInfo) { 
-    // ========== 【修正】lineInputの取得とparseLineInputの実行 ==========
+// ========== 【修正】ライン強度計算・視覚化関数 (calculateLineCoeffs) ==========
+/**
+ * ライン強度係数 C_L の計算と、ラインの視覚化表示を行う
+ * 【修正点】競り表示にカッコを適用し、矢印を削除する
+ */
+function calculateLineCoeffs(players, settings) { 
+    // 【修正】orderedPlayerIdsも受け取るように変更
     const lineInput = document.getElementById('line-input').value; 
-    const { lines, seriInfo: parsedSeriInfo } = parseLineInput(lineInput, players);
-    // ===================================================================
+    const { lines, seriInfo: parsedSeriInfo, orderedPlayerIds } = parseLineInput(lineInput, players);
 
     const playerToLineMap = {}; 
-    const allPlayerIds = new Set(players.map(p => p.id)); 
-    let assignedPlayerIds = new Set(); 
-
+    
     lines.forEach((members, index) => {
         members.forEach(id => {
             playerToLineMap[id] = index + 1;
-            assignedPlayerIds.add(id);
         });
     });
     
-    // C_L係数計算 (省略) 
+    // C_L係数計算 (省略 - 変更なし) 
     if (settings.IS_GIRLS) { 
         logMessage(`[C_L] ガールズ競輪モード。エースマーク係数 $C_{mark}$ を評価。`); 
         const ace = players.reduce((max, p) => (p.score > max.score ? p : max), { score: -Infinity }); 
@@ -289,7 +313,7 @@ function calculateLineCoeffs(players, settings, seriInfo) {
         const coopWeight = settings.COOP_WEIGHT; 
         
         lines.forEach(line => { 
-            if (line.length < 2) return; // 単騎ラインは無視
+            if (line.length < 2) return;
             
             const p2Id = line[1]; 
             const p2 = players.find(p => p.id === p2Id); 
@@ -306,13 +330,13 @@ function calculateLineCoeffs(players, settings, seriInfo) {
         }); 
     } 
 
-    // ライン強度の視覚化出力 
+    // ライン強度の視覚化出力ロジック
     const lineDisplay = document.getElementById('line-display'); 
     if (lineDisplay) { 
         let displayHtml = ''; 
-        const allPlayerIdsSorted = Array.from(allPlayerIds).sort((a, b) => a - b); 
-        
-        allPlayerIdsSorted.forEach(id => { 
+
+        // 【修正】並び替えられた orderedPlayerIds に従って表示を生成
+        orderedPlayerIds.forEach((id) => { 
             const lineId = playerToLineMap[id] || 0; 
             let className = ''; 
             if (lineId === 0) { 
@@ -320,20 +344,32 @@ function calculateLineCoeffs(players, settings, seriInfo) {
             } else { 
                 className = `line-color-${lineId}`; 
             } 
-            displayHtml += `<span class="line-box ${className}">${id}</span>`; 
+            
+            // 選手ボックスを生成
+            let playerHtml = `<span class="line-box ${className}">${id}</span>`;
+            
+            // 競りが発生している場合のカッコ適用
+            if (parsedSeriInfo.exists) {
+                // イン側の選手 (follower) の後に、カッコでアウト側の選手 (contender) のボックスを囲む
+                if (id === parsedSeriInfo.contender) {
+                    playerHtml = `(${playerHtml})`;
+                }
+            }
+            
+            // 【削除】隊列を示す矢印ロジックはすべて削除
+            
+            displayHtml += playerHtml;
         }); 
         lineDisplay.innerHTML = displayHtml; 
     } 
+
+    // 【修正】seriInfoを返す
     return { lines, seriInfo: parsedSeriInfo };
 } 
+// =========================================================
 
-// ========== 【追記】競り補正関数 ==========
-/**
- * 競りの発生に基づき、スコアを調整する
- * @param {Array<Object>} scoredPlayers - 基礎スコアが計算された選手データ
- * @param {Object} seriInfo - parseLineInputの結果に含まれる競り情報
- * @returns {Array<Object>} 競り補正後の選手データ
- */
+
+// ========== 競り補正関数 (変更なし) ==========
 function applySeriCorrection(scoredPlayers, seriInfo) {
     if (seriInfo.exists) {
         logMessage(`[SERI] 競り補正開始: 選手${seriInfo.winner} vs 選手${seriInfo.loser}`);
@@ -341,16 +377,13 @@ function applySeriCorrection(scoredPlayers, seriInfo) {
         // 競り勝者 (Winner): 小さいボーナスと小さい減点
         const winner = scoredPlayers.find(p => p.id === seriInfo.winner);
         if (winner) {
-            // final_scoreに補正をかける
             winner.final_score = winner.final_score * (1 + SERI_WIN_BONUS) * (1 - SERI_FATIGUE_PENALTY_IN);
             logMessage(`[SERI] 競り勝者 選手${winner.id}: スコア微増/体力減点 ${Math.round(SERI_FATIGUE_PENALTY_IN * 100)}%`);
         }
 
         // 競り敗者 (Loser): アウト側が競り負けた場合の大きな減点
-        // (外を走らされるからきつくなる要素)
         const loser = scoredPlayers.find(p => p.id === seriInfo.loser);
         if (loser) {
-            // final_scoreに補正をかける
             loser.final_score *= (1 - SERI_FATIGUE_PENALTY_OUT);
             logMessage(`[SERI] 競り敗者 選手${loser.id}: スコア大幅減点 ${Math.round(SERI_FATIGUE_PENALTY_OUT * 100)}%`);
         }
@@ -361,36 +394,34 @@ function applySeriCorrection(scoredPlayers, seriInfo) {
 // =======================================
 
 
-function getScenarioCoeffs(scenario) { 
+function getScenarioCoeffs(scenario) { // (変更なし)
     if (scenario === '先行有利') return { '自': 1.05, '追': 1.02, '両': 1.03 }; 
     if (scenario === '捲り有利') return { '自': 1.00, '追': 1.05, '両': 1.04 }; 
     if (scenario === '差し有利') return { '自': 0.90, '追': 1.08, '両': 1.05 }; 
     return { '自': 1.0, '追': 1.0, '両': 1.0 };
 } 
 
-function generateScenarioWagers(results) { 
+function generateScenarioWagers(results) { // (変更なし)
     const top3 = results.slice(0, 3).map(p => p.id); 
-    // 三連単 3点: 1-2-3, 1-3-2, 2-1-3 (ランキング順) 
     const tritan = [ 
         `${top3[0]}-${top3[1]}-${top3[2]}`, 
         `${top3[0]}-${top3[2]}-${top3[1]}`, 
         `${top3[1]}-${top3[0]}-${top3[2]}` 
     ].join(', '); 
     
-    // 三連複 2点: 1=2=3, 1=2=4 (昇順ソートを適用) 
     const top4 = results.slice(0, 4).map(p => p.id); 
-    const tri1 = [...top4.slice(0, 3)].sort((a, b) => a - b).join('='); // 1, 2, 3 
+    const tri1 = [...top4.slice(0, 3)].sort((a, b) => a - b).join('='); 
     
     let tri2 = ''; 
     if (top4.length >= 4) { 
-        tri2 = [top4[0], top4[1], top4[3]].sort((a, b) => a - b).join('='); // 1, 2, 4 
+        tri2 = [top4[0], top4[1], top4[3]].sort((a, b) => a - b).join('='); 
     } 
     
     const trifuku = [tri1, tri2].filter(t => t.length > 0).join(', '); 
     return { tritan, trifuku };
 } 
 
-function assignFinalGrades(scenarioPlayers) { 
+function assignFinalGrades(scenarioPlayers) { // (変更なし)
     if (scenarioPlayers.length === 0) return; 
     
     const scores = scenarioPlayers.map(p => p.final_score); 
@@ -426,24 +457,12 @@ function assignFinalGrades(scenarioPlayers) {
     });
 } 
 
-// ----------------------------------------------------------------------
-// ★ 修正ロジック関数: calculate_koutenrei_bias の追加 ★
-// ----------------------------------------------------------------------
-
-/** * 荒天令モード専用の非実力リスクバイアス (C係数) を計算し、スコア減点を適用する 
- * @param {Array<Object>} players - 選手データ配列 (c_l, c_eなどが既に計算済み) 
- * @param {string} scenario - 現在のシミュレーション展開 (先行有利/捲り有利/差し有利) 
- * @param {Object} bankData - バンクデータ 
- * @returns {Array<Object>} C係数適用後の選手データ配列 
- */
-function calculate_koutenrei_bias(players, scenario, bankData) { // 【修正】lines引数を削除
-    // NOTE: この関数は applyKoutenrei が true の場合のみ呼び出されます。 
+// 荒天令モード専用の非実力リスクバイアス (C係数) を計算し、スコア減点を適用する (変更なし)
+function calculate_koutenrei_bias(players, scenario, bankData) { 
     logMessage("[KOUTENREI] 荒天令リスクバイアス (C係数) の計算を開始..."); 
     
-    // 係数適用前の基礎スコアを保持 
     let tempPlayers = JSON.parse(JSON.stringify(players)); 
     
-    // レース全体のスコア範囲を計算 (C_split、C_mentalの相対値基準に必要) 
     const allScores = players.map(p => p.score); 
     const scoreMax = Math.max(...allScores); 
     const scoreMin = Math.min(...allScores); 
@@ -566,18 +585,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) { // 【修正】
     return tempPlayers;
 } 
 
-// ----------------------------------------------------------------------
-// ★ 新規ヘルパー関数: runScenarioSimulation (計算ロジックの本体) ★
-// ----------------------------------------------------------------------
-
-/** * 展開シミュレーションを実行し、結果と統合スコアを返す。 
- * @param {Array<Object>} basePlayers - 基礎係数適用済みの選手データ 
- * @param {Object} seriInfo - 競り情報
- * @param {Object} settings - 級班設定 
- * @param {Object} bankData - バンクデータ 
- * @param {boolean} applyKoutenrei - 荒天令バイアス (C係数) を適用するかどうか 
- * @returns {{allScenarioResults: Array, integratedScores: Object}} 
- */
+// 展開シミュレーションを実行し、結果と統合スコアを返す。 (変更なし)
 function runScenarioSimulation(basePlayers, seriInfo, settings, bankData, applyKoutenrei) { 
     const scenarios = ['先行有利', '捲り有利', '差し有利']; 
     const allScenarioResults = []; 
@@ -594,13 +602,11 @@ function runScenarioSimulation(basePlayers, seriInfo, settings, bankData, applyK
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e; 
         }); 
 
-        // ========== 【追記】競り補正の適用 ==========
+        // 競り補正の適用
         scenarioPlayers = applySeriCorrection(scenarioPlayers, seriInfo);
-        // ===========================================
 
         // 荒天令モードの場合、C係数バイアスを適用 
         if (applyKoutenrei) { 
-            // 【修正】lines引数を削除
             scenarioPlayers = calculate_koutenrei_bias(scenarioPlayers, scenario, bankData); 
         } 
 
@@ -619,29 +625,18 @@ function runScenarioSimulation(basePlayers, seriInfo, settings, bankData, applyK
     return { allScenarioResults, integratedScores };
 } 
 
-// ----------------------------------------------------------------------
-// ★ 修正後のロジック関数: calculateTenunIndex (一致率に基づく) ★
-// ----------------------------------------------------------------------
-
-/** * 晴天令と荒天令のランキング上位3名の一致率を計算し、天雲指数 (0, 33, 67, 100) とメッセージを返す。 
- * @param {Object} seitenreiScores - 晴天令の統合スコア 
- * @param {Object} koutenreiScores - 荒天令の統合スコア 
- * @returns {{tenunIndex: number, message: string}} 0〜100の天雲指数と対応するメッセージ 
- */
+// 天雲指数 (一致率に基づく) (変更なし)
 function calculateTenunIndex(seitenreiScores, koutenreiScores) { 
-    // 1. スコアをランキングに変換 
     const seitenreiRanking = Object.keys(seitenreiScores).map(id => ({ id: Number(id), score: seitenreiScores[id] })).sort((a, b) => b.score - a.score); 
     const koutenreiRanking = Object.keys(koutenreiScores).map(id => ({ id: Number(id), score: koutenreiScores[id] })).sort((a, b) => b.score - a.score); 
     
-    // 2. 上位3名の選手IDを取得 (7車立て未満の場合は処理しない) 
     if (seitenreiRanking.length < 3 || koutenreiRanking.length < 3) { 
         return { tenunIndex: 50, message: 'データ不足のため指数算出不可' }; 
     } 
     
     const seitenTop3 = new Set(seitenreiRanking.slice(0, 3).map(p => p.id)); 
-    const koutenTop3 = koutenreiRanking.slice(0, 3).map(p => p.id); // Setと比較するためArrayのまま 
+    const koutenTop3 = koutenreiRanking.slice(0, 3).map(p => p.id); 
 
-    // 3. 一致選手数をカウント 
     let matchCount = 0; 
     koutenTop3.forEach(id => { 
         if (seitenTop3.has(id)) { 
@@ -649,25 +644,24 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores) {
         } 
     }); 
 
-    // 4. 一致選手数に基づき天雲指数 (0, 33, 67, 100) とメッセージを算出 
     let tenunIndex; 
     let message = ''; 
     
     switch (matchCount) { 
         case 3: 
-            tenunIndex = 0; // 絶対安定 
+            tenunIndex = 0; 
             message = '☀️ **これは稀に見る大安吉日！晴天令の信頼度、揺るぎなしと見ますぞ！**'; 
             break; 
         case 2: 
-            tenunIndex = 33; // 比較安定 
+            tenunIndex = 33; 
             message = '🔮 **なるほど、比較的穏やかな気配ですじゃ。軸は堅いが紐は広めに。**'; 
             break; 
         case 1: 
-            tenunIndex = 67; // 波乱注意 
+            tenunIndex = 67; 
             message = '⛈️ **天の気配に乱れあり！荒天令の特異点を強く警戒すべきでしょう。**'; 
             break; 
         case 0: 
-            tenunIndex = 100; // 強い荒天 
+            tenunIndex = 100; 
             message = '💥 **うむむ…これは強い荒天の気が出ておる…何かが起こりますぞ！**'; 
             break; 
         default: 
@@ -679,11 +673,7 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores) {
     return { tenunIndex, message };
 } 
 
-// ----------------------------------------------------------------------
-// ★ 3. メイン計算関数: calculatePrediction の置換 (両モード実行ロジックへ) ★
-// ----------------------------------------------------------------------
-
-// メイン計算関数
+// メイン計算関数 (変更なし)
 async function calculatePrediction() { 
     if (Object.keys(BANK_DATA).length === 0) { 
         logMessage("[WAIT] バンクデータの読み込みを待機します..."); 
@@ -706,7 +696,6 @@ async function calculatePrediction() {
 
     // UIから現在の選択モードを取得 
     const modeSelector = document.getElementById('mode-selector'); 
-    // 【修正】modeSelectorがない場合に 'seitenrei' をデフォルトにする
     const koutenreiModeSelected = modeSelector ? modeSelector.value === 'koutenrei' : false; 
     
     let players = getPlayerData(); 
@@ -714,7 +703,7 @@ async function calculatePrediction() {
 
     // --- I. ライン解析と C_L (ライン・連係係数) の計算 --- 
     // 【修正】calculateLineCoeffsの戻り値を受け取るように変更
-    const { lines, seriInfo } = calculateLineCoeffs(players, settings); 
+    const { seriInfo } = calculateLineCoeffs(players, settings); 
 
     // --- II. 選手固有係数 C_W, C_R, C_S1, C_B1 & C_E の計算 (基礎係数) --- 
     // この係数は両モードで共通して使用される 
@@ -765,7 +754,7 @@ async function calculatePrediction() {
         seitenreiResults.integratedScores, 
         koutenreiResults.integratedScores, 
         bankName,
-        seriInfo // 【追記】競り情報を渡す
+        seriInfo // 競り情報を渡す
     ); 
     
     const resultsContainer = document.getElementById('results-container'); 
@@ -776,13 +765,8 @@ async function calculatePrediction() {
     logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
 } 
 
-// ----------------------------------------------------------------------
-// ★ 修正後の表示関数: displayResults (メッセージ出力ロジックを追加) ★
-// ----------------------------------------------------------------------
-
-// ★修正: 統合スコアを晴天令用と荒天令用の2つ受け取る + 競り情報を受け取る
+// 修正後の表示関数: displayResults (変更なし)
 function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, seriInfo) { 
-    // バンク展開傾向の再表示（実行結果エリアの先頭） 
     displayBankTendency(); 
 
     // ---------------------------------------------------------- 
@@ -790,11 +774,15 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // ----------------------------------------------------------
     let seriSummaryHtml = '';
     if (seriInfo.exists) {
+        const followerId = seriInfo.follower;
+        const contenderId = seriInfo.contender;
+        const winnerId = seriInfo.winner;
+        
         seriSummaryHtml = `
             <div style="padding: 10px; margin-bottom: 15px; border: 2px solid #c07777; background-color: #fcf0f0; border-radius: 6px;">
                 <h4>⚠️ 競り発生！ (並び: ${document.getElementById('line-input').value})</h4>
-                <p><strong>競り選手:</strong> 選手${seriInfo.follower} (イン) vs 選手${seriInfo.contender} (アウト)</p>
-                <p><strong>予測結果:</strong> 競り係数に基づき、競り勝つのは **選手${seriInfo.winner}** です。</p>
+                <p><strong>競り選手:</strong> 選手${followerId} (イン) vs 選手${contenderId} (アウト)</p>
+                <p><strong>予測結果:</strong> 競り係数に基づき、競り勝つのは **選手${winnerId}** です。</p>
                 <p style="font-size: 0.9em; color: #c07777;">※ アウト側（競り敗者）の選手は、体力消耗による大幅な減点を受けています。</p>
             </div>
         `;
@@ -803,19 +791,16 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // ---------------------------------------------------------- 
     // ★ 天雲指数 (占い師メッセージ) の計算と表示 ★ 
     // ---------------------------------------------------------- 
-    // ★修正: 新しいロジックで天雲指数とメッセージを取得 
     const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores); 
     const tenunIndex = tenunIndexData.tenunIndex; 
     const oracleMessage = tenunIndexData.message; 
 
-    // 1. メッセージに応じてクラスを割り当ててデザインを分岐させる 
     let messageClass = ''; 
     if (tenunIndex === 0) messageClass = 'tenun-stable'; 
     else if (tenunIndex === 33) messageClass = 'tenun-mild'; 
     else if (tenunIndex === 67) messageClass = 'tenun-alert'; 
     else if (tenunIndex === 100) messageClass = 'tenun-severe'; 
 
-    // 2. 占い師メッセージの生成 
     const tenunHtml = ` 
         <div class="tenun-index-container ${messageClass}"> 
             <h4>⚫ 天雲指数（てんうんしすう）</h4> 
@@ -830,10 +815,9 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     } 
 
     // ---------------------------------------------------------- 
-    // シナリオ詳細 (三連複は generateScenarioWagers 内でソート済み) 
+    // シナリオ詳細 
     const scenarioOutput = document.getElementById('scenario-output'); 
     if (scenarioOutput) { 
-        // 【追記】競りサマリーを最初に表示する
         scenarioOutput.innerHTML = seriSummaryHtml;
         
         scenarioOutput.innerHTML += detailedScenarioResults.map(s => { 
@@ -869,12 +853,11 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         `${seitenTop3[1]}-${seitenTop3[0]}-${seitenTop3[2]}` 
     ].join(', '); 
     
-    // ★修正: 三連複の組み合わせを昇順ソートする 
-    const triSeiten1 = [...seitenTop4.slice(0, 3)].sort((a, b) => a - b).join('='); // 1, 2, 3 
+    const triSeiten1 = [...seitenTop4.slice(0, 3)].sort((a, b) => a - b).join('='); 
     
     let triSeiten2; 
     if (seitenTop4.length >= 4) { 
-        triSeiten2 = [seitenTop4[0], seitenTop4[1], seitenTop4[3]].sort((a, b) => a - b).join('='); // 1, 2, 4 
+        triSeiten2 = [seitenTop4[0], seitenTop4[1], seitenTop4[3]].sort((a, b) => a - b).join('='); 
     } else { 
         triSeiten2 = 'データ不足'; 
     } 
@@ -889,58 +872,44 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     } 
 
     // --- ⛈️ 荒天令 (高配当狙い) の表示 --- 
-    const koutenreiRanking = Object.keys(koutenreiIntegratedScores).map(id => ({ id: Number(id), score: koutenreiIntegratedScores[id] / detailedScenarioResults.length, rank: 0 // 順位情報格納用 
+    const koutenreiRanking = Object.keys(koutenreiIntegratedScores).map(id => ({ id: Number(id), score: koutenreiIntegratedScores[id] / detailedScenarioResults.length, rank: 0 
     })).sort((a, b) => b.score - a.score); 
     
-    // 順位情報を付与 (後の5位/6位特定に使用) 
     koutenreiRanking.forEach((p, index) => p.rank = index + 1); 
 
     const koutenTop3 = koutenreiRanking.slice(0, 3).map(p => p.id); 
     const koutenTop4 = koutenreiRanking.slice(0, 4).map(p => p.id); 
     
-    // 荒天令の軸 (C係数適用後のランキングで4位) 
     const koutenLeader = koutenTop4.length >= 4 ? koutenTop4[3] : null; 
     let koutenTrifuku = []; 
 
-    // --- 従来の荒天令買い目 (P1: 4位軸の3点) --- 
-    // 4位 (koutenLeader) とトップ3を絡めた3点。 
     if (koutenLeader) { 
-        // 4位軸とトップ3の組み合わせを昇順ソート 
-        koutenTrifuku.push([koutenLeader, koutenTop3[0], koutenTop3[1]].sort((a, b) => a - b).join('=')); // 4=1=2 
-        koutenTrifuku.push([koutenLeader, koutenTop3[0], koutenTop3[2]].sort((a, b) => a - b).join('=')); // 4=1=3 
-        koutenTrifuku.push([koutenLeader, koutenTop3[1], koutenTop3[2]].sort((a, b) => a - b).join('=')); // 4=2=3 
+        koutenTrifuku.push([koutenLeader, koutenTop3[0], koutenTop3[1]].sort((a, b) => a - b).join('=')); 
+        koutenTrifuku.push([koutenLeader, koutenTop3[0], koutenTop3[2]].sort((a, b) => a - b).join('=')); 
+        koutenTrifuku.push([koutenLeader, koutenTop3[1], koutenTop3[2]].sort((a, b) => a - b).join('=')); 
     } 
 
-    // --- 拡張ロジック: 評価中位（5位・6位）の強制組み込み (P2: 2点追加) --- 
-    // 1. 中位波乱軸（評価5位または6位の選手）を特定 
-    // ※ 7車立て未満の場合は生成しない 
     const middleWaveRiders = koutenreiRanking.filter(p => p.rank === 5 || p.rank === 6).map(p => p.id); 
     
     if (middleWaveRiders.length > 0) { 
-        // 今回のレースで7番が該当したポジションの選手を「波乱の主役」とする 
-        const mainWaveRider = middleWaveRiders[0]; // 5位の選手を優先 
+        const mainWaveRider = middleWaveRiders[0]; 
 
-        // 軸（1位, 2位）と堅い紐（4位）から、最適な2車を選定 
-        const axis1 = koutenTop3[0]; // 1位選手 
-        const axis2 = koutenTop3.length >= 2 ? koutenTop3[1] : null; // 2位選手 
-        const firmHimo = koutenLeader; // 4位選手を堅い紐として採用 
+        const axis1 = koutenTop3[0]; 
+        const axis2 = koutenTop3.length >= 2 ? koutenTop3[1] : null; 
+        const firmHimo = koutenLeader; 
 
         if (axis1 && firmHimo && mainWaveRider) { 
-            // 1点目: 中位軸 + トップ軸 + 堅紐 (例: 7=1=4) -> 今回の7-5-1パターンを狙う 
-            if (koutenTrifuku.length < 6) { // 6点制限 
+            if (koutenTrifuku.length < 6) { 
                 koutenTrifuku.push([mainWaveRider, axis1, firmHimo].sort((a, b) => a - b).join('=')); 
             } 
-            // 2点目: 中位軸 + 2番目の軸 + 堅紐 (例: 7=3=4) 
-            if (axis2 && koutenTrifuku.length < 6) { // 6点制限 
+            if (axis2 && koutenTrifuku.length < 6) { 
                 koutenTrifuku.push([mainWaveRider, axis2, firmHimo].sort((a, b) => a - b).join('=')); 
             } 
         } 
     } 
 
-    // 最終的に6点に制限 
     const finalKoutenTrifuku = koutenTrifuku.slice(0, 6).join(', '); 
     
-    // 特異点メッセージは4位選手のものを使用 
     const koutenreiOutput = document.getElementById('koutenrei-output'); 
     if (koutenreiOutput) { 
         koutenreiOutput.innerHTML = ` 
