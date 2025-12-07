@@ -1,5 +1,14 @@
 // --- 華耀天輪 真・自在律 V6.0 ロジック (天雲指数実装済み) ---
 
+// [LOG: 2025/12/04] 並び予想に競り表記 (例: 12(3)4(5)) を導入。calculateLineCoeffsに関数に解析ロジックを追加し、
+// PLAYERS_FACING_SERI と SERI_ATTACKERS に情報を格納。
+// calculate_koutenrei_bias関数内でこの情報に基づき、競り選手に消耗ペナルティ (0.97 / 0.93) を適用するロジックを追加。
+
+// [LOG: 2025/12/07] 予想結果が表示されなくなるバグ対応として、
+// runScenarioSimulation実行時に競り情報グローバル変数をリセットする処理を追加。
+// PLAYERS_FACING_SERI, SERI_ATTACKERS の初期化漏れを防ぐ。
+
+
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
     's-kyu': { R_BIAS: 1.15, RECENT_WEIGHT: 0.90, COOP_WEIGHT: 1.20, IS_GIRLS: false },
@@ -156,7 +165,7 @@ function displayBankTendency() {
 // ライン強度を視覚的に表示するロジック
 function calculateLineCoeffs(players, settings) {
     
-    // ★競り情報をリセット (修正2: 開始)★
+    // ★競り情報をリセット (修正2: 既に実装済み)★
     PLAYERS_FACING_SERI = [];
     SERI_ATTACKERS = [];
 
@@ -417,6 +426,9 @@ function calculate_koutenrei_bias(players, lines, scenario, bankData) {
         }
         
         // C_guard 係数に競りリスクを適用 (他のC係数に先立って適用)
+        // final_scoreは runScenarioSimulation の中で p.score * C係数で初期化されるべきだが、
+        // ここでは applyKoutenrei=true の場合のみ呼ばれるため、この時点で final_score には
+        // 基礎スコア * C_score_adj * ... * C_e が入っている前提
         p.final_score = p.final_score * seriRisk;
     });
 
@@ -458,7 +470,7 @@ function calculate_koutenrei_bias(players, lines, scenario, bankData) {
              }
         }
         
-        // 最終的なC係数をスコアに乗算
+        // 最終的なC係数をスコアに乗算 (競りペナルティ適用後の final_score に乗算)
         p.final_score = p.final_score * C_TOTAL;
     });
 
@@ -560,6 +572,12 @@ function calculate_koutenrei_bias(players, lines, scenario, bankData) {
  * @returns {{allScenarioResults: Array, integratedScores: Object}}
  */
 function runScenarioSimulation(basePlayers, lines, settings, bankData, applyKoutenrei) {
+    
+    // [LOG: 2025/12/07] 予想結果が表示されなくなるバグ対応として、
+    // runScenarioSimulation実行時に競り情報グローバル変数をリセットする処理を追加。
+    // PLAYERS_FACING_SERI, SERI_ATTACKERS の初期化漏れを防ぐ。
+    PLAYERS_FACING_SERI = [];
+    SERI_ATTACKERS = [];
     
     const scenarios = ['先行有利', '捲り有利', '差し有利'];
     const allScenarioResults = [];
