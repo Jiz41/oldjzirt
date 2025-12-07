@@ -16,6 +16,9 @@
 // [LOG: 2025/12/07-3] スコアが均一またはゼロの場合に発生するゼロ除算による NaN 伝播を防ぐため、
 // calculate_koutenrei_bias関数に scoreRange のゼロチェックによるガード処理を追加。
 
+// [LOG: 2025/12/07-4] Android端末単体でのデバッグのため、
+// メインの実行関数 (runFullSimulation) 全体を try...catch で囲み、エラーをデバッグログに出力するロジックを追加。
+
 
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
@@ -35,8 +38,8 @@ const C_MARK_VALUES = {
 let BANK_DATA = {};
 
 // ★競り情報格納用のグローバル変数★
-let PLAYERS_FACING_SERI = []; // 競りを受けている選手ID (防衛側: 例 2, 4)
-let SERI_ATTACKERS = [];     // 競りを仕掛けている選手ID (消耗側: 例 3, 5)
+let PLAYERS_FACING_SERI = []; 
+let SERI_ATTACKERS = [];     
 
 // ロギング関数
 function logMessage(message) {
@@ -62,12 +65,18 @@ function getPlayerData() {
         const id = parseInt(row.getAttribute('data-id'));
         if (isNaN(id)) return;
 
+        // ★重要: HTML要素が存在しない場合、null.value でクラッシュしないようにガード
+        const scoreElement = row.querySelector('.score');
+        const styleElement = row.querySelector('.style');
+        const wmarkElement = row.querySelector('.wmark');
+        const recentElement = row.querySelector('.recent');
+
         players.push({
             id: id,
-            score: parseFloat(row.querySelector('.score').value) || 0,
-            style: row.querySelector('.style').value,
-            wmark: row.querySelector('.wmark').value.trim(), 
-            recent: row.querySelector('.recent').value.trim(),
+            score: scoreElement ? parseFloat(scoreElement.value) || 0 : 0,
+            style: styleElement ? styleElement.value : '追', // デフォルト値設定
+            wmark: wmarkElement ? wmarkElement.value.trim() : '', 
+            recent: recentElement ? recentElement.value.trim() : '44444', // デフォルト値設定
             
             is_s1: id === s1Id,
             is_b1: id === b1Id,
@@ -105,7 +114,6 @@ async function loadBankData() {
             });
             logMessage("[UI] バンク名の選択肢を動的に構築しました。");
             
-            // データを読み込んだら、一度展開傾向を表示する
             displayBankTendency();
         }
 
@@ -555,7 +563,7 @@ function calculate_koutenrei_bias(players, lines, scenario, bankData) {
 
 
 // ----------------------------------------------------------------------
-// ★ 新規ヘルパー関数: runScenarioSimulation (計算ロジックの本体) ★
+// ★ ヘルパー関数: runScenarioSimulation (計算ロジックの本体) ★
 // ----------------------------------------------------------------------
 function runScenarioSimulation(basePlayers, lines, settings, bankData, applyKoutenrei) {
     
@@ -604,7 +612,7 @@ function runScenarioSimulation(basePlayers, lines, settings, bankData, applyKout
 
 
 // ----------------------------------------------------------------------
-// ★ 修正後のロジック関数: calculateTenunIndex (一致率に基づく) ★
+// ★ ロジック関数: calculateTenunIndex (一致率に基づく) ★
 // ----------------------------------------------------------------------
 function calculateTenunIndex(seitenreiScores, koutenreiScores) {
     // 1. スコアをランキングに変換
@@ -654,4 +662,66 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores) {
 
     logMessage(`[TENUN] 晴天/荒天 上位3名一致数: ${matchCount}名。天雲指数: ${tenunIndex}`);
     return { tenunIndex, message };
+}
+
+
+// ----------------------------------------------------------------------
+// ★ 実行トリガー関数 (HTMLボタンなどから呼び出される想定の関数) ★
+// ----------------------------------------------------------------------
+// ※ この関数をHTMLのボタンクリックイベントなどから呼び出してください。
+function runFullSimulation() { 
+    // グローバル競り情報を実行前に確実にリセット
+    PLAYERS_FACING_SERI = [];
+    SERI_ATTACKERS = [];
+
+    try {
+        logMessage("<br>--- シミュレーション実行開始 (V6.0-DB) ---");
+        
+        // 選手データ、設定、バンクデータの取得
+        const players = getPlayerData(); 
+        if (players.length < 2) {
+            logMessage("[ERROR] 選手データが不足しています（2名以上必要）。");
+            return;
+        }
+
+        const raceType = document.getElementById('race-type').value;
+        const settings = COEFFICIENT_SETTINGS[raceType] || COEFFICIENT_SETTINGS['a-kyu'];
+        const bankName = document.getElementById('bank-name').value;
+        const bankData = BANK_DATA[bankName] || BANK_DATA['ダミーバンク'];
+        
+        // 1. ライン解析 (競り解析を含む)
+        const lines = calculateLineCoeffs(players, settings); 
+        logMessage(`[LINE] 解析ライン数: ${lines.length}。競り仕掛け: ${SERI_ATTACKERS.length}名。`);
+
+
+        // 2. 晴天令（通常ロジック）を実行
+        logMessage("[CORE] 晴天令ロジックを実行中...");
+        const { integratedScores: seitenreiScores } = runScenarioSimulation(players, lines, settings, bankData, false);
+        
+        // 3. 荒天令（C係数ロジック）を実行
+        logMessage("[CORE] 荒天令ロジックを実行中...");
+        const { allScenarioResults, integratedScores: koutenreiScores } = runScenarioSimulation(players, lines, settings, bankData, true);
+        
+        // 4. 天雲指数の計算
+        const tenunData = calculateTenunIndex(seitenreiScores, koutenreiScores);
+
+        // 5. 結果表示 (この関数はユーザー様のHTML/JS側に存在する想定です)
+        // もしこの関数がない場合は、ここでクラッシュする可能性はあります。
+        if (typeof displayResults === 'function') {
+            displayResults(allScenarioResults, seitenreiScores, koutenreiScores, tenunData); 
+        } else {
+            logMessage("[NOTICE] 結果表示関数 (displayResults) が見つかりませんでしたが、計算は完了しました。");
+        }
+        
+        logMessage("--- シミュレーション実行完了 ---");
+
+    } catch (error) {
+        // --- 💥 致命的なエラーが発生した場合、ここに情報が出力されます 💥 ---
+        logMessage(" ");
+        logMessage("--- 💥 FATAL CRASH CATCHED (V6.0-DB) 💥 ---");
+        logMessage(`エラー名: **${error.name}**`);
+        logMessage(`メッセージ: **${error.message}**`);
+        logMessage("----------------------------------");
+        logMessage(`【重要】原因特定のため、上記の**エラー名**と**メッセージ**の全文を共有してください。`);
+    }
 }
