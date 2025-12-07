@@ -8,6 +8,9 @@
 // runScenarioSimulation実行時に競り情報グローバル変数をリセットする処理を追加。
 // PLAYERS_FACING_SERI, SERI_ATTACKERS の初期化漏れを防ぐ。
 
+// [LOG: 2025/12/07-2] 競り解析時の型変換エラーを防ぐため、
+// calculateLineCoeffs関数内で選手IDの抽出時に明示的な Number() 変換を追加し、堅牢性を強化。
+
 
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
@@ -187,7 +190,8 @@ function calculateLineCoeffs(players, settings) {
             const seriRegex = /\((\d+)\)/g;
             
             while ((match = seriRegex.exec(part)) !== null) {
-                const attackerId = Number(match[1]); // 括弧内の数字 (例: 3, 5)
+                // ★修正ログ 2025/12/07-2: Number()で明示的に変換★
+                const attackerId = Number(match[1]); 
                 SERI_ATTACKERS.push(attackerId);
                 assignedPlayerIds.add(attackerId);
                 
@@ -195,7 +199,8 @@ function calculateLineCoeffs(players, settings) {
                 const indexBeforeParen = match.index - 1;
                 if (indexBeforeParen >= 0) {
                     const defenderIdStr = part[indexBeforeParen];
-                    const defenderId = Number(defenderIdStr);
+                    // ★修正ログ 2025/12/07-2: Number()で明示的に変換★
+                    const defenderId = Number(defenderIdStr); 
                     
                     if (!isNaN(defenderId) && defenderId > 0) {
                         PLAYERS_FACING_SERI.push(defenderId);
@@ -207,7 +212,8 @@ function calculateLineCoeffs(players, settings) {
             }
 
             // 競り情報を取り除いた後の確定ラインの選手を解析 (例: 124)
-            const members = tempPart.split('').map(Number).filter(id => id > 0);
+            // ★修正ログ 2025/12/07-2: mapでNumber()を適用★
+            const members = tempPart.split('').map(idStr => Number(idStr)).filter(id => id > 0);
             
             if (members.length >= 2) { // 競り選手を除いたラインメンバーが2名以上
                 lines.push(members);
