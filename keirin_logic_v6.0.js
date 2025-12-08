@@ -169,6 +169,7 @@ function displayBankTendency() {
 /**
  * ライン入力文字列を解析し、ライン構成と競り情報を取得する
  * 【修正点】orderedPlayerIds に競り選手の並びを正確に格納するように修正
+ * 【修正点】単騎ラインがカンマ区切りで入力された際(1,2,3,...)の処理を確実に orderedPlayerIds に含めるよう修正
  * @param {string} lineInput - 例: "14(3)2, 567"
  * @param {Array<Object>} allPlayers - 全選手データ
  * @returns {Object} { lines: Array<Array<number>>, seriInfo: Object, orderedPlayerIds: Array<number> }
@@ -180,7 +181,7 @@ function parseLineInput(lineInput, allPlayers) {
     
     const lines = [];
     // 【新規】表示順を格納する配列
-    const orderedPlayerIds = []; 
+    let orderedPlayerIds = []; // const から let に変更
     const seriInfo = { exists: false, leader: null, follower: null, contender: null, winner: null, loser: null };
 
     segments.forEach(seg => {
@@ -218,37 +219,46 @@ function parseLineInput(lineInput, allPlayers) {
 
             // 競り並びの後ろにいた選手(2)
             const remainingSegment = seriMatch[4]; 
-            const remainingMembers = remainingSegment.split('').map(Number);
+            // 残りのメンバーを個別の数字として抽出 (split('') で処理)
+            const remainingMembers = remainingSegment.split('').map(Number).filter(id => id > 0);
             
-            // 残りの選手をラインと表示順に追加 (競り負けた選手は lines には入れない)
+            // 残りの選手をラインと表示順に追加
             if (remainingMembers.length > 0) {
                  lines.push(remainingMembers); 
                  orderedPlayerIds.push(...remainingMembers);
             }
             // 競り負けた選手を単独ラインとしてラインに追加 (スコア計算用)
             lines.push([seriInfo.loser]); 
-            // orderedPlayerIdsには既に格納されているのでここでは追加しない (重複防止のため)
             
         } else {
-            // 通常ライン
-            const members = seg.split('').map(Number);
-            lines.push(members);
-            // 【修正】通常ラインでも隊列順に orderedPlayerIds に格納
-            orderedPlayerIds.push(...members);
+            // ★★★ 【修正箇所: 単騎・通常ラインの処理】 ★★★
+            // 例: "1", "2", "3" または "567"
+            const members = seg.split('').map(Number).filter(id => id > 0);
+            
+            if (members.length > 0) {
+                 // 各セグメントをラインとして登録
+                 lines.push(members);
+                 // 隊列順に orderedPlayerIds に格納
+                 orderedPlayerIds.push(...members);
+            }
         }
     });
     
-    // ラインに含まれていない選手は単騎扱いとして、orderedPlayerIdsの最後に追加
+    // 【重要な修正】ラインに含まれていない選手を単騎扱いとして、orderedPlayerIdsの最後に追加
+    // このロジックは競りがないガールズケイリン(1,2,3,4,5,6,7)のような入力では不要だが、
+    // 予期せぬ入力ミスや、選手が入力されなかった場合に備えて残す。
     const allRidersInInput = new Set(orderedPlayerIds);
     allPlayers.forEach(p => {
         if (!allRidersInInput.has(p.id)) {
+            // ライン計算用
             lines.push([p.id]);
-            // 【修正】orderedPlayerIdsにも単騎選手を追加
+            // 表示順用
             orderedPlayerIds.push(p.id);
+            logMessage(`[PARSE] 未入力選手(ID: ${p.id})を単騎ラインとして追加しました。`);
         }
     });
 
-    // 【新規】重複IDを削除し、隊列順を維持
+    // 【新規】重複IDを削除し、隊列順を維持 (競り選手が lines にも orderedPlayerIds にも登録されるため)
     const uniqueOrderedPlayerIds = [];
     const seenIds = new Set();
     for (const id of orderedPlayerIds) {
@@ -268,6 +278,7 @@ function parseLineInput(lineInput, allPlayers) {
 /**
  * ライン強度係数 C_L の計算と、ラインの視覚化表示を行う
  * 【修正点】競り表示にカッコを適用し、矢印を削除する
+ * (ここではロジックの変更なし - 表示がorderedPlayerIdsに依存するため)
  */
 function calculateLineCoeffs(players, settings) { 
     // 【修正】orderedPlayerIdsも受け取るように変更
@@ -336,10 +347,12 @@ function calculateLineCoeffs(players, settings) {
         let displayHtml = ''; 
 
         // 【修正】並び替えられた orderedPlayerIds に従って表示を生成
+        // orderedPlayerIds に7人全員が入っていれば、ここで7つのボックスが生成される。
         orderedPlayerIds.forEach((id) => { 
             const lineId = playerToLineMap[id] || 0; 
             let className = ''; 
             if (lineId === 0) { 
+                // lineId が 0 の場合（ラインに組み込まれなかった選手）
                 className = 'line-solo'; 
             } else { 
                 className = `line-color-${lineId}`; 
@@ -350,7 +363,7 @@ function calculateLineCoeffs(players, settings) {
             
             // 競りが発生している場合のカッコ適用
             if (parsedSeriInfo.exists) {
-                // イン側の選手 (follower) の後に、カッコでアウト側の選手 (contender) のボックスを囲む
+                // アウト側の選手 (contender) の ID にのみカッコを適用
                 if (id === parsedSeriInfo.contender) {
                     playerHtml = `(${playerHtml})`;
                 }
