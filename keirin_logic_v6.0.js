@@ -1,4 +1,4 @@
-// --- 華耀天輪 真・自在律 V7.2 ロジック (ライン強制補完強化版) --- //
+// --- 華耀天輪 真・自在律 V7.3 ロジック (強弱グラデーションカラー導入) --- //
 
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
@@ -28,7 +28,7 @@ const SERI_WIN_BONUS = 0.05;           // 競り勝ち選手への微増補正
 // バンクデータを格納するグローバル変数
 let BANK_DATA = {}; 
 
-// ロギング関数
+// ロギング関数 (変更なし)
 function logMessage(message) { 
     const logArea = document.getElementById('debug-log'); 
     const timestamp = new Date().toLocaleTimeString('ja-JP', { hour12: false }); 
@@ -38,6 +38,7 @@ function logMessage(message) {
     }
 } 
 
+// getPlayerData 関数 (変更なし)
 function getPlayerData() { 
     const players = []; 
     const playerRows = document.querySelectorAll('.player-row'); 
@@ -77,7 +78,7 @@ function getPlayerData() {
     return players;
 } 
 
-// 銀行データの非同期読み込み (変更なし)
+// loadBankData 関数 (変更なし)
 async function loadBankData() { 
     try { 
         logMessage("[INIT] bankdata.jsonの読み込みを開始します..."); 
@@ -116,7 +117,7 @@ async function loadBankData() {
     }
 } 
 
-// バンク展開傾向の表示関数 (実行前にも表示可能) (変更なし)
+// displayBankTendency 関数 (変更なし)
 function displayBankTendency() { 
     const bankName = document.getElementById('bank-name').value; 
     const displayArea = document.getElementById('bank-tendency-display'); 
@@ -165,13 +166,7 @@ function displayBankTendency() {
 })(); 
 
 
-// ========== 競り解析関数 (parseLineInput) ==========
-/**
- * ライン入力文字列を解析し、ライン構成と競り情報を取得する
- * @param {string} lineInput - 例: "14(3)2, 567"
- * @param {Array<Object>} allPlayers - 全選手データ
- * @returns {Object} { lines: Array<Array<number>>, seriInfo: Object, orderedPlayerIds: Array<number> }
- */
+// parseLineInput 関数 (変更なし)
 function parseLineInput(lineInput, allPlayers) {
     logMessage(`[PARSE] ライン入力解析開始: ${lineInput}`);
     const processedLineInput = lineInput.replace(/\s/g, '');
@@ -261,26 +256,20 @@ function parseLineInput(lineInput, allPlayers) {
 
     return { lines, seriInfo, orderedPlayerIds: uniqueOrderedPlayerIds };
 }
-// =======================================
 
 
-// ========== 【最終修正】ライン強度計算・視覚化関数 (calculateLineCoeffs) ==========
+// ========== ライン強度計算 (calculateLineCoeffs) - ロジック計算は維持、表示ロジック削除 ==========
 /**
- * ライン強度係数 C_L の計算と、ラインの視覚化表示を行う
- * 【V7.2 修正点】すべての選手に正しくラインIDが割り当てられ、表示されるようにロジックを強化。
+ * ライン強度係数 C_L の計算を行う（表示ロジックは displayResults に移動）
  */
 function calculateLineCoeffs(players, settings) { 
-    // parseLineInputで得られた初期データ
     const lineInput = document.getElementById('line-input').value; 
     const { lines: initialLines, seriInfo: parsedSeriInfo, orderedPlayerIds: initialOrderedPlayerIds } = parseLineInput(lineInput, players); 
-
-    // 🚨 【NEW LOG】parseLineInputの戻り値を強制ログ出力 🚨
-    logMessage(`[C_L_DEBUG] initialOrderedPlayerIds: [${initialOrderedPlayerIds.join(', ')}] (長さ: ${initialOrderedPlayerIds.length})`);
     
     let lines = [...initialLines]; // スコア計算に使うライン
-    let finalOrderedPlayerIds = [...initialOrderedPlayerIds]; // 表示に使う並び
+    let finalOrderedPlayerIds = [...initialOrderedPlayerIds]; // 表示に使う並び (今回はスコア計算には影響しない)
 
-    // 🚨 欠落選手強制補完ロジック (V7.2: 補完とライン再構築のロジックを分離・強化) 🚨
+    // 🚨 欠落選手強制補完ロジック (V7.2) 🚨
     const playerIdsSet = new Set(initialOrderedPlayerIds);
     
     // 1. 欠落選手を finalOrderedPlayerIds に補完
@@ -288,7 +277,6 @@ function calculateLineCoeffs(players, settings) {
         if (!playerIdsSet.has(i)) {
             finalOrderedPlayerIds.push(i);
             playerIdsSet.add(i); 
-            logMessage(`[C_L_FIX] 欠落選手ID ${i} を最終表示並びに補完しました。`);
         }
     }
 
@@ -299,25 +287,18 @@ function calculateLineCoeffs(players, settings) {
     for (let i = 1; i <= 7; i++) {
         if (!allRidersInLines.has(i)) {
             lines.push([i]); // ライン計算用
-            logMessage(`[C_L_FIX] 選手ID ${i} をスコア計算用ラインリストに単騎として追加しました。`);
         }
     }
 
-    // 3. Player ID -> Line ID のマッピングを、**lines配列の最終的な構成**に基づいて再構築
+    // 3. Player ID -> Line ID のマッピングを、**lines配列の最終的な構成**に基づいて再構築 (表示用ではないが、ロジックとして維持)
     const playerToLineMap = {}; 
-    
-    // lines配列の最終的な構成に基づいてマッピングを再構築
-    // index + 1 をラインIDとする (1から始まる)
     lines.forEach((members, index) => {
         members.forEach(id => {
             playerToLineMap[id] = index + 1;
         });
     });
-    logMessage(`[C_L_DEBUG] 最終ライン数: ${lines.length}`);
-    logMessage(`[C_L_DEBUG] 選手→ラインIDマップ: ${JSON.stringify(playerToLineMap)}`);
 
-
-    // C_L係数計算 (ライン結束力係数)
+    // C_L係数計算 (ライン結束力係数) - ロジックは変更なし
     if (settings.IS_GIRLS) { 
         logMessage(`[C_L] ガールズ競輪モード。エースマーク係数 $C_{mark}$ を評価。`); 
         const ace = players.reduce((max, p) => (p.score > max.score ? p : max), { score: -Infinity }); 
@@ -367,44 +348,13 @@ function calculateLineCoeffs(players, settings) {
         }); 
     } 
 
-    // ライン強度の視覚化出力ロジック
-    const lineDisplay = document.getElementById('line-display'); 
-    if (lineDisplay) { 
-        let displayHtml = ''; 
-
-        // finalOrderedPlayerIds に従って表示を生成
-        finalOrderedPlayerIds.forEach((id) => { 
-            const lineId = playerToLineMap[id] || 0; 
-            let className = ''; 
-            
-            // lineId が 1以上の場合はラインカラーを適用
-            if (lineId > 0) { 
-                className = `line-color-${lineId % 4 || 4}`; // 4色で循環させる
-            } else { 
-                // lineId が 0 または割り当てがない場合は単騎として処理
-                className = 'line-solo'; 
-            } 
-            
-            let playerHtml = `<span class="line-box ${className}">${id}</span>`;
-            
-            // 競りが発生している場合のカッコ適用
-            if (parsedSeriInfo.exists) {
-                if (id === parsedSeriInfo.contender) {
-                    playerHtml = `(${playerHtml})`;
-                }
-            }
-            
-            displayHtml += playerHtml;
-        }); 
-        lineDisplay.innerHTML = displayHtml; 
-    } 
-
-    return { lines, seriInfo: parsedSeriInfo };
+    // ここでは表示ロジックを削除し、表示に必要な情報のみを返す
+    return { lines, seriInfo: parsedSeriInfo, finalOrderedPlayerIds };
 } 
 // =========================================================
 
 
-// ========== 競り補正関数 (変更なし) ==========
+// applySeriCorrection 関数 (変更なし)
 function applySeriCorrection(scoredPlayers, seriInfo) {
     if (seriInfo.exists) {
         logMessage(`[SERI] 競り補正開始: 選手${seriInfo.winner} vs 選手${seriInfo.loser}`);
@@ -426,7 +376,6 @@ function applySeriCorrection(scoredPlayers, seriInfo) {
 
     return scoredPlayers;
 }
-// =======================================
 
 
 function getScenarioCoeffs(scenario) { // (変更なし)
@@ -492,7 +441,7 @@ function assignFinalGrades(scenarioPlayers) { // (変更なし)
     });
 } 
 
-// 荒天令モード専用の非実力リスクバイアス (C係数) を計算し、スコア減点を適用する 
+// calculate_koutenrei_bias 関数 (変更なし)
 function calculate_koutenrei_bias(players, scenario, bankData) { 
     logMessage("[KOUTENREI] 荒天令リスクバイアス (C係数) の計算を開始..."); 
     
@@ -503,11 +452,9 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     const scoreMin = Math.min(...allScores); 
     const scoreRange = scoreMax - scoreMin; 
 
-    // parseLineInputを呼び出し、linesを取得
     const lineInput = document.getElementById('line-input').value;
     const { lines: initialLines } = parseLineInput(lineInput, players); 
 
-    // V7.2 修正: lines配列をcalculateLineCoeffsのロジックで強制補完
     const lines = [];
     const allRidersInLines = new Set();
     initialLines.forEach(line => {
@@ -630,11 +577,10 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
             logMessage(`[C_guard] 番手選手ID ${p2.id} に防衛リスク (${(1.0-baseRisk).toFixed(2)}) を適用。`); 
         } 
     }); 
-    
-    // --- 10. C_suicide (自滅消耗ペナルティ：Weight印集中リスク) --- 
+
+    // 10. C_suicide (自滅消耗ペナルティ：Weight印集中リスク) 
     logMessage("[C_suicide] V7.1 自滅消耗ペナルティの計算を開始...");
 
-    // 1. 各ラインの評価集中度を計測
     const lineEvaluations = {};
     
     const playerIdToLineIndex = {};
@@ -671,16 +617,14 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
         };
     });
 
-    // 2. 自滅リスクラインの判定と係数の適用
-    const SUICIDE_PENALTY = 0.90; // リスクライン選手への減点係数 (10%減)
-    const BOOTY_BONUS = 1.05;      // 漁夫の利選手への加点係数 (5%増)
+    const SUICIDE_PENALTY = 0.90; 
+    const BOOTY_BONUS = 1.05;      
     let isSuicideRiskDetected = false;
     let suicideRiskLineMembers = new Set();
     
     Object.keys(lineEvaluations).forEach(lineIndex => {
         const eval = lineEvaluations[lineIndex];
         
-        // リスク判定条件: 3車以上 かつ 評価印合計がちょうど3点 かつ 自力選手がいる
         if (eval.lineLength >= 3 && eval.totalWeightScore === 3 && eval.hasSelfStarter) { 
             logMessage(`[C_suicide] 🔴 リスク極大ライン検出！ (ライン${eval.lineMembers.join('-')}、評価点: ${eval.totalWeightScore}点 - ◎〇△混在)`);
             isSuicideRiskDetected = true;
@@ -689,21 +633,16 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     });
 
     if (isSuicideRiskDetected) {
-        // 減点と加点を適用
         tempPlayers.forEach(p => {
             if (suicideRiskLineMembers.has(p.id)) {
-                // 自滅リスクラインの選手: スコア減点
                 p.final_score *= SUICIDE_PENALTY;
                 logMessage(`[C_suicide] 選手ID ${p.id} に消耗ペナルティ (${SUICIDE_PENALTY.toFixed(2)}) 適用。`);
             } else {
-                // 漁夫の利選手: スコア加点
                 const lineIndex = playerIdToLineIndex[p.id];
                 if (lineIndex !== undefined && lineEvaluations[lineIndex].lineLength >= 2) {
-                     // 2車以上のラインに属する選手への加点
                      p.final_score *= BOOTY_BONUS;
                      logMessage(`[C_suicide] 選手ID ${p.id} に漁夫の利ブースト (${BOOTY_BONUS.toFixed(2)}) 適用。`);
                 } else if (lineIndex === undefined || lineEvaluations[lineIndex].lineLength === 1) {
-                    // 単騎選手への微量ブースト
                     p.final_score *= 1.02;
                     logMessage(`[C_suicide] 選手ID ${p.id} (単騎) に微量ブースト (1.02) 適用。`);
                 }
@@ -717,7 +656,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     return tempPlayers;
 } 
 
-// 展開シミュレーションを実行し、結果と統合スコアを返す。 (変更なし)
+// runScenarioSimulation 関数 (変更なし)
 function runScenarioSimulation(basePlayers, seriInfo, settings, bankData, applyKoutenrei) { 
     const scenarios = ['先行有利', '捲り有利', '差し有利']; 
     const allScenarioResults = []; 
@@ -729,21 +668,17 @@ function runScenarioSimulation(basePlayers, seriInfo, settings, bankData, applyK
         const cDCoeffs = getScenarioCoeffs(scenario); 
         let scenarioPlayers = JSON.parse(JSON.stringify(basePlayers)); 
 
-        // 基礎スコア (C係数適用前のスコア) 
         scenarioPlayers.forEach(p => { 
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e; 
         }); 
 
-        // 競り補正の適用
         scenarioPlayers = applySeriCorrection(scenarioPlayers, seriInfo);
 
-        // 荒天令モードの場合、C係数バイアスを適用 
         if (applyKoutenrei) { 
             scenarioPlayers = calculate_koutenrei_bias(scenarioPlayers, scenario, bankData); 
         } 
 
         scenarioPlayers.forEach(p => { 
-            // C係数適用後の final_score に cDCoeffs (展開係数) を乗算する 
             const cD = cDCoeffs[p.style] || 1.0; 
             p.final_score = p.final_score * cD; 
             integratedScores[p.id] += p.final_score; 
@@ -757,7 +692,7 @@ function runScenarioSimulation(basePlayers, seriInfo, settings, bankData, applyK
     return { allScenarioResults, integratedScores };
 } 
 
-// 天雲指数 (一致率に基づく) (変更なし)
+// calculateTenunIndex 関数 (変更なし)
 function calculateTenunIndex(seitenreiScores, koutenreiScores) { 
     const seitenreiRanking = Object.keys(seitenreiScores).map(id => ({ id: Number(id), score: seitenreiScores[id] })).sort((a, b) => b.score - a.score); 
     const koutenreiRanking = Object.keys(koutenreiScores).map(id => ({ id: Number(id), score: koutenreiScores[id] })).sort((a, b) => b.score - a.score); 
@@ -805,7 +740,7 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores) {
     return { tenunIndex, message };
 } 
 
-// メイン計算関数 (変更なし)
+// メイン計算関数 (calculatePrediction) - 変更なし
 async function calculatePrediction() { 
     if (Object.keys(BANK_DATA).length === 0) { 
         logMessage("[WAIT] バンクデータの読み込みを待機します..."); 
@@ -826,7 +761,6 @@ async function calculatePrediction() {
         return; 
     } 
 
-    // UIから現在の選択モードを取得 
     const modeSelector = document.getElementById('mode-selector'); 
     const koutenreiModeSelected = modeSelector ? modeSelector.value === 'koutenrei' : false; 
     
@@ -834,7 +768,8 @@ async function calculatePrediction() {
     logMessage(`[CALC START] ${raceType} / バンク: ${bankName} で計算開始。モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`); 
 
     // --- I. ライン解析と C_L (ライン・連係係数) の計算 --- 
-    const { seriInfo } = calculateLineCoeffs(players, settings); 
+    const { seriInfo, finalOrderedPlayerIds } = calculateLineCoeffs(players, settings); 
+    // finalOrderedPlayerIds をここで受け取り、後の表示で使用する
 
     // --- II. 選手固有係数 C_W, C_R, C_S1, C_B1 & C_E の計算 (基礎係数) --- 
     let basePlayers = JSON.parse(JSON.stringify(players)); 
@@ -867,16 +802,12 @@ async function calculatePrediction() {
     }); 
 
     // --- III. シミュレーション実行 (晴天令と荒天令の同時実行) --- 
-    // 1. ☀️ 晴天令シミュレーション (C係数適用なし) 
     const seitenreiResults = runScenarioSimulation(basePlayers, seriInfo, settings, bankData, false); 
     logMessage("[CALC] 晴天令 (安定) シミュレーションが完了しました。"); 
-
-    // 2. ⛈️ 荒天令シミュレーション (C係数適用あり) 
     const koutenreiResults = runScenarioSimulation(basePlayers, seriInfo, settings, bankData, true); 
     logMessage("[CALC] 荒天令 (波乱) シミュレーションが完了しました。"); 
 
     // --- IV. 最終結果の統合と表示 --- 
-    // 詳細テーブル (scenario-output) に表示する結果は、UIで選択されたモードに合わせる 
     const detailedScenarioResults = koutenreiModeSelected ? koutenreiResults.allScenarioResults : seitenreiResults.allScenarioResults; 
 
     displayResults( 
@@ -884,7 +815,8 @@ async function calculatePrediction() {
         seitenreiResults.integratedScores, 
         koutenreiResults.integratedScores, 
         bankName,
-        seriInfo
+        seriInfo,
+        finalOrderedPlayerIds // 表示順を渡す
     ); 
     
     const resultsContainer = document.getElementById('results-container'); 
@@ -895,12 +827,115 @@ async function calculatePrediction() {
     logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
 } 
 
-// 修正後の表示関数: displayResults (変更なし)
-function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, seriInfo) { 
+// ========== 【V7.3 修正】表示関数: displayResults (グラデーションカラーロジック追加) ==========
+
+/**
+ * 強弱グラデーションカラーのCSSコードを生成する (RGB: 赤(231, 76, 60) -> 青(52, 152, 219))
+ * @param {number} score - 選手の統合スコア
+ * @param {number} minScore - 統合スコアの最小値
+ * @param {number} maxScore - 統合スコアの最大値
+ * @returns {string} - RGBカラー文字列 (例: 'rgb(231, 76, 60)')
+ */
+function getStrengthColor(score, minScore, maxScore) {
+    if (maxScore === minScore) return 'rgb(142, 142, 142)'; // スコアが同じ場合はグレー
+
+    // 0 から 100 のパーセンテージを計算 (強ければ100、弱ければ0)
+    const normalizedScore = (score - minScore) / (maxScore - minScore);
+    
+    // 範囲を 0.0 (最弱) から 1.0 (最強) に変換。
+    // 青 (最弱) から 赤 (最強) へ。
+    // R: (赤: 231, 76, 60) B: (青: 52, 152, 219)
+    
+    const rStart = 52;   // 青のR
+    const gStart = 152;  // 青のG
+    const bStart = 219;  // 青のB
+    
+    const rEnd = 231;    // 赤のR
+    const gEnd = 76;     // 赤のG
+    const bEnd = 60;     // 赤のB
+
+    const r = Math.round(rStart + (rEnd - rStart) * normalizedScore);
+    const g = Math.round(gStart + (gEnd - gStart) * normalizedScore);
+    const b = Math.round(bStart + (bEnd - bStart) * normalizedScore);
+    
+    // スコアが強いほど赤に近くなる (0 -> 青, 1 -> 赤)
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
+/**
+ * 選手番号の文字色を決定する（背景の明るさに基づいて自動調整）
+ * @param {string} rgbColor - 背景色 (例: 'rgb(231, 76, 60)')
+ * @returns {string} - 文字色 ('#fff' または '#333')
+ */
+function getTextColor(rgbColor) {
+    const match = rgbColor.match(/\d+/g);
+    if (!match || match.length < 3) return '#fff'; // デフォルトは白
+
+    const r = parseInt(match[0]);
+    const g = parseInt(match[1]);
+    const b = parseInt(match[2]);
+
+    // 輝度 (Luminance) の計算: ITU-R BT.709
+    const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+
+    // 閾値: 0.5 が一般的
+    return luminance > 0.5 ? '#333' : '#fff';
+}
+
+
+function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, seriInfo, finalOrderedPlayerIds) { 
     displayBankTendency(); 
 
     // ---------------------------------------------------------- 
-    // ★ 競りサマリーの表示 (新規追加) ★ 
+    // ★ V7.3: ライン強度表示のための統合スコア (晴天令) の準備 ★ 
+    // ---------------------------------------------------------- 
+    const finalScores = Object.keys(seitenreiIntegratedScores).map(id => ({ 
+        id: Number(id), 
+        score: seitenreiIntegratedScores[id] / detailedScenarioResults.length 
+    }));
+    
+    const allScores = finalScores.map(p => p.score);
+    const maxScore = Math.max(...allScores);
+    const minScore = Math.min(...allScores);
+    
+    const playerIdToScore = {};
+    finalScores.forEach(p => {
+        playerIdToScore[p.id] = p.score;
+    });
+
+    // ---------------------------------------------------------- 
+    // ★ V7.3: ライン強度 (強弱グラデーション) の視覚化 ★ 
+    // ---------------------------------------------------------- 
+    const lineDisplay = document.getElementById('line-display'); 
+    let displayHtml = ''; 
+
+    // finalOrderedPlayerIds (並び順) に従って表示を生成
+    finalOrderedPlayerIds.forEach((id) => { 
+        const score = playerIdToScore[id] || minScore; // スコアが見つからない場合は最小スコアとして扱う
+        const rgbColor = getStrengthColor(score, minScore, maxScore);
+        const textColor = getTextColor(rgbColor);
+        
+        let style = `background-color: ${rgbColor}; color: ${textColor};`;
+        
+        let playerHtml = `<span class="line-box strength-color" style="${style}">${id}</span>`;
+        
+        // 競りが発生している場合のカッコ適用
+        if (seriInfo.exists) {
+            if (id === seriInfo.contender) {
+                playerHtml = `(${playerHtml})`;
+            }
+        }
+        
+        displayHtml += playerHtml;
+    }); 
+    
+    if (lineDisplay) { 
+        lineDisplay.innerHTML = displayHtml; 
+    } 
+    logMessage(`[COLOR] ライン表示を強弱グラデーションカラーに更新しました。 Max: ${maxScore.toFixed(2)}, Min: ${minScore.toFixed(2)}`);
+
+    // ---------------------------------------------------------- 
+    // ★ 競りサマリーの表示 (変更なし) ★ 
     // ----------------------------------------------------------
     let seriSummaryHtml = '';
     if (seriInfo.exists) {
@@ -919,7 +954,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     }
 
     // ---------------------------------------------------------- 
-    // ★ 天雲指数 (占い師メッセージ) の計算と表示 ★ 
+    // ★ 天雲指数 (占い師メッセージ) の計算と表示 (変更なし) ★ 
     // ---------------------------------------------------------- 
     const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores); 
     const tenunIndex = tenunIndexData.tenunIndex; 
@@ -945,7 +980,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     } 
 
     // ---------------------------------------------------------- 
-    // シナリオ詳細 
+    // シナリオ詳細 (変更なし)
     const scenarioOutput = document.getElementById('scenario-output'); 
     if (scenarioOutput) { 
         scenarioOutput.innerHTML = seriSummaryHtml;
@@ -972,7 +1007,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         }).join(''); 
     } 
 
-    // --- ☀️ 晴天令 (安定推奨) の表示 --- 
+    // --- ☀️ 晴天令 (安定推奨) の表示 (変更なし) --- 
     const seitenreiRanking = Object.keys(seitenreiIntegratedScores).map(id => ({ id: Number(id), score: seitenreiIntegratedScores[id] / detailedScenarioResults.length })).sort((a, b) => b.score - a.score); 
     const seitenTop3 = seitenreiRanking.slice(0, 3).map(p => p.id); 
     const seitenTop4 = seitenreiRanking.slice(0, 4).map(p => p.id); 
@@ -1001,7 +1036,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             三連複 (2点): <strong>${seitenTrifuku}</strong> `; 
     } 
 
-    // --- ⛈️ 荒天令 (高配当狙い) の表示 --- 
+    // --- ⛈️ 荒天令 (高配当狙い) の表示 (変更なし) --- 
     const koutenreiRanking = Object.keys(koutenreiIntegratedScores).map(id => ({ id: Number(id), score: koutenreiIntegratedScores[id] / detailedScenarioResults.length, rank: 0 
     })).sort((a, b) => b.score - a.score); 
     
@@ -1047,3 +1082,4 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             三連複 (${koutenTrifuku.slice(0, 6).length}点): <strong>${finalKoutenTrifuku}</strong> `; 
     }
 }
+// =========================================================
