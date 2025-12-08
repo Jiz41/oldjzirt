@@ -1,4 +1,4 @@
-// --- 華耀天輪 真・自在律 V7.0 ロジック (自滅消耗ペナルティ/競り表示: ボックス維持/カッコ 適用済み) --- //
+// --- 華耀天輪 真・自在律 V7.1 ロジック (自滅消耗ペナルティ/競り表示: ボックス維持/カッコ 適用済み) --- //
 
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
@@ -582,11 +582,10 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     }); 
     
     // --- 10. C_suicide (自滅消耗ペナルティ：Weight印集中リスク) --- 
-    logMessage("[C_suicide] V7.0 自滅消耗ペナルティの計算を開始...");
+    logMessage("[C_suicide] V7.1 自滅消耗ペナルティの計算を開始...");
 
     // 1. 各ラインの評価集中度を計測
     const lineEvaluations = {};
-    const weightMarks = ['◎', '〇', '△', '✕']; // 評価印のリスト
     
     // player.id -> line index のマッピングを作成
     const playerIdToLineIndex = {};
@@ -604,11 +603,11 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
         line.forEach(id => {
             const player = tempPlayers.find(p => p.id === id);
             if (player) {
-                // Weight印のスコア化
-                if (player.wmark === '◎') totalWeightScore += 3;
-                else if (player.wmark === '〇') totalWeightScore += 2;
+                // 🛠️ 【修正 1/2】Weight印のスコア化をケンさんの提案ロジックに変更 (◎, 〇, △ = 1点)
+                if (player.wmark === '◎') totalWeightScore += 1;
+                else if (player.wmark === '〇') totalWeightScore += 1;
                 else if (player.wmark === '△') totalWeightScore += 1;
-                // '✕' は0点とする
+                // '✕' と無印は0点とする
 
                 if (player.style === '自' || player.style === '両') {
                     hasSelfStarter = true;
@@ -633,9 +632,10 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     Object.keys(lineEvaluations).forEach(lineIndex => {
         const eval = lineEvaluations[lineIndex];
         
-        // 🚨 リスク判定条件: 3車以上 かつ 評価印合計が3点以上 かつ 自力選手がいる
-        if (eval.lineLength >= 3 && eval.totalWeightScore >= 3 && eval.hasSelfStarter) {
-            logMessage(`[C_suicide] 🔴 リスク極大ライン検出！ (ライン${eval.lineMembers.join('-')}、評価点: ${eval.totalWeightScore}点)`);
+        // 🚨 リスク判定条件: 3車以上 かつ 評価印合計が**ちょうど3点** かつ 自力選手がいる
+        // 🛠️ 【修正 2/2】発動条件を totalWeightScore === 3 に変更 (◎〇△ラインのみをターゲット)
+        if (eval.lineLength >= 3 && eval.totalWeightScore === 3 && eval.hasSelfStarter) { 
+            logMessage(`[C_suicide] 🔴 リスク極大ライン検出！ (ライン${eval.lineMembers.join('-')}、評価点: ${eval.totalWeightScore}点 - ◎〇△混在)`);
             isSuicideRiskDetected = true;
             eval.lineMembers.forEach(id => suicideRiskLineMembers.add(id));
         }
