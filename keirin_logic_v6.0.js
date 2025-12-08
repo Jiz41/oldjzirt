@@ -1,4 +1,4 @@
-// --- 華耀天輪 真・自在律 V7.1 ロジック (自滅消耗ペナルティ/競り表示: ボックス維持/カッコ 適用済み) --- //
+// --- 華耀天輪 真・自在律 V7.1 ロジック (再修正版: 単騎ライン表示バグ修正) --- //
 
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
@@ -165,11 +165,10 @@ function displayBankTendency() {
 })(); 
 
 
-// ========== 【修正】競り解析関数 (parseLineInput) ==========
+// ========== 競り解析関数 (parseLineInput) ==========
 /**
  * ライン入力文字列を解析し、ライン構成と競り情報を取得する
- * 【修正点】orderedPlayerIds に競り選手の並びを正確に格納するように修正
- * 【修正点】単騎ラインがカンマ区切りで入力された際(1,2,3,...)の処理を確実に orderedPlayerIds に含めるよう修正
+ * (前回の修正を維持: 単騎ラインがカンマ区切りで入力された際も orderedPlayerIds に確実に含める)
  * @param {string} lineInput - 例: "14(3)2, 567"
  * @param {Array<Object>} allPlayers - 全選手データ
  * @returns {Object} { lines: Array<Array<number>>, seriInfo: Object, orderedPlayerIds: Array<number> }
@@ -180,8 +179,7 @@ function parseLineInput(lineInput, allPlayers) {
     const segments = processedLineInput.split(',');
     
     const lines = [];
-    // 【新規】表示順を格納する配列
-    let orderedPlayerIds = []; // const から let に変更
+    let orderedPlayerIds = []; 
     const seriInfo = { exists: false, leader: null, follower: null, contender: null, winner: null, loser: null };
 
     segments.forEach(seg => {
@@ -190,9 +188,9 @@ function parseLineInput(lineInput, allPlayers) {
         if (seriMatch) {
             // 競り並び検出
             seriInfo.exists = true;
-            seriInfo.leader = parseInt(seriMatch[1]);     // 1: 自力選手
-            seriInfo.follower = parseInt(seriMatch[2]);   // 4: イン側の選手 (番手本線)
-            seriInfo.contender = parseInt(seriMatch[3]);  // 3: アウト側の選手 (競り選手)
+            seriInfo.leader = parseInt(seriMatch[1]);     
+            seriInfo.follower = parseInt(seriMatch[2]);   
+            seriInfo.contender = parseInt(seriMatch[3]);  
             
             logMessage(`[PARSE] 競り検出: 選手${seriInfo.follower} (イン) vs 選手${seriInfo.contender} (アウト)`);
             
@@ -212,17 +210,14 @@ function parseLineInput(lineInput, allPlayers) {
             // ライン再構築: 競り勝者のみがラインに残り、敗者は単騎扱い
             lines.push([seriInfo.leader, seriInfo.winner]); 
             
-            // 【修正】表示順の構築: 1 -> 4 -> 3 -> 2 -> ... (競り選手も隊列として格納)
+            // 表示順の構築
             orderedPlayerIds.push(seriInfo.leader);
-            orderedPlayerIds.push(seriInfo.follower);  // 競られる側 (イン側)
-            orderedPlayerIds.push(seriInfo.contender); // 競り込む側 (アウト側)
+            orderedPlayerIds.push(seriInfo.follower);  
+            orderedPlayerIds.push(seriInfo.contender); 
 
-            // 競り並びの後ろにいた選手(2)
             const remainingSegment = seriMatch[4]; 
-            // 残りのメンバーを個別の数字として抽出 (split('') で処理)
             const remainingMembers = remainingSegment.split('').map(Number).filter(id => id > 0);
             
-            // 残りの選手をラインと表示順に追加
             if (remainingMembers.length > 0) {
                  lines.push(remainingMembers); 
                  orderedPlayerIds.push(...remainingMembers);
@@ -231,8 +226,7 @@ function parseLineInput(lineInput, allPlayers) {
             lines.push([seriInfo.loser]); 
             
         } else {
-            // ★★★ 【修正箇所: 単騎・通常ラインの処理】 ★★★
-            // 例: "1", "2", "3" または "567"
+            // 単騎・通常ラインの処理
             const members = seg.split('').map(Number).filter(id => id > 0);
             
             if (members.length > 0) {
@@ -244,9 +238,7 @@ function parseLineInput(lineInput, allPlayers) {
         }
     });
     
-    // 【重要な修正】ラインに含まれていない選手を単騎扱いとして、orderedPlayerIdsの最後に追加
-    // このロジックは競りがないガールズケイリン(1,2,3,4,5,6,7)のような入力では不要だが、
-    // 予期せぬ入力ミスや、選手が入力されなかった場合に備えて残す。
+    // ラインに含まれていない選手を単騎扱いとして、orderedPlayerIdsの最後に追加 (念のため維持)
     const allRidersInInput = new Set(orderedPlayerIds);
     allPlayers.forEach(p => {
         if (!allRidersInInput.has(p.id)) {
@@ -258,7 +250,7 @@ function parseLineInput(lineInput, allPlayers) {
         }
     });
 
-    // 【新規】重複IDを削除し、隊列順を維持 (競り選手が lines にも orderedPlayerIds にも登録されるため)
+    // 重複IDを削除し、隊列順を維持
     const uniqueOrderedPlayerIds = [];
     const seenIds = new Set();
     for (const id of orderedPlayerIds) {
@@ -268,32 +260,50 @@ function parseLineInput(lineInput, allPlayers) {
         }
     }
 
-    // 【修正】orderedPlayerIdsも戻り値に追加
     return { lines, seriInfo, orderedPlayerIds: uniqueOrderedPlayerIds };
 }
 // =======================================
 
 
-// ========== 【修正】ライン強度計算・視覚化関数 (calculateLineCoeffs) ==========
+// ========== 【最終修正】ライン強度計算・視覚化関数 (calculateLineCoeffs) ==========
 /**
  * ライン強度係数 C_L の計算と、ラインの視覚化表示を行う
- * 【修正点】競り表示にカッコを適用し、矢印を削除する
- * (ここではロジックの変更なし - 表示がorderedPlayerIdsに依存するため)
+ * 【最終修正点】orderedPlayerIds の最終的なメンバー数を7人に強制補完
  */
 function calculateLineCoeffs(players, settings) { 
-    // 【修正】orderedPlayerIdsも受け取るように変更
+    // parseLineInputで得られた初期データ
     const lineInput = document.getElementById('line-input').value; 
-    const { lines, seriInfo: parsedSeriInfo, orderedPlayerIds } = parseLineInput(lineInput, players);
+    const { lines: initialLines, seriInfo: parsedSeriInfo, orderedPlayerIds: initialOrderedPlayerIds } = parseLineInput(lineInput, players); 
+
+    let lines = [...initialLines]; // スコア計算に使うライン
+    let finalOrderedPlayerIds = [...initialOrderedPlayerIds]; // 表示に使う並び
+
+    // 🚨 欠落選手強制補完ロジック: 単騎入力バグの確実な解決策 🚨
+    const playerIdsSet = new Set(initialOrderedPlayerIds);
+    
+    // 1から7までのIDをチェックし、含まれていない場合は末尾に追加
+    // これにより、ライン表示の要素数が必ず7個になることが保証される
+    for (let i = 1; i <= 7; i++) {
+        if (!playerIdsSet.has(i)) {
+            finalOrderedPlayerIds.push(i);
+            playerIdsSet.add(i); 
+            logMessage(`[C_L_FIX] 欠落選手ID ${i} を最終表示並びに補完しました。`);
+            
+            // lines 配列にも単騎ラインとして追加（スコア計算への影響を確保）
+            lines.push([i]);
+        }
+    }
 
     const playerToLineMap = {}; 
     
+    // lines配列の最終的な構成に基づいてマッピングを再構築
     lines.forEach((members, index) => {
         members.forEach(id => {
             playerToLineMap[id] = index + 1;
         });
     });
     
-    // C_L係数計算 (省略 - 変更なし) 
+    // C_L係数計算 (ライン結束力係数)
     if (settings.IS_GIRLS) { 
         logMessage(`[C_L] ガールズ競輪モード。エースマーク係数 $C_{mark}$ を評価。`); 
         const ace = players.reduce((max, p) => (p.score > max.score ? p : max), { score: -Infinity }); 
@@ -313,16 +323,18 @@ function calculateLineCoeffs(players, settings) {
         else cMarkValue = C_MARK_VALUES.LOW; 
 
         players.forEach(p => { 
+            p.c_l = 1.0; // 初期化
             if (aceMarkPlayers.has(p.id)) { 
                 p.c_l = cMarkValue; 
-            } else if (lines.some(l => l.includes(p.id))) { 
+            } else if (lines.some(l => l.includes(p.id)) && !aceMarkPlayers.has(p.id)) { 
                 p.c_l = 1.005; 
-            } 
+            }
         }); 
     } else { 
         logMessage(`[C_L] 一般競輪 (${settings.R_BIAS.toFixed(2)}) モード。ライン結束力係数 $C_{coop}$ を評価。`); 
         const coopWeight = settings.COOP_WEIGHT; 
         
+        players.forEach(p => p.c_l = 1.0); // 全員初期化
         lines.forEach(line => { 
             if (line.length < 2) return;
             
@@ -346,37 +358,30 @@ function calculateLineCoeffs(players, settings) {
     if (lineDisplay) { 
         let displayHtml = ''; 
 
-        // 【修正】並び替えられた orderedPlayerIds に従って表示を生成
-        // orderedPlayerIds に7人全員が入っていれば、ここで7つのボックスが生成される。
-        orderedPlayerIds.forEach((id) => { 
+        // finalOrderedPlayerIds に従って表示を生成
+        finalOrderedPlayerIds.forEach((id) => { 
             const lineId = playerToLineMap[id] || 0; 
             let className = ''; 
             if (lineId === 0) { 
-                // lineId が 0 の場合（ラインに組み込まれなかった選手）
                 className = 'line-solo'; 
             } else { 
                 className = `line-color-${lineId}`; 
             } 
             
-            // 選手ボックスを生成
             let playerHtml = `<span class="line-box ${className}">${id}</span>`;
             
             // 競りが発生している場合のカッコ適用
             if (parsedSeriInfo.exists) {
-                // アウト側の選手 (contender) の ID にのみカッコを適用
                 if (id === parsedSeriInfo.contender) {
                     playerHtml = `(${playerHtml})`;
                 }
             }
-            
-            // 【削除】隊列を示す矢印ロジックはすべて削除
             
             displayHtml += playerHtml;
         }); 
         lineDisplay.innerHTML = displayHtml; 
     } 
 
-    // 【修正】seriInfoを返す
     return { lines, seriInfo: parsedSeriInfo };
 } 
 // =========================================================
@@ -483,7 +488,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
 
     // parseLineInputを呼び出し、linesを取得
     const lineInput = document.getElementById('line-input').value;
-    const { lines } = parseLineInput(lineInput, players);
+    const { lines } = parseLineInput(lineInput, players); // parseLineInputの戻り値を使う
 
     // --- C係数の計算と適用 --- 
     tempPlayers.forEach(p => { 
@@ -600,7 +605,6 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     // 1. 各ラインの評価集中度を計測
     const lineEvaluations = {};
     
-    // player.id -> line index のマッピングを作成
     const playerIdToLineIndex = {};
     lines.forEach((line, index) => {
         line.forEach(id => {
@@ -616,11 +620,10 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
         line.forEach(id => {
             const player = tempPlayers.find(p => p.id === id);
             if (player) {
-                // 🛠️ 【修正 1/2】Weight印のスコア化をケンさんの提案ロジックに変更 (◎, 〇, △ = 1点)
+                // Weight印のスコア化をケンさんの提案ロジックに変更 (◎, 〇, △ = 1点)
                 if (player.wmark === '◎') totalWeightScore += 1;
                 else if (player.wmark === '〇') totalWeightScore += 1;
                 else if (player.wmark === '△') totalWeightScore += 1;
-                // '✕' と無印は0点とする
 
                 if (player.style === '自' || player.style === '両') {
                     hasSelfStarter = true;
@@ -632,7 +635,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
             lineLength: lineLength,
             totalWeightScore: totalWeightScore,
             hasSelfStarter: hasSelfStarter,
-            lineMembers: line // メンバーIDを保持
+            lineMembers: line 
         };
     });
 
@@ -645,8 +648,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     Object.keys(lineEvaluations).forEach(lineIndex => {
         const eval = lineEvaluations[lineIndex];
         
-        // 🚨 リスク判定条件: 3車以上 かつ 評価印合計が**ちょうど3点** かつ 自力選手がいる
-        // 🛠️ 【修正 2/2】発動条件を totalWeightScore === 3 に変更 (◎〇△ラインのみをターゲット)
+        // リスク判定条件: 3車以上 かつ 評価印合計がちょうど3点 かつ 自力選手がいる
         if (eval.lineLength >= 3 && eval.totalWeightScore === 3 && eval.hasSelfStarter) { 
             logMessage(`[C_suicide] 🔴 リスク極大ライン検出！ (ライン${eval.lineMembers.join('-')}、評価点: ${eval.totalWeightScore}点 - ◎〇△混在)`);
             isSuicideRiskDetected = true;
@@ -663,7 +665,6 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
                 logMessage(`[C_suicide] 選手ID ${p.id} に消耗ペナルティ (${SUICIDE_PENALTY.toFixed(2)}) 適用。`);
             } else {
                 // 漁夫の利選手: スコア加点
-                // 単騎ラインでない選手、または明確なラインに属さない単騎選手に適用
                 const lineIndex = playerIdToLineIndex[p.id];
                 if (lineIndex !== undefined && lineEvaluations[lineIndex].lineLength >= 2) {
                      // 2車以上のラインに属する選手への加点
@@ -801,11 +802,9 @@ async function calculatePrediction() {
     logMessage(`[CALC START] ${raceType} / バンク: ${bankName} で計算開始。モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`); 
 
     // --- I. ライン解析と C_L (ライン・連係係数) の計算 --- 
-    // 【修正】calculateLineCoeffsの戻り値を受け取るように変更
     const { seriInfo } = calculateLineCoeffs(players, settings); 
 
     // --- II. 選手固有係数 C_W, C_R, C_S1, C_B1 & C_E の計算 (基礎係数) --- 
-    // この係数は両モードで共通して使用される 
     let basePlayers = JSON.parse(JSON.stringify(players)); 
     
     basePlayers.forEach(p => { 
@@ -853,7 +852,7 @@ async function calculatePrediction() {
         seitenreiResults.integratedScores, 
         koutenreiResults.integratedScores, 
         bankName,
-        seriInfo // 競り情報を渡す
+        seriInfo
     ); 
     
     const resultsContainer = document.getElementById('results-container'); 
