@@ -1,4 +1,4 @@
-// --- 華耀天輪 真・自在律 V7.1 ロジック (最終デバッグ用ログ追加版) --- //
+// --- 華耀天輪 真・自在律 V7.2 ロジック (ライン強制補完強化版) --- //
 
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
@@ -168,7 +168,6 @@ function displayBankTendency() {
 // ========== 競り解析関数 (parseLineInput) ==========
 /**
  * ライン入力文字列を解析し、ライン構成と競り情報を取得する
- * (前回の修正を維持: 単騎ラインがカンマ区切りで入力された際も orderedPlayerIds に確実に含める)
  * @param {string} lineInput - 例: "14(3)2, 567"
  * @param {Array<Object>} allPlayers - 全選手データ
  * @returns {Object} { lines: Array<Array<number>>, seriInfo: Object, orderedPlayerIds: Array<number> }
@@ -268,7 +267,7 @@ function parseLineInput(lineInput, allPlayers) {
 // ========== 【最終修正】ライン強度計算・視覚化関数 (calculateLineCoeffs) ==========
 /**
  * ライン強度係数 C_L の計算と、ラインの視覚化表示を行う
- * 【最終修正点】orderedPlayerIds の最終的なメンバー数を7人に強制補完
+ * 【V7.2 修正点】すべての選手に正しくラインIDが割り当てられ、表示されるようにロジックを強化。
  */
 function calculateLineCoeffs(players, settings) { 
     // parseLineInputで得られた初期データ
@@ -281,31 +280,43 @@ function calculateLineCoeffs(players, settings) {
     let lines = [...initialLines]; // スコア計算に使うライン
     let finalOrderedPlayerIds = [...initialOrderedPlayerIds]; // 表示に使う並び
 
-    // 🚨 欠落選手強制補完ロジック: 単騎入力バグの確実な解決策 🚨
+    // 🚨 欠落選手強制補完ロジック (V7.2: 補完とライン再構築のロジックを分離・強化) 🚨
     const playerIdsSet = new Set(initialOrderedPlayerIds);
     
-    // 1から7までのIDをチェックし、含まれていない場合は末尾に追加
-    // これにより、ライン表示の要素数が必ず7個になることが保証される
+    // 1. 欠落選手を finalOrderedPlayerIds に補完
     for (let i = 1; i <= 7; i++) {
         if (!playerIdsSet.has(i)) {
             finalOrderedPlayerIds.push(i);
             playerIdsSet.add(i); 
             logMessage(`[C_L_FIX] 欠落選手ID ${i} を最終表示並びに補完しました。`);
-            
-            // lines 配列にも単騎ラインとして追加（スコア計算への影響を確保）
-            lines.push([i]);
         }
     }
 
+    // 2. スコア計算用ラインリストを再構築し、すべての選手が含まれるようにする
+    const allRidersInLines = new Set();
+    lines.forEach(line => line.forEach(id => allRidersInLines.add(id)));
+
+    for (let i = 1; i <= 7; i++) {
+        if (!allRidersInLines.has(i)) {
+            lines.push([i]); // ライン計算用
+            logMessage(`[C_L_FIX] 選手ID ${i} をスコア計算用ラインリストに単騎として追加しました。`);
+        }
+    }
+
+    // 3. Player ID -> Line ID のマッピングを、**lines配列の最終的な構成**に基づいて再構築
     const playerToLineMap = {}; 
     
     // lines配列の最終的な構成に基づいてマッピングを再構築
+    // index + 1 をラインIDとする (1から始まる)
     lines.forEach((members, index) => {
         members.forEach(id => {
             playerToLineMap[id] = index + 1;
         });
     });
-    
+    logMessage(`[C_L_DEBUG] 最終ライン数: ${lines.length}`);
+    logMessage(`[C_L_DEBUG] 選手→ラインIDマップ: ${JSON.stringify(playerToLineMap)}`);
+
+
     // C_L係数計算 (ライン結束力係数)
     if (settings.IS_GIRLS) { 
         logMessage(`[C_L] ガールズ競輪モード。エースマーク係数 $C_{mark}$ を評価。`); 
@@ -365,10 +376,13 @@ function calculateLineCoeffs(players, settings) {
         finalOrderedPlayerIds.forEach((id) => { 
             const lineId = playerToLineMap[id] || 0; 
             let className = ''; 
-            if (lineId === 0) { 
-                className = 'line-solo'; 
+            
+            // lineId が 1以上の場合はラインカラーを適用
+            if (lineId > 0) { 
+                className = `line-color-${lineId % 4 || 4}`; // 4色で循環させる
             } else { 
-                className = `line-color-${lineId}`; 
+                // lineId が 0 または割り当てがない場合は単騎として処理
+                className = 'line-solo'; 
             } 
             
             let playerHtml = `<span class="line-box ${className}">${id}</span>`;
@@ -491,7 +505,22 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
 
     // parseLineInputを呼び出し、linesを取得
     const lineInput = document.getElementById('line-input').value;
-    const { lines } = parseLineInput(lineInput, players); // parseLineInputの戻り値を使う
+    const { lines: initialLines } = parseLineInput(lineInput, players); 
+
+    // V7.2 修正: lines配列をcalculateLineCoeffsのロジックで強制補完
+    const lines = [];
+    const allRidersInLines = new Set();
+    initialLines.forEach(line => {
+        lines.push(line);
+        line.forEach(id => allRidersInLines.add(id));
+    });
+
+    for (let i = 1; i <= 7; i++) {
+        if (!allRidersInLines.has(i)) {
+            lines.push([i]); 
+        }
+    }
+
 
     // --- C係数の計算と適用 --- 
     tempPlayers.forEach(p => { 
