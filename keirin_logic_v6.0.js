@@ -1,4 +1,4 @@
-// --- 華耀天輪 真・自在律 V7.1 ロジック (再修正版: 単騎ライン表示バグ修正) --- //
+// --- 華耀天輪 真・自在律 V7.1 ロジック (最終デバッグ用ログ追加版) --- //
 
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
@@ -275,6 +275,9 @@ function calculateLineCoeffs(players, settings) {
     const lineInput = document.getElementById('line-input').value; 
     const { lines: initialLines, seriInfo: parsedSeriInfo, orderedPlayerIds: initialOrderedPlayerIds } = parseLineInput(lineInput, players); 
 
+    // 🚨 【NEW LOG】parseLineInputの戻り値を強制ログ出力 🚨
+    logMessage(`[C_L_DEBUG] initialOrderedPlayerIds: [${initialOrderedPlayerIds.join(', ')}] (長さ: ${initialOrderedPlayerIds.length})`);
+    
     let lines = [...initialLines]; // スコア計算に使うライン
     let finalOrderedPlayerIds = [...initialOrderedPlayerIds]; // 表示に使う並び
 
