@@ -10,7 +10,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             margin: 0; 
             padding: 0; 
-            padding-bottom: 40px; 
+            padding-bottom: 70px; /* 固定フッターの高さ分を確保 */
             background-color: #fcfcf0; /* 生成りの背景 */
             color: #333333; /* 墨色の文字 */
         }
@@ -105,6 +105,59 @@
         
         /* アイコンの調整 */
         .icon { font-size: 1.2em; margin-right: 5px; }
+
+
+        /* ここから追加・修正されたスタイル */
+
+        /* 著作権フッター */
+        .copyright-footer {
+            text-align: center;
+            padding: 15px 0 5px 0;
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 20px;
+        }
+
+        /* ナビゲーションフッター (戻るボタンのコンテナ) */
+        .navigation-footer {
+            position: fixed; 
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #8b2222; /* 渋い朱色 */
+            padding: 10px 0;
+            text-align: center;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        /* 戻るボタンのスタイル */
+        .back-button {
+            display: inline-block;
+            padding: 10px 30px;
+            background-color: #d6a300; /* くすんだ金色 */
+            color: #333333; 
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 25px;
+            transition: background-color 0.3s;
+            font-size: 1.1em;
+        }
+
+        .back-button:hover {
+            background-color: #ffc433; 
+            color: #8b2222;
+        }
+        
+        /* 免責事項リンクのスタイル */
+        .copyright-footer a {
+            color: #8b2222;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .copyright-footer a:hover {
+            text-decoration: underline;
+        }
 
     </style>
 </head>
@@ -257,6 +310,17 @@
     </ul>
     
     <div style="height: 40px;"></div>
+</div>
+
+<footer class="copyright-footer">
+    <a href="https://note.com/kytnrnsnjzitr/n/nbc069a03d13c" target="_blank">免責事項・利用規約</a>
+    <span style="margin: 0 5px;"> | </span>
+    <span>(C)2025 Mushyn Reagan</span>
+</footer>
+
+
+<div class="navigation-footer">
+    <a href="https://huggingface.co/spaces/Jiz41/Jiz41r1t5u" class="back-button">メインページへ戻る</a>
 </div>
 
 </body>
