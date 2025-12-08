@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>華耀天輪 真・自在律 V6.0 - Mobile (Friendly)</title>
+    <title>華耀天輪 真・自在律 V7.3 - Mobile (Friendly)</title>
     <style>
         /* 🎨 新デザイン: 優しく、落ち着いた色合い */
         html, body {
@@ -31,35 +31,34 @@
             box-sizing: border-box;
         }
         
-        /* ★★★ 追加CSS: 演算制御多重交響体 (サブタイトル) ★★★ */
+        /* ★★★ 演算制御多重交響体 (サブタイトル) ★★★ */
         header {
-            padding: 15px 15px 0 15px; /* h1からパディングを一部移動 */
+            padding: 15px 15px 0 15px;
             margin-top: 0; 
             border-radius: 8px 8px 0 0;
             background-color: #ffffff;
         }
         
         .subtitle {
-            font-size: 0.8em; /* 小さく */
-            color: #98b498; /* h1のボーダーと同系統の優しい色 */
-            font-style: italic; /* 斜体 */
-            text-align: center; /* 中央揃え（横幅合わせのため） */
-            letter-spacing: 0.1em; /* 見やすくするため文字間隔を広げる */
-            padding-bottom: 5px; /* h1との間隔を調整 */
-            border-bottom: 1px solid #f0f0f0; /* 薄い区切り線 */
+            font-size: 0.8em;
+            color: #98b498;
+            font-style: italic;
+            text-align: center;
+            letter-spacing: 0.1em;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #f0f0f0;
         }
         
-        /* ヘッダー/タイトル (既存h1の修正) */
+        /* ヘッダー/タイトル */
         h1 {
             font-size: 1.5em;
             color: #698b69;
             border-bottom: 3px solid #98b498;
-            padding: 10px 0 10px 0; /* paddingを上下に集中 */
+            padding: 10px 0 10px 0;
             margin-top: 0;
-            border-radius: 0 0 8px 8px; /* 角丸を下側のみに修正 */
-            text-align: center; /* 中央揃えで横幅に合わせる */
+            border-radius: 0 0 8px 8px;
+            text-align: center;
         }
-        /* ------------------------------------------- */
         
         h2 {
             font-size: 1.2em;
@@ -132,7 +131,6 @@
             width: 30%;
         }
 
-        /* マニュアル内の箇条書きのパディング調整 */
         .manual-content ul {
             padding-left: 20px;
             margin-top: 5px;
@@ -143,9 +141,7 @@
             margin-bottom: 2px;
         }
 
-        /* ------------------------------------------- */
         /* デバッグログのヘッダーサイズを縮小し、色を薄く */
-        /* ------------------------------------------- */
         .debug-log-header {
             font-size: 1.0em;
             color: #888;
@@ -170,9 +166,6 @@
             margin: 0 auto 15px auto;
         }
 
-        /* ------------------------------------------- */
-        /* その他のスタイル（変更なし） */
-        /* ------------------------------------------- */
         /* 縦積み化の基本スタイル */
         .input-item {
             margin-bottom: 15px;
@@ -195,17 +188,14 @@
             background-color: #ffffff;
         }
 
-        /* ★修正: 地元スイッチのコンパクト化 */
         .local-switch-group {
             display: flex;
             align-items: center;
             padding: 5px 0;
-            /* 縦のパディングを減らす */
             margin-bottom: 5px;
             font-size: 0.95em;
             color: #555;
             border-top: 1px dashed #e0e0e0;
-            /* 境界線を薄くする */
             border-bottom: 1px dashed #e0e0e0;
         }
 
@@ -245,24 +235,6 @@
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
-        /* ★修正: 地元チェックボックスのスタイルを調整 */
-        .local-group {
-            display: flex;
-            align-items: center;
-            font-size: 0.75em;
-            color: #698b69;
-            /* 地元を目立たせる色 */
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        .local-group input[type="checkbox"] {
-            width: auto;
-            margin-left: 4px;
-            margin-right: 2px;
-            transform: scale(1.1);
-        }
-
         /* 枠番色：非常に薄い色を維持 */
         .id-1 .player-header {
             background-color: #ffffff;
@@ -298,6 +270,22 @@
             background-color: #fff5ee;
             color: #333;
         }
+        
+        .local-group {
+            display: flex;
+            align-items: center;
+            font-size: 0.75em;
+            color: #698b69;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .local-group input[type="checkbox"] {
+            width: auto;
+            margin-left: 4px;
+            margin-right: 2px;
+            transform: scale(1.1);
+        }
 
         /* 選手フィールド */
         .player-fields {
@@ -313,7 +301,6 @@
             box-sizing: border-box;
         }
 
-        /* ★修正: 地元チェックボックスをフィールドから削除したため、幅を再調整 */
         .player-field:nth-child(1) {
             flex: 1 1 23%;
         }
@@ -333,7 +320,6 @@
             flex: 1 1 25%;
         }
 
-        /* 直近3走 */
         .player-field label {
             display: block;
             font-size: 0.7em;
@@ -380,39 +366,19 @@
             margin-top: 5px;
         }
 
-        /* ラインカラーは以前の強い色を維持 */
+        /* ★★★ V7.3 修正: グラデーションカラーのベーススタイル ★★★ */
         .line-box {
             display: inline-block;
             padding: 2px 6px;
             border-radius: 4px;
             font-weight: bold;
-            color: white;
+            /* style属性で色を動的に変更するため、ここでは色を指定しない */
             margin-right: 5px;
             font-size: 0.9em;
+            transition: background-color 0.5s, color 0.5s; /* 視覚効果 */
         }
 
-        .line-color-1 {
-            background-color: #e74c3c;
-        }
-
-        .line-color-2 {
-            background-color: #3498db;
-        }
-
-        .line-color-3 {
-            background-color: #2ecc71;
-        }
-
-        .line-color-4 {
-            background-color: #9b59b6;
-        }
-
-        /* ★★★ 修正箇所: 単騎の文字色を暗い色に変更 ★★★ */
-        .line-solo {
-            background-color: #95a5a6;
-            color: #333; /* 文字を濃い色に上書き */
-        }
-        /* ★★★ 修正箇所ここまで ★★★ */
+        /* 従来の line-color-* や line-solo は削除 */
 
         /* バンク展開傾向 */
         #bank-tendency-display {
@@ -424,7 +390,7 @@
             font-weight: bold;
         }
 
-        /* 結果テーブル */
+        /* 結果テーブル (変更なし) */
         .scenario-detail table {
             width: 100%;
             border-collapse: collapse;
@@ -449,7 +415,7 @@
             display: none !important;
         }
 
-        /* その他UI要素 */
+        /* その他UI要素 (変更なし) */
         .recommendation {
             padding: 12px;
             border-radius: 6px;
@@ -459,7 +425,6 @@
             line-height: 1.6;
         }
 
-        /* 晴天令・荒天令の色味を優しく調整 */
         #seitenrei-output {
             background-color: #e6f5e6;
             border-left: 5px solid #698b69;
@@ -504,19 +469,6 @@
             background-color: #557755;
         }
 
-        /* フッターCSS */
-        .copyright-footer {
-            text-align: center;
-            font-size: 0.75em;
-            color: #aaa;
-            margin-top: 20px;
-            width: 100%;
-            /* フッターを画面下部ではなく、コンテンツの最後に表示 */
-            padding: 15px; 
-            box-sizing: border-box;
-        }
-
-        /* 実行前の結果セクションを非表示にしてがたつきを解消 */
         #results-container {
             display: none;
             opacity: 0;
@@ -528,15 +480,13 @@
             opacity: 1;
         }
 
-        /* ★★★ 天雲指数ゲージの追加CSS ★★★ */
+        /* 天雲指数ゲージ (変更なし) */
         .tenun-index-container {
             margin: 20px 0;
             padding: 15px;
             border: 2px dashed #d6a300;
-            /* 占い・亀卜のイメージ */
             border-radius: 8px;
             background-color: #fff9e6;
-            /* 薄い黄色の背景 */
             text-align: center;
         }
 
@@ -548,9 +498,7 @@
             margin: 10px 0;
             overflow-x: auto;
             display: inline-block;
-            /* 中央揃えのため */
             color: #698b69;
-            /* 落ち着いた緑系 */
         }
 
         .tenun-description {
@@ -558,7 +506,16 @@
             color: #a37200;
         }
 
-        /* ★★★ 追加CSSここまで ★★★ */
+        /* フッターCSS (変更なし) */
+        .copyright-footer {
+            text-align: center;
+            font-size: 0.75em;
+            color: #aaa;
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px; 
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
@@ -971,7 +928,7 @@
             <h2>📊 予想結果・推奨買い目</h2>
             <div class="result-section">
                 <div id="bank-tendency-display"></div>
-                <h3>🔗 ライン強度</h3>
+                <h3>🔗 ライン強度（強弱グラデーション）</h3>
                 <div id="line-display" class="line-display">
                     計算結果待ち...
                 </div>
