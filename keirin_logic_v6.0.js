@@ -1,4 +1,4 @@
-// --- 華耀天輪 真・自在律 V6.1 ロジック (競り表示: ボックス維持/カッコ/矢印削除 適用済み) --- //
+// --- 華耀天輪 真・自在律 V7.0 ロジック (自滅消耗ペナルティ/競り表示: ボックス維持/カッコ 適用済み) --- //
 
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
@@ -457,7 +457,7 @@ function assignFinalGrades(scenarioPlayers) { // (変更なし)
     });
 } 
 
-// 荒天令モード専用の非実力リスクバイアス (C係数) を計算し、スコア減点を適用する (変更なし)
+// 荒天令モード専用の非実力リスクバイアス (C係数) を計算し、スコア減点を適用する 
 function calculate_koutenrei_bias(players, scenario, bankData) { 
     logMessage("[KOUTENREI] 荒天令リスクバイアス (C係数) の計算を開始..."); 
     
@@ -580,6 +580,92 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
             logMessage(`[C_guard] 番手選手ID ${p2.id} に防衛リスク (${(1.0-baseRisk).toFixed(2)}) を適用。`); 
         } 
     }); 
+    
+    // --- 10. C_suicide (自滅消耗ペナルティ：Weight印集中リスク) --- 
+    logMessage("[C_suicide] V7.0 自滅消耗ペナルティの計算を開始...");
+
+    // 1. 各ラインの評価集中度を計測
+    const lineEvaluations = {};
+    const weightMarks = ['◎', '〇', '△', '✕']; // 評価印のリスト
+    
+    // player.id -> line index のマッピングを作成
+    const playerIdToLineIndex = {};
+    lines.forEach((line, index) => {
+        line.forEach(id => {
+            playerIdToLineIndex[id] = index;
+        });
+    });
+
+    lines.forEach((line, index) => {
+        let lineLength = line.length;
+        let totalWeightScore = 0;
+        let hasSelfStarter = false;
+
+        line.forEach(id => {
+            const player = tempPlayers.find(p => p.id === id);
+            if (player) {
+                // Weight印のスコア化
+                if (player.wmark === '◎') totalWeightScore += 3;
+                else if (player.wmark === '〇') totalWeightScore += 2;
+                else if (player.wmark === '△') totalWeightScore += 1;
+                // '✕' は0点とする
+
+                if (player.style === '自' || player.style === '両') {
+                    hasSelfStarter = true;
+                }
+            }
+        });
+
+        lineEvaluations[index] = {
+            lineLength: lineLength,
+            totalWeightScore: totalWeightScore,
+            hasSelfStarter: hasSelfStarter,
+            lineMembers: line // メンバーIDを保持
+        };
+    });
+
+    // 2. 自滅リスクラインの判定と係数の適用
+    const SUICIDE_PENALTY = 0.90; // リスクライン選手への減点係数 (10%減)
+    const BOOTY_BONUS = 1.05;      // 漁夫の利選手への加点係数 (5%増)
+    let isSuicideRiskDetected = false;
+    let suicideRiskLineMembers = new Set();
+    
+    Object.keys(lineEvaluations).forEach(lineIndex => {
+        const eval = lineEvaluations[lineIndex];
+        
+        // 🚨 リスク判定条件: 3車以上 かつ 評価印合計が3点以上 かつ 自力選手がいる
+        if (eval.lineLength >= 3 && eval.totalWeightScore >= 3 && eval.hasSelfStarter) {
+            logMessage(`[C_suicide] 🔴 リスク極大ライン検出！ (ライン${eval.lineMembers.join('-')}、評価点: ${eval.totalWeightScore}点)`);
+            isSuicideRiskDetected = true;
+            eval.lineMembers.forEach(id => suicideRiskLineMembers.add(id));
+        }
+    });
+
+    if (isSuicideRiskDetected) {
+        // 減点と加点を適用
+        tempPlayers.forEach(p => {
+            if (suicideRiskLineMembers.has(p.id)) {
+                // 自滅リスクラインの選手: スコア減点
+                p.final_score *= SUICIDE_PENALTY;
+                logMessage(`[C_suicide] 選手ID ${p.id} に消耗ペナルティ (${SUICIDE_PENALTY.toFixed(2)}) 適用。`);
+            } else {
+                // 漁夫の利選手: スコア加点
+                // 単騎ラインでない選手、または明確なラインに属さない単騎選手に適用
+                const lineIndex = playerIdToLineIndex[p.id];
+                if (lineIndex !== undefined && lineEvaluations[lineIndex].lineLength >= 2) {
+                     // 2車以上のラインに属する選手への加点
+                     p.final_score *= BOOTY_BONUS;
+                     logMessage(`[C_suicide] 選手ID ${p.id} に漁夫の利ブースト (${BOOTY_BONUS.toFixed(2)}) 適用。`);
+                } else if (lineIndex === undefined || lineEvaluations[lineIndex].lineLength === 1) {
+                    // 単騎選手への微量ブースト
+                    p.final_score *= 1.02;
+                    logMessage(`[C_suicide] 選手ID ${p.id} (単騎) に微量ブースト (1.02) 適用。`);
+                }
+            }
+        });
+    } else {
+        logMessage("[C_suicide] 自滅リスク極大ラインは検出されませんでした。");
+    }
 
     logMessage("[KOUTENREI] C係数計算が完了しました。"); 
     return tempPlayers;
