@@ -30,17 +30,37 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
             box-sizing: border-box;
         }
-
-        /* ヘッダー/タイトル */
+        
+        /* ★★★ 追加CSS: 演算制御多重交響体 (サブタイトル) ★★★ */
+        header {
+            padding: 15px 15px 0 15px; /* h1からパディングを一部移動 */
+            margin-top: 0; 
+            border-radius: 8px 8px 0 0;
+            background-color: #ffffff;
+        }
+        
+        .subtitle {
+            font-size: 0.8em; /* 小さく */
+            color: #98b498; /* h1のボーダーと同系統の優しい色 */
+            font-style: italic; /* 斜体 */
+            text-align: center; /* 中央揃え（横幅合わせのため） */
+            letter-spacing: 0.1em; /* 見やすくするため文字間隔を広げる */
+            padding-bottom: 5px; /* h1との間隔を調整 */
+            border-bottom: 1px solid #f0f0f0; /* 薄い区切り線 */
+        }
+        
+        /* ヘッダー/タイトル (既存h1の修正) */
         h1 {
             font-size: 1.5em;
             color: #698b69;
             border-bottom: 3px solid #98b498;
-            padding: 15px 15px 10px 15px;
+            padding: 10px 0 10px 0; /* paddingを上下に集中 */
             margin-top: 0;
-            border-radius: 8px 8px 0 0;
+            border-radius: 0 0 8px 8px; /* 角丸を下側のみに修正 */
+            text-align: center; /* 中央揃えで横幅に合わせる */
         }
-
+        /* ------------------------------------------- */
+        
         h2 {
             font-size: 1.2em;
             color: #698b69;
@@ -488,6 +508,9 @@
             color: #aaa;
             margin-top: 20px;
             width: 100%;
+            /* フッターを画面下部ではなく、コンテンツの最後に表示 */
+            padding: 15px; 
+            box-sizing: border-box;
         }
 
         /* 実行前の結果セクションを非表示にしてがたつきを解消 */
@@ -537,7 +560,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>華耀天輪 真・自在律 V6.0</h1>
+        <header>
+            <div class="subtitle">演算制御多重交響体</div>
+            <h1>華耀天輪 真・自在律 V6.0</h1>
+        </header>
         <div class="manual-header" onclick="toggleManual()">
             <span id="manual-toggle-icon">▶</span> 📖 操作説明書・マニュアル
         </div>
@@ -974,16 +1000,23 @@
         [TOOL START] ツール起動。すべての係数とロジックを読み込みました。<br>
         [INFO] bankdata.jsonの読み込みを待機しています...
     </div>
+    
     <div style="text-align: center; margin-bottom: 5px;">
         <a href="manual_details.html" target="_blank" style="font-size: 0.85em; color: #a37200; text-decoration: underline;">
             📖ツール利用ガイド・各項目の解説はこちら
         </a>
     </div>
+    
     <footer class="copyright-footer">
         <a href="https://note.com/kytnrnsnjzitr/n/nbc069a03d13c" target="_blank">免責事項・利用規約</a>
         <span style="margin: 0 5px;"> | </span> 
         <span>(C)2025 Mushyn Reagan</span>
     </footer>
+
+    <div class="navigation-footer">
+        <a href="https://huggingface.co/spaces/Jiz41/Jiz41r1t5u" class="back-button">メインページへ戻る</a>
+    </div>
+    
     <script>
         function toggleDebugLog() {
             const logElement = document.getElementById('debug-log');
