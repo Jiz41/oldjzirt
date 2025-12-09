@@ -1,15 +1,15 @@
 /**
  * 華耀天輪 真・自在律 用：ランダム格言表示機能
- * ケンさん確定の格言リスト (29個) を使用。
+ * 格言リスト (29個) を使用。
  *
  * 【使用方法】
- * 1. HTMLの表示したい場所に <div id="maxim-display"></div> を追加。
+ * 1. HTMLの表示したい場所に <div id="maxim-display-container"></div> を追加。
  * 2. このJSコードをHTMLファイルまたは外部JSファイルに組み込む。
  * 3. ページが読み込まれると、ランダムな格言が自動で表示されます。
  */
 
 function displayRandomMaxim() {
-    // ケンさん確定の格言リスト (29個)
+    // 格言リスト (29個)
     const maxims = [
         { maxim: "成功率はなんてのは単なる目安だ、あとは勇気で補えばいい！！", speaker: "大河幸太郎" },
         { maxim: "LUCK(幸運を)&PLUCK(勇気をッ!)", speaker: "ブラフォード" },
@@ -47,21 +47,22 @@ function displayRandomMaxim() {
     const selectedMaxim = maxims[randomIndex];
 
     // HTMLに表示するための要素を取得
-    const displayElement = document.getElementById('maxim-display');
+    // 💡 ここを 'maxim-display-container' に修正しました
+    const displayElement = document.getElementById('maxim-display-container');
 
     if (displayElement) {
         // 格言と発言者を整形してHTMLに挿入
         displayElement.innerHTML = `
-            <p style="font-size: 1.1em; font-weight: bold; margin-bottom: 5px;">
+            <p class="maxim-text">
                 『${selectedMaxim.maxim}』
             </p>
-            <p style="font-size: 0.9em; text-align: right; color: #666; margin-top: 0;">
+            <p class="maxim-speaker">
                 —— ${selectedMaxim.speaker}
             </p>
         `;
     } else {
         // デバッグ用: 要素が見つからない場合のコンソール表示
-        console.error("Error: HTML element with id 'maxim-display' not found.");
+        console.error("Error: HTML element with id 'maxim-display-container' not found.");
     }
 }
 
