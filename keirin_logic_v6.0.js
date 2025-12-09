@@ -1,4 +1,4 @@
-// --- 華耀天輪 真・自在律 V7.3 ロジック (強弱グラデーションカラー導入) --- //
+// 【V7.3 欠場選手除外後のライン強度表示 最終修正】
 
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
@@ -35,10 +35,10 @@ function logMessage(message) {
     if (logArea) { 
         logArea.innerHTML += `[${timestamp}] ${message}<br>`; 
         logArea.scrollTop = logArea.scrollHeight; 
-    }
+    } 
 } 
 
-// getPlayerData 関数 💡 修正箇所：欠場フラグ (is_scratch) の読み込みを追加
+// getPlayerData 関数 (変更なし - 欠場フラグの読み込み済み)
 function getPlayerData() { 
     const players = []; 
     const playerRows = document.querySelectorAll('.player-row'); 
@@ -170,7 +170,7 @@ function displayBankTendency() {
 })(); 
 
 
-// parseLineInput 関数 💡 修正箇所：欠場選手を単騎として追加するロジックを削除
+// parseLineInput 関数 (変更なし)
 function parseLineInput(lineInput, allPlayers) {
     logMessage(`[PARSE] ライン入力解析開始: ${lineInput}`);
     const processedLineInput = lineInput.replace(/\s/g, '');
@@ -236,9 +236,6 @@ function parseLineInput(lineInput, allPlayers) {
         }
     });
     
-    // 💡 修正箇所: ラインに含まれていない選手を単騎ラインとして追加するロジックを削除 
-    //    （欠場選手が計算に乗るのを防ぐため、calculateLineCoeffs側で除外処理を行う）
-    
     // 重複IDを削除し、隊列順を維持
     const uniqueOrderedPlayerIds = [];
     const seenIds = new Set();
@@ -253,9 +250,9 @@ function parseLineInput(lineInput, allPlayers) {
 }
 
 
-// ========== ライン強度計算 (calculateLineCoeffs) - 💡 修正箇所：欠場選手の除外処理を追加 ==========
+// ========== ライン強度計算 (calculateLineCoeffs) - 💡 修正箇所：欠場選手の除外処理と並び順の整理 ==========
 /**
- * ライン強度係数 C_L の計算を行う（表示ロジックは displayResults に移動）
+ * ライン強度係数 C_L の計算を行う
  */
 function calculateLineCoeffs(players, settings) { 
     
@@ -268,12 +265,11 @@ function calculateLineCoeffs(players, settings) {
     // もし出走選手が0の場合、計算を中止
     if (participatingPlayers.length === 0) {
         logMessage("[ERROR] 出走選手がゼロのため、ライン解析をスキップします。");
-        return { lines: [], seriInfo: { exists: false }, finalOrderedPlayerIds: [] };
+        return { players: [], seriInfo: { exists: false }, finalOrderedPlayerIds: [] }; // 空の配列を返す
     }
 
     // 以降のライン解析は、participatingPlayersに対して行う
     const lineInput = document.getElementById('line-input').value; 
-    // ライン解析は、欠場選手を含まないparticipatingPlayersリストで行う
     const { lines: initialLines, seriInfo: parsedSeriInfo, orderedPlayerIds: initialOrderedPlayerIds } = parseLineInput(lineInput, participatingPlayers); 
     
     let lines = [...initialLines]; // スコア計算に使うライン
@@ -282,17 +278,19 @@ function calculateLineCoeffs(players, settings) {
     // 🚨 欠落選手強制補完ロジック (V7.2) 🚨
     const playerIdsSet = new Set(initialOrderedPlayerIds);
     
-    // 1. 欠落選手を finalOrderedPlayerIds に補完 (今回は欠場選手のみが欠落しているはず)
-    // 補完対象は、出走選手リスト (participatingPlayers) 内でラインに入力されなかった選手のみ
+    // 1. 欠落選手を finalOrderedPlayerIds に補完 (ラインに入力されなかった出走選手)
     const participatingIds = new Set(participatingPlayers.map(p => p.id));
     
     // 出走選手の中で、ライン入力に含まれていない選手を探す
     participatingPlayers.forEach(p => {
         if (!playerIdsSet.has(p.id)) {
-            finalOrderedPlayerIds.push(p.id);
+            // 💡 修正: finalOrderedPlayerIds に含める (ライン強度に単騎として表示させるため)
+            finalOrderedPlayerIds.push(p.id); 
             playerIdsSet.add(p.id); 
         }
     });
+    logMessage(`[ORDER] 最終表示順序: ${finalOrderedPlayerIds.join(', ')}`);
+
 
     // 2. スコア計算用ラインリストを再構築し、すべての出走選手が含まれるようにする
     const allRidersInLines = new Set();
@@ -365,8 +363,8 @@ function calculateLineCoeffs(players, settings) {
         }); 
     } 
 
-    // 欠場選手を除外したparticipatingPlayersを返す
-    return { players: participatingPlayers, lines, seriInfo: parsedSeriInfo, finalOrderedPlayerIds };
+    // 欠場選手を除外したparticipatingPlayersと、欠場選手を除いた並び順を返す
+    return { players: participatingPlayers, seriInfo: parsedSeriInfo, finalOrderedPlayerIds };
 } 
 // =========================================================
 
@@ -470,7 +468,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     const scoreRange = scoreMax - scoreMin; 
 
     const lineInput = document.getElementById('line-input').value;
-    // 欠場選手を除外したリストをparseLineInputに渡す（ここではtempPlayersがすでに除外済み）
+    // 欠場選手を除外したリストをparseLineInputに渡す
     const { lines: initialLines } = parseLineInput(lineInput, tempPlayers); 
 
     const lines = [];
@@ -689,10 +687,6 @@ function runScenarioSimulation(basePlayers, seriInfo, settings, bankData, applyK
 
     basePlayers.forEach(p => integratedScores[p.id] = 0); // basePlayersは欠場選手を含まない
 
-    // ----------------------------------------------------
-    // 💡 欠場選手を results に含めないように、ループ処理を basePlayers に対して行う
-    // ----------------------------------------------------
-    
     scenarios.forEach(scenario => { 
         const cDCoeffs = getScenarioCoeffs(scenario); 
         let scenarioPlayers = JSON.parse(JSON.stringify(basePlayers)); 
@@ -798,7 +792,7 @@ async function calculatePrediction() {
     logMessage(`[CALC START] ${raceType} / バンク: ${bankName} で計算開始。モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`); 
 
     // --- I. ライン解析と C_L (ライン・連係係数) の計算 (欠場選手除外と係数計算を同時に行う) --- 
-    // calculateLineCoeffsが欠場選手を除外したリスト(participatingPlayers)を返すように変更
+    // calculateLineCoeffsが欠場選手を除外したリスト(participatingPlayers)と最終表示順序を返す
     const { players: participatingPlayers, seriInfo, finalOrderedPlayerIds } = calculateLineCoeffs(players, settings); 
 
     // 欠場により選手がいない場合は計算を終了
@@ -864,10 +858,10 @@ async function calculatePrediction() {
     logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
 } 
 
-// ========== 【V7.3 修正】表示関数: displayResults (グラデーションカラーロジック追加) ==========
+// ========== 【V7.3 修正】表示関数: displayResults (ライン強度表示のロジック修正) ==========
 
 /**
- * 強弱グラデーションカラーのCSSコードを生成する (RGB: 赤(231, 76, 60) -> 青(52, 152, 219))
+ * 強弱グラデーションカラーのCSSコードを生成する (RGB: 青(52, 152, 219) -> 赤(231, 76, 60))
  * @param {number} score - 選手の統合スコア
  * @param {number} minScore - 統合スコアの最小値
  * @param {number} maxScore - 統合スコアの最大値
@@ -879,15 +873,11 @@ function getStrengthColor(score, minScore, maxScore) {
     // 0 から 100 のパーセンテージを計算 (強ければ100、弱ければ0)
     const normalizedScore = (score - minScore) / (maxScore - minScore);
     
-    // 範囲を 0.0 (最弱) から 1.0 (最強) に変換。
-    // 青 (最弱) から 赤 (最強) へ。
-    // R: (赤: 231, 76, 60) B: (青: 52, 152, 219)
-    
-    const rStart = 52;   // 青のR
+    const rStart = 52;   // 青のR (最弱)
     const gStart = 152;  // 青のG
     const bStart = 219;  // 青のB
     
-    const rEnd = 231;    // 赤のR
+    const rEnd = 231;    // 赤のR (最強)
     const gEnd = 76;     // 赤のG
     const bEnd = 60;     // 赤のB
 
@@ -933,8 +923,8 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     }));
     
     const allScores = finalScores.map(p => p.score);
-    const maxScore = Math.max(...allScores);
-    const minScore = Math.min(...allScores);
+    const maxScore = allScores.length > 0 ? Math.max(...allScores) : 0; // 💡 修正: 配列が空の場合のガード
+    const minScore = allScores.length > 0 ? Math.min(...allScores) : 0; // 💡 修正: 配列が空の場合のガード
     
     const playerIdToScore = {};
     finalScores.forEach(p => {
@@ -947,9 +937,16 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     const lineDisplay = document.getElementById('line-display'); 
     let displayHtml = ''; 
 
-    // finalOrderedPlayerIds (欠場選手を除いた並び順) に従って表示を生成
+    // 💡 修正箇所: finalOrderedPlayerIds (欠場選手を除いた並び順) に従って表示を生成
     finalOrderedPlayerIds.forEach((id) => { 
-        const score = playerIdToScore[id] || minScore; // スコアが見つからない場合は最小スコアとして扱う (欠場選手はここに来ない)
+        const score = playerIdToScore[id]; // finalOrderedPlayerIdsのIDは必ずplayerIdToScoreにあるはず
+        
+        if (score === undefined) {
+             // 万が一、欠場選手が混入した場合の安全策（理論上はあり得ない）
+             logMessage(`[ERROR] 表示順序ID ${id} のスコアが見つかりません。スキップします。`);
+             return; 
+        }
+
         const rgbColor = getStrengthColor(score, minScore, maxScore);
         const textColor = getTextColor(rgbColor);
         
@@ -960,7 +957,11 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         // 競りが発生している場合のカッコ適用
         if (seriInfo.exists) {
             if (id === seriInfo.contender) {
+                // 競る選手(アウト側)は()で囲む
                 playerHtml = `(${playerHtml})`;
+            } else if (id === seriInfo.loser && id !== seriInfo.contender) {
+                // 競り負けた選手（イン側が負けた場合）も()で囲む (理論上あり得ないが安全策として)
+                 playerHtml = `(${playerHtml})`;
             }
         }
         
