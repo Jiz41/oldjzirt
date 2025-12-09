@@ -38,7 +38,7 @@ function logMessage(message) {
     }
 } 
 
-// getPlayerData 関数 (変更なし)
+// getPlayerData 関数 💡 修正箇所：欠場フラグ (is_scratch) の読み込みを追加
 function getPlayerData() { 
     const players = []; 
     const playerRows = document.querySelectorAll('.player-row'); 
@@ -54,6 +54,9 @@ function getPlayerData() {
         const score = parseFloat(row.querySelector('.score').value) || 0;
         const style = row.querySelector('.style').value;
         const wmark = row.querySelector('.wmark').value.trim();
+        // 💡 欠場チェックボックスの状態を読み込む
+        const isScratchCheckbox = row.querySelector('.is-scratch');
+        const is_scratch = isScratchCheckbox ? isScratchCheckbox.checked : false;
         
         players.push({ 
             id: id, 
@@ -62,7 +65,8 @@ function getPlayerData() {
             wmark: wmark, 
             recent: row.querySelector('.recent').value.trim(), 
             is_s1: id === s1Id, 
-            is_b1: id === b1Id, 
+            is_b1: id === b1Id,
+            is_scratch: is_scratch, // 💡 欠場フラグ
             c_score_adj: 1.0, 
             c_recent: 1.0, 
             c_wmark: 1.0, 
@@ -166,7 +170,7 @@ function displayBankTendency() {
 })(); 
 
 
-// parseLineInput 関数 (変更なし)
+// parseLineInput 関数 💡 修正箇所：欠場選手を単騎として追加するロジックを削除
 function parseLineInput(lineInput, allPlayers) {
     logMessage(`[PARSE] ライン入力解析開始: ${lineInput}`);
     const processedLineInput = lineInput.replace(/\s/g, '');
@@ -232,18 +236,9 @@ function parseLineInput(lineInput, allPlayers) {
         }
     });
     
-    // ラインに含まれていない選手を単騎扱いとして、orderedPlayerIdsの最後に追加 (念のため維持)
-    const allRidersInInput = new Set(orderedPlayerIds);
-    allPlayers.forEach(p => {
-        if (!allRidersInInput.has(p.id)) {
-            // ライン計算用
-            lines.push([p.id]);
-            // 表示順用
-            orderedPlayerIds.push(p.id);
-            logMessage(`[PARSE] 未入力選手(ID: ${p.id})を単騎ラインとして追加しました。`);
-        }
-    });
-
+    // 💡 修正箇所: ラインに含まれていない選手を単騎ラインとして追加するロジックを削除 
+    //    （欠場選手が計算に乗るのを防ぐため、calculateLineCoeffs側で除外処理を行う）
+    
     // 重複IDを削除し、隊列順を維持
     const uniqueOrderedPlayerIds = [];
     const seenIds = new Set();
@@ -258,39 +253,59 @@ function parseLineInput(lineInput, allPlayers) {
 }
 
 
-// ========== ライン強度計算 (calculateLineCoeffs) - ロジック計算は維持、表示ロジック削除 ==========
+// ========== ライン強度計算 (calculateLineCoeffs) - 💡 修正箇所：欠場選手の除外処理を追加 ==========
 /**
  * ライン強度係数 C_L の計算を行う（表示ロジックは displayResults に移動）
  */
 function calculateLineCoeffs(players, settings) { 
+    
+    // ----------------------------------------------------
+    // 💡 V7.3 欠場選手除外ロジック (最重要)
+    // ----------------------------------------------------
+    const participatingPlayers = players.filter(p => !p.is_scratch);
+    logMessage(`[SCRATCH] 欠場選手を除外しました。出走選手数: ${participatingPlayers.length}`);
+
+    // もし出走選手が0の場合、計算を中止
+    if (participatingPlayers.length === 0) {
+        logMessage("[ERROR] 出走選手がゼロのため、ライン解析をスキップします。");
+        return { lines: [], seriInfo: { exists: false }, finalOrderedPlayerIds: [] };
+    }
+
+    // 以降のライン解析は、participatingPlayersに対して行う
     const lineInput = document.getElementById('line-input').value; 
-    const { lines: initialLines, seriInfo: parsedSeriInfo, orderedPlayerIds: initialOrderedPlayerIds } = parseLineInput(lineInput, players); 
+    // ライン解析は、欠場選手を含まないparticipatingPlayersリストで行う
+    const { lines: initialLines, seriInfo: parsedSeriInfo, orderedPlayerIds: initialOrderedPlayerIds } = parseLineInput(lineInput, participatingPlayers); 
     
     let lines = [...initialLines]; // スコア計算に使うライン
-    let finalOrderedPlayerIds = [...initialOrderedPlayerIds]; // 表示に使う並び (今回はスコア計算には影響しない)
+    let finalOrderedPlayerIds = [...initialOrderedPlayerIds]; // 表示に使う並び
 
     // 🚨 欠落選手強制補完ロジック (V7.2) 🚨
     const playerIdsSet = new Set(initialOrderedPlayerIds);
     
-    // 1. 欠落選手を finalOrderedPlayerIds に補完
-    for (let i = 1; i <= 7; i++) {
-        if (!playerIdsSet.has(i)) {
-            finalOrderedPlayerIds.push(i);
-            playerIdsSet.add(i); 
+    // 1. 欠落選手を finalOrderedPlayerIds に補完 (今回は欠場選手のみが欠落しているはず)
+    // 補完対象は、出走選手リスト (participatingPlayers) 内でラインに入力されなかった選手のみ
+    const participatingIds = new Set(participatingPlayers.map(p => p.id));
+    
+    // 出走選手の中で、ライン入力に含まれていない選手を探す
+    participatingPlayers.forEach(p => {
+        if (!playerIdsSet.has(p.id)) {
+            finalOrderedPlayerIds.push(p.id);
+            playerIdsSet.add(p.id); 
         }
-    }
+    });
 
-    // 2. スコア計算用ラインリストを再構築し、すべての選手が含まれるようにする
+    // 2. スコア計算用ラインリストを再構築し、すべての出走選手が含まれるようにする
     const allRidersInLines = new Set();
     lines.forEach(line => line.forEach(id => allRidersInLines.add(id)));
 
-    for (let i = 1; i <= 7; i++) {
-        if (!allRidersInLines.has(i)) {
-            lines.push([i]); // ライン計算用
+    // ラインに含まれていない出走選手は単騎ラインとして追加
+    participatingPlayers.forEach(p => {
+        if (!allRidersInLines.has(p.id)) {
+            lines.push([p.id]); // ライン計算用
         }
-    }
+    });
 
-    // 3. Player ID -> Line ID のマッピングを、**lines配列の最終的な構成**に基づいて再構築 (表示用ではないが、ロジックとして維持)
+    // 3. Player ID -> Line ID のマッピングを、**lines配列の最終的な構成**に基づいて再構築 (ロジックとして維持)
     const playerToLineMap = {}; 
     lines.forEach((members, index) => {
         members.forEach(id => {
@@ -301,7 +316,7 @@ function calculateLineCoeffs(players, settings) {
     // C_L係数計算 (ライン結束力係数) - ロジックは変更なし
     if (settings.IS_GIRLS) { 
         logMessage(`[C_L] ガールズ競輪モード。エースマーク係数 $C_{mark}$ を評価。`); 
-        const ace = players.reduce((max, p) => (p.score > max.score ? p : max), { score: -Infinity }); 
+        const ace = participatingPlayers.reduce((max, p) => (p.score > max.score ? p : max), { score: -Infinity }); 
         let aceMarkPlayers = new Set(); 
 
         lines.forEach(line => { 
@@ -317,7 +332,8 @@ function calculateLineCoeffs(players, settings) {
         else if (ace.score >= 102.0) cMarkValue = C_MARK_VALUES.MEDIUM; 
         else cMarkValue = C_MARK_VALUES.LOW; 
 
-        players.forEach(p => { 
+        // participatingPlayersに対して係数を適用
+        participatingPlayers.forEach(p => { 
             p.c_l = 1.0; // 初期化
             if (aceMarkPlayers.has(p.id)) { 
                 p.c_l = cMarkValue; 
@@ -329,18 +345,19 @@ function calculateLineCoeffs(players, settings) {
         logMessage(`[C_L] 一般競輪 (${settings.R_BIAS.toFixed(2)}) モード。ライン結束力係数 $C_{coop}$ を評価。`); 
         const coopWeight = settings.COOP_WEIGHT; 
         
-        players.forEach(p => p.c_l = 1.0); // 全員初期化
+        // participatingPlayersに対して係数を適用
+        participatingPlayers.forEach(p => p.c_l = 1.0); // 全員初期化
         lines.forEach(line => { 
             if (line.length < 2) return;
             
             const p2Id = line[1]; 
-            const p2 = players.find(p => p.id === p2Id); 
+            const p2 = participatingPlayers.find(p => p.id === p2Id); // 参加選手のみから検索
             if (p2) { 
                 p2.c_l = 1.0 + (0.06 * coopWeight); 
             } 
             for (let i = 2; i < line.length; i++) { 
                 const pNId = line[i]; 
-                const pN = players.find(p => p.id === pNId); 
+                const pN = participatingPlayers.find(p => p.id === pNId); // 参加選手のみから検索
                 if (pN) { 
                     pN.c_l = 1.0 + (0.02 * coopWeight); 
                 } 
@@ -348,8 +365,8 @@ function calculateLineCoeffs(players, settings) {
         }); 
     } 
 
-    // ここでは表示ロジックを削除し、表示に必要な情報のみを返す
-    return { lines, seriInfo: parsedSeriInfo, finalOrderedPlayerIds };
+    // 欠場選手を除外したparticipatingPlayersを返す
+    return { players: participatingPlayers, lines, seriInfo: parsedSeriInfo, finalOrderedPlayerIds };
 } 
 // =========================================================
 
@@ -453,7 +470,8 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     const scoreRange = scoreMax - scoreMin; 
 
     const lineInput = document.getElementById('line-input').value;
-    const { lines: initialLines } = parseLineInput(lineInput, players); 
+    // 欠場選手を除外したリストをparseLineInputに渡す（ここではtempPlayersがすでに除外済み）
+    const { lines: initialLines } = parseLineInput(lineInput, tempPlayers); 
 
     const lines = [];
     const allRidersInLines = new Set();
@@ -462,11 +480,12 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
         line.forEach(id => allRidersInLines.add(id));
     });
 
-    for (let i = 1; i <= 7; i++) {
-        if (!allRidersInLines.has(i)) {
-            lines.push([i]); 
+    // 欠場選手を除いた出走選手の中で、ライン入力に入っていない選手を単騎ラインとして追加
+    tempPlayers.forEach(p => {
+        if (!allRidersInLines.has(p.id)) {
+            lines.push([p.id]); 
         }
-    }
+    });
 
 
     // --- C係数の計算と適用 --- 
@@ -489,7 +508,11 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
         
         // 3. C_mental (メンタル・疲労減衰) 
         const raceGrade = document.getElementById('race-type').value; 
-        const isHighPressure = ['s-kyu'].includes(raceGrade) || (p.score === scoreMax); 
+        // 参加選手のみを対象にスコア最大値を求める
+        const participatingScores = tempPlayers.map(p => p.score);
+        const participatingMaxScore = Math.max(...participatingScores);
+
+        const isHighPressure = ['s-kyu'].includes(raceGrade) || (p.score === participatingMaxScore); 
         if (isHighPressure && p.recent.startsWith('1')) { 
             C_TOTAL *= 0.96; 
             logMessage(`[C_mental] 選手ID ${p.id} はプレッシャー減点適用 (${raceGrade})。`); 
@@ -512,7 +535,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     const targetPlayer = tempPlayers.find(p => p.score === scoreMax); 
     if (targetPlayer) { 
         let rivalAutos = 0; 
-        tempPlayers.forEach(p => { 
+        tempPlayers.forEach(p => { // tempPlayersは欠場選手を除外済み
             if (p.id !== targetPlayer.id && (p.style === '自' || p.style === '両')) { 
                 rivalAutos++; 
             } 
@@ -541,7 +564,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     // 7. C_pace (序盤速度・燃焼リスク) 
     const leaderPlayer = tempPlayers.find(p => p.style === '自' || p.style === '両'); 
     if (leaderPlayer) { 
-        const rivalsCount = lines.length - 1; 
+        const rivalsCount = lines.length - 1; // ライン数 - 1がライバルの数
         const baseScore = leaderPlayer.score; 
         if (baseScore >= 105.0 && rivalsCount >= 2) { 
             leaderPlayer.final_score *= 0.96; 
@@ -553,6 +576,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     tempPlayers.forEach(p => { 
         if (p.style === '両') { 
             const line = lines.find(l => l.includes(p.id)); 
+            // p.idがラインの先頭ではない場合
             if (line && line.indexOf(p.id) >= 1) { 
                 p.final_score *= 0.97; 
                 logMessage(`[C_timing] 選手ID ${p.id} は捲りにもかかわらず不利な位置で減点。`); 
@@ -569,6 +593,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
             if (p2.score < lowScoreThreshold) { 
                 baseRisk = 0.95; 
             } 
+            // 欠場選手を除いたリストでアタッカー数をカウント
             const attackers = tempPlayers.filter(p => p.id !== p2.id && (p.style === '自' || p.style === '両')).length; 
             if (attackers >= 2) { 
                 baseRisk *= 0.95; 
@@ -596,7 +621,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
         let hasSelfStarter = false;
 
         line.forEach(id => {
-            const player = tempPlayers.find(p => p.id === id);
+            const player = tempPlayers.find(p => p.id === id); // tempPlayersは欠場除外済み
             if (player) {
                 // Weight印のスコア化をケンさんの提案ロジックに変更 (◎, 〇, △ = 1点)
                 if (player.wmark === '◎') totalWeightScore += 1;
@@ -633,7 +658,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     });
 
     if (isSuicideRiskDetected) {
-        tempPlayers.forEach(p => {
+        tempPlayers.forEach(p => { // tempPlayersは欠場除外済み
             if (suicideRiskLineMembers.has(p.id)) {
                 p.final_score *= SUICIDE_PENALTY;
                 logMessage(`[C_suicide] 選手ID ${p.id} に消耗ペナルティ (${SUICIDE_PENALTY.toFixed(2)}) 適用。`);
@@ -662,7 +687,11 @@ function runScenarioSimulation(basePlayers, seriInfo, settings, bankData, applyK
     const allScenarioResults = []; 
     const integratedScores = {}; 
 
-    basePlayers.forEach(p => integratedScores[p.id] = 0); 
+    basePlayers.forEach(p => integratedScores[p.id] = 0); // basePlayersは欠場選手を含まない
+
+    // ----------------------------------------------------
+    // 💡 欠場選手を results に含めないように、ループ処理を basePlayers に対して行う
+    // ----------------------------------------------------
     
     scenarios.forEach(scenario => { 
         const cDCoeffs = getScenarioCoeffs(scenario); 
@@ -694,6 +723,7 @@ function runScenarioSimulation(basePlayers, seriInfo, settings, bankData, applyK
 
 // calculateTenunIndex 関数 (変更なし)
 function calculateTenunIndex(seitenreiScores, koutenreiScores) { 
+    // 欠場選手を除いたスコアオブジェクトを処理
     const seitenreiRanking = Object.keys(seitenreiScores).map(id => ({ id: Number(id), score: seitenreiScores[id] })).sort((a, b) => b.score - a.score); 
     const koutenreiRanking = Object.keys(koutenreiScores).map(id => ({ id: Number(id), score: koutenreiScores[id] })).sort((a, b) => b.score - a.score); 
     
@@ -740,7 +770,7 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores) {
     return { tenunIndex, message };
 } 
 
-// メイン計算関数 (calculatePrediction) - 変更なし
+// メイン計算関数 (calculatePrediction) 💡 修正箇所：calculateLineCoeffsの戻り値変更に対応
 async function calculatePrediction() { 
     if (Object.keys(BANK_DATA).length === 0) { 
         logMessage("[WAIT] バンクデータの読み込みを待機します..."); 
@@ -764,15 +794,21 @@ async function calculatePrediction() {
     const modeSelector = document.getElementById('mode-selector'); 
     const koutenreiModeSelected = modeSelector ? modeSelector.value === 'koutenrei' : false; 
     
-    let players = getPlayerData(); 
+    let players = getPlayerData(); // 7名分のデータ（is_scratchフラグ付き）を取得
     logMessage(`[CALC START] ${raceType} / バンク: ${bankName} で計算開始。モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`); 
 
-    // --- I. ライン解析と C_L (ライン・連係係数) の計算 --- 
-    const { seriInfo, finalOrderedPlayerIds } = calculateLineCoeffs(players, settings); 
-    // finalOrderedPlayerIds をここで受け取り、後の表示で使用する
+    // --- I. ライン解析と C_L (ライン・連係係数) の計算 (欠場選手除外と係数計算を同時に行う) --- 
+    // calculateLineCoeffsが欠場選手を除外したリスト(participatingPlayers)を返すように変更
+    const { players: participatingPlayers, seriInfo, finalOrderedPlayerIds } = calculateLineCoeffs(players, settings); 
+
+    // 欠場により選手がいない場合は計算を終了
+    if (participatingPlayers.length === 0) {
+        alert("出走選手がいないため、計算を中止しました。");
+        return;
+    }
 
     // --- II. 選手固有係数 C_W, C_R, C_S1, C_B1 & C_E の計算 (基礎係数) --- 
-    let basePlayers = JSON.parse(JSON.stringify(players)); 
+    let basePlayers = JSON.parse(JSON.stringify(participatingPlayers)); // 欠場選手が除外されたリストを使用
     
     basePlayers.forEach(p => { 
         p.c_score_adj = 1.0 + (p.score / 100 - 1) * settings.R_BIAS; 
@@ -802,6 +838,7 @@ async function calculatePrediction() {
     }); 
 
     // --- III. シミュレーション実行 (晴天令と荒天令の同時実行) --- 
+    // basePlayersはすでに欠場選手を除外済み
     const seitenreiResults = runScenarioSimulation(basePlayers, seriInfo, settings, bankData, false); 
     logMessage("[CALC] 晴天令 (安定) シミュレーションが完了しました。"); 
     const koutenreiResults = runScenarioSimulation(basePlayers, seriInfo, settings, bankData, true); 
@@ -816,7 +853,7 @@ async function calculatePrediction() {
         koutenreiResults.integratedScores, 
         bankName,
         seriInfo,
-        finalOrderedPlayerIds // 表示順を渡す
+        finalOrderedPlayerIds // 欠場選手を除いた並び順を渡す
     ); 
     
     const resultsContainer = document.getElementById('results-container'); 
@@ -889,6 +926,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // ---------------------------------------------------------- 
     // ★ V7.3: ライン強度表示のための統合スコア (晴天令) の準備 ★ 
     // ---------------------------------------------------------- 
+    // スコアオブジェクトは欠場選手を含まないため、そのまま使用可能
     const finalScores = Object.keys(seitenreiIntegratedScores).map(id => ({ 
         id: Number(id), 
         score: seitenreiIntegratedScores[id] / detailedScenarioResults.length 
@@ -909,9 +947,9 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     const lineDisplay = document.getElementById('line-display'); 
     let displayHtml = ''; 
 
-    // finalOrderedPlayerIds (並び順) に従って表示を生成
+    // finalOrderedPlayerIds (欠場選手を除いた並び順) に従って表示を生成
     finalOrderedPlayerIds.forEach((id) => { 
-        const score = playerIdToScore[id] || minScore; // スコアが見つからない場合は最小スコアとして扱う
+        const score = playerIdToScore[id] || minScore; // スコアが見つからない場合は最小スコアとして扱う (欠場選手はここに来ない)
         const rgbColor = getStrengthColor(score, minScore, maxScore);
         const textColor = getTextColor(rgbColor);
         
@@ -1082,4 +1120,3 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             三連複 (${koutenTrifuku.slice(0, 6).length}点): <strong>${finalKoutenTrifuku}</strong> `; 
     }
 }
-// =========================================================
