@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>華耀天輪 真・自在律 V7.3 - Mobile (Friendly)</title>
     <style>
-        /* 🎨 新デザイン: 優しく、落ち着いた色合い */
         html, body {
             overflow-x: hidden;
             width: 100%;
@@ -31,7 +30,6 @@
             box-sizing: border-box;
         }
         
-        /* ★★★ 演算制御多重交響体 (サブタイトル) ★★★ */
         header {
             padding: 15px 15px 0 15px;
             margin-top: 0; 
@@ -49,7 +47,6 @@
             border-bottom: 1px solid #f0f0f0;
         }
         
-        /* ヘッダー/タイトル */
         h1 {
             font-size: 1.5em;
             color: #698b69;
@@ -58,6 +55,30 @@
             margin-top: 0;
             border-radius: 0 0 8px 8px;
             text-align: center;
+        }
+
+        #maxim-display-container {
+            text-align: center;
+            padding: 8px 15px; 
+            margin: 0 0 10px 0; 
+        }
+        
+        #maxim-display-container p {
+            margin: 0;
+            padding: 0;
+            font-style: italic;
+            font-weight: 300;
+            color: #444; 
+            line-height: 1.4;
+        }
+        
+        #maxim-display-container .maxim-text {
+            font-size: 0.9em;
+        }
+
+        #maxim-display-container .maxim-speaker {
+            font-size: 0.75em;
+            color: #888;
         }
         
         h2 {
@@ -68,7 +89,6 @@
             margin-top: 20px;
         }
 
-        /* グループボックス（入力・結果） */
         .input-group, .result-section {
             margin: 0 15px 20px 15px;
             padding: 15px;
@@ -78,9 +98,6 @@
             box-sizing: border-box;
         }
 
-        /* ------------------------------------------- */
-        /* マニュアル/デバッグログのトグルヘッダー共通スタイル */
-        /* ------------------------------------------- */
         .manual-header, .debug-log-header {
             font-size: 1.05em;
             color: #698b69;
@@ -141,7 +158,6 @@
             margin-bottom: 2px;
         }
 
-        /* デバッグログのヘッダーサイズを縮小し、色を薄く */
         .debug-log-header {
             font-size: 1.0em;
             color: #888;
@@ -166,7 +182,6 @@
             margin: 0 auto 15px auto;
         }
 
-        /* 縦積み化の基本スタイル */
         .input-item {
             margin-bottom: 15px;
         }
@@ -207,12 +222,10 @@
             vertical-align: middle;
         }
 
-        /* 選手データ入力リスト */
         .player-input-list {
             margin-top: 10px;
         }
 
-        /* 選手行の基本スタイル */
         .player-row {
             border: 1px solid #e0e0e0;
             padding: 0;
@@ -222,7 +235,6 @@
             overflow: hidden;
         }
 
-        /* 選手ヘッダー（枠番カラー） */
         .player-header {
             font-weight: bold;
             font-size: 1.0em;
@@ -235,7 +247,6 @@
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
-        /* 枠番色：非常に薄い色を維持 */
         .id-1 .player-header {
             background-color: #ffffff;
             color: #333;
@@ -287,7 +298,6 @@
             transform: scale(1.1);
         }
 
-        /* 選手フィールド */
         .player-fields {
             display: flex;
             flex-wrap: wrap;
@@ -305,17 +315,14 @@
             flex: 1 1 23%;
         }
 
-        /* 脚質 */
         .player-field:nth-child(2) {
             flex: 1 1 27%;
         }
 
-        /* 得点 */
         .player-field:nth-child(3) {
             flex: 1 1 20%;
         }
 
-        /* W印 */
         .player-field:nth-child(4) {
             flex: 1 1 25%;
         }
@@ -334,7 +341,6 @@
             font-size: 0.85em;
         }
 
-        /* S/B 1位のラジオボタン用レイアウト */
         .sb-group {
             display: flex;
             gap: 6px;
@@ -353,7 +359,6 @@
             margin-left: 2px;
         }
 
-        /* ライン強度用CSS */
         #line-strength {
             padding: 8px 0;
             font-size: 1.1em;
@@ -366,21 +371,16 @@
             margin-top: 5px;
         }
 
-        /* ★★★ V7.3 修正: グラデーションカラーのベーススタイル ★★★ */
         .line-box {
             display: inline-block;
             padding: 2px 6px;
             border-radius: 4px;
             font-weight: bold;
-            /* style属性で色を動的に変更するため、ここでは色を指定しない */
             margin-right: 5px;
             font-size: 0.9em;
-            transition: background-color 0.5s, color 0.5s; /* 視覚効果 */
+            transition: background-color 0.5s, color 0.5s;
         }
 
-        /* 従来の line-color-* や line-solo は削除 */
-
-        /* バンク展開傾向 */
         #bank-tendency-display {
             margin-top: 5px;
             margin-bottom: 10px;
@@ -390,7 +390,6 @@
             font-weight: bold;
         }
 
-        /* 結果テーブル (変更なし) */
         .scenario-detail table {
             width: 100%;
             border-collapse: collapse;
@@ -415,7 +414,6 @@
             display: none !important;
         }
 
-        /* その他UI要素 (変更なし) */
         .recommendation {
             padding: 12px;
             border-radius: 6px;
@@ -480,7 +478,6 @@
             opacity: 1;
         }
 
-        /* 天雲指数ゲージ (変更なし) */
         .tenun-index-container {
             margin: 20px 0;
             padding: 15px;
@@ -506,7 +503,6 @@
             color: #a37200;
         }
 
-        /* フッターCSS (変更なし) */
         .copyright-footer {
             text-align: center;
             font-size: 0.75em;
@@ -524,6 +520,10 @@
             <div class="subtitle">演算制御多重交響体</div>
             <h1>華耀天輪 真・自在律</h1>
         </header>
+        
+        <div id="maxim-display-container">
+        </div>
+
         <div class="manual-header" onclick="toggleManual()">
             <span id="manual-toggle-icon">▶</span> 📖 操作説明書・マニュアル
         </div>
@@ -997,5 +997,6 @@
         }
     </script>
     <script src="keirin_logic_v6.0.js"></script>
+    <script src="Meigen.js"></script>
 </body>
 </html>
