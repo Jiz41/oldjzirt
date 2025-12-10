@@ -215,7 +215,7 @@ function displayBankTendency() {
 })(); 
 
 
-// ========== 競り対応強化版 parseLineInput 関数 (このブロックのみ置き換え) ==========
+// ========== 競り対応強化版 parseLineInput 関数 (【修正済み】このブロックを置き換える) ==========
 /**
  * ライン入力文字列 (例: 15(3)4(6)2, 7) を解析し、ライン構成と競り情報を抽出する。
  * 💡 複数競り、ライン内競り、競り敗者の単騎扱いを正確に処理。
@@ -231,8 +231,9 @@ function parseLineInput(lineInput, allPlayers) {
     const seriInfos = []; 
     const allParsedIds = new Set();
     
+    // 【修正箇所】正規表現: (\d+) を (\d) に変更し、1桁の数字IDのみを強制的にキャプチャ
     // 正規表現: (先頭数字)+(競り並び(数字(数字)) または 通常並び(数字))の繰り返し
-    const complexLinePattern = /(\d+)(?:(\d+)\((\d+)\))?(\d*)/g;
+    const complexLinePattern = /(\d)(?:(\d)\((\d)\))?(\d*)/g; // ⬅️ **修正済み**
 
     segments.forEach(seg => {
         let currentLine = [];
@@ -314,15 +315,6 @@ function parseLineInput(lineInput, allPlayers) {
                     allParsedIds.add(id);
                 }
             });
-
-            // 競り並びがセグメントの途中にあり、後ろにまだ数字がある場合、
-            // currentLineは次のループでリセットされるのではなく継続されるべき。
-            // 複雑な並び (例: 15(3)4(6)2) は、linesにプッシュされる前に、
-            // `currentLine`として一度に結合される。
-            
-            // Note: `complexLinePattern`の`g`フラグは、`exec`を繰り返すことでセグメント内の連続したパターンを捕捉する。
-            // 競りが起きた場合、その勝者がラインに入り、敗者が単騎ラインとして既にlinesに追加されているため、
-            // このループの終わりに currentLine を lines に push しても問題ない。
         }
         
         // currentLineが空でなければ、ラインとして追加（単騎ラインも含む）
