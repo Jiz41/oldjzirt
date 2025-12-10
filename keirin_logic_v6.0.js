@@ -22,8 +22,8 @@ const SERI_STYLE_BONUS = { // 脚質別競り係数 C_style (追込重視)
     '両': 1.00, 
     '自': 0.95  
 };
-const SERI_FATIGUE_PENALTY_IN = 0.15;  // 競り勝った側（イン）の体力消耗減点 Δ_in
-const SERI_FATIGUE_PENALTY_OUT = 0.25; // 競り負けた側（アウト）の体力消耗減点 Δ_out
+const SERI_FATIGUE_PENALTY_IN = 0.15;  // 競り勝った側（イン）の体力消耗減点 $\Delta_{in}$
+const SERI_FATIGUE_PENALTY_OUT = 0.25; // 競り負けた側（アウト）の体力消耗減点 $\Delta_{out}$
 const SERI_WIN_BONUS = 0.05;           // 競り勝ち選手への微増補正
 // =======================================
 
