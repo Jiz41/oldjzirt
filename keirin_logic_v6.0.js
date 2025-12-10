@@ -1,6 +1,6 @@
 // 真自在律 実質Ver7.3
 // 競りライン追加版
-// 【V7.3 欠場選手除外後のライン強度表示 最終修正】
+// 【V7.3 最終修正】消耗ペナルティ適用拡大 ＆ 複数競り表示修正
 
 // 1. 🗃️ 係数設定オブジェクトの分離
 const COEFFICIENT_SETTINGS = {
@@ -172,7 +172,7 @@ function displayBankTendency() {
     const displayArea = document.getElementById('bank-tendency-display'); 
     
     if (!bankName || !BANK_DATA[bankName] || !displayArea) { 
-        if(displayArea) displayArea.innerHTML = ''; 
+        if (displayArea) displayArea.innerHTML = ''; 
         return; 
     } 
 
@@ -215,7 +215,7 @@ function displayBankTendency() {
 })(); 
 
 
-// ========== 競り対応強化版 parseLineInput 関数 (【V7.3 最終修正】このブロックを置き換える) ==========
+// ========== 競り対応強化版 parseLineInput 関数 (💡 修正: allSeriInfosを返すように変更) ==========
 /**
  * ライン入力文字列 (例: 12(3)4(5)6) を解析し、ライン構成と競り情報を抽出する。
  * 💡 複数競り、ライン内競り、競り敗者の単騎扱いを正確に処理。
@@ -227,7 +227,7 @@ function parseLineInput(lineInput, allPlayers) {
     
     const lines = []; // スコア計算に使用するライン（競り勝者のみが残る）
     let orderedPlayerIds = []; // 最終的な表示順
-    const seriInfos = []; 
+    const allSeriInfos = []; // 💡 修正: 全ての競り情報を格納
     const allParsedIds = new Set();
     
     // 競り並びを識別するパターン: 2(3) の形式を抽出する
@@ -274,6 +274,7 @@ function parseLineInput(lineInput, allPlayers) {
                 let winnerId;
                 let loserId;
 
+                // 💡 勝敗判定ロジック
                 if (followerCoef >= contenderCoef) {
                     winnerId = follower;
                     loserId = contender;
@@ -282,7 +283,7 @@ function parseLineInput(lineInput, allPlayers) {
                     loserId = follower;
                 }
                 
-                seriInfos.push({ 
+                allSeriInfos.push({ // 💡 全ての競り情報を追加
                     exists: true, follower, contender, winner: winnerId, loser: loserId 
                 });
                 logMessage(`[PARSE] 競り勝者予測: 選手${winnerId}`);
@@ -338,13 +339,13 @@ function parseLineInput(lineInput, allPlayers) {
         }
     }
 
-    // seriInfoは、最初の競りの情報のみを返す（競り補正ロジックの制約による）
-    return { lines, seriInfo: seriInfos.length > 0 ? seriInfos[0] : { exists: false }, orderedPlayerIds: uniqueOrderedPlayerIds };
+    // 💡 修正: 全ての競り情報 (allSeriInfos) を返す
+    return { lines, allSeriInfos, orderedPlayerIds: uniqueOrderedPlayerIds };
 }
 // ====================================================================================
 
 
-// ========== ライン強度計算 (calculateLineCoeffs) - 💡 修正箇所：欠場選手の除外処理と並び順の整理 ==========
+// ========== ライン強度計算 (calculateLineCoeffs) - 💡 修正箇所：allSeriInfosを返すように変更 ==========
 /**
  * ライン強度係数 C_L の計算を行う
  */
@@ -359,12 +360,14 @@ function calculateLineCoeffs(players, settings) {
     // もし出走選手が0の場合、計算を中止
     if (participatingPlayers.length === 0) {
         logMessage("[ERROR] 出走選手がゼロのため、ライン解析をスキップします。");
-        return { players: [], seriInfo: { exists: false }, finalOrderedPlayerIds: [] }; // 空の配列を返す
+        // 💡 修正: allSeriInfosは空の配列を返す
+        return { players: [], allSeriInfos: [], finalOrderedPlayerIds: [] }; 
     }
 
     // 以降のライン解析は、participatingPlayersに対して行う
     const lineInput = document.getElementById('line-input').value; 
-    const { lines: initialLines, seriInfo: parsedSeriInfo, orderedPlayerIds: initialOrderedPlayerIds } = parseLineInput(lineInput, participatingPlayers); 
+    // 💡 修正: allSeriInfosを受け取るように変更
+    const { lines: initialLines, allSeriInfos: parsedAllSeriInfos, orderedPlayerIds: initialOrderedPlayerIds } = parseLineInput(lineInput, participatingPlayers); 
     
     let lines = [...initialLines]; // スコア計算に使うライン
     let finalOrderedPlayerIds = [...initialOrderedPlayerIds]; // 表示に使う並び
@@ -457,20 +460,27 @@ function calculateLineCoeffs(players, settings) {
         }); 
     } 
 
-    // 欠場選手を除外したparticipatingPlayersと、欠場選手を除いた並び順を返す
-    return { players: participatingPlayers, seriInfo: parsedSeriInfo, finalOrderedPlayerIds };
+    // 欠場選手を除外したparticipatingPlayersと、欠場選手を除いた並び順、そして全ての競り情報を返す
+    // 💡 修正: allSeriInfosを返す
+    return { players: participatingPlayers, allSeriInfos: parsedAllSeriInfos, finalOrderedPlayerIds };
 } 
 // =========================================================
 
 
-// applySeriCorrection 関数 (変更なし)
-function applySeriCorrection(scoredPlayers, seriInfo) {
-    if (seriInfo.exists) {
-        logMessage(`[SERI] 競り補正開始: 選手${seriInfo.winner} vs 選手${seriInfo.loser}`);
-        
-        // 競り勝者 (Winner): 小さいボーナスと小さい減点
+// applySeriCorrection 関数 (💡 修正: 全ての競り情報に基づいて補正を適用)
+function applySeriCorrection(scoredPlayers, allSeriInfos) {
+    if (allSeriInfos.length === 0) {
+        return scoredPlayers;
+    }
+    
+    // 💡 修正: 全ての競り並びをループして補正を適用
+    allSeriInfos.forEach((seriInfo, index) => {
+        logMessage(`[SERI] 競り補正開始 (競り${index + 1}): 選手${seriInfo.winner} vs 選手${seriInfo.loser}`);
+
+        // 競り勝者 (Winner): 小さいボーナスと小さい減点 (イン側勝利と仮定)
         const winner = scoredPlayers.find(p => p.id === seriInfo.winner);
         if (winner) {
+            // 勝者にはボーナスと消耗減点（イン側と同じ値を使用）
             winner.final_score = winner.final_score * (1 + SERI_WIN_BONUS) * (1 - SERI_FATIGUE_PENALTY_IN);
             logMessage(`[SERI] 競り勝者 選手${winner.id}: スコア微増/体力減点 ${Math.round(SERI_FATIGUE_PENALTY_IN * 100)}%`);
         }
@@ -478,10 +488,11 @@ function applySeriCorrection(scoredPlayers, seriInfo) {
         // 競り敗者 (Loser): アウト側が競り負けた場合の大きな減点
         const loser = scoredPlayers.find(p => p.id === seriInfo.loser);
         if (loser) {
+            // 敗者には大幅な消耗減点（アウト側と同じ値を使用）
             loser.final_score *= (1 - SERI_FATIGUE_PENALTY_OUT);
             logMessage(`[SERI] 競り敗者 選手${loser.id}: スコア大幅減点 ${Math.round(SERI_FATIGUE_PENALTY_OUT * 100)}%`);
         }
-    }
+    });
 
     return scoredPlayers;
 }
@@ -773,8 +784,8 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     return tempPlayers;
 } 
 
-// runScenarioSimulation 関数 (変更なし)
-function runScenarioSimulation(basePlayers, seriInfo, settings, bankData, applyKoutenrei) { 
+// runScenarioSimulation 関数 (💡 修正: seriInfo -> allSeriInfos に変更)
+function runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, applyKoutenrei) { 
     const scenarios = ['先行有利', '捲り有利', '差し有利']; 
     const allScenarioResults = []; 
     const integratedScores = {}; 
@@ -789,7 +800,8 @@ function runScenarioSimulation(basePlayers, seriInfo, settings, bankData, applyK
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e; 
         }); 
 
-        scenarioPlayers = applySeriCorrection(scenarioPlayers, seriInfo);
+        // 💡 修正: allSeriInfos を渡す
+        scenarioPlayers = applySeriCorrection(scenarioPlayers, allSeriInfos);
 
         if (applyKoutenrei) { 
             scenarioPlayers = calculate_koutenrei_bias(scenarioPlayers, scenario, bankData); 
@@ -809,7 +821,7 @@ function runScenarioSimulation(basePlayers, seriInfo, settings, bankData, applyK
     return { allScenarioResults, integratedScores };
 } 
 
-// calculateTenunIndex 関数
+// calculateTenunIndex 関数 (変更なし)
 function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResults, participatingPlayers) { 
     // 欠場選手を除いたスコアオブジェクトを処理
     const seitenreiRanking = Object.keys(seitenreiScores).map(id => ({ id: Number(id), score: seitenreiScores[id] })).sort((a, b) => b.score - a.score); 
@@ -944,8 +956,8 @@ async function calculatePrediction() {
     logMessage(`[CALC START] ${raceType} / バンク: ${bankName} で計算開始。モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`); 
 
     // --- I. ライン解析と C_L (ライン・連係係数) の計算 (欠場選手除外と係数計算を同時に行う) --- 
-    // calculateLineCoeffsが欠場選手を除外したリスト(participatingPlayers)と最終表示順序を返す
-    const { players: participatingPlayers, seriInfo, finalOrderedPlayerIds } = calculateLineCoeffs(players, settings); 
+    // 💡 修正: allSeriInfosを受け取るように変更
+    const { players: participatingPlayers, allSeriInfos, finalOrderedPlayerIds } = calculateLineCoeffs(players, settings); 
 
     // 欠場により選手がいない場合は計算を終了
     if (participatingPlayers.length === 0) {
@@ -985,23 +997,26 @@ async function calculatePrediction() {
 
     // --- III. シミュレーション実行 (晴天令と荒天令の同時実行) --- 
     // basePlayersはすでに欠場選手を除外済み
-    const seitenreiResults = runScenarioSimulation(basePlayers, seriInfo, settings, bankData, false); 
+    // 💡 修正: allSeriInfos を渡す
+    const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, false); 
     logMessage("[CALC] 晴天令 (安定) シミュレーションが完了しました。"); 
-    const koutenreiResults = runScenarioSimulation(basePlayers, seriInfo, settings, bankData, true); 
+    // 💡 修正: allSeriInfos を渡す
+    const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, true); 
     logMessage("[CALC] 荒天令 (波乱) シミュレーションが完了しました。"); 
 
     // --- IV. 最終結果の統合と表示 --- 
     const detailedScenarioResults = koutenreiModeSelected ? koutenreiResults.allScenarioResults : seitenreiResults.allScenarioResults; 
 
+    // 💡 修正: allSeriInfos を渡す
     displayResults( 
         detailedScenarioResults, 
         seitenreiResults.integratedScores, 
         koutenreiResults.integratedScores, 
         bankName,
-        seriInfo,
-        finalOrderedPlayerIds, // 欠場選手を除いた並び順を渡す
-        seitenreiResults.allScenarioResults, // 💡 追加：壱耀晴乾ノ象判定のために渡す
-        participatingPlayers // 💡 追加：壱耀晴乾ノ象判定のために渡す
+        allSeriInfos, // 💡 修正: allSeriInfos を渡す
+        finalOrderedPlayerIds, 
+        seitenreiResults.allScenarioResults, 
+        participatingPlayers 
     ); 
     
     const resultsContainer = document.getElementById('results-container'); 
@@ -1012,7 +1027,7 @@ async function calculatePrediction() {
     logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
 } 
 
-// ========== 【V7.3 修正】表示関数: displayResults (ライン強度表示のロジック修正) ==========
+// ========== 【V7.3 修正】表示関数: displayResults (複数競り表示と文章修正) ==========
 
 /**
  * 強弱グラデーションカラーのCSSコードを生成する (RGB: 青(52, 152, 219) -> 赤(231, 76, 60))
@@ -1064,7 +1079,8 @@ function getTextColor(rgbColor) {
 }
 
 
-function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, seriInfo, finalOrderedPlayerIds, allScenarioResults, participatingPlayers) { 
+// 💡 修正: seriInfo -> allSeriInfos に変更
+function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers) { 
     displayBankTendency(); 
 
     // ---------------------------------------------------------- 
@@ -1077,8 +1093,8 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     }));
     
     const allScores = finalScores.map(p => p.score);
-    const maxScore = allScores.length > 0 ? Math.max(...allScores) : 0; // 💡 修正: 配列が空の場合のガード
-    const minScore = allScores.length > 0 ? Math.min(...allScores) : 0; // 💡 修正: 配列が空の場合のガード
+    const maxScore = allScores.length > 0 ? Math.max(...allScores) : 0; 
+    const minScore = allScores.length > 0 ? Math.min(...allScores) : 0; 
     
     const playerIdToScore = {};
     finalScores.forEach(p => {
@@ -1091,12 +1107,18 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     const lineDisplay = document.getElementById('line-display'); 
     let displayHtml = ''; 
 
+    // 競り発生中の選手IDのセットを事前に作成
+    const seriPlayers = new Set();
+    allSeriInfos.forEach(info => {
+        seriPlayers.add(info.follower);
+        seriPlayers.add(info.contender);
+    });
+
     // 💡 修正箇所: finalOrderedPlayerIds (欠場選手を除いた並び順) に従って表示を生成
     finalOrderedPlayerIds.forEach((id) => { 
-        const score = playerIdToScore[id]; // finalOrderedPlayerIdsのIDは必ずplayerIdToScoreにあるはず
+        const score = playerIdToScore[id]; 
         
         if (score === undefined) {
-             // 万が一、欠場選手が混入した場合の安全策（理論上はあり得ない）
              logMessage(`[ERROR] 表示順序ID ${id} のスコアが見つかりません。スキップします。`);
              return; 
         }
@@ -1108,19 +1130,8 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         
         let playerHtml = `<span class="line-box strength-color" style="${style}">${id}</span>`;
         
-        // 競りが発生している場合のカッコ適用
-        // seriInfoは最初の競り情報のみを持つが、ここでは全ての競りを検出する必要がある
-        // ➡︎ parseLineInputの戻り値を、全ての競り情報を含むseriInfosに変更する必要があるが、
-        // 競り補正ロジックの制約で現状は最初の競りしか使えないため、表示も暫定的に最初の競り情報のみに依存する
-        // ※ 複数競りがある場合の()表示は、parseLineInput関数内でseriInfosを全て取得し、
-        // displayResultsに渡す必要があります。現在のseriInfoは最初の競りの情報しか含んでいません。
-        // 現状のコードでは、複数の競りが発生しても、表示の()は最初の競りの選手にしか適用されません。
-        
-        // 【暫定対応】表示される選手IDが、最初の競りのイン側またはアウト側の選手IDと一致した場合に()を適用する
-        const isSeriPlayer = seriInfo.exists && (id === seriInfo.follower || id === seriInfo.contender);
-
-        if (isSeriPlayer) {
-            // 競る選手(イン側、アウト側)は()で囲む
+        // 競る選手(イン側、アウト側)は()で囲む
+        if (seriPlayers.has(id)) { // 💡 修正: 全ての競り参加者に()を適用
             playerHtml = `(${playerHtml})`;
         }
         
@@ -1133,20 +1144,41 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     logMessage(`[COLOR] ライン表示を強弱グラデーションカラーに更新しました。 Max: ${maxScore.toFixed(2)}, Min: ${minScore.toFixed(2)}`);
 
     // ---------------------------------------------------------- 
-    // ★ 競りサマリーの表示 (変更なし) ★ 
+    // ★ 競りサマリーの表示 (💡 修正: 複数の競りを自然な文章で表示) ★ 
     // ----------------------------------------------------------
     let seriSummaryHtml = '';
-    if (seriInfo.exists) {
-        const followerId = seriInfo.follower;
-        const contenderId = seriInfo.contender;
-        const winnerId = seriInfo.winner;
-        
-        seriSummaryHtml = `
+    if (allSeriInfos.length > 0) {
+        seriSummaryHtml += `
             <div style="padding: 10px; margin-bottom: 15px; border: 2px solid #c07777; background-color: #fcf0f0; border-radius: 6px;">
-                <h4>⚠️ 競り発生！ (並び: ${document.getElementById('line-input').value})</h4>
-                <p><strong>競り選手:</strong> 選手${followerId} (イン) vs 選手${contenderId} (アウト)</p>
-                <p><strong>予測結果:</strong> 競り係数に基づき、競り勝つのは **選手${winnerId}** です。</p>
-                <p style="font-size: 0.9em; color: #c07777;">※ アウト側（競り敗者）の選手は、体力消耗による大幅な減点を受けています。</p>
+            <h4>⚠️ 競り発生！ (並び: ${document.getElementById('line-input').value})</h4>
+        `;
+        
+        allSeriInfos.forEach((info, index) => {
+            const followerId = info.follower;
+            const contenderId = info.contender;
+            const winnerId = info.winner;
+            
+            let prefix = '';
+            if (index === 0) {
+                prefix = '最初の競りは、';
+            } else {
+                prefix = '<strong>さらに、</strong>'; // 💡 接続詞「さらに」を適用
+            }
+            
+            // 競り情報と予測結果を文章で表示
+            seriSummaryHtml += `
+                <p>
+                    ${prefix}選手<strong>${followerId}</strong> (イン) vs 選手<strong>${contenderId}</strong> (アウト) です。
+                    予測勝者は **選手${winnerId}** です。
+                </p>
+            `;
+        });
+        
+        // 注意書き
+        seriSummaryHtml += `
+            <p style="font-size: 0.9em; color: #c07777;">
+                ※ アウト側（競り敗者）の選手、および競り勝者（イン側）の選手には、**全て**の競り並びに対して体力消耗による減点補正が適用されています。
+            </p>
             </div>
         `;
     }
@@ -1154,7 +1186,6 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // ---------------------------------------------------------- 
     // ★ 天雲指数 (占い師メッセージ) の計算と表示 (変更なし) ★ 
     // ---------------------------------------------------------- 
-    // 💡 修正：calculateTenunIndexに新しい引数を追加
     const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores, allScenarioResults, participatingPlayers); 
     const tenunIndex = tenunIndexData.tenunIndex; 
     const oracleMessage = tenunIndexData.message; 
