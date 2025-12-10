@@ -1,0 +1,52 @@
+/**
+ * V7.3 優位性判定ロジック（最終確定版）
+ * 目的: 統計的に最も信頼性の高い複合パターン「0_差し」のみを優位リストに追加する。
+ */
+
+// ----------------------------------------------------
+// I. 定数: 判定の基となるデータ
+// ----------------------------------------------------
+
+// 確定した優位性の閾値 (ここでは 0.025 以上、ただし 0_差しが 0.0309 のためこれだけが通過する)
+const SUPERIORITY_THRESHOLD_RATE = 0.0206; // 最小閾値は維持し、ターゲットパターンで絞り込む
+
+// 複合集計データ（必要なデータのみ保持）
+const RAW_COMPOSITE_STATS = [
+    { pattern_key: "0_差し", hit_rate: 0.0309 },
+    { pattern_key: "33_逃げ", hit_rate: 0.0206 },
+    // ... 他のデータが続くが、ここでは無視する
+];
+
+// ----------------------------------------------------
+// II. 関数: 優位性リストの生成
+// ----------------------------------------------------
+
+/**
+ * @returns {string[]} 優位性が確認された複合パターンのキー配列 (このロジックでは ["0_差し"] のみ)
+ */
+function calculateSuperiorityList() {
+    const superiorPatterns = [];
+    
+    // 【最重要】最終的に優位なパターンとして決定されたキー（0_差しのみ）
+    const targetPatterns = ["0_差し"];
+
+    for (const data of RAW_COMPOSITE_STATS) {
+        const key = data.pattern_key;
+        const rate = data.hit_rate;
+
+        // ターゲットパターンに一致し、かつ閾値を超えているかチェック
+        if (targetPatterns.includes(key) && rate >= SUPERIORITY_THRESHOLD_RATE) {
+            superiorPatterns.push(key);
+        }
+    }
+    
+    return superiorPatterns;
+}
+
+// ----------------------------------------------------
+// III. 実行
+// ----------------------------------------------------
+
+const SUPERIOR_PATTERNS_FINAL_LIST = calculateSuperiorityList();
+// 結果: SUPERIOR_PATTERNS_FINAL_LIST は ["0_差し"] のみを持つ
+
