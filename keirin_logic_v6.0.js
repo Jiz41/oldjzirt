@@ -28,6 +28,49 @@ const SERI_WIN_BONUS = 0.05;           // 競り勝ち選手への微増補正
 // バンクデータを格納するグローバル変数
 let BANK_DATA = {}; 
 
+
+// ====================================================================================
+// 💥 【新規追加】壱耀晴乾ノ象 (いちようせいかんのしょう) 判定ロジック (事前計算) 💥
+// ====================================================================================
+
+// 確定した優位性の閾値 (中立的中率 2.06% 以上)
+const SUPERIORITY_THRESHOLD_RATE = 0.0206;
+
+// 複合集計データ（天運指数 x 脚質ごとの三連単3点買い的中率。ichiyouseiken.jsonからロードされる想定）
+// ※ 現状はコード内に直接定義
+const RAW_COMPOSITE_STATS = [
+    { pattern_key: "0_差し", hit_rate: 0.0309 },
+    { pattern_key: "33_逃げ", hit_rate: 0.0206 },
+    // ... 他のデータが続くが、このロジックでは targetPatterns以外は無視される
+];
+
+/**
+ * 過去データから優位性の高い複合パターンを抽出し、リストを生成する関数。
+ * @returns {string[]} 優位性が確認された複合パターンのキー配列 (ここでは ["0_差し"] のみ)
+ */
+function calculateSuperiorityList() {
+    const superiorPatterns = [];
+    // 【最終決定】優位なパターンとして決定されたキー
+    const targetPatterns = ["0_差し"];
+
+    for (const data of RAW_COMPOSITE_STATS) {
+        const key = data.pattern_key;
+        const rate = data.hit_rate;
+
+        // ターゲットパターンに一致し、かつ閾値を超えているかチェック
+        if (targetPatterns.includes(key) && rate >= SUPERIORITY_THRESHOLD_RATE) {
+            superiorPatterns.push(key);
+        }
+    }
+    
+    return superiorPatterns;
+}
+
+// 判定ロジックが使用する最終的な優位性リスト (初期ロード時に一度だけ実行される想定)
+const SUPERIOR_PATTERNS_FINAL_LIST = calculateSuperiorityList();
+// ====================================================================================
+
+
 // ロギング関数 (変更なし)
 function logMessage(message) { 
     const logArea = document.getElementById('debug-log'); 
@@ -715,8 +758,8 @@ function runScenarioSimulation(basePlayers, seriInfo, settings, bankData, applyK
     return { allScenarioResults, integratedScores };
 } 
 
-// calculateTenunIndex 関数 (変更なし)
-function calculateTenunIndex(seitenreiScores, koutenreiScores) { 
+// calculateTenunIndex 関数
+function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResults, participatingPlayers) { 
     // 欠場選手を除いたスコアオブジェクトを処理
     const seitenreiRanking = Object.keys(seitenreiScores).map(id => ({ id: Number(id), score: seitenreiScores[id] })).sort((a, b) => b.score - a.score); 
     const koutenreiRanking = Object.keys(koutenreiScores).map(id => ({ id: Number(id), score: koutenreiScores[id] })).sort((a, b) => b.score - a.score); 
@@ -736,32 +779,90 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores) {
     }); 
 
     let tenunIndex; 
-    let message = ''; 
+    let oracleMessage = ''; 
     
     switch (matchCount) { 
         case 3: 
             tenunIndex = 0; 
-            message = '☀️ **これは稀に見る大安吉日！晴天令の信頼度、揺るぎなしと見ますぞ！**'; 
+            oracleMessage = '☀️ **これは稀に見る大安吉日！晴天令の信頼度、揺るぎなしと見ますぞ！**'; 
             break; 
         case 2: 
             tenunIndex = 33; 
-            message = '🔮 **なるほど、比較的穏やかな気配ですじゃ。軸は堅いが紐は広めに。**'; 
+            oracleMessage = '🔮 **なるほど、比較的穏やかな気配ですじゃ。軸は堅いが紐は広めに。**'; 
             break; 
         case 1: 
             tenunIndex = 67; 
-            message = '⛈️ **天の気配に乱れあり！荒天令の特異点を強く警戒すべきでしょう。**'; 
+            oracleMessage = '⛈️ **天の気配に乱れあり！荒天令の特異点を強く警戒すべきでしょう。**'; 
             break; 
         case 0: 
             tenunIndex = 100; 
-            message = '💥 **うむむ…これは強い荒天の気が出ておる…何かが起こりますぞ！**'; 
+            oracleMessage = '💥 **うむむ…これは強い荒天の気が出ておる…何かが起こりますぞ！**'; 
             break; 
         default: 
             tenunIndex = 50; 
-            message = '算出ロジックエラー'; 
+            oracleMessage = '算出ロジックエラー'; 
     } 
+
+    // ====================================================================================
+    // 💥 【修正箇所】壱耀晴乾ノ象 (いちようせいかんのしょう) 発令ロジックの追加 💥
+    // 発令条件: 1. 天運指数が優位リストにある AND 2. 軸選手が◎/〇評価 AND 3. 展開予想で軸選手が上位
+    // ====================================================================================
+
+    let superiorMessage = ''; // 発令時に追記するセリフ
+
+    // 1. 軸となる選手と脚質を特定 (優位パターンは「0_差し」のみ)
+    if (tenunIndex === 0) {
+        // 天運指数 0 の場合、優位性の可能性あり
+
+        // 軸となる「差し」選手を探す (◎または〇評価であること)
+        const superiorStyle = '追'; // 差し脚質は V7.3 内部で '追' (追込) に対応
+        const axisPlayer = participatingPlayers.find(p => 
+            p.style === superiorStyle && (p.wmark === '◎' || p.wmark === '〇')
+        );
+
+        if (axisPlayer) {
+            // ステップ I: 統計的優位性の確認
+            const compositeKey = `${tenunIndex}_差し`; // 優位性リストは "0_差し" を参照
+            const isStatisticallySuperior = SUPERIOR_PATTERNS_FINAL_LIST.includes(compositeKey);
+
+            if (isStatisticallySuperior) {
+                
+                // ステップ II: 展開の整合性の確認 (差し有利シナリオでの上位着順)
+                const sashiScenario = allScenarioResults.find(s => s.scenario === '差し有利');
+                let isIntegrated = false;
+
+                if (sashiScenario && sashiScenario.results.length >= 2) {
+                    const top1 = sashiScenario.results[0].id;
+                    const top2 = sashiScenario.results[1].id;
+                    
+                    if (axisPlayer.id === top1 || axisPlayer.id === top2) {
+                        isIntegrated = true; // 軸選手が1着または2着に予想されている
+                    }
+                }
+
+                if (isIntegrated) {
+                    // 発令確定！
+                    logMessage(`[ICHIOU] 壱耀晴乾ノ象 発動条件クリア: 選手ID ${axisPlayer.id} (天運${tenunIndex}_差し)`);
+                    
+                    // 【最終奥義のセリフ】を生成 (選手IDを挿入)
+                    superiorMessage = `
+                        <p class="fortune-teller-message">
+                            <strong>🐢</strong>＜…むむ、これは..."壱耀晴乾ノ象"が出ておる！ 
+                            <strong>${axisPlayer.id}</strong> を絡めた三連単がひときわ光って見えるぞい！
+                            ただし！回収の極意はオッズにあり。荒れ過ぎる波に乗るでないぞ。ホッホッホ…＞
+                        </p>`;
+                }
+            }
+        }
+    }
+
+    // 既存のメッセージに、発令メッセージがあれば追記
+    oracleMessage += superiorMessage;
     
+    // ====================================================================================
+
     logMessage(`[TENUN] 晴天/荒天 上位3名一致数: ${matchCount}名。天雲指数: ${tenunIndex}`); 
-    return { tenunIndex, message };
+    return { tenunIndex, message: oracleMessage }; // ← 修正後の message を返す
 } 
 
 // メイン計算関数 (calculatePrediction) 💡 修正箇所：calculateLineCoeffsの戻り値変更に対応
@@ -847,7 +948,9 @@ async function calculatePrediction() {
         koutenreiResults.integratedScores, 
         bankName,
         seriInfo,
-        finalOrderedPlayerIds // 欠場選手を除いた並び順を渡す
+        finalOrderedPlayerIds, // 欠場選手を除いた並び順を渡す
+        seitenreiResults.allScenarioResults, // 💡 追加：壱耀晴乾ノ象判定のために渡す
+        participatingPlayers // 💡 追加：壱耀晴乾ノ象判定のために渡す
     ); 
     
     const resultsContainer = document.getElementById('results-container'); 
@@ -910,7 +1013,7 @@ function getTextColor(rgbColor) {
 }
 
 
-function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, seriInfo, finalOrderedPlayerIds) { 
+function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, seriInfo, finalOrderedPlayerIds, allScenarioResults, participatingPlayers) { 
     displayBankTendency(); 
 
     // ---------------------------------------------------------- 
@@ -995,7 +1098,8 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // ---------------------------------------------------------- 
     // ★ 天雲指数 (占い師メッセージ) の計算と表示 (変更なし) ★ 
     // ---------------------------------------------------------- 
-    const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores); 
+    // 💡 修正：calculateTenunIndexに新しい引数を追加
+    const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores, allScenarioResults, participatingPlayers); 
     const tenunIndex = tenunIndexData.tenunIndex; 
     const oracleMessage = tenunIndexData.message; 
 
