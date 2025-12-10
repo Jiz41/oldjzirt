@@ -1,3 +1,5 @@
+// 真自在律 実質Ver7.3
+// 競りライン追加版
 // 【V7.3 欠場選手除外後のライン強度表示 最終修正】
 
 // 1. 🗃️ 係数設定オブジェクトの分離
@@ -213,7 +215,11 @@ function displayBankTendency() {
 })(); 
 
 
-// parseLineInput 関数 (変更なし)
+// ========== 競り対応強化版 parseLineInput 関数 (このブロックのみ置き換え) ==========
+/**
+ * ライン入力文字列 (例: 15(3)4(6)2, 7) を解析し、ライン構成と競り情報を抽出する。
+ * 💡 複数競り、ライン内競り、競り敗者の単騎扱いを正確に処理。
+ */
 function parseLineInput(lineInput, allPlayers) {
     logMessage(`[PARSE] ライン入力解析開始: ${lineInput}`);
     const processedLineInput = lineInput.replace(/\s/g, '');
@@ -221,62 +227,111 @@ function parseLineInput(lineInput, allPlayers) {
     
     const lines = [];
     let orderedPlayerIds = []; 
-    const seriInfo = { exists: false, leader: null, follower: null, contender: null, winner: null, loser: null };
+    // 競り情報も複数持つ可能性があるためリスト化
+    const seriInfos = []; 
+    const allParsedIds = new Set();
+    
+    // 正規表現: (先頭数字)+(競り並び(数字(数字)) または 通常並び(数字))の繰り返し
+    const complexLinePattern = /(\d+)(?:(\d+)\((\d+)\))?(\d*)/g;
 
     segments.forEach(seg => {
-        // ルール: 14(3)2 形式を解析
-        const seriMatch = seg.match(/^(\d+)(\d+)\((\d+)\)(.*)$/);
-        if (seriMatch) {
-            // 競り並び検出
-            seriInfo.exists = true;
-            seriInfo.leader = parseInt(seriMatch[1]);     
-            seriInfo.follower = parseInt(seriMatch[2]);   
-            seriInfo.contender = parseInt(seriMatch[3]);  
-            
-            logMessage(`[PARSE] 競り検出: 選手${seriInfo.follower} (イン) vs 選手${seriInfo.contender} (アウト)`);
-            
-            // 競りの勝敗予測 (競り係数 C_seri に基づく)
-            const followerCoef = allPlayers.find(p => p.id === seriInfo.follower)?.seri_coef || 0;
-            const contenderCoef = allPlayers.find(p => p.id === seriInfo.contender)?.seri_coef || 0;
+        let currentLine = [];
+        let segOrderedIds = [];
+        let match;
 
-            if (followerCoef >= contenderCoef) {
-                seriInfo.winner = seriInfo.follower;
-                seriInfo.loser = seriInfo.contender;
-            } else {
-                seriInfo.winner = seriInfo.contender;
-                seriInfo.loser = seriInfo.follower;
-            }
-            logMessage(`[PARSE] 競り勝者予測: 選手${seriInfo.winner}`);
+        // 複雑なラインセグメントを解析 (例: 15(3)4(6)2)
+        while ((match = complexLinePattern.exec(seg)) !== null) {
+            const leader = parseInt(match[1]);
+            const follower = match[2] ? parseInt(match[2]) : null;
+            const contender = match[3] ? parseInt(match[3]) : null;
+            const remaining = match[4].split('').map(Number).filter(id => id > 0);
 
-            // ライン再構築: 競り勝者のみがラインに残り、敗者は単騎扱い
-            lines.push([seriInfo.leader, seriInfo.winner]); 
-            
-            // 表示順の構築
-            orderedPlayerIds.push(seriInfo.leader);
-            orderedPlayerIds.push(seriInfo.follower);  
-            orderedPlayerIds.push(seriInfo.contender); 
+            if (isNaN(leader)) continue; // エラーチェック
 
-            const remainingSegment = seriMatch[4]; 
-            const remainingMembers = remainingSegment.split('').map(Number).filter(id => id > 0);
-            
-            if (remainingMembers.length > 0) {
-                 lines.push(remainingMembers); 
-                 orderedPlayerIds.push(...remainingMembers);
+            // 1. 先頭選手を処理
+            currentLine.push(leader);
+            if (!allParsedIds.has(leader)) {
+                segOrderedIds.push(leader);
+                allParsedIds.add(leader);
             }
-            // 競り負けた選手を単独ラインとしてラインに追加 (スコア計算用)
-            lines.push([seriInfo.loser]); 
             
-        } else {
-            // 単騎・通常ラインの処理
-            const members = seg.split('').map(Number).filter(id => id > 0);
-            
-            if (members.length > 0) {
-                 // 各セグメントをラインとして登録
-                 lines.push(members);
-                 // 隊列順に orderedPlayerIds に格納
-                 orderedPlayerIds.push(...members);
+            // 2. 競り並びの処理 (例: 5(3))
+            if (follower !== null && contender !== null) {
+                
+                const seriInfo = { 
+                    exists: true, 
+                    leader: leader, 
+                    follower: follower, 
+                    contender: contender, 
+                    winner: null, 
+                    loser: null 
+                };
+                
+                logMessage(`[PARSE] 競り検出: 選手${follower} (イン) vs 選手${contender} (アウト)`);
+                
+                // 競りの勝敗予測 (競り係数 C_seri に基づく)
+                const followerCoef = allPlayers.find(p => p.id === follower)?.seri_coef || 0;
+                const contenderCoef = allPlayers.find(p => p.id === contender)?.seri_coef || 0;
+
+                let winnerId;
+                let loserId;
+
+                if (followerCoef >= contenderCoef) {
+                    winnerId = follower;
+                    loserId = contender;
+                } else {
+                    winnerId = contender;
+                    loserId = follower;
+                }
+                
+                seriInfo.winner = winnerId;
+                seriInfo.loser = loserId;
+                seriInfos.push(seriInfo);
+                logMessage(`[PARSE] 競り勝者予測: 選手${winnerId}`);
+                
+                // 競り勝者のみがラインに残り、敗者は単騎扱い
+                currentLine.push(winnerId); 
+                
+                // 表示順の構築: 3選手全てを登場順で追加
+                if (!allParsedIds.has(follower)) {
+                    segOrderedIds.push(follower);
+                    allParsedIds.add(follower);
+                }
+                if (!allParsedIds.has(contender)) {
+                    segOrderedIds.push(contender);
+                    allParsedIds.add(contender);
+                }
+                
+                // 競り敗者を単独ラインとしてラインに追加 (スコア計算用)
+                lines.push([loserId]); 
             }
+            
+            // 3. 残りの選手を処理
+            remaining.forEach(id => {
+                currentLine.push(id);
+                if (!allParsedIds.has(id)) {
+                    segOrderedIds.push(id);
+                    allParsedIds.add(id);
+                }
+            });
+
+            // 競り並びがセグメントの途中にあり、後ろにまだ数字がある場合、
+            // currentLineは次のループでリセットされるのではなく継続されるべき。
+            // 複雑な並び (例: 15(3)4(6)2) は、linesにプッシュされる前に、
+            // `currentLine`として一度に結合される。
+            
+            // Note: `complexLinePattern`の`g`フラグは、`exec`を繰り返すことでセグメント内の連続したパターンを捕捉する。
+            // 競りが起きた場合、その勝者がラインに入り、敗者が単騎ラインとして既にlinesに追加されているため、
+            // このループの終わりに currentLine を lines に push しても問題ない。
         }
+        
+        // currentLineが空でなければ、ラインとして追加（単騎ラインも含む）
+        if (currentLine.length > 0) {
+            lines.push(currentLine);
+        }
+
+        // セグメント内の順序を、全体順序に追加
+        orderedPlayerIds.push(...segOrderedIds);
     });
     
     // 重複IDを削除し、隊列順を維持
@@ -289,8 +344,11 @@ function parseLineInput(lineInput, allPlayers) {
         }
     }
 
-    return { lines, seriInfo, orderedPlayerIds: uniqueOrderedPlayerIds };
+    // seriInfoは、最初の競りの情報（もしあれば）を返すか、競りがなければ空のオブジェクトを返す
+    // 競り補正ロジックは一つ目の競り情報のみを使用するため、最初の情報を返す
+    return { lines, seriInfo: seriInfos.length > 0 ? seriInfos[0] : { exists: false }, orderedPlayerIds: uniqueOrderedPlayerIds };
 }
+// ====================================================================================
 
 
 // ========== ライン強度計算 (calculateLineCoeffs) - 💡 修正箇所：欠場選手の除外処理と並び順の整理 ==========
@@ -1059,6 +1117,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         
         // 競りが発生している場合のカッコ適用
         if (seriInfo.exists) {
+            // Note: 新しい競りロジックではseriInfoは最初の競り情報のみを持つ
             if (id === seriInfo.contender) {
                 // 競る選手(アウト側)は()で囲む
                 playerHtml = `(${playerHtml})`;
@@ -1206,7 +1265,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         const axis2 = koutenTop3.length >= 2 ? koutenTop3[1] : null; 
         const firmHimo = koutenLeader; 
 
-        if (axis1 && firmHimo && mainWaveRider) { 
+            if (axis1 && firmHimo && mainWaveRider) { 
             if (koutenTrifuku.length < 6) { 
                 koutenTrifuku.push([mainWaveRider, axis1, firmHimo].sort((a, b) => a - b).join('=')); 
             } 
