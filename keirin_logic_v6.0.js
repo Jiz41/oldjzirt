@@ -215,9 +215,9 @@ function displayBankTendency() {
 })(); 
 
 
-// ========== 競り対応強化版 parseLineInput 関数 (【修正済み】このブロックを置き換える) ==========
+// ========== 競り対応強化版 parseLineInput 関数 (【V7.3 最終修正】このブロックを置き換える) ==========
 /**
- * ライン入力文字列 (例: 15(3)4(6)2, 7) を解析し、ライン構成と競り情報を抽出する。
+ * ライン入力文字列 (例: 12(3)4(5)6) を解析し、ライン構成と競り情報を抽出する。
  * 💡 複数競り、ライン内競り、競り敗者の単騎扱いを正確に処理。
  */
 function parseLineInput(lineInput, allPlayers) {
@@ -225,52 +225,49 @@ function parseLineInput(lineInput, allPlayers) {
     const processedLineInput = lineInput.replace(/\s/g, '');
     const segments = processedLineInput.split(',');
     
-    const lines = [];
-    let orderedPlayerIds = []; 
-    // 競り情報も複数持つ可能性があるためリスト化
+    const lines = []; // スコア計算に使用するライン（競り勝者のみが残る）
+    let orderedPlayerIds = []; // 最終的な表示順
     const seriInfos = []; 
     const allParsedIds = new Set();
     
-    // 【修正箇所】正規表現: (\d+) を (\d) に変更し、1桁の数字IDのみを強制的にキャプチャ
-    // 正規表現: (先頭数字)+(競り並び(数字(数字)) または 通常並び(数字))の繰り返し
-    const complexLinePattern = /(\d)(?:(\d)\((\d)\))?(\d*)/g; // ⬅️ **修正済み**
+    // 競り並びを識別するパターン: 2(3) の形式を抽出する
+    const seriPattern = /(\d)\((\d)\)/; 
 
     segments.forEach(seg => {
-        let currentLine = [];
+        let currentLine = []; // 競り敗者を除いた、ライン構成選手のリスト
         let segOrderedIds = [];
-        let match;
-
-        // 複雑なラインセグメントを解析 (例: 15(3)4(6)2)
-        while ((match = complexLinePattern.exec(seg)) !== null) {
-            const leader = parseInt(match[1]);
-            const follower = match[2] ? parseInt(match[2]) : null;
-            const contender = match[3] ? parseInt(match[3]) : null;
-            const remaining = match[4].split('').map(Number).filter(id => id > 0);
-
-            if (isNaN(leader)) continue; // エラーチェック
-
-            // 1. 先頭選手を処理
-            currentLine.push(leader);
-            if (!allParsedIds.has(leader)) {
-                segOrderedIds.push(leader);
-                allParsedIds.add(leader);
-            }
+        let remainingSeg = seg; 
+        
+        while (remainingSeg.length > 0) {
             
-            // 2. 競り並びの処理 (例: 5(3))
-            if (follower !== null && contender !== null) {
+            // 競り並びを探す: 例: 2(3)
+            let seriMatch = remainingSeg.match(seriPattern);
+
+            if (seriMatch) {
+                // 競り並びがある場合
+                const seriStart = seriMatch.index;
+                const seriEnd = seriStart + seriMatch[0].length;
                 
-                const seriInfo = { 
-                    exists: true, 
-                    leader: leader, 
-                    follower: follower, 
-                    contender: contender, 
-                    winner: null, 
-                    loser: null 
-                };
+                // 1. 競り並びの前の数字列を処理 (例: 12(3)4(5)6 の中の "1" または "4")
+                if (seriStart > 0) {
+                    const numericalPart = remainingSeg.substring(0, seriStart);
+                    // 前の数字列を、ラインの構成要素として追加
+                    numericalPart.split('').map(Number).filter(id => id > 0).forEach(id => {
+                        if (!allParsedIds.has(id)) {
+                            segOrderedIds.push(id);
+                            allParsedIds.add(id);
+                        }
+                        currentLine.push(id);
+                    });
+                }
+                
+                // 2. 競り並びを処理 (例: 2(3) または 5(6))
+                const follower = parseInt(seriMatch[1]); // イン側
+                const contender = parseInt(seriMatch[2]); // アウト側
                 
                 logMessage(`[PARSE] 競り検出: 選手${follower} (イン) vs 選手${contender} (アウト)`);
                 
-                // 競りの勝敗予測 (競り係数 C_seri に基づく)
+                // 勝敗予測
                 const followerCoef = allPlayers.find(p => p.id === follower)?.seri_coef || 0;
                 const contenderCoef = allPlayers.find(p => p.id === contender)?.seri_coef || 0;
 
@@ -285,15 +282,18 @@ function parseLineInput(lineInput, allPlayers) {
                     loserId = follower;
                 }
                 
-                seriInfo.winner = winnerId;
-                seriInfo.loser = loserId;
-                seriInfos.push(seriInfo);
+                seriInfos.push({ 
+                    exists: true, follower, contender, winner: winnerId, loser: loserId 
+                });
                 logMessage(`[PARSE] 競り勝者予測: 選手${winnerId}`);
                 
-                // 競り勝者のみがラインに残り、敗者は単騎扱い
+                // 競り勝者のみをライン構成に追加 (ラインに連なる)
                 currentLine.push(winnerId); 
                 
-                // 表示順の構築: 3選手全てを登場順で追加
+                // 競り敗者を単独ラインとして追加 (スコア計算用)
+                lines.push([loserId]); 
+                
+                // 順序の構築 (表示順): 3選手全てを登場順で追加
                 if (!allParsedIds.has(follower)) {
                     segOrderedIds.push(follower);
                     allParsedIds.add(follower);
@@ -302,22 +302,24 @@ function parseLineInput(lineInput, allPlayers) {
                     segOrderedIds.push(contender);
                     allParsedIds.add(contender);
                 }
+
+                // 3. 競り並びの文字列のみを削除し、次のループへ
+                remainingSeg = remainingSeg.substring(seriEnd);
                 
-                // 競り敗者を単独ラインとしてラインに追加 (スコア計算用)
-                lines.push([loserId]); 
+            } else {
+                // 競り並びがない場合、残りの文字列すべてを数字列として処理
+                remainingSeg.split('').map(Number).filter(id => id > 0).forEach(id => {
+                    if (!allParsedIds.has(id)) {
+                        segOrderedIds.push(id);
+                        allParsedIds.add(id);
+                    }
+                    currentLine.push(id);
+                });
+                remainingSeg = ""; // 終了
             }
-            
-            // 3. 残りの選手を処理
-            remaining.forEach(id => {
-                currentLine.push(id);
-                if (!allParsedIds.has(id)) {
-                    segOrderedIds.push(id);
-                    allParsedIds.add(id);
-                }
-            });
-        }
+        } // while (remainingSeg.length > 0)
         
-        // currentLineが空でなければ、ラインとして追加（単騎ラインも含む）
+        // currentLineが空でなければ、ラインとして追加（競りを経たライン）
         if (currentLine.length > 0) {
             lines.push(currentLine);
         }
@@ -336,8 +338,7 @@ function parseLineInput(lineInput, allPlayers) {
         }
     }
 
-    // seriInfoは、最初の競りの情報（もしあれば）を返すか、競りがなければ空のオブジェクトを返す
-    // 競り補正ロジックは一つ目の競り情報のみを使用するため、最初の情報を返す
+    // seriInfoは、最初の競りの情報のみを返す（競り補正ロジックの制約による）
     return { lines, seriInfo: seriInfos.length > 0 ? seriInfos[0] : { exists: false }, orderedPlayerIds: uniqueOrderedPlayerIds };
 }
 // ====================================================================================
@@ -1108,15 +1109,19 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         let playerHtml = `<span class="line-box strength-color" style="${style}">${id}</span>`;
         
         // 競りが発生している場合のカッコ適用
-        if (seriInfo.exists) {
-            // Note: 新しい競りロジックではseriInfoは最初の競り情報のみを持つ
-            if (id === seriInfo.contender) {
-                // 競る選手(アウト側)は()で囲む
-                playerHtml = `(${playerHtml})`;
-            } else if (id === seriInfo.loser && id !== seriInfo.contender) {
-                // 競り負けた選手（イン側が負けた場合）も()で囲む (理論上あり得ないが安全策として)
-                 playerHtml = `(${playerHtml})`;
-            }
+        // seriInfoは最初の競り情報のみを持つが、ここでは全ての競りを検出する必要がある
+        // ➡︎ parseLineInputの戻り値を、全ての競り情報を含むseriInfosに変更する必要があるが、
+        // 競り補正ロジックの制約で現状は最初の競りしか使えないため、表示も暫定的に最初の競り情報のみに依存する
+        // ※ 複数競りがある場合の()表示は、parseLineInput関数内でseriInfosを全て取得し、
+        // displayResultsに渡す必要があります。現在のseriInfoは最初の競りの情報しか含んでいません。
+        // 現状のコードでは、複数の競りが発生しても、表示の()は最初の競りの選手にしか適用されません。
+        
+        // 【暫定対応】表示される選手IDが、最初の競りのイン側またはアウト側の選手IDと一致した場合に()を適用する
+        const isSeriPlayer = seriInfo.exists && (id === seriInfo.follower || id === seriInfo.contender);
+
+        if (isSeriPlayer) {
+            // 競る選手(イン側、アウト側)は()で囲む
+            playerHtml = `(${playerHtml})`;
         }
         
         displayHtml += playerHtml;
