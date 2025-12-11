@@ -215,10 +215,11 @@ function displayBankTendency() {
 })(); 
 
 
-// ========== 競り対応強化版 parseLineInput 関数 (💡 修正: allSeriInfosを返すように変更) ==========
+// ========== 競り対応強化版 parseLineInput 関数 (💡 修正: allSeriInfosとdisplayLineSegmentsを返すように変更) ==========
 /**
  * ライン入力文字列 (例: 12(3)4(5)6) を解析し、ライン構成と競り情報を抽出する。
  * 💡 複数競り、ライン内競り、競り敗者の単騎扱いを正確に処理。
+ * 💡 【V7.3 競り表示修正対応】表示用の構造化データ (displayLineSegments) を追加で返す。
  */
 function parseLineInput(lineInput, allPlayers) {
     logMessage(`[PARSE] ライン入力解析開始: ${lineInput}`);
@@ -228,6 +229,8 @@ function parseLineInput(lineInput, allPlayers) {
     const lines = []; // スコア計算に使用するライン（競り勝者のみが残る）
     let orderedPlayerIds = []; // 最終的な表示順
     const allSeriInfos = []; // 💡 修正: 全ての競り情報を格納
+    // 💡 修正: 表示のための構造化セグメントリスト
+    const displayLineSegments = [];
     const allParsedIds = new Set();
     
     // 競り並びを識別するパターン: 2(3) の形式を抽出する
@@ -257,6 +260,8 @@ function parseLineInput(lineInput, allPlayers) {
                             segOrderedIds.push(id);
                             allParsedIds.add(id);
                         }
+                        // 💡 修正: 表示セグメントにも追加
+                        displayLineSegments.push({ type: 'single', id: id });
                         currentLine.push(id);
                     });
                 }
@@ -303,6 +308,10 @@ function parseLineInput(lineInput, allPlayers) {
                     segOrderedIds.push(contender);
                     allParsedIds.add(contender);
                 }
+                
+                // 💡 修正: 競りセグメントを表示リストに追加
+                displayLineSegments.push({ type: 'seri', follower: follower, contender: contender });
+
 
                 // 3. 競り並びの文字列のみを削除し、次のループへ
                 remainingSeg = remainingSeg.substring(seriEnd);
@@ -314,6 +323,8 @@ function parseLineInput(lineInput, allPlayers) {
                         segOrderedIds.push(id);
                         allParsedIds.add(id);
                     }
+                    // 💡 修正: 表示セグメントにも追加
+                    displayLineSegments.push({ type: 'single', id: id });
                     currentLine.push(id);
                 });
                 remainingSeg = ""; // 終了
@@ -339,13 +350,13 @@ function parseLineInput(lineInput, allPlayers) {
         }
     }
 
-    // 💡 修正: 全ての競り情報 (allSeriInfos) を返す
-    return { lines, allSeriInfos, orderedPlayerIds: uniqueOrderedPlayerIds };
+    // 💡 修正: 競り情報 (allSeriInfos) と 表示セグメント (displayLineSegments) を返す
+    return { lines, allSeriInfos, orderedPlayerIds: uniqueOrderedPlayerIds, displayLineSegments };
 }
 // ====================================================================================
 
 
-// ========== ライン強度計算 (calculateLineCoeffs) - 💡 修正箇所：allSeriInfosを返すように変更 ==========
+// ========== ライン強度計算 (calculateLineCoeffs) - 💡 修正箇所：displayLineSegmentsを返すように変更 ==========
 /**
  * ライン強度係数 C_L の計算を行う
  */
@@ -360,17 +371,23 @@ function calculateLineCoeffs(players, settings) {
     // もし出走選手が0の場合、計算を中止
     if (participatingPlayers.length === 0) {
         logMessage("[ERROR] 出走選手がゼロのため、ライン解析をスキップします。");
-        // 💡 修正: allSeriInfosは空の配列を返す
-        return { players: [], allSeriInfos: [], finalOrderedPlayerIds: [] }; 
+        // 💡 修正: displayLineSegments は空の配列を返す
+        return { players: [], allSeriInfos: [], finalOrderedPlayerIds: [], displayLineSegments: [] }; 
     }
 
     // 以降のライン解析は、participatingPlayersに対して行う
     const lineInput = document.getElementById('line-input').value; 
-    // 💡 修正: allSeriInfosを受け取るように変更
-    const { lines: initialLines, allSeriInfos: parsedAllSeriInfos, orderedPlayerIds: initialOrderedPlayerIds } = parseLineInput(lineInput, participatingPlayers); 
+    // 💡 修正: allSeriInfosとdisplayLineSegmentsを受け取るように変更
+    const { 
+        lines: initialLines, 
+        allSeriInfos: parsedAllSeriInfos, 
+        orderedPlayerIds: initialOrderedPlayerIds, 
+        displayLineSegments: parsedDisplayLineSegments 
+    } = parseLineInput(lineInput, participatingPlayers); 
     
     let lines = [...initialLines]; // スコア計算に使うライン
-    let finalOrderedPlayerIds = [...initialOrderedPlayerIds]; // 表示に使う並び
+    let finalOrderedPlayerIds = [...initialOrderedPlayerIds]; // 表示に使う並び (古いロジック維持のため保持)
+    let displayLineSegments = [...parsedDisplayLineSegments]; // 💡 修正: 表示セグメント
 
     // 🚨 欠落選手強制補完ロジック (V7.2) 🚨
     const playerIdsSet = new Set(initialOrderedPlayerIds);
@@ -384,9 +401,11 @@ function calculateLineCoeffs(players, settings) {
             // 💡 修正: finalOrderedPlayerIds に含める (ライン強度に単騎として表示させるため)
             finalOrderedPlayerIds.push(p.id); 
             playerIdsSet.add(p.id); 
+            // 💡 修正: displayLineSegments にも単騎として追加
+            displayLineSegments.push({ type: 'single', id: p.id }); 
         }
     });
-    logMessage(`[ORDER] 最終表示順序: ${finalOrderedPlayerIds.join(', ')}`);
+    logMessage(`[ORDER] 最終表示順序 (旧ロジック): ${finalOrderedPlayerIds.join(', ')}`);
 
 
     // 2. スコア計算用ラインリストを再構築し、すべての出走選手が含まれるようにする
@@ -461,8 +480,8 @@ function calculateLineCoeffs(players, settings) {
     } 
 
     // 欠場選手を除外したparticipatingPlayersと、欠場選手を除いた並び順、そして全ての競り情報を返す
-    // 💡 修正: allSeriInfosを返す
-    return { players: participatingPlayers, allSeriInfos: parsedAllSeriInfos, finalOrderedPlayerIds };
+    // 💡 修正: allSeriInfosとdisplayLineSegmentsを返す
+    return { players: participatingPlayers, allSeriInfos: parsedAllSeriInfos, finalOrderedPlayerIds, displayLineSegments };
 } 
 // =========================================================
 
@@ -574,6 +593,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
 
     const lineInput = document.getElementById('line-input').value;
     // 欠場選手を除外したリストをparseLineInputに渡す
+    // 💡 parseLineInputの戻り値変更に対応 (linesのみ使用)
     const { lines: initialLines } = parseLineInput(lineInput, tempPlayers); 
 
     const lines = [];
@@ -956,8 +976,8 @@ async function calculatePrediction() {
     logMessage(`[CALC START] ${raceType} / バンク: ${bankName} で計算開始。モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`); 
 
     // --- I. ライン解析と C_L (ライン・連係係数) の計算 (欠場選手除外と係数計算を同時に行う) --- 
-    // 💡 修正: allSeriInfosを受け取るように変更
-    const { players: participatingPlayers, allSeriInfos, finalOrderedPlayerIds } = calculateLineCoeffs(players, settings); 
+    // 💡 修正: allSeriInfosとdisplayLineSegmentsを受け取るように変更
+    const { players: participatingPlayers, allSeriInfos, finalOrderedPlayerIds, displayLineSegments } = calculateLineCoeffs(players, settings); 
 
     // 欠場により選手がいない場合は計算を終了
     if (participatingPlayers.length === 0) {
@@ -1007,16 +1027,17 @@ async function calculatePrediction() {
     // --- IV. 最終結果の統合と表示 --- 
     const detailedScenarioResults = koutenreiModeSelected ? koutenreiResults.allScenarioResults : seitenreiResults.allScenarioResults; 
 
-    // 💡 修正: allSeriInfos を渡す
+    // 💡 修正: allSeriInfos と displayLineSegments を渡す
     displayResults( 
         detailedScenarioResults, 
         seitenreiResults.integratedScores, 
         koutenreiResults.integratedScores, 
         bankName,
         allSeriInfos, // 💡 修正: allSeriInfos を渡す
-        finalOrderedPlayerIds, 
+        finalOrderedPlayerIds, // 旧ロジック維持のため保持
         seitenreiResults.allScenarioResults, 
-        participatingPlayers 
+        participatingPlayers,
+        displayLineSegments // 💡 修正: displayLineSegments を渡す
     ); 
     
     const resultsContainer = document.getElementById('results-container'); 
@@ -1079,8 +1100,8 @@ function getTextColor(rgbColor) {
 }
 
 
-// 💡 修正: seriInfo -> allSeriInfos に変更
-function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers) { 
+// 💡 修正: displayLineSegments を受け取るように変更
+function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers, displayLineSegments) { 
     displayBankTendency(); 
 
     // ---------------------------------------------------------- 
@@ -1102,43 +1123,69 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     });
 
     // ---------------------------------------------------------- 
-    // ★ V7.3: ライン強度 (強弱グラデーション) の視覚化 ★ 
+    // ★ V7.3: ライン強度 (強弱グラデーション) の視覚化 (矢印表示対応) ★ 
     // ---------------------------------------------------------- 
     const lineDisplay = document.getElementById('line-display'); 
     let displayHtml = ''; 
 
-    // 競り発生中の選手IDのセットを事前に作成
-    const seriPlayers = new Set();
-    allSeriInfos.forEach(info => {
-        seriPlayers.add(info.follower);
-        seriPlayers.add(info.contender);
+    // 💡 修正: displayLineSegments をループして表示を生成
+    displayLineSegments.forEach((segment) => {
+        if (segment.type === 'single') {
+            const id = segment.id;
+            const score = playerIdToScore[id]; 
+            
+            if (score === undefined) {
+                 logMessage(`[ERROR] 表示ID ${id} のスコアが見つかりません。スキップします。`);
+                 return; 
+            }
+
+            const rgbColor = getStrengthColor(score, minScore, maxScore);
+            const textColor = getTextColor(rgbColor);
+            
+            let style = `background-color: ${rgbColor}; color: ${textColor};`;
+            
+            // 単騎選手（括弧なし）
+            displayHtml += `<span class="line-box strength-color" style="${style}">${id}</span>`;
+            
+        } else if (segment.type === 'seri') {
+            const followerId = segment.follower; // イン側 (競りかけられる側)
+            const contenderId = segment.contender; // アウト側 (競りかける側)
+            
+            // イン側選手のスコアに基づいて色を決定
+            const scoreF = playerIdToScore[followerId];
+            const scoreC = playerIdToScore[contenderId];
+            
+            if (scoreF === undefined || scoreC === undefined) {
+                 logMessage(`[ERROR] 競り選手 ${followerId} or ${contenderId} のスコアが見つかりません。スキップします。`);
+                 return; 
+            }
+            
+            // 💡 競り並びのメインカラーは、イン側の選手 (follower) のスコアを使用
+            const rgbColorF = getStrengthColor(scoreF, minScore, maxScore);
+            const textColorF = getTextColor(rgbColorF);
+
+            const rgbColorC = getStrengthColor(scoreC, minScore, maxScore);
+            const textColorC = getTextColor(rgbColorC);
+
+            // 💡 修正: ケンさんのご要望通り、1(2←3) の形式で HTML を生成
+            // 競り選手全体を一つのコンテナで囲む
+            displayHtml += `<span class="seri-segment">(`;
+            
+            // 競りかけられる側（イン側）
+            displayHtml += `<span class="line-box strength-color" style="background-color: ${rgbColorF}; color: ${textColorF};">${followerId}</span>`;
+            
+            // 矢印（競りかけられている側を指す: ←）
+            displayHtml += `<span class="seri-arrow">←</span>`; 
+            
+            // 競りかける側（アウト側）
+            displayHtml += `<span class="line-box strength-color" style="background-color: ${rgbColorC}; color: ${textColorC};">${contenderId}</span>`;
+            
+            displayHtml += `)</span>`;
+        }
     });
-
-    // 💡 修正箇所: finalOrderedPlayerIds (欠場選手を除いた並び順) に従って表示を生成
-    finalOrderedPlayerIds.forEach((id) => { 
-        const score = playerIdToScore[id]; 
-        
-        if (score === undefined) {
-             logMessage(`[ERROR] 表示順序ID ${id} のスコアが見つかりません。スキップします。`);
-             return; 
-        }
-
-        const rgbColor = getStrengthColor(score, minScore, maxScore);
-        const textColor = getTextColor(rgbColor);
-        
-        let style = `background-color: ${rgbColor}; color: ${textColor};`;
-        
-        let playerHtml = `<span class="line-box strength-color" style="${style}">${id}</span>`;
-        
-        // 競る選手(イン側、アウト側)は()で囲む
-        if (seriPlayers.has(id)) { // 💡 修正: 全ての競り参加者に()を適用
-            playerHtml = `(${playerHtml})`;
-        }
-        
-        displayHtml += playerHtml;
-    }); 
     
     if (lineDisplay) { 
+        // 💡 CSSで要素を並べるため、lineDisplayにも専用クラスを付与することを推奨 (後でHTMLで修正)
         lineDisplay.innerHTML = displayHtml; 
     } 
     logMessage(`[COLOR] ライン表示を強弱グラデーションカラーに更新しました。 Max: ${maxScore.toFixed(2)}, Min: ${minScore.toFixed(2)}`);
@@ -1147,6 +1194,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // ★ 競りサマリーの表示 (💡 修正: 複数の競りを自然な文章で表示) ★ 
     // ----------------------------------------------------------
     let seriSummaryHtml = '';
+    // 💡 競りサマリーは、矢印表示ロジックとは独立して、全ての競り情報を表示する
     if (allSeriInfos.length > 0) {
         seriSummaryHtml += `
             <div style="padding: 10px; margin-bottom: 15px; border: 2px solid #c07777; background-color: #fcf0f0; border-radius: 6px;">
