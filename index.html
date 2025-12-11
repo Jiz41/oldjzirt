@@ -369,6 +369,7 @@
             flex-wrap: wrap;
             gap: 5px;
             margin-top: 5px;
+            align-items: center; /* 競り表示の縦位置を揃える */
         }
 
         .line-box {
@@ -376,10 +377,34 @@
             padding: 2px 6px;
             border-radius: 4px;
             font-weight: bold;
-            margin-right: 5px;
+            margin-right: 0px; /* 競りの並びに合わせるため削除 */
             font-size: 0.9em;
             transition: background-color 0.5s, color 0.5s;
+            line-height: 1.5;
         }
+
+        /* 競りセグメント全体のスタイル: (2←3) */
+        .seri-segment {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.9em;
+            font-weight: bold;
+            /* 競り全体に軽めの枠線を適用して一体感を持たせる */
+            border: 1px dashed #b3c7b3;
+            border-radius: 4px;
+            padding: 1px 3px;
+            margin-right: 5px;
+        }
+        
+        /* 競りの中の矢印のスタイル */
+        .seri-arrow {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #c07777; /* 赤系の色で競合を強調 */
+            margin: 0 2px;
+        }
+
+        /* 競りの中の選手ボックスは個別の line-box スタイルが適用される */
 
         #bank-tendency-display {
             margin-top: 5px;
@@ -410,6 +435,7 @@
             color: #555;
         }
 
+        /* 💡 修正: シミュレーション詳細のスコア/ランクを非表示にするCSSを明確に定義 */
         .hide-score-rank {
             display: none !important;
         }
@@ -478,13 +504,35 @@
             opacity: 1;
         }
 
+        /* 💡 修正: 天雲指数コンテナのクラス定義を追加 (JSの結果に応じて色が変わる) */
         .tenun-index-container {
             margin: 20px 0;
             padding: 15px;
-            border: 2px dashed #d6a300;
             border-radius: 8px;
-            background-color: #fff9e6;
             text-align: center;
+            
+            border: 2px dashed #d6a300;
+            background-color: #fff9e6;
+        }
+        /* 晴天令 (安定) */
+        .tenun-stable {
+            border: 2px solid #557755;
+            background-color: #e6f5e6;
+        }
+        /* 穏やか (中間) */
+        .tenun-mild {
+            border: 2px dashed #698b69;
+            background-color: #f7fff7;
+        }
+        /* 荒天予報 (アラート) */
+        .tenun-alert {
+            border: 2px dashed #d6a300;
+            background-color: #fff9e6;
+        }
+        /* 荒天令 (波乱) */
+        .tenun-severe {
+            border: 2px solid #c07777;
+            background-color: #fcf0f0;
         }
 
         .tenun-gauge {
@@ -511,6 +559,18 @@
             width: 100%;
             padding: 15px; 
             box-sizing: border-box;
+        }
+        
+        /* 壱耀晴乾ノ象 (いちようせいかんのしょう) 用メッセージスタイル */
+        .fortune-teller-message {
+            margin-top: 10px;
+            font-size: 1.0em;
+            line-height: 1.5;
+            text-align: center;
+        }
+        .fortune-teller-message strong {
+            color: #c07777;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -943,7 +1003,7 @@
                 </div>
             </div>
             <div class="input-item">
-                <label for="line-input">全体並び: (例: 123,45,67 または 1,2,3,4,5,6,7)</label>
+                <label for="line-input">全体並び: (例: 123,45,67 または 1,2(3),4,5,6,7)</label>
                 <input type="text" id="line-input" value="1,2,3,4,5,6,7">
             </div>
             <div class="local-switch-group">
