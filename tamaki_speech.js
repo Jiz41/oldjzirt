@@ -211,7 +211,7 @@ function generateTamakiTenunHTML(tenunIndex, isIchiyo = false, playerId = null) 
                 
                 <!-- セリフ吹き出し -->
                 <div class="tamaki-speech-bubble">
-                    <div class="tamaki-name">🌸⚡超電磁巫女🌸⚡<BR>七曜院パラドキサ環</div>
+                    <div class="tamaki-name">🌸 七曜院パラドキサ環</div>
                     <div class="tamaki-speech-text">${speech}</div>
                 </div>
             </div>
@@ -234,6 +234,9 @@ const TAMAKI_CSS = `
     background: linear-gradient(135deg, #ffffff 0%, #fffdf7 100%);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .tenun-index-container h4 {
@@ -267,6 +270,8 @@ const TAMAKI_CSS = `
     display: flex;
     gap: 15px;
     align-items: flex-start;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 /* 環ちゃんキャラクター */
@@ -315,12 +320,15 @@ const TAMAKI_CSS = `
 /* セリフ吹き出し */
 .tamaki-speech-bubble {
     flex: 1;
+    min-width: 0;  /* flexアイテムがはみ出さないように */
     background: white;
     border: 2px solid #d6a300;
     border-radius: 15px;
     padding: 15px;
     position: relative;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    word-wrap: break-word;  /* 長い文字列を折り返し */
 }
 
 /* 吹き出しの三角 */
@@ -372,19 +380,30 @@ const TAMAKI_CSS = `
 
 /* モバイル対応 */
 @media (max-width: 600px) {
+    .tenun-index-container {
+        margin: 20px 10px;
+        padding: 15px;
+    }
+    
     .tamaki-display {
-        flex-direction: column;
-        align-items: center;
+        flex-direction: row;  /* 横並びを維持 */
+        gap: 10px;
     }
     
     .tamaki-character {
-        width: 70px;   /* モバイルではさらに小さく */
-        height: 70px;
+        width: 60px;   /* モバイルではさらに小さく */
+        height: 60px;
+    }
+    
+    .tamaki-speech-bubble {
+        padding: 12px;
+        font-size: 0.9em;
     }
     
     .tamaki-speech-bubble::before,
     .tamaki-speech-bubble::after {
-        display: none;
+        /* 三角を小さく */
+        border-width: 8px 10px 8px 0;
     }
 }
 </style>
