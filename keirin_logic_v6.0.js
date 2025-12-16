@@ -1030,7 +1030,6 @@ async function calculatePrediction() {
 } 
 
 // ========== 表示関数: displayResults (複数競り表示と文章修正) ==========
-// 以下、表示に関する関数は、機能ロジックに影響がないため、元のコードを維持し、ログ出力のみを強化
 // ... [getStrengthColor 関数]
 function getStrengthColor(score, minScore, maxScore) {
     if (maxScore === minScore) return 'rgb(142, 142, 142)';
@@ -1122,7 +1121,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             const textColorC = getTextColor(rgbColorC);
 
             displayHtml += `<span class="seri-segment">(`;
-            displayHtml += `<span class="line-box strength-color" style="background-color: ${rgbColorF}; color: ${textColorF};">${followerId}</span>`;
+            displayHtml += `<span class="line-box strength-color" style="background-color: ${rgbColorF}; color: ${textColorF};">${followerId}}</span>`;
             displayHtml += `<span class="seri-arrow">←</span>`; 
             displayHtml += `<span class="line-box strength-color" style="background-color: ${rgbColorC}; color: ${textColorC};">${contenderId}</span>`;
             displayHtml += `)</span>`;
@@ -1222,36 +1221,54 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         }).join(''); 
     } 
 
-    // --- ☀️ 晴天令 (安定推奨) の表示 (変更なし) --- 
+    // --- ☀️ 晴天令 (安定推奨) の表示 (旧ロジック) --- 
+    // ※ ここから、新戦略に基づくロジックに置き換わります。
+    
     const seitenreiRanking = Object.keys(seitenreiIntegratedScores).map(id => ({ id: Number(id), score: seitenreiIntegratedScores[id] / detailedScenarioResults.length })).sort((a, b) => b.score - a.score); 
     const seitenTop3 = seitenreiRanking.slice(0, 3).map(p => p.id); 
-    const seitenTop4 = seitenreiRanking.slice(0, 4).map(p => p.id); 
     
-    const seitenTritan = [ 
-        `${seitenTop3[0]}-${seitenTop3[1]}-${seitenTop3[2]}`, 
-        `${seitenTop3[0]}-${seitenTop3[2]}-${seitenTop3[1]}`, 
-        `${seitenTop3[1]}-${seitenTop3[0]}-${seitenTop3[2]}` 
-    ].join(', '); 
+    // ====================================================================================
+    // 💡【修正箇所】☀️ 晴天令 (3連単3: 3連複1: 2車単1) の新10点戦略適用 
+    // ====================================================================================
     
-    const triSeiten1 = [...seitenTop4.slice(0, 3)].sort((a, b) => a - b).join('='); 
+    // A, B, C の定義 (晴天令TOP3)
+    const A = seitenTop3[0] || 'N/A';
+    const B = seitenTop3[1] || 'N/A';
+    const C = seitenTop3[2] || 'N/A';
+
+    // 1. 3連単 (3点): A-B-C, A-C-B, B-A-C
+    let seitenTritan = [];
+    if (A && B && C) {
+        seitenTritan.push(`${A}-${B}-${C}`);
+        seitenTritan.push(`${A}-${C}-${B}`);
+        seitenTritan.push(`${B}-${A}-${C}`); // B-Aの逆転も3連単で高回収
+    }
     
-    let triSeiten2; 
-    if (seitenTop4.length >= 4) { 
-        triSeiten2 = [seitenTop4[0], seitenTop4[1], seitenTop4[3]].sort((a, b) => a - b).join('='); 
-    } else { 
-        triSeiten2 = 'データ不足'; 
-    } 
-    
-    const seitenTrifuku = [triSeiten1, triSeiten2].join(', '); 
+    // 2. 3連複 (1点): A=B=C
+    let seitenTrifuku = [];
+    if (A && B && C) {
+        seitenTrifuku.push([A, B, C].sort((a, b) => a - b).join('='));
+    }
+
+    // 3. 2車単 (1点): A-B (順当決着の最終保険)
+    let seitenFukushiki = [];
+    if (A && B) {
+        seitenFukushiki.push(`${A}-${B}`);
+    }
     
     const seitenreiOutput = document.getElementById('seitenrei-output'); 
     if (seitenreiOutput) { 
         seitenreiOutput.innerHTML = ` 
-            三連単 (3点): <strong>${seitenTritan}</strong><br> 
-            三連複 (2点): <strong>${seitenTrifuku}</strong> `; 
+            <p style="font-size: 1.1em; font-weight: bold; color: #2980b9;">☀️ 晴天令 (回収特化: 5点)</p>
+            三連単 (3点): <strong>${seitenTritan.join(', ')}</strong><br> 
+            三連複 (1点): <strong>${seitenTrifuku.join(', ')}</strong><br> 
+            二車単 (1点): <strong>${seitenFukushiki.join(', ')}</strong>
+        `; 
     } 
 
-    // --- ⛈️ 荒天令 (高配当狙い) の表示 (変更なし) --- 
+    // --- ⛈️ 荒天令 (高配当狙い) の表示 (旧ロジック) ---
+    // ※ ここから、新戦略に基づくロジックに置き換わります。
+    
     const koutenreiRanking = Object.keys(koutenreiIntegratedScores).map(id => ({ id: Number(id), score: koutenreiIntegratedScores[id] / detailedScenarioResults.length, rank: 0 
     })).sort((a, b) => b.score - a.score); 
     
@@ -1260,40 +1277,43 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     const koutenTop3 = koutenreiRanking.slice(0, 3).map(p => p.id); 
     const koutenTop4 = koutenreiRanking.slice(0, 4).map(p => p.id); 
     
-    const koutenLeader = koutenTop4.length >= 4 ? koutenTop4[3] : null; 
-    let koutenTrifuku = []; 
+    // A, B, C (荒天令のTOP3)
+    const kA = koutenTop3[0] || 'N/A';
+    const kB = koutenTop3[1] || 'N/A';
+    const kC = koutenTop3[2] || 'N/A';
+    // L (特異点: 荒天令の4位)
+    const kL = koutenTop4.length >= 4 ? koutenTop4[3] : null; 
 
-    if (koutenLeader) { 
-        koutenTrifuku.push([koutenLeader, koutenTop3[0], koutenTop3[1]].sort((a, b) => a - b).join('=')); 
-        koutenTrifuku.push([koutenLeader, koutenTop3[0], koutenTop3[2]].sort((a, b) => a - b).join('=')); 
-        koutenTrifuku.push([koutenLeader, koutenTop3[1], koutenTop3[2]].sort((a, b) => a - b).join('=')); 
-    } 
+    // ====================================================================================
+    // 💡【修正箇所】⛈️ 荒天令 (3連複2: 2車単2: 2車複1) の新10点戦略適用 
+    // ====================================================================================
 
-    const middleWaveRiders = koutenreiRanking.filter(p => p.rank === 5 || p.rank === 6).map(p => p.id); 
-    
-    if (middleWaveRiders.length > 0) { 
-        const mainWaveRider = middleWaveRiders[0]; 
+    let koutenTrifuku = [];
+    let koutenFukushiki = []; // 2車単
+    let koutenFukusho = []; // 2車複
 
-        const axis1 = koutenTop3[0]; 
-        const axis2 = koutenTop3.length >= 2 ? koutenTop3[1] : null; 
-        const firmHimo = koutenLeader; 
+    if (kA && kB && kC && kL) {
+        
+        // 1. 3連複 (2点): A=B=L, A=C=L (L軸の守りの核)
+        koutenTrifuku.push([kA, kB, kL].sort((a, b) => a - b).join('='));
+        koutenTrifuku.push([kA, kC, kL].sort((a, b) => a - b).join('='));
+        
+        // 2. 2車単 (2点): L-A, B-A (L軸の攻めと変動の攻め)
+        koutenFukushiki.push(`${kL}-${kA}`); // LがAを差す超高配当
+        koutenFukushiki.push(`${kB}-${kA}`); // B-Aの逆転という発生率の高い変動攻め
+        
+        // 3. 2車複 (1点): A=L (L軸の堅実な中穴保険)
+        koutenFukusho.push([kA, kL].sort((a, b) => a - b).join('='));
+    }
 
-            if (axis1 && firmHimo && mainWaveRider) { 
-            if (koutenTrifuku.length < 6) { 
-                koutenTrifuku.push([mainWaveRider, axis1, firmHimo].sort((a, b) => a - b).join('=')); 
-            } 
-            if (axis2 && koutenTrifuku.length < 6) { 
-                koutenTrifuku.push([mainWaveRider, axis2, firmHimo].sort((a, b) => a - b).join('=')); 
-            } 
-        } 
-    } 
-
-    const finalKoutenTrifuku = koutenTrifuku.slice(0, 6).join(', '); 
-    
     const koutenreiOutput = document.getElementById('koutenrei-output'); 
     if (koutenreiOutput) { 
         koutenreiOutput.innerHTML = ` 
-            ⚫ 特異点 : **${koutenLeader ? koutenLeader : 'N/A'}**<br> 
-            三連複 (${koutenTrifuku.slice(0, 6).length}点): <strong>${finalKoutenTrifuku}</strong> `; 
+            <p style="font-size: 1.1em; font-weight: bold; color: #e74c3c;">⛈️ 荒天令 (変動・攻め: 5点)</p>
+            ⚫ 特異点 (L) : **${kL ? kL : 'N/A'}**<br>
+            三連複 (2点): <strong>${koutenTrifuku.join(', ')}</strong><br>
+            二車単 (2点): <strong>${koutenFukushiki.join(', ')}</strong><br>
+            二車複 (1点): <strong>${koutenFukusho.join(', ')}</strong>
+        `; 
     }
 }
