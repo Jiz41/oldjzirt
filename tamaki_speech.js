@@ -167,6 +167,11 @@ function getTamakiExpression(tenunIndex, isIchiyo = false) {
  * @returns {string} HTML文字列
  */
 function generateTamakiTenunHTML(tenunIndex, isIchiyo = false, playerId = null) {
+    // デバッグログに天雲指数を出力
+    if (typeof logMessage === 'function') {
+        logMessage(`[TENUN] 天雲指数: ${tenunIndex} ${isIchiyo ? '(壱耀晴乾ノ象発動)' : ''}`);
+    }
+    
     const speech = getTamakiSpeech(tenunIndex, isIchiyo, playerId);
     const expression = getTamakiExpression(tenunIndex, isIchiyo);
     
@@ -268,8 +273,8 @@ const TAMAKI_CSS = `
 /* 環ちゃん表示エリア */
 .tamaki-display {
     display: flex;
-    gap: 15px;
-    align-items: flex-start;
+    gap: 10px;
+    align-items: center;  /* flex-start → center に変更 */
     max-width: 100%;
     box-sizing: border-box;
 }
@@ -320,39 +325,39 @@ const TAMAKI_CSS = `
 /* セリフ吹き出し */
 .tamaki-speech-bubble {
     flex: 1;
-    min-width: 0;  /* flexアイテムがはみ出さないように */
+    min-width: 0;
     background: white;
     border: 2px solid #d6a300;
     border-radius: 15px;
-    padding: 15px;
+    padding: 12px;  /* 15px → 12px に縮小 */
     position: relative;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
-    word-wrap: break-word;  /* 長い文字列を折り返し */
+    word-wrap: break-word;
 }
 
 /* 吹き出しの三角 */
 .tamaki-speech-bubble::before {
     content: '';
     position: absolute;
-    left: -12px;
+    left: -10px;  /* -12px → -10px */
     top: 20px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 10px 12px 10px 0;
+    border-width: 8px 10px 8px 0;  /* 少し小さく */
     border-color: transparent #d6a300 transparent transparent;
 }
 
 .tamaki-speech-bubble::after {
     content: '';
     position: absolute;
-    left: -8px;
+    left: -6px;  /* -8px → -6px */
     top: 22px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 8px 10px 8px 0;
+    border-width: 6px 8px 6px 0;  /* 少し小さく */
     border-color: transparent white transparent transparent;
 }
 
@@ -367,9 +372,9 @@ const TAMAKI_CSS = `
 }
 
 .tamaki-speech-text {
-    line-height: 1.7;
+    line-height: 1.6;  /* 1.7 → 1.6 */
     color: #333;
-    font-size: 0.95em;
+    font-size: 0.9em;  /* 0.95em → 0.9em */
 }
 
 /* マークダウン風の強調 */
@@ -391,8 +396,8 @@ const TAMAKI_CSS = `
     }
     
     .tamaki-character {
-        width: 60px;   /* モバイルではさらに小さく */
-        height: 60px;
+        width: 45px;   /* モバイルではさらに小さく */
+        height: 45px;
     }
     
     .tamaki-speech-bubble {
