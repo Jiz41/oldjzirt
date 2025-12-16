@@ -211,7 +211,7 @@ function generateTamakiTenunHTML(tenunIndex, isIchiyo = false, playerId = null) 
                 
                 <!-- セリフ吹き出し -->
                 <div class="tamaki-speech-bubble">
-                    <div class="tamaki-name">🌸 七曜院パラドキサ環</div>
+                    <div class="tamaki-name">🌸⚡超電磁巫女🌸⚡<BR>七曜院パラドキサ環</div>
                     <div class="tamaki-speech-text">${speech}</div>
                 </div>
             </div>
@@ -378,8 +378,8 @@ const TAMAKI_CSS = `
     }
     
     .tamaki-character {
-        width: 100px;
-        height: 120px;
+        width: 70px;   /* モバイルではさらに小さく */
+        height: 70px;
     }
     
     .tamaki-speech-bubble::before,
