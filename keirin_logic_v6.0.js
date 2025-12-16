@@ -1181,13 +1181,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     else if (tenunIndex === 67) messageClass = 'tenun-alert'; 
     else if (tenunIndex === 100) messageClass = 'tenun-severe'; 
 
-    const tenunHtml = ` 
-        <div class="tenun-index-container ${messageClass}"> 
-            <h4>⚫ 天雲指数（てんうんしすう）：${tenunIndex}</h4> 
-            <p class="fortune-teller-message"> 
-                <strong>🔮🐢</strong>＜${oracleMessage}＞ 
-            </p> 
-        </div> `; 
+    const tenunHtml = window.generateTamakiTenunHTML(tenunIndex, false, null); 
         
     const tenunOutput = document.getElementById('tenun-index-output'); 
     if (tenunOutput) { 
