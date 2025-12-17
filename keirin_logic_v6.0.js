@@ -921,6 +921,14 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
 
 // メイン計算関数 (calculatePrediction)
 async function calculatePrediction() { 
+    // 【演出追加】計算の前に「異相因果境界収束中」を表示
+    const tenunOutputArea = document.getElementById('tenun-index-output');
+    if (tenunOutputArea && typeof window.generateTamakiObservingHTML === 'function') {
+        tenunOutputArea.innerHTML = window.generateTamakiObservingHTML();
+    }
+    // 描画を反映させるための待機（0.1秒）
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     // バンクデータ読み込みチェック
     if (Object.keys(BANK_DATA).length === 0) { 
         logMessage("[WAIT] バンクデータの読み込みを待機します..."); 
