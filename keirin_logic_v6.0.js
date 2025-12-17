@@ -905,12 +905,7 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
                 if (isIntegrated) {
                     logMessage(`[ICHIOU] 壱耀晴乾ノ象 発動条件クリア: 選手ID ${axisPlayer.id} (天運${tenunIndex}_差し)`);
                     
-                    superiorMessage = `
-                        <p class="fortune-teller-message">
-                            <strong>🐢</strong>＜…むむ、これは..."壱耀晴乾ノ象"が出ておる！ 
-                            <strong>${axisPlayer.id}</strong> を絡めた三連単がひときわ光って見えるぞい！
-                            ただし！回収の極意はオッズにあり。荒れ過ぎる波に乗るでないぞ。ホッホッホ…＞
-                        </p>`;
+                    superiorMessage = window.generateTamakiTenunHTML(tenunIndex, true, axisPlayer.id);;
                 }
             }
         }
