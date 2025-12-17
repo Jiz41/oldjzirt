@@ -284,11 +284,6 @@
             box-sizing: border-box;
         }
 
-        .player-field:nth-child(1) { flex: 1 1 23%; }
-        .player-field:nth-child(2) { flex: 1 1 27%; }
-        .player-field:nth-child(3) { flex: 1 1 20%; }
-        .player-field:nth-child(4) { flex: 1 1 25%; }
-
         .player-field label {
             display: block;
             font-size: 0.7em;
@@ -435,7 +430,7 @@
             opacity: 1;
         }
 
-        /* 💡 天雲指数コンテナの状態別デザイン */
+        /* 💡 天雲指数コンテナのデザイン */
         .tenun-index-container {
             margin: 20px 0;
             padding: 15px;
@@ -445,10 +440,27 @@
             background-color: #fff9e6;
         }
         
+        .tenun-title {
+            font-weight: bold;
+            font-size: 0.95em;
+            color: #8b6d00;
+            margin-bottom: 10px;
+            display: block;
+            border-bottom: 1px solid rgba(139, 109, 0, 0.2);
+            padding-bottom: 5px;
+        }
+
         .tenun-stable { border: 2px solid #557755 !important; background-color: #e6f5e6 !important; }
+        .tenun-stable .tenun-title { color: #557755 !important; border-bottom: 1px solid rgba(85, 119, 85, 0.2); }
+        
         .tenun-mild { border: 2px dashed #698b69 !important; background-color: #f7fff7 !important; }
+        .tenun-mild .tenun-title { color: #698b69 !important; border-bottom: 1px solid rgba(105, 139, 105, 0.2); }
+
         .tenun-alert { border: 2px dashed #d6a300 !important; background-color: #fff9e6 !important; }
+        .tenun-alert .tenun-title { color: #d6a300 !important; border-bottom: 1px solid rgba(214, 163, 0, 0.2); }
+
         .tenun-severe { border: 2px solid #c07777 !important; background-color: #fcf0f0 !important; }
+        .tenun-severe .tenun-title { color: #c07777 !important; border-bottom: 1px solid rgba(192, 119, 119, 0.2); }
 
         .copyright-footer {
             text-align: center;
@@ -494,6 +506,7 @@
             font-size: 0.9em;
             line-height: 1.4;
             box-sizing: border-box;
+            position: relative;
         }
 
         @media (max-width: 600px) {
@@ -556,7 +569,7 @@
                 <li>**記述例1 (1番手で競り):** <code>1(3)2, 45</code></li>
                 <li>**記述例2 (3番手で競り):** <code>123(4), 56</code></li>
             </ul>
-            <p>※競りが発生した場合、結果表示エリア（フロントエンド側）では、選手IDボックスが連続して表示され、競り選手には特別な装飾が施されます。</p>
+            <p>※競りが発生した場合、結果表示エリアでは選手IDが連続して表示されます。</p>
 
             <h3>📝 選手個別データの入力</h3>
             <table>
@@ -570,7 +583,7 @@
                 </tr>
                 <tr>
                     <td>**S 1位 / B 1位**</td>
-                    <td>**S（上がり）**と**B（バック）**の1着候補を、それぞれ1名選択します。展開パターン生成に影響します。</td>
+                    <td>**S（上がり）**と**B（バック）**の1着候補を、それぞれ1名選択します。</td>
                 </tr>
                 <tr>
                     <td>**脚質**</td>
@@ -578,7 +591,7 @@
                 </tr>
                 <tr>
                     <td>**得点 (R)**</td>
-                    <td>競走得点を入力します。予測の根幹となる最重要データです。</td>
+                    <td>競走得点を入力します。</td>
                 </tr>
                 <tr>
                     <td>**W印**</td>
@@ -586,15 +599,16 @@
                 </tr>
                 <tr>
                     <td>**直近3走**</td>
-                    <td>直近3レースの着順を**最新の着順から**入力します（例: `111`、`231`）。</td>
+                    <td>直近3レースの着順を**最新の着順から**入力します（例: `111`）。</td>
                 </tr>
             </table>
             <h3>📊 予想結果・推奨買い目エリア</h3>
             <ul>
-                <li>**晴天令 (安定推奨):** 最も安定し、堅い決着が予想される展開パターンを重視した推奨買い目です。</li>
-                <li>**荒天令 (高配当狙い):** 波乱の可能性が高く、高配当が期待できる展開パターンを重視した推奨買い目です。</li>
+                <li>**晴天令 (安定推奨):** 最も安定し、堅い決着が予想される推奨買い目です。</li>
+                <li>**荒天令 (高配当狙い):** 波乱の可能性が高く、高配当が期待できる推奨買い目です。</li>
             </ul>
         </div>
+
         <h2>🎛️ レース/選手情報入力</h2>
         <div class="input-group">
             <div class="input-item">
@@ -643,10 +657,11 @@
             </div>
             <div class="local-switch-group">
                 <input type="checkbox" id="local-switch">
-                <label for="local-switch">🎌 **地元スイッチ ON** (地元利の補正係数を適用)</label>
+                <label for="local-switch">🎌 **地元スイッチ ON**</label>
             </div>
             <button onclick="calculatePrediction()">🚀 予想を計算 (実行)</button>
         </div>
+
         <div id="results-container">
             <h2>📊 予想結果・推奨買い目</h2>
             <div class="result-section">
@@ -665,6 +680,7 @@
             </div>
         </div>
     </div>
+
     <div class="debug-log-header" onclick="toggleDebugLog()">
         <span id="log-toggle-icon">▶</span> 🛠️ デバッグ・処理ログ
     </div>
