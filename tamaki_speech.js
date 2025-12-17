@@ -1,7 +1,7 @@
 /**
  * tamaki_speech.js
- * 七曜院パラドキサ環 - 天雲指数セリフシステム (Ver 1.1)
- * 修正内容: モバイルサイズ最適化、数値のユーザー非表示化
+ * 七曜院パラドキサ環 - 天雲指数セリフシステム (Ver 1.2)
+ * 修正内容: 天雲指数タイトルの常時出力対応、モバイルサイズ最適化
  */
 
 // ========================================
@@ -16,7 +16,7 @@ const TAMAKI_SPEECHES = {
         "はぁい、神託が降りましたぁ。これは**天が祝福している**ような穏やかさですぅ。晴天令の上位陣、間違いないと思いますぅ!",
         "ふふっ、良いお知らせですぅ♪ **波乱の要素がほぼゼロ**なんですぅ。安心して本命筋を狙ってくださいねー",
         "演算完了ですぅ! これはもう、**法則が完璧に調和している**証ですぅ。晴天令の決着、ほぼ確実かとー",
-        "わぁ、すごいですぅ! 今日は**天の巡りが完璧**なんですねぇ。晴天令を信じて、堅く攻めましょうぅ♪",
+        "わぁ,すごいですぅ! 今日は**天の巡りが完璧**なんですねぇ。晴天令を信じて、堅く攻めましょうぅ♪",
         "神託の結果、**最高レベルの安定性**を示していますぅ。迷わず晴天令でどうぞですぅ!",
         "えへへ、良い神託ですぅ♪ まるで**雲一つない晴天**のような状態ですぅ。今日は堅い決着、間違いなしですよぉ!"
     ],
@@ -40,9 +40,9 @@ const TAMAKI_SPEECHES = {
         "あわわ…これ、けっこう**危険な神託**なんですぅ。実力上位が飛ぶかもしれませんぅ。荒天令、真剣に考えた方が…",
         "演算結果ですぅ。**天の法則が揺らいいでいる**感じがしますねぇ。波乱に備えて、荒天令を重視してみてくださいぃ",
         "うぅ…ちょっと困った神託が出てしまいましたぁ。これは**荒天の気配が強い**ですぅ。晴天令より、荒天令の買い目を優先した方が良いかもですぅ",
-        "ふわぁ、これは…**かなり波乱含み**ですぅ。堅い決着は期待しない方が…荒天令、要チェックですよぉ!",
+        "ふわぁ,これは…**かなり波乱含み**ですぅ。堅い決着は期待しない方が…荒天令、要チェックですよぉ!",
         "はいー、神託を確認しましたぁ。**乱れた気配が濃厚**ですぅ。荒天令の特異点を軸に考えた方が賢明かもですぅ",
-        "あのぉ…この神託、**けっこう荒れるサイン**なんですぅ。本命より穴狙いの方が良いかもしれませんねぇ"
+        "あのぉ…この神託、**けっけう荒れるサイン**なんですぅ。本命筋より穴狙いの方が良いかもしれませんねぇ"
     ],
     index_100: [
         "【警告】最大級の波乱を検知。実力通りの決着は期待できません。荒天令の買い目を最優先で実行してください。演算プロセス、完了。",
@@ -106,17 +106,31 @@ function getTamakiExpression(tenunIndex, isIchiyo = false) {
     else return TAMAKI_EXPRESSIONS.index_100;
 }
 
+/**
+ * HTMLを生成して返す
+ */
 function generateTamakiTenunHTML(tenunIndex, isIchiyo = false, playerId = null) {
     if (typeof logMessage === 'function') {
         logMessage(`[TENUN] 天雲指数: ${tenunIndex} ${isIchiyo ? '(壱耀晴乾ノ象発動)' : ''}`);
     }
     const speech = getTamakiSpeech(tenunIndex, isIchiyo, playerId);
     const expression = getTamakiExpression(tenunIndex, isIchiyo);
+    
+    // カードのスタイルクラス決定
     let cardClass = isIchiyo ? 'tenun-ichiyo' : (tenunIndex === 0 ? 'tenun-stable' : (tenunIndex <= 50 ? 'tenun-mild' : (tenunIndex <= 83 ? 'tenun-alert' : 'tenun-severe')));
-    const expressionImages = { 'smile': 'tamaki_smile.png', 'normal': 'tamaki_normal.png', 'worried': 'tamaki_worried.png', 'shocked': 'tamaki_shocked.png', 'excited': 'tamaki_smile.png' };
+    
+    const expressionImages = { 
+        'smile': 'tamaki_smile.png', 
+        'normal': 'tamaki_normal.png', 
+        'worried': 'tamaki_worried.png', 
+        'shocked': 'tamaki_shocked.png', 
+        'excited': 'tamaki_smile.png' 
+    };
     const expressionImagePath = expressionImages[expression] || expressionImages['normal'];
 
+    // 💡 重要: 戻り値の先頭に「天雲指数」というタイトルを配置するようにしました
     return `
+        <span class="tenun-title" style="font-weight: bold; font-size: 0.95em; color: #8b6d00; margin-bottom: 8px; display: block;">天雲指数</span>
         <div class="tenun-index-container ${cardClass}">
             <div class="tamaki-display">
                 <div class="tamaki-character">
@@ -133,8 +147,14 @@ function generateTamakiTenunHTML(tenunIndex, isIchiyo = false, playerId = null) 
 
 const TAMAKI_CSS = `
 <style>
+/* タイトルのスタイル */
+.tenun-title {
+    border-bottom: 1px solid rgba(139, 109, 0, 0.2);
+    padding-bottom: 4px;
+}
+
 .tenun-index-container {
-    margin: 20px 15px; padding: 20px; border-radius: 12px; border: 3px solid;
+    margin: 5px 0 20px 0; padding: 20px; border-radius: 12px; border: 3px solid;
     background: linear-gradient(135deg, #ffffff 0%, #fffdf7 100%);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: all 0.3s ease;
 }
@@ -164,7 +184,7 @@ const TAMAKI_CSS = `
 .tamaki-speech-text strong { color: #c07777; font-weight: bold; }
 
 @media (max-width: 600px) {
-    .tenun-index-container { margin: 15px 5px; padding: 12px; }
+    .tenun-index-container { margin: 5px 0 15px 0; padding: 12px; }
     .tamaki-character { width: 75px; }
     .tamaki-speech-bubble { padding: 10px; }
     .tamaki-speech-text { font-size: 0.85em; line-height: 1.5; }
