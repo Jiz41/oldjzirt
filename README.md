@@ -1,10 +1,9 @@
 ---
 title: 華耀天輪 真・自在律
-emoji: 📊
+emoji: 🌸
 colorFrom: gray
-colorTo: indigo
+colorTo: blue
 sdk: static
-pinned: false
+pinned: true
 ---
-
 Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
