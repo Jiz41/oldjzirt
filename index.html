@@ -504,52 +504,7 @@
             opacity: 1;
         }
 
-        /* 💡 修正: 天雲指数コンテナのクラス定義を追加 (JSの結果に応じて色が変わる) */
-        .tenun-index-container {
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            
-            border: 2px dashed #d6a300;
-            background-color: #fff9e6;
-        }
-        /* 晴天令 (安定) */
-        .tenun-stable {
-            border: 2px solid #557755;
-            background-color: #e6f5e6;
-        }
-        /* 穏やか (中間) */
-        .tenun-mild {
-            border: 2px dashed #698b69;
-            background-color: #f7fff7;
-        }
-        /* 荒天予報 (アラート) */
-        .tenun-alert {
-            border: 2px dashed #d6a300;
-            background-color: #fff9e6;
-        }
-        /* 荒天令 (波乱) */
-        .tenun-severe {
-            border: 2px solid #c07777;
-            background-color: #fcf0f0;
-        }
-
-        .tenun-gauge {
-            font-family: monospace;
-            white-space: pre;
-            font-size: 1.3em;
-            line-height: 1.0;
-            margin: 10px 0;
-            overflow-x: auto;
-            display: inline-block;
-            color: #698b69;
-        }
-
-        .tenun-description {
-            font-size: 0.95em;
-            color: #a37200;
-        }
+        /* 💡 古い天雲指数コンテナとゲージの設定は、たまきちゃんシステム側と衝突するため削除済み */
 
         .copyright-footer {
             text-align: center;
@@ -571,6 +526,24 @@
         .fortune-teller-message strong {
             color: #c07777;
             font-weight: bold;
+        }
+
+        /* モバイル用強制上書き設定：たまきちゃんの画像サイズを固定 */
+        @media (max-width: 600px) {
+            .tamaki-character {
+                width: 75px !important;
+                min-width: 75px !important;
+                height: auto !important;
+            }
+            .tamaki-image {
+                width: 100% !important;
+                height: auto !important;
+                max-width: 75px !important;
+            }
+            .tamaki-display {
+                display: flex !important;
+                align-items: flex-start !important;
+            }
         }
     </style>
 </head>
@@ -623,7 +596,7 @@
                 </tr>
                 <tr>
                     <td>**競られる選手**の後ろに、**競る選手を半角カッコで囲んで**記入します。</td>
-                    <td>競りが発生した箇所をシステムに正確に伝達し、競合パターンのシミュレーションに反映させます。</td>
+                    <td>競りが発生した箇所をシステムに正確に伝達し、競合パターをシミュレーションに反映させます。</td>
                 </tr>
             </table>
             <ul>
@@ -1020,13 +993,8 @@
                 <div id="line-display" class="line-display">
                     計算結果待ち...
                 </div>
-                <div class="tenun-index-container" id="tenun-index-output">
-                    <h4>⚫ 天雲指数（てんうんしすう）</h4>
-                    <pre class="tenun-gauge">
- 🌤️┃││││┃││││┃⛈️ 🐢
-                    </pre>
-                    <p class="tenun-description">計算結果待ち...</p>
-                </div>
+                <div id="tenun-index-output"></div>
+
                 <h3>☀️ 晴天令 (安定推奨)</h3>
                 <div class="recommendation" id="seitenrei-output">
                     計算結果待ち...
