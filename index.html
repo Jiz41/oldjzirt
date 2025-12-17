@@ -247,40 +247,13 @@
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
-        .id-1 .player-header {
-            background-color: #ffffff;
-            color: #333;
-        }
-
-        .id-2 .player-header {
-            background-color: #f0f0f0;
-            color: #333;
-        }
-
-        .id-3 .player-header {
-            background-color: #fff0f0;
-            color: #333;
-        }
-
-        .id-4 .player-header {
-            background-color: #f0f8ff;
-            color: #333;
-        }
-
-        .id-5 .player-header {
-            background-color: #fffaf0;
-            color: #333;
-        }
-
-        .id-6 .player-header {
-            background-color: #f0fff0;
-            color: #333;
-        }
-
-        .id-7 .player-header {
-            background-color: #fff5ee;
-            color: #333;
-        }
+        .id-1 .player-header { background-color: #ffffff; color: #333; }
+        .id-2 .player-header { background-color: #f0f0f0; color: #333; }
+        .id-3 .player-header { background-color: #fff0f0; color: #333; }
+        .id-4 .player-header { background-color: #f0f8ff; color: #333; }
+        .id-5 .player-header { background-color: #fffaf0; color: #333; }
+        .id-6 .player-header { background-color: #f0fff0; color: #333; }
+        .id-7 .player-header { background-color: #fff5ee; color: #333; }
         
         .local-group {
             display: flex;
@@ -311,21 +284,10 @@
             box-sizing: border-box;
         }
 
-        .player-field:nth-child(1) {
-            flex: 1 1 23%;
-        }
-
-        .player-field:nth-child(2) {
-            flex: 1 1 27%;
-        }
-
-        .player-field:nth-child(3) {
-            flex: 1 1 20%;
-        }
-
-        .player-field:nth-child(4) {
-            flex: 1 1 25%;
-        }
+        .player-field:nth-child(1) { flex: 1 1 23%; }
+        .player-field:nth-child(2) { flex: 1 1 27%; }
+        .player-field:nth-child(3) { flex: 1 1 20%; }
+        .player-field:nth-child(4) { flex: 1 1 25%; }
 
         .player-field label {
             display: block;
@@ -359,17 +321,12 @@
             margin-left: 2px;
         }
 
-        #line-strength {
-            padding: 8px 0;
-            font-size: 1.1em;
-        }
-
         .line-display {
             display: flex;
             flex-wrap: wrap;
             gap: 5px;
             margin-top: 5px;
-            align-items: center; /* 競り表示の縦位置を揃える */
+            align-items: center;
         }
 
         .line-box {
@@ -377,34 +334,28 @@
             padding: 2px 6px;
             border-radius: 4px;
             font-weight: bold;
-            margin-right: 0px; /* 競りの並びに合わせるため削除 */
             font-size: 0.9em;
             transition: background-color 0.5s, color 0.5s;
             line-height: 1.5;
         }
 
-        /* 競りセグメント全体のスタイル: (2←3) */
         .seri-segment {
             display: inline-flex;
             align-items: center;
             font-size: 0.9em;
             font-weight: bold;
-            /* 競り全体に軽めの枠線を適用して一体感を持たせる */
             border: 1px dashed #b3c7b3;
             border-radius: 4px;
             padding: 1px 3px;
             margin-right: 5px;
         }
         
-        /* 競りの中の矢印のスタイル */
         .seri-arrow {
             font-size: 1.1em;
             font-weight: bold;
-            color: #c07777; /* 赤系の色で競合を強調 */
+            color: #c07777;
             margin: 0 2px;
         }
-
-        /* 競りの中の選手ボックスは個別の line-box スタイルが適用される */
 
         #bank-tendency-display {
             margin-top: 5px;
@@ -430,15 +381,8 @@
             word-break: break-all;
         }
 
-        .scenario-detail th {
-            background-color: #f7f7f7;
-            color: #555;
-        }
-
-        /* 💡 修正: シミュレーション詳細のスコア/ランクを非表示にするCSSを明確に定義 */
-        .hide-score-rank {
-            display: none !important;
-        }
+        .scenario-detail th { background-color: #f7f7f7; color: #555; }
+        .hide-score-rank { display: none !important; }
 
         .recommendation {
             padding: 12px;
@@ -449,17 +393,8 @@
             line-height: 1.6;
         }
 
-        #seitenrei-output {
-            background-color: #e6f5e6;
-            border-left: 5px solid #698b69;
-            color: #444;
-        }
-
-        #koutenrei-output {
-            background-color: #fcf0f0;
-            border-left: 5px solid #c07777;
-            color: #444;
-        }
+        #seitenrei-output { background-color: #e6f5e6; border-left: 5px solid #698b69; color: #444; }
+        #koutenrei-output { background-color: #fcf0f0; border-left: 5px solid #c07777; color: #444; }
 
         .scenario-detail {
             border: 1px dashed #dcdcdc;
@@ -489,10 +424,6 @@
             transition: background-color 0.3s;
         }
 
-        button:hover {
-            background-color: #557755;
-        }
-
         #results-container {
             display: none;
             opacity: 0;
@@ -504,17 +435,16 @@
             opacity: 1;
         }
 
-        /* 💡 天雲指数コンテナの基本デザイン（JS側の tamaki_speech.js と協調） */
+        /* 💡 天雲指数コンテナの状態別デザイン */
         .tenun-index-container {
             margin: 20px 0;
             padding: 15px;
             border-radius: 8px;
-            text-align: left; /* たまきちゃんの横並びを崩さない */
-            border: 2px dashed #d6a300; /* デフォルトの破線 */
+            text-align: left;
+            border: 2px dashed #d6a300;
             background-color: #fff9e6;
         }
         
-        /* 状態に応じた動的デザイン */
         .tenun-stable { border: 2px solid #557755 !important; background-color: #e6f5e6 !important; }
         .tenun-mild { border: 2px dashed #698b69 !important; background-color: #f7fff7 !important; }
         .tenun-alert { border: 2px dashed #d6a300 !important; background-color: #fff9e6 !important; }
@@ -529,41 +459,45 @@
             padding: 15px; 
             box-sizing: border-box;
         }
-        
-        /* 壱耀晴乾ノ象 (いちようせいかんのしょう) 用メッセージスタイル */
-        .fortune-teller-message {
-            margin-top: 10px;
-            font-size: 1.0em;
-            line-height: 1.5;
-            text-align: center;
-        }
-        .fortune-teller-message strong {
-            color: #c07777;
-            font-weight: bold;
+
+        /* ------------------------------------------------------------
+           🚨 たまきちゃん画像サイズ強制制御設定
+        ------------------------------------------------------------ */
+        .tamaki-display {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: flex-start !important;
         }
 
-        /* 🚀 最重要：スマホでのたまきちゃんのサイズ・レイアウト強制固定設定 */
+        .tamaki-character {
+            width: 75px !important;
+            min-width: 75px !important;
+            max-width: 75px !important;
+            height: auto !important;
+            margin-right: 12px !important;
+            flex-shrink: 0 !important;
+        }
+
+        .tamaki-image {
+            width: 100% !important;
+            height: auto !important;
+            display: block !important;
+        }
+
+        .tamaki-speech-bubble {
+            flex: 1 !important;
+            min-width: 0 !important;
+            background: white;
+            border: 2px solid #d6a300;
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 0.9em;
+            line-height: 1.4;
+            box-sizing: border-box;
+        }
+
         @media (max-width: 600px) {
-            .tamaki-character {
-                width: 75px !important;
-                min-width: 75px !important;
-                height: auto !important;
-                margin-right: 10px !important;
-            }
-            .tamaki-image {
-                width: 100% !important;
-                height: auto !important;
-                max-width: 75px !important;
-            }
-            .tamaki-display {
-                display: flex !important;
-                flex-direction: row !important;
-                align-items: flex-start !important;
-            }
-            .tamaki-speech-bubble {
-                flex: 1 !important;
-                margin-top: 0 !important;
-            }
+            .tamaki-character { width: 70px !important; min-width: 70px !important; }
         }
     </style>
 </head>
@@ -574,8 +508,7 @@
             <h1>華耀天輪 真・自在律</h1>
         </header>
         
-        <div id="maxim-display-container">
-        </div>
+        <div id="maxim-display-container"></div>
 
         <div class="manual-header" onclick="toggleManual()">
             <span id="manual-toggle-icon">▶</span> 📖 操作説明書・マニュアル
@@ -679,324 +612,33 @@
             </div>
             <p><strong>選手データ入力 (7名)</strong></p>
             <div class="player-input-list" id="player-data">
-                <div class="player-row id-1" data-id="1">
-                    <div class="player-header">
-                        <span>選手ID 1</span>
-                        <div class="local-group">
-                            <label for="local-1">地元:</label>
-                            <input type="checkbox" id="local-1" class="is-local">
-                        </div>
-                        <div class="local-group" style="color: #c07777; margin-left: 10px;">
-                            <label for="scratch-1">欠場:</label>
-                            <input type="checkbox" id="scratch-1" class="is-scratch">
-                        </div>
-                        <div class="sb-group">
-                            <label>S 1位: <input type="radio" name="s-leader" class="s1" data-id="1"></label>
-                            <label>B 1位: <input type="radio" name="b-leader" class="b1" data-id="1"></label>
-                        </div>
-                    </div>
-                    <div class="player-fields">
-                        <div class="player-field">
-                            <label>脚質</label>
-                            <select class="style">
-                                <option value="自">逃先</option>
-                                <option value="追">差マ</option>
-                                <option value="両">捲り</option>
-                            </select>
-                        </div>
-                        <div class="player-field">
-                            <label>得点 (R)</label>
-                            <input type="number" class="score" value="105.50">
-                        </div>
-                        <div class="player-field">
-                            <label>W印</label>
-                            <select class="wmark">
-                                <option value="◎">◎</option>
-                                <option value="〇">〇</option>
-                                <option value="✕">✕</option>
-                                <option value="△">△</option>
-                                <option value="無" selected>無</option>
-                            </select>
-                        </div>
-                        <div class="player-field">
-                            <label>直近3走</label>
-                            <input type="text" class="recent" value="111">
-                        </div>
-                    </div>
-                </div>
-                <div class="player-row id-2" data-id="2">
-                    <div class="player-header">
-                        <span>選手ID 2</span>
-                        <div class="local-group">
-                            <label for="local-2">地元:</label>
-                            <input type="checkbox" id="local-2" class="is-local">
-                        </div>
-                        <div class="local-group" style="color: #c07777; margin-left: 10px;">
-                            <label for="scratch-2">欠場:</label>
-                            <input type="checkbox" id="scratch-2" class="is-scratch">
-                        </div>
-                        <div class="sb-group">
-                            <label>S 1位: <input type="radio" name="s-leader" class="s1" data-id="2"></label>
-                            <label>B 1位: <input type="radio" name="b-leader" class="b1" data-id="2"></label>
-                        </div>
-                    </div>
-                    <div class="player-fields">
-                        <div class="player-field">
-                            <label>脚質</label>
-                            <select class="style">
-                                <option value="追">差マ</option>
-                                <option value="自">逃先</option>
-                                <option value="両">捲り</option>
-                            </select>
-                        </div>
-                        <div class="player-field">
-                            <label>得点 (R)</label>
-                            <input type="number" class="score" value="103.20">
-                        </div>
-                        <div class="player-field">
-                            <label>W印</label>
-                            <select class="wmark">
-                                <option value="◎">◎</option>
-                                <option value="〇">〇</option>
-                                <option value="✕">✕</option>
-                                <option value="△">△</option>
-                                <option value="無" selected>無</option>
-                            </select>
-                        </div>
-                        <div class="player-field">
-                            <label>直近3走</label>
-                            <input type="text" class="recent" value="211">
-                        </div>
-                    </div>
-                </div>
-                <div class="player-row id-3" data-id="3">
-                    <div class="player-header">
-                        <span>選手ID 3</span>
-                        <div class="local-group">
-                            <label for="local-3">地元:</label>
-                            <input type="checkbox" id="local-3" class="is-local">
-                        </div>
-                        <div class="local-group" style="color: #c07777; margin-left: 10px;">
-                            <label for="scratch-3">欠場:</label>
-                            <input type="checkbox" id="scratch-3" class="is-scratch">
-                        </div>
-                        <div class="sb-group">
-                            <label>S 1位: <input type="radio" name="s-leader" class="s1" data-id="3"></label>
-                            <label>B 1位: <input type="radio" name="b-leader" class="b1" data-id="3" checked></label>
-                        </div>
-                    </div>
-                    <div class="player-fields">
-                        <div class="player-field">
-                            <label>脚質</label>
-                            <select class="style">
-                                <option value="自">逃先</option>
-                                <option value="追">差マ</option>
-                                <option value="両">捲り</option>
-                            </select>
-                        </div>
-                        <div class="player-field">
-                            <label>得点 (R)</label>
-                            <input type="number" class="score" value="101.80">
-                        </div>
-                        <div class="player-field">
-                            <label>W印</label>
-                            <select class="wmark">
-                                <option value="◎">◎</option>
-                                <option value="〇">〇</option>
-                                <option value="✕">✕</option>
-                                <option value="△" selected>△</option>
-                                <option value="無">無</option>
-                            </select>
-                        </div>
-                        <div class="player-field">
-                            <label>直近3走</label>
-                            <input type="text" class="recent" value="444">
-                        </div>
-                    </div>
-                </div>
-                <div class="player-row id-4" data-id="4">
-                    <div class="player-header">
-                        <span>選手ID 4</span>
-                        <div class="local-group">
-                            <label for="local-4">地元:</label>
-                            <input type="checkbox" id="local-4" class="is-local">
-                        </div>
-                        <div class="local-group" style="color: #c07777; margin-left: 10px;">
-                            <label for="scratch-4">欠場:</label>
-                            <input type="checkbox" id="scratch-4" class="is-scratch">
-                        </div>
-                        <div class="sb-group">
-                            <label>S 1位: <input type="radio" name="s-leader" class="s1" data-id="4"></label>
-                            <label>B 1位: <input type="radio" name="b-leader" class="b1" data-id="4"></label>
-                        </div>
-                    </div>
-                    <div class="player-fields">
-                        <div class="player-field">
-                            <label>脚質</label>
-                            <select class="style">
-                                <option value="追">差マ</option>
-                                <option value="自">逃先</option>
-                                <option value="両">捲り</option>
-                            </select>
-                        </div>
-                        <div class="player-field">
-                            <label>得点 (R)</label>
-                            <input type="number" class="score" value="99.50">
-                        </div>
-                        <div class="player-field">
-                            <label>W印</label>
-                            <select class="wmark">
-                                <option value="◎">◎</option>
-                                <option value="〇">〇</option>
-                                <option value="✕">✕</option>
-                                <option value="△">△</option>
-                                <option value="無" selected>無</option>
-                            </select>
-                        </div>
-                        <div class="player-field">
-                            <label>直近3走</label>
-                            <input type="text" class="recent" value="333">
-                        </div>
-                    </div>
-                </div>
-                <div class="player-row id-5" data-id="5">
-                    <div class="player-header">
-                        <span>選手ID 5</span>
-                        <div class="local-group">
-                            <label for="local-5">地元:</label>
-                            <input type="checkbox" id="local-5" class="is-local">
-                        </div>
-                        <div class="local-group" style="color: #c07777; margin-left: 10px;">
-                            <label for="scratch-5">欠場:</label>
-                            <input type="checkbox" id="scratch-5" class="is-scratch">
-                        </div>
-                        <div class="sb-group">
-                            <label>S 1位: <input type="radio" name="s-leader" class="s1" data-id="5"></label>
-                            <label>B 1位: <input type="radio" name="b-leader" class="b1" data-id="5"></label>
-                        </div>
-                    </div>
-                    <div class="player-fields">
-                        <div class="player-field">
-                            <label>脚質</label>
-                            <select class="style">
-                                <option value="両">捲り</option>
-                                <option value="自">逃先</option>
-                                <option value="追">差マ</option>
-                            </select>
-                        </div>
-                        <div class="player-field">
-                            <label>得点 (R)</label>
-                            <input type="number" class="score" value="98.00">
-                        </div>
-                        <div class="player-field">
-                            <label>W印</label>
-                            <select class="wmark">
-                                <option value="◎">◎</option>
-                                <option value="〇">〇</option>
-                                <option value="✕">✕</option>
-                                <option value="△">△</option>
-                                <option value="無" selected>無</option>
-                            </select>
-                        </div>
-                        <div class="player-field">
-                            <label>直近3走</label>
-                            <input type="text" class="recent" value="555">
-                        </div>
-                    </div>
-                </div>
-                <div class="player-row id-6" data-id="6">
-                    <div class="player-header">
-                        <span>選手ID 6</span>
-                        <div class="local-group">
-                            <label for="local-6">地元:</label>
-                            <input type="checkbox" id="local-6" class="is-local">
-                        </div>
-                        <div class="local-group" style="color: #c07777; margin-left: 10px;">
-                            <label for="scratch-6">欠場:</label>
-                            <input type="checkbox" id="scratch-6" class="is-scratch">
-                        </div>
-                        <div class="sb-group">
-                            <label>S 1位: <input type="radio" name="s-leader" class="s1" data-id="6"></label>
-                            <label>B 1位: <input type="radio" name="b-leader" class="b1" data-id="6"></label>
-                        </div>
-                    </div>
-                    <div class="player-fields">
-                        <div class="player-field">
-                            <label>脚質</label>
-                            <select class="style">
-                                <option value="自">逃先</option>
-                                <option value="追">差マ</option>
-                                <option value="両">捲り</option>
-                            </select>
-                        </div>
-                        <div class="player-field">
-                            <label>得点 (R)</label>
-                            <input type="number" class="score" value="97.20">
-                        </div>
-                        <div class="player-field">
-                            <label>W印</label>
-                            <select class="wmark">
-                                <option value="◎">◎</option>
-                                <option value="〇">〇</option>
-                                <option value="✕">✕</option>
-                                <option value="△">△</option>
-                                <option value="無" selected>無</option>
-                            </select>
-                        </div>
-                        <div class="player-field">
-                            <label>直近3走</label>
-                            <input type="text" class="recent" value="666">
-                        </div>
-                    </div>
-                </div>
-                <div class="player-row id-7" data-id="7">
-                    <div class="player-header">
-                        <span>選手ID 7</span>
-                        <div class="local-group">
-                            <label for="local-7">地元:</label>
-                            <input type="checkbox" id="local-7" class="is-local">
-                        </div>
-                        <div class="local-group" style="color: #c07777; margin-left: 10px;">
-                            <label for="scratch-7">欠場:</label>
-                            <input type="checkbox" id="scratch-7" class="is-scratch">
-                        </div>
-                        <div class="sb-group">
-                            <label>S 1位: <input type="radio" name="s-leader" class="s1" data-id="7"></label>
-                            <label>B 1位: <input type="radio" name="b-leader" class="b1" data-id="7"></label>
-                        </div>
-                    </div>
-                    <div class="player-fields">
-                        <div class="player-field">
-                            <label>脚質</label>
-                            <select class="style">
-                                <option value="追">差マ</option>
-                                <option value="自">逃先</option>
-                                <option value="両">捲り</option>
-                            </select>
-                        </div>
-                        <div class="player-field">
-                            <label>得点 (R)</label>
-                            <input type="number" class="score" value="95.10">
-                        </div>
-                        <div class="player-field">
-                            <label>W印</label>
-                            <select class="wmark">
-                                <option value="◎">◎</option>
-                                <option value="〇">〇</option>
-                                <option value="✕">✕</option>
-                                <option value="△">△</option>
-                                <option value="無" selected>無</option>
-                            </select>
-                        </div>
-                        <div class="player-field">
-                            <label>直近3走</label>
-                            <input type="text" class="recent" value="777">
-                        </div>
-                    </div>
-                </div>
+                <script>
+                    const defaultScores = [105.50, 103.20, 101.80, 99.50, 98.00, 97.20, 95.10];
+                    const defaultRecent = ["111", "211", "444", "333", "555", "666", "777"];
+                    for(let i=1; i<=7; i++) {
+                        document.write(`
+                        <div class="player-row id-${i}" data-id="${i}">
+                            <div class="player-header">
+                                <span>選手ID ${i}</span>
+                                <div class="local-group"><label for="local-${i}">地元:</label><input type="checkbox" id="local-${i}" class="is-local"></div>
+                                <div class="local-group" style="color: #c07777; margin-left: 10px;"><label for="scratch-${i}">欠場:</label><input type="checkbox" id="scratch-${i}" class="is-scratch"></div>
+                                <div class="sb-group">
+                                    <label>S 1位: <input type="radio" name="s-leader" class="s1" data-id="${i}"></label>
+                                    <label>B 1位: <input type="radio" name="b-leader" class="b1" data-id="${i}" ${i===3?'checked':''}></label>
+                                </div>
+                            </div>
+                            <div class="player-fields">
+                                <div class="player-field"><label>脚質</label><select class="style"><option value="自">逃先</option><option value="追">差マ</option><option value="両">捲り</option></select></div>
+                                <div class="player-field"><label>得点 (R)</label><input type="number" class="score" value="${defaultScores[i-1].toFixed(2)}"></div>
+                                <div class="player-field"><label>W印</label><select class="wmark"><option value="◎">◎</option><option value="〇">〇</option><option value="✕">✕</option><option value="△" ${i===3?'selected':''}>△</option><option value="無" ${i!==3?'selected':''}>無</option></select></div>
+                                <div class="player-field"><label>直近3走</label><input type="text" class="recent" value="${defaultRecent[i-1]}"></div>
+                            </div>
+                        </div>`);
+                    }
+                </script>
             </div>
             <div class="input-item">
-                <label for="line-input">全体並び: (例: 123,45,67 または 1,2(3),4,5,6,7)</label>
+                <label for="line-input">全体並び: (例: 123,45,67)</label>
                 <input type="text" id="line-input" value="1,2,3,4,5,6,7">
             </div>
             <div class="local-switch-group">
@@ -1010,23 +652,16 @@
             <div class="result-section">
                 <div id="bank-tendency-display"></div>
                 <h3>🔗 ライン強度（強弱グラデーション）</h3>
-                <div id="line-display" class="line-display">
-                    計算結果待ち...
-                </div>
+                <div id="line-display" class="line-display">計算結果待ち...</div>
                 
                 <div id="tenun-index-output"></div>
 
                 <h3>☀️ 晴天令 (安定推奨)</h3>
-                <div class="recommendation" id="seitenrei-output">
-                    計算結果待ち...
-                </div>
+                <div class="recommendation" id="seitenrei-output">計算結果待ち...</div>
                 <h3>⛈️ 荒天令 (波乱推奨)</h3>
-                <div class="recommendation" id="koutenrei-output">
-                    計算結果待ち...
-                </div>
+                <div class="recommendation" id="koutenrei-output">計算結果待ち...</div>
                 <h3>展開別シミュレーション詳細</h3>
-                <div id="scenario-output">
-                </div>
+                <div id="scenario-output"></div>
             </div>
         </div>
     </div>
@@ -1053,24 +688,14 @@
         function toggleDebugLog() {
             const logElement = document.getElementById('debug-log');
             const iconElement = document.getElementById('log-toggle-icon');
-            if (logElement.style.display === 'block') {
-                logElement.style.display = 'none';
-                iconElement.textContent = '▶';
-            } else {
-                logElement.style.display = 'block';
-                iconElement.textContent = '▼';
-            }
+            if (logElement.style.display === 'block') { logElement.style.display = 'none'; iconElement.textContent = '▶'; }
+            else { logElement.style.display = 'block'; iconElement.textContent = '▼'; }
         }
         function toggleManual() {
             const manualElement = document.getElementById('manual-content');
             const iconElement = document.getElementById('manual-toggle-icon');
-            if (manualElement.style.display === 'block') {
-                manualElement.style.display = 'none';
-                iconElement.textContent = '▶';
-            } else {
-                manualElement.style.display = 'block';
-                iconElement.textContent = '▼';
-            }
+            if (manualElement.style.display === 'block') { manualElement.style.display = 'none'; iconElement.textContent = '▶'; }
+            else { manualElement.style.display = 'block'; iconElement.textContent = '▼'; }
         }
     </script>
     <script src="keirin_logic_v6.0.js"></script>
