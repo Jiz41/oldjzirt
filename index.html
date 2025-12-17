@@ -504,7 +504,21 @@
             opacity: 1;
         }
 
-        /* 💡 古い天雲指数コンテナとゲージの設定は、たまきちゃんシステム側と衝突するため削除済み */
+        /* 💡 天雲指数コンテナの基本デザイン（JS側の tamaki_speech.js と協調） */
+        .tenun-index-container {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left; /* たまきちゃんの横並びを崩さない */
+            border: 2px dashed #d6a300; /* デフォルトの破線 */
+            background-color: #fff9e6;
+        }
+        
+        /* 状態に応じた動的デザイン */
+        .tenun-stable { border: 2px solid #557755 !important; background-color: #e6f5e6 !important; }
+        .tenun-mild { border: 2px dashed #698b69 !important; background-color: #f7fff7 !important; }
+        .tenun-alert { border: 2px dashed #d6a300 !important; background-color: #fff9e6 !important; }
+        .tenun-severe { border: 2px solid #c07777 !important; background-color: #fcf0f0 !important; }
 
         .copyright-footer {
             text-align: center;
@@ -528,12 +542,13 @@
             font-weight: bold;
         }
 
-        /* モバイル用強制上書き設定：たまきちゃんの画像サイズを固定 */
+        /* 🚀 最重要：スマホでのたまきちゃんのサイズ・レイアウト強制固定設定 */
         @media (max-width: 600px) {
             .tamaki-character {
                 width: 75px !important;
                 min-width: 75px !important;
                 height: auto !important;
+                margin-right: 10px !important;
             }
             .tamaki-image {
                 width: 100% !important;
@@ -542,7 +557,12 @@
             }
             .tamaki-display {
                 display: flex !important;
+                flex-direction: row !important;
                 align-items: flex-start !important;
+            }
+            .tamaki-speech-bubble {
+                flex: 1 !important;
+                margin-top: 0 !important;
             }
         }
     </style>
@@ -596,7 +616,7 @@
                 </tr>
                 <tr>
                     <td>**競られる選手**の後ろに、**競る選手を半角カッコで囲んで**記入します。</td>
-                    <td>競りが発生した箇所をシステムに正確に伝達し、競合パターをシミュレーションに反映させます。</td>
+                    <td>競りが発生した箇所をシステムに正確に伝達し、競合パターンのシミュレーションに反映させます。</td>
                 </tr>
             </table>
             <ul>
@@ -993,6 +1013,7 @@
                 <div id="line-display" class="line-display">
                     計算結果待ち...
                 </div>
+                
                 <div id="tenun-index-output"></div>
 
                 <h3>☀️ 晴天令 (安定推奨)</h3>
