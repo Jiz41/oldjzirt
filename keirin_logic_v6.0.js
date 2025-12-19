@@ -1171,29 +1171,28 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         `;
     }
 
-        // ---------------------------------------------------------- 
+    // ---------------------------------------------------------- 
     // ★ 天雲指数 (占い師メッセージ) の計算と表示 ★ 
     // ---------------------------------------------------------- 
     const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores, allScenarioResults, participatingPlayers); 
     const tenunIndex = tenunIndexData.tenunIndex; 
-
-    // 【修正ポイント】壱耀が発動したかどうかのフラグを判定
-    // oracleMessageに特定のタグが含まれているか、または判定ロジックから直接取得
+    
+    // 壱耀が発動したかの判定
     const isIchiyo = tenunIndexData.message.includes('ichiyo-emblem'); 
 
-    // UIを生成して表示
+    // 外枠のHTMLを生成
     const tenunHtml = window.generateTamakiTenunHTML(tenunIndex, isIchiyo, null); 
         
+    // 画面の 'tenun-index-output' に流し込む
     const tenunOutput = document.getElementById('tenun-index-output'); 
     if (tenunOutput) { 
         tenunOutput.innerHTML = tenunHtml; 
-    } 
+    }
 
-    // ==========================================
+    // 【★ここが最重要：たまきを呼び出す命令】
     if (typeof displayTamakiMessage === 'function') {
         displayTamakiMessage(tenunIndex, isIchiyo);
     }
-    // ==========================================
   
     // ---------------------------------------------------------- 
     // シナリオ詳細 (変更なし)
