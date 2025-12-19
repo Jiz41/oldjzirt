@@ -902,17 +902,22 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
                     }
                 }
 
-                if (isIntegrated) {
-                    logMessage(`[ICHIOU] 壱耀晴乾ノ象 発動条件クリア: 選手ID ${axisPlayer.id} (天運${tenunIndex}_差し)`);
+                 if (isIntegrated) {
+                    logMessage(`[ICHIOU] 壱耀晴乾ノ象 発動条件クリア: 選手ID ${axisPlayer.id}`);
                     
-                    superiorMessage = window.generateTamakiTenunHTML(tenunIndex, true, axisPlayer.id);;
+                    // 改行(<br><br>)を入れ、IDを明示的に表示するHTMLを追加
+                    superiorMessage = `<br><br><div class="ichiyo-id-display">【壱耀対象：選手${axisPlayer.id}】</div>` 
+                                    + window.generateTamakiTenunHTML(tenunIndex, true, axisPlayer.id);
                 }
             }
         }
     }
 
-    // 既存のメッセージに、発令メッセージがあれば追記
-    oracleMessage += superiorMessage;
+    // 通常メッセージと、一行空けた壱耀メッセージを統合
+    const finalMessage = oracleMessage + superiorMessage;
+    
+    logMessage(`[TENUN] 晴天/荒天 上位3名一致数: ${matchCount}名。天雲指数: ${tenunIndex}`); 
+    return { tenunIndex, message: finalMessage }; 
     
     // 💡 ログ出力: 天雲指数の値のみを出力（係数非公開ルールに抵触しない）
     logMessage(`[TENUN] 晴天/荒天 上位3名一致数: ${matchCount}名。天雲指数: ${tenunIndex}`); 
