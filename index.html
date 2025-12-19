@@ -792,8 +792,8 @@
             });
         }
 
-        // ------------------------------------------------------------
-        // 🛠️ たまきセリフ制御
+                // ------------------------------------------------------------
+        // 🛠️ たまきセリフ制御（修正版：一行空けて追加表示）
         // ------------------------------------------------------------
         function displayTamakiMessage(index, isIchiyo) {
             const textElement = document.getElementById('tamaki-speech-text');
@@ -809,15 +809,19 @@
             const speeches = TAMAKI_SPEECHES[category];
             let message = speeches[Math.floor(Math.random() * speeches.length)];
 
-            // 【修正点2】壱耀晴乾フラグが立っている場合、ラベルなしでセリフを連結
+            // 【壱耀対応】フラグがある場合、一行空けて連結
             if (isIchiyo && TAMAKI_SPEECHES.ichiyo) {
                 const ichiyoSpeeches = TAMAKI_SPEECHES.ichiyo;
                 const ichiyoExtra = ichiyoSpeeches[Math.floor(Math.random() * ichiyoSpeeches.length)];
-                message += " " + ichiyoExtra;
+                
+                // 💡 innerHTMLに変更し、<br><br>で一行空ける
+                textElement.innerHTML = `${message}<br><br>${ichiyoExtra}`;
+            } else {
+                // 通常時はテキストとして表示
+                textElement.textContent = message;
             }
-
-            textElement.textContent = message;
         }
+
     </script>
     <script src="keirin_logic_v6.0.js"></script>
     <script src="meigen.js"></script>
