@@ -1,5 +1,3 @@
-alert("ロジックファイルを読み込みました");
-
 // 真自在律 実質Ver7.3 - 日本語コメント & ログ機密保持強化版
 // 競りライン追加版
 // 【V7.3 最終修正】消耗ペナルティ適用拡大 ＆ 複数競り表示修正
@@ -1174,24 +1172,23 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     }
 
     // ---------------------------------------------------------- 
-    // ★ 天雲指数 (占い師メッセージ) の計算と表示 ★ 
+    // ★ 天雲指数 (たまきシステム) の統合表示 ★ 
     // ---------------------------------------------------------- 
     const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores, allScenarioResults, participatingPlayers); 
     const tenunIndex = tenunIndexData.tenunIndex; 
     
-    // 壱耀が発動したかの判定
-    const isIchiyo = tenunIndexData.message.includes('ichiyo-emblem'); 
+    // 壱耀判定：メッセージ内に ID が含まれているかチェック
+    // window.generateTamakiTenunHTML 内で生成されたHTMLに 'tenun-ichiyo' があるかで判定
+    const isIchiyo = tenunIndexData.message.includes('tenun-ichiyo') || tenunIndexData.message.includes('ichiyo-emblem'); 
 
-    // 外枠のHTMLを生成
-    const tenunHtml = window.generateTamakiTenunHTML(tenunIndex, isIchiyo, null); 
-        
-    // 画面の 'tenun-index-output' に流し込む
+    // 1. 画面の枠を生成して表示
     const tenunOutput = document.getElementById('tenun-index-output'); 
     if (tenunOutput) { 
-        tenunOutput.innerHTML = tenunHtml; 
+        // 既に判定済みの内容を表示
+        tenunOutput.innerHTML = window.generateTamakiTenunHTML(tenunIndex, isIchiyo, null); 
     }
 
-    // 【★ここが最重要：たまきを呼び出す命令】
+    // 2. たまきの音声/セリフシステムに「壱耀フラグ」を渡して実行
     if (typeof displayTamakiMessage === 'function') {
         displayTamakiMessage(tenunIndex, isIchiyo);
     }
