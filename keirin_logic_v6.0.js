@@ -3,7 +3,7 @@
 // 【V7.3 最終修正】消耗ペナルティ適用拡大 ＆ 複数競り表示修正
 
 // ------------------------------------------------------------------------------------
-// 🗃️ 係数設定オブジェクトの分離 (COEFFICIENT SETTINGS)
+// 🗃️ 係数設定オブジェクト (COEFFICIENT SETTINGS)
 // ------------------------------------------------------------------------------------
 const COEFFICIENT_SETTINGS = {
     's-kyu': { R_BIAS: 1.15, RECENT_WEIGHT: 0.90, COOP_WEIGHT: 1.20, IS_GIRLS: false },
@@ -256,7 +256,6 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
         lines.forEach(l => { if(l[0] && l[1] === p.id && (tempPlayers.find(x=>x.id===l[0]).score - p.score)/scoreRange >= 0.3) p.final_score *= 0.92; });
     }); 
 
-    // C_suicide 
     const lineEvaluations = {};
     lines.forEach((line, index) => {
         let totalWeightScore = 0; let hasSelfStarter = false;
@@ -301,7 +300,6 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, ap
     return { allScenarioResults, integratedScores };
 } 
 
-// 🔧 修正: oracleMessageを廃止し、superiorHtmlを返す
 function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResults, participatingPlayers) { 
     const seitenreiRanking = Object.keys(seitenreiScores).map(id => ({ id: Number(id), score: seitenreiScores[id] })).sort((a, b) => b.score - a.score); 
     const koutenreiRanking = Object.keys(koutenreiScores).map(id => ({ id: Number(id), score: koutenreiScores[id] })).sort((a, b) => b.score - a.score); 
@@ -331,7 +329,6 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
             }
         }
     }
-    logMessage(`[TENUN] 天雲指数: ${tenunIndex}`); 
     return { tenunIndex, superiorHtml }; 
 } 
 
@@ -420,7 +417,6 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         seriSummaryHtml += `<p style="font-size: 0.9em; color: #c07777;">※体力消耗減点適用済</p></div>`;
     }
 
-    // 🔧 修正: 合体表示
     const tenunData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores, allScenarioResults, participatingPlayers); 
     const tenunHtml = window.generateTamakiTenunHTML(tenunData.tenunIndex, false, null); 
     const tenunOutput = document.getElementById('tenun-index-output'); 
