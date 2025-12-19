@@ -1300,27 +1300,16 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     }
 }
 
-// ⚡️ 画面のどこに「天雲指数」の箱があるか、全スキャンして表示させる
-const originalLogMessage = logMessage;
-logMessage = function(msg) {
-    originalLogMessage(msg); 
+    // 1. 天雲指数のデータを取得
+    const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores, allScenarioResults, participatingPlayers);
+    const tenunIndex = tenunIndexData.tenunIndex;
 
-    if (msg.includes("天雲指数:")) {
-        const value = msg.match(/\d+/);
-        if (value) {
-            const num = parseInt(value[0]);
-            
-            // 1. たまきのセリフ機能を無理やり実行
-            if (typeof displayTamakiMessage === 'function') {
-                displayTamakiMessage(num, false);
-            }
+    // 💡【重要】壱耀が発動したかどうかの「合図」を作る
+    // ログに「ichiyo-emblem」という文字が含まれていれば、isIchiyo は true（正）になります
+    const isIchiyo = tenunIndexData.message.includes('ichiyo-emblem');
 
-            // 2. 画面上の「天雲指数」に関係しそうな場所に、片っ端から数字を放り込む
-            const possibleIds = ['tenun-index-output', 'tenun-display', 'tamaki-speech'];
-            possibleIds.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) { el.innerText = "天雲指数: " + num; }
-            });
-        }
+    // 2. たまきのセリフ機能を呼び出す
+    if (typeof displayTamakiMessage === 'function') {
+        // 第2引数に isIchiyo を渡すことで、壱耀専用セリフが選ばれるようになります
+        displayTamakiMessage(tenunIndex, isIchiyo);
     }
-};
