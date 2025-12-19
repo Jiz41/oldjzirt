@@ -715,6 +715,109 @@
             if (manualElement.style.display === 'block') { manualElement.style.display = 'none'; iconElement.textContent = '▶'; }
             else { manualElement.style.display = 'block'; iconElement.textContent = '▼'; }
         }
+
+        // ------------------------------------------------------------
+        // 🛠️ UI 更新関数
+        // ------------------------------------------------------------
+        function updateUI(result) {
+            const container = document.getElementById('results-container');
+            container.classList.add('visible');
+
+            // 天雲指数のコンテナ更新
+            const tenunOutput = document.getElementById('tenun-index-output');
+            let severityClass = "tenun-alert";
+            if (result.tenunIndex === 100) severityClass = "tenun-severe";
+            else if (result.tenunIndex >= 95) severityClass = "tenun-severe";
+            else if (result.tenunIndex >= 70) severityClass = "tenun-alert";
+            else if (result.tenunIndex >= 30) severityClass = "tenun-mild";
+            else severityClass = "tenun-stable";
+
+            tenunOutput.className = `tenun-index-container ${severityClass}`;
+            tenunOutput.innerHTML = `
+                <span class="tenun-title">天雲指数: ${result.tenunIndex}</span>
+                <div class="tamaki-display">
+                    <div class="tamaki-character">
+                        <img src="tamaki.png" alt="七曜院環" class="tamaki-image">
+                    </div>
+                    <div class="tamaki-speech-bubble">
+                        <span id="tamaki-speech-text">読み込み中...</span>
+                    </div>
+                </div>
+            `;
+
+            // 【修正点1】壱耀晴乾フラグを渡す
+            displayTamakiMessage(result.tenunIndex, result.isIchiyo);
+
+            // 推奨買い目表示
+            document.getElementById('seitenrei-output').innerHTML = `
+                <div>三連単: ${result.seitenrei.trifecta.join(', ')}</div>
+                <div style="font-size: 0.9em; font-weight: normal; margin-top: 4px;">三連複: ${result.seitenrei.trifuku.join(', ')}</div>
+            `;
+            document.getElementById('koutenrei-output').innerHTML = `
+                <div>三連単: ${result.koutenrei.trifecta.join(', ')}</div>
+                <div style="font-size: 0.9em; font-weight: normal; margin-top: 4px;">三連複: ${result.koutenrei.trifuku.join(', ')}</div>
+            `;
+
+            // ライン表示の更新
+            const lineDisplay = document.getElementById('line-display');
+            lineDisplay.innerHTML = '';
+            result.lineAnalysis.forEach(line => {
+                const box = document.createElement('div');
+                box.className = 'line-box';
+                box.textContent = line.line;
+                
+                let opacity = 0.4 + (line.score / 200);
+                if (opacity > 1) opacity = 1;
+                box.style.backgroundColor = `rgba(105, 139, 105, ${opacity})`;
+                box.style.color = opacity > 0.7 ? '#fff' : '#333';
+                lineDisplay.appendChild(box);
+            });
+
+            // 詳細シミュレーション
+            const scenarioOutput = document.getElementById('scenario-output');
+            scenarioOutput.innerHTML = '';
+            result.scenarios.forEach(sc => {
+                const div = document.createElement('div');
+                div.className = 'scenario-detail';
+                div.innerHTML = `
+                    <h4>展開: ${sc.name} (期待度: ${sc.weight.toFixed(2)})</h4>
+                    <table>
+                        <thead><tr><th>順位</th><th>ID</th><th>得点</th></tr></thead>
+                        <tbody>
+                            ${sc.ranking.map((p, idx) => `<tr><td>${idx+1}</td><td>${p.id}</td><td>${p.score.toFixed(1)}</td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                `;
+                scenarioOutput.appendChild(div);
+            });
+        }
+
+        // ------------------------------------------------------------
+        // 🛠️ たまきセリフ制御
+        // ------------------------------------------------------------
+        function displayTamakiMessage(index, isIchiyo) {
+            const textElement = document.getElementById('tamaki-speech-text');
+            if (!textElement) return;
+
+            let category = "";
+            if (index === 100) category = "index_100";
+            else if (index >= 95) category = "index_95";
+            else if (index >= 70) category = "index_70";
+            else if (index >= 30) category = "index_30";
+            else category = "index_0";
+
+            const speeches = TAMAKI_SPEECHES[category];
+            let message = speeches[Math.floor(Math.random() * speeches.length)];
+
+            // 【修正点2】壱耀晴乾フラグが立っている場合、ラベルなしでセリフを連結
+            if (isIchiyo && TAMAKI_SPEECHES.ichiyo) {
+                const ichiyoSpeeches = TAMAKI_SPEECHES.ichiyo;
+                const ichiyoExtra = ichiyoSpeeches[Math.floor(Math.random() * ichiyoSpeeches.length)];
+                message += " " + ichiyoExtra;
+            }
+
+            textElement.textContent = message;
+        }
     </script>
     <script src="keirin_logic_v6.0.js"></script>
     <script src="meigen.js"></script>
