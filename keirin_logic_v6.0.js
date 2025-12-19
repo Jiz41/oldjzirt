@@ -1296,17 +1296,3 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             三連複 (${koutenTrifuku.slice(0, 6).length}点): <strong>${finalKoutenTrifuku}</strong> `; 
     }
 }
-
-    // 1. 天雲指数のデータを取得
-    const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores, allScenarioResults, participatingPlayers);
-    const tenunIndex = tenunIndexData.tenunIndex;
-
-    // 💡【重要】壱耀が発動したかどうかの「合図」を作る
-    // ログに「ichiyo-emblem」という文字が含まれていれば、isIchiyo は true（正）になります
-    const isIchiyo = tenunIndexData.message.includes('ichiyo-emblem');
-
-    // 2. たまきのセリフ機能を呼び出す
-    if (typeof displayTamakiMessage === 'function') {
-        // 第2引数に isIchiyo を渡すことで、壱耀専用セリフが選ばれるようになります
-        displayTamakiMessage(tenunIndex, isIchiyo);
-    }
