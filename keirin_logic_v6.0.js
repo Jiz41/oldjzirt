@@ -1189,10 +1189,11 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         tenunOutput.innerHTML = tenunHtml; 
     } 
 
-    // 💡 重要：ここでHTML側のたまきセリフ更新関数を呼び出す
+    // ==========================================
     if (typeof displayTamakiMessage === 'function') {
         displayTamakiMessage(tenunIndex, isIchiyo);
     }
+    // ==========================================
   
     // ---------------------------------------------------------- 
     // シナリオ詳細 (変更なし)
