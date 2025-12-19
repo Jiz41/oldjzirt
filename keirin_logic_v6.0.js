@@ -1184,10 +1184,12 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     else if (tenunIndex === 67) messageClass = 'tenun-alert'; 
     else if (tenunIndex === 100) messageClass = 'tenun-severe'; 
 
+    const tenunHtml = window.generateTamakiTenunHTML(tenunIndex, false, null); 
+        
     const tenunOutput = document.getElementById('tenun-index-output'); 
-if (tenunOutput) { 
-    tenunOutput.innerHTML = tenunIndexData.message; 
-}
+    if (tenunOutput) { 
+        tenunOutput.innerHTML = tenunHtml; 
+    } 
 
     // ---------------------------------------------------------- 
     // シナリオ詳細 (変更なし)
