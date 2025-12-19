@@ -1171,26 +1171,29 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         `;
     }
 
-    // ---------------------------------------------------------- 
+        // ---------------------------------------------------------- 
     // ★ 天雲指数 (占い師メッセージ) の計算と表示 ★ 
     // ---------------------------------------------------------- 
     const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores, allScenarioResults, participatingPlayers); 
     const tenunIndex = tenunIndexData.tenunIndex; 
-    const oracleMessage = tenunIndexData.message; 
 
-    let messageClass = ''; 
-    if (tenunIndex === 0) messageClass = 'tenun-stable'; 
-    else if (tenunIndex === 33) messageClass = 'tenun-mild'; 
-    else if (tenunIndex === 67) messageClass = 'tenun-alert'; 
-    else if (tenunIndex === 100) messageClass = 'tenun-severe'; 
+    // 【修正ポイント】壱耀が発動したかどうかのフラグを判定
+    // oracleMessageに特定のタグが含まれているか、または判定ロジックから直接取得
+    const isIchiyo = tenunIndexData.message.includes('ichiyo-emblem'); 
 
-    const tenunHtml = window.generateTamakiTenunHTML(tenunIndex, false, null); 
+    // UIを生成して表示
+    const tenunHtml = window.generateTamakiTenunHTML(tenunIndex, isIchiyo, null); 
         
     const tenunOutput = document.getElementById('tenun-index-output'); 
     if (tenunOutput) { 
         tenunOutput.innerHTML = tenunHtml; 
     } 
 
+    // 💡 重要：ここでHTML側のたまきセリフ更新関数を呼び出す
+    if (typeof displayTamakiMessage === 'function') {
+        displayTamakiMessage(tenunIndex, isIchiyo);
+    }
+  
     // ---------------------------------------------------------- 
     // シナリオ詳細 (変更なし)
     const scenarioOutput = document.getElementById('scenario-output'); 
