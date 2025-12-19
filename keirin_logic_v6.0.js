@@ -1300,21 +1300,27 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     }
 }
 
-// ⚡️ ログには出ている「天雲指数」を、強引に画面に表示させる命令
+// ⚡️ 画面のどこに「天雲指数」の箱があるか、全スキャンして表示させる
 const originalLogMessage = logMessage;
 logMessage = function(msg) {
-    originalLogMessage(msg); // 従来のログ機能はそのまま動かす
+    originalLogMessage(msg); 
 
-    // ログの中に "天雲指数: " という文字を見つけたら実行
     if (msg.includes("天雲指数:")) {
-        const value = msg.match(/\d+/); // 数字だけを抜き出す
-        if (value && typeof displayTamakiMessage === 'function') {
-            // たまきのセリフ更新機能を呼び出す
-            displayTamakiMessage(parseInt(value[0]), false);
+        const value = msg.match(/\d+/);
+        if (value) {
+            const num = parseInt(value[0]);
             
-            // 念のため画面の受け皿にも数字を入れる
-            const target = document.getElementById('tenun-index-output');
-            if (target) { target.innerText = value[0]; }
+            // 1. たまきのセリフ機能を無理やり実行
+            if (typeof displayTamakiMessage === 'function') {
+                displayTamakiMessage(num, false);
+            }
+
+            // 2. 画面上の「天雲指数」に関係しそうな場所に、片っ端から数字を放り込む
+            const possibleIds = ['tenun-index-output', 'tenun-display', 'tamaki-speech'];
+            possibleIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.innerText = "天雲指数: " + num; }
+            });
         }
     }
 };
