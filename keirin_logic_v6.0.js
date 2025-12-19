@@ -1186,11 +1186,11 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // window.generateTamakiTenunHTML 内で生成されたHTMLに 'tenun-ichiyo' があるかで判定
     const isIchiyo = tenunIndexData.message.includes('tenun-ichiyo') || tenunIndexData.message.includes('ichiyo-emblem'); 
 
-    // 1. 画面の枠を生成して表示
+   // 1. 画面の枠を生成して表示
     const tenunOutput = document.getElementById('tenun-index-output'); 
     if (tenunOutput) { 
-        // 既に判定済みの内容を表示
-        tenunOutput.innerHTML = window.generateTamakiTenunHTML(tenunIndex, isIchiyo, null); 
+        // Logic.js 上部で統合したメッセージ（tenunIndexData.message）をそのまま表示に使う
+        tenunOutput.innerHTML = tenunIndexData.message; 
     }
 
     // 2. たまきの音声/セリフシステムに「壱耀フラグ」を渡して実行
