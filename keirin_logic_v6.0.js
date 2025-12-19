@@ -1300,14 +1300,21 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     }
 }
 
-// 🔍 画面に受け皿があるかチェックするデバッグコード
-function checkDisplayElement() {
-    const target = document.getElementById('tenun-index-output');
-    if (target) {
-        console.log("✅ 成功: 'tenun-index-output' という受け皿を見つけました。");
-    } else {
-        console.error("❌ 失敗: 'tenun-index-output' という受け皿が画面に見当たりません。ID名が違う可能性があります。");
+// ⚡️ ログには出ている「天雲指数」を、強引に画面に表示させる命令
+const originalLogMessage = logMessage;
+logMessage = function(msg) {
+    originalLogMessage(msg); // 従来のログ機能はそのまま動かす
+
+    // ログの中に "天雲指数: " という文字を見つけたら実行
+    if (msg.includes("天雲指数:")) {
+        const value = msg.match(/\d+/); // 数字だけを抜き出す
+        if (value && typeof displayTamakiMessage === 'function') {
+            // たまきのセリフ更新機能を呼び出す
+            displayTamakiMessage(parseInt(value[0]), false);
+            
+            // 念のため画面の受け皿にも数字を入れる
+            const target = document.getElementById('tenun-index-output');
+            if (target) { target.innerText = value[0]; }
+        }
     }
-}
-// 計算実行時にチェックを走らせる
-checkDisplayElement();
+};
