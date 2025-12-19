@@ -1297,3 +1297,15 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             三連複 (${koutenTrifuku.slice(0, 6).length}点): <strong>${finalKoutenTrifuku}</strong> `; 
     }
 }
+
+// 🔍 画面に受け皿があるかチェックするデバッグコード
+function checkDisplayElement() {
+    const target = document.getElementById('tenun-index-output');
+    if (target) {
+        console.log("✅ 成功: 'tenun-index-output' という受け皿を見つけました。");
+    } else {
+        console.error("❌ 失敗: 'tenun-index-output' という受け皿が画面に見当たりません。ID名が違う可能性があります。");
+    }
+}
+// 計算実行時にチェックを走らせる
+checkDisplayElement();
