@@ -1,6 +1,6 @@
 // 真自在律 実質Ver7.3 - 日本語コメント & ログ機密保持強化版
 // 競りライン追加版
-// 【V7.3 最終修正】消耗ペナルティ適用拡大 ＆ 複数競り表示修正
+// 【V7.3 最終修正】消耗ペナルティ適用拡大 ＆ 複数競り表示修正 ＆ 壱耀演出統合
 
 // ------------------------------------------------------------------------------------
 // 🗃️ 係数設定オブジェクト (COEFFICIENT SETTINGS)
@@ -29,6 +29,7 @@ const SERI_WIN_BONUS = 0.05;
 
 let BANK_DATA = {}; 
 
+// 壱耀演出用閾値
 const SUPERIORITY_THRESHOLD_RATE = 0.0206;
 const RAW_COMPOSITE_STATS = [
     { pattern_key: "0_差し", hit_rate: 0.0309 },
@@ -50,6 +51,9 @@ function calculateSuperiorityList() {
 
 const SUPERIOR_PATTERNS_FINAL_LIST = calculateSuperiorityList();
 
+// ------------------------------------------------------------------------------------
+// 🛠️ デバッグ・ユーティリティ (DEBUG UTILS)
+// ------------------------------------------------------------------------------------
 function logMessage(message) { 
     const logArea = document.getElementById('debug-log'); 
     const timestamp = new Date().toLocaleTimeString('ja-JP', { hour12: false }); 
@@ -59,6 +63,9 @@ function logMessage(message) {
     } 
 } 
 
+// ------------------------------------------------------------------------------------
+// 📡 データ取得・読み込み (DATA LOADING)
+// ------------------------------------------------------------------------------------
 function getPlayerData() { 
     const players = []; 
     const playerRows = document.querySelectorAll('.player-row'); 
@@ -125,6 +132,9 @@ function displayBankTendency() {
 
 (async function() { await loadBankData(); })(); 
 
+// ------------------------------------------------------------------------------------
+// 🏎️ ライン解析 & 競り処理 (LINE & SERI ANALYSIS)
+// ------------------------------------------------------------------------------------
 function parseLineInput(lineInput, allPlayers) {
     const processedLineInput = lineInput.replace(/\s/g, '');
     const segments = processedLineInput.split(',');
@@ -144,10 +154,13 @@ function parseLineInput(lineInput, allPlayers) {
                     });
                 }
                 const follower = parseInt(seriMatch[1]); const contender = parseInt(seriMatch[2]);
-                const followerCoef = allPlayers.find(p => p.id === follower)?.seri_coef || 0;
-                const contenderCoef = allPlayers.find(p => p.id === contender)?.seri_coef || 0;
+                const followerData = allPlayers.find(p => p.id === follower);
+                const contenderData = allPlayers.find(p => p.id === contender);
+                const followerCoef = followerData ? followerData.seri_coef : 0;
+                const contenderCoef = contenderData ? contenderData.seri_coef : 0;
                 let winnerId = (followerCoef >= contenderCoef) ? follower : contender;
                 let loserId = (followerCoef >= contenderCoef) ? contender : follower;
+                
                 allSeriInfos.push({ exists: true, follower, contender, winner: winnerId, loser: loserId });
                 currentLine.push(winnerId); lines.push([loserId]); 
                 if (!allParsedIds.has(follower)) { segOrderedIds.push(follower); allParsedIds.add(follower); }
@@ -201,13 +214,22 @@ function calculateLineCoeffs(players, settings) {
 function applySeriCorrection(scoredPlayers, allSeriInfos) {
     allSeriInfos.forEach(info => {
         const winner = scoredPlayers.find(p => p.id === info.winner);
-        if (winner) winner.final_score = winner.final_score * (1 + SERI_WIN_BONUS) * (1 - SERI_FATIGUE_PENALTY_IN);
+        if (winner) {
+            logMessage(`[SERI] 選手${info.winner}が勝利。ボーナスと消耗ペナルティ(小)を適用。`);
+            winner.final_score = winner.final_score * (1 + SERI_WIN_BONUS) * (1 - SERI_FATIGUE_PENALTY_IN);
+        }
         const loser = scoredPlayers.find(p => p.id === info.loser);
-        if (loser) loser.final_score *= (1 - SERI_FATIGUE_PENALTY_OUT);
+        if (loser) {
+            logMessage(`[SERI] 選手${info.loser}が敗北。消耗ペナルティ(大)を適用。`);
+            loser.final_score *= (1 - SERI_FATIGUE_PENALTY_OUT);
+        }
     });
     return scoredPlayers;
 }
 
+// ------------------------------------------------------------------------------------
+// 🧪 シミュレーションロジック (SIMULATION LOGIC)
+// ------------------------------------------------------------------------------------
 function getScenarioCoeffs(scenario) {
     if (scenario === '先行有利') return { '自': 1.05, '追': 1.02, '両': 1.03 }; 
     if (scenario === '捲り有利') return { '自': 1.00, '追': 1.05, '両': 1.04 }; 
@@ -215,31 +237,8 @@ function getScenarioCoeffs(scenario) {
     return { '自': 1.0, '追': 1.0, '両': 1.0 };
 } 
 
-function generateScenarioWagers(results) {
-    const top3 = results.slice(0, 3).map(p => p.id); 
-    const tritan = [`${top3[0]}-${top3[1]}-${top3[2]}`, `${top3[0]}-${top3[2]}-${top3[1]}`, `${top3[1]}-${top3[0]}-${top3[2]}`].join(', '); 
-    const top4 = results.slice(0, 4).map(p => p.id); 
-    const tri1 = [...top4.slice(0, 3)].sort((a, b) => a - b).join('='); 
-    let tri2 = top4.length >= 4 ? [top4[0], top4[1], top4[3]].sort((a, b) => a - b).join('=') : ''; 
-    return { tritan, trifuku: [tri1, tri2].filter(t => t.length > 0).join(', ') };
-} 
-
-function assignFinalGrades(scenarioPlayers) {
-    if (scenarioPlayers.length === 0) return; 
-    const scores = scenarioPlayers.map(p => p.final_score); 
-    const maxScore = scores[0]; const minScore = scores[scores.length - 1]; const range = maxScore - minScore; 
-    scenarioPlayers.forEach(p => { 
-        p.grade = range > 0 ? Math.ceil(1 + 9 * (p.final_score - minScore) / range) : 1; 
-        p.grade = Math.min(10, Math.max(1, p.grade)); 
-    }); 
-    scenarioPlayers.forEach((p, i) => { 
-        if (i === scenarioPlayers.length - 1) { p.strength_mark = '→'; return; }
-        const next = scenarioPlayers[i+1]; const diff = p.final_score - next.final_score;
-        p.strength_mark = diff >= (range/1000) ? '↑' : (diff >= (range/10000) ? '↗' : '→');
-    });
-} 
-
 function calculate_koutenrei_bias(players, scenario, bankData) { 
+    logMessage(`[LOGIC] 光天霊補正を適用中... (${scenario})`);
     let tempPlayers = JSON.parse(JSON.stringify(players)); 
     const allScores = players.map(p => p.score); 
     const scoreMax = Math.max(...allScores); const scoreMin = Math.min(...allScores); const scoreRange = scoreMax - scoreMin; 
@@ -247,15 +246,22 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     const { lines } = parseLineInput(lineInput, tempPlayers); 
 
     tempPlayers.forEach(p => { 
+        // 1. 短走路ペナルティ
         if (bankData.length === 333) p.final_score *= 0.985; 
+        // 2. 格差補正
         const avgScore = allScores.reduce((a,b)=>a+b,0)/allScores.length;
         if (p.score < avgScore - 2.0) p.final_score *= 0.97; 
+        // 3. 直近1着過信ペナルティ
         if (p.score === scoreMax && p.recent.startsWith('1')) p.final_score *= 0.96; 
+        // 4. 追込選手の底力
         if ((p.style === '両' || p.style === '追') && (p.score - scoreMin)/scoreRange > 0.6) p.final_score *= 1.05;
+        // 5. 逃げ潰れ（多自力の消耗）
         if (p.score === scoreMax && tempPlayers.filter(x=>x.id!==p.id&&(x.style==='自'||x.style==='両')).length >= 2) p.final_score *= 0.95; 
+        // 6. 番手無風（先行との点数差）
         lines.forEach(l => { if(l[0] && l[1] === p.id && (tempPlayers.find(x=>x.id===l[0]).score - p.score)/scoreRange >= 0.3) p.final_score *= 0.92; });
     }); 
 
+    // 7. 自滅ライン（C_suicide）ロジック
     const lineEvaluations = {};
     lines.forEach((line, index) => {
         let totalWeightScore = 0; let hasSelfStarter = false;
@@ -270,6 +276,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     Object.keys(lineEvaluations).forEach(idx => {
         const ev = lineEvaluations[idx];
         if (ev.lineLength >= 3 && ev.totalWeightScore === 3 && ev.hasSelfStarter) {
+            logMessage(`[ALERT] ライン[${ev.members}]にて自滅（牽制過多）のリスクを検知。`);
             tempPlayers.forEach(p => { 
                 if (ev.members.includes(p.id)) p.final_score *= 0.90; 
                 else p.final_score *= 1.05;
@@ -283,16 +290,26 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, ap
     const scenarios = ['先行有利', '捲り有利', '差し有利']; 
     const allScenarioResults = []; const integratedScores = {}; 
     basePlayers.forEach(p => integratedScores[p.id] = 0);
+
     scenarios.forEach(scenario => { 
         const cDCoeffs = getScenarioCoeffs(scenario); 
         let scenarioPlayers = JSON.parse(JSON.stringify(basePlayers)); 
-        scenarioPlayers.forEach(p => { p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e; }); 
+        
+        scenarioPlayers.forEach(p => { 
+            p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e; 
+        }); 
+
         scenarioPlayers = applySeriCorrection(scenarioPlayers, allSeriInfos);
-        if (applyKoutenrei) scenarioPlayers = calculate_koutenrei_bias(scenarioPlayers, scenario, bankData); 
+        
+        if (applyKoutenrei) {
+            scenarioPlayers = calculate_koutenrei_bias(scenarioPlayers, scenario, bankData); 
+        }
+
         scenarioPlayers.forEach(p => { 
             p.final_score *= (cDCoeffs[p.style] || 1.0); 
             integratedScores[p.id] += p.final_score; 
         }); 
+
         scenarioPlayers.sort((a, b) => b.final_score - a.final_score); 
         assignFinalGrades(scenarioPlayers); 
         allScenarioResults.push({ scenario, results: scenarioPlayers }); 
@@ -300,6 +317,9 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, ap
     return { allScenarioResults, integratedScores };
 } 
 
+// ------------------------------------------------------------------------------------
+// 🔮 天雲指数 & 壱耀演出 (TENUN & ICHIOU)
+// ------------------------------------------------------------------------------------
 function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResults, participatingPlayers) { 
     const seitenreiRanking = Object.keys(seitenreiScores).map(id => ({ id: Number(id), score: seitenreiScores[id] })).sort((a, b) => b.score - a.score); 
     const koutenreiRanking = Object.keys(koutenreiScores).map(id => ({ id: Number(id), score: koutenreiScores[id] })).sort((a, b) => b.score - a.score); 
@@ -329,12 +349,18 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
             }
         }
     }
+    logMessage(`[TENUN] 天雲指数: ${tenunIndex}% (一致数: ${matchCount})`); 
     return { tenunIndex, superiorHtml }; 
 } 
 
+// ------------------------------------------------------------------------------------
+// 🏁 メイン計算処理 (MAIN CALCULATION)
+// ------------------------------------------------------------------------------------
 async function calculatePrediction() { 
     const tenunOutputArea = document.getElementById('tenun-index-output');
-    if (tenunOutputArea && typeof window.generateTamakiObservingHTML === 'function') tenunOutputArea.innerHTML = window.generateTamakiObservingHTML();
+    if (tenunOutputArea && typeof window.generateTamakiObservingHTML === 'function') {
+        tenunOutputArea.innerHTML = window.generateTamakiObservingHTML();
+    }
     await new Promise(resolve => setTimeout(resolve, 100));
 
     if (Object.keys(BANK_DATA).length === 0) await loadBankData(); 
@@ -343,13 +369,19 @@ async function calculatePrediction() {
     const settings = COEFFICIENT_SETTINGS[raceType]; 
     const bankName = document.getElementById('bank-name').value; 
     const bankData = BANK_DATA[bankName]; 
-    if (!bankData) return; 
+    if (!bankData) {
+        logMessage("[ERROR] バンクデータが見つかりません。");
+        return;
+    }
 
     const modeSelector = document.getElementById('mode-selector'); 
     const koutenreiModeSelected = modeSelector ? modeSelector.value === 'koutenrei' : false; 
+    
     let players = getPlayerData(); 
     const { players: participatingPlayers, allSeriInfos, finalOrderedPlayerIds, displayLineSegments } = calculateLineCoeffs(players, settings); 
     if (participatingPlayers.length === 0) return;
+
+    logMessage(`[CALC] ${bankName} (${raceType}) の計算を開始します...`);
 
     let basePlayers = JSON.parse(JSON.stringify(participatingPlayers)); 
     basePlayers.forEach(p => { 
@@ -371,8 +403,27 @@ async function calculatePrediction() {
         seitenreiResults.integratedScores, koutenreiResults.integratedScores, bankName,
         allSeriInfos, finalOrderedPlayerIds, seitenreiResults.allScenarioResults, participatingPlayers, displayLineSegments 
     ); 
+    
     const resultsContainer = document.getElementById('results-container'); 
     if (resultsContainer) resultsContainer.classList.add('visible'); 
+} 
+
+// ------------------------------------------------------------------------------------
+// 📊 表示・UI出力 (DISPLAY & UI)
+// ------------------------------------------------------------------------------------
+function assignFinalGrades(scenarioPlayers) {
+    if (scenarioPlayers.length === 0) return; 
+    const scores = scenarioPlayers.map(p => p.final_score); 
+    const maxScore = scores[0]; const minScore = scores[scores.length - 1]; const range = maxScore - minScore; 
+    scenarioPlayers.forEach(p => { 
+        p.grade = range > 0 ? Math.ceil(1 + 9 * (p.final_score - minScore) / range) : 1; 
+        p.grade = Math.min(10, Math.max(1, p.grade)); 
+    }); 
+    scenarioPlayers.forEach((p, i) => { 
+        if (i === scenarioPlayers.length - 1) { p.strength_mark = '→'; return; }
+        const next = scenarioPlayers[i+1]; const diff = p.final_score - next.final_score;
+        p.strength_mark = diff >= (range/1000) ? '↑' : (diff >= (range/10000) ? '↗' : '→');
+    });
 } 
 
 function getStrengthColor(score, minScore, maxScore) {
@@ -389,13 +440,24 @@ function getTextColor(rgbColor) {
     return l > 0.5 ? '#333' : '#fff';
 }
 
+function generateScenarioWagers(results) {
+    const top3 = results.slice(0, 3).map(p => p.id); 
+    const tritan = [`${top3[0]}-${top3[1]}-${top3[2]}`, `${top3[0]}-${top3[2]}-${top3[1]}`, `${top3[1]}-${top3[0]}-${top3[2]}`].join(', '); 
+    const top4 = results.slice(0, 4).map(p => p.id); 
+    const tri1 = [...top4.slice(0, 3)].sort((a, b) => a - b).join('='); 
+    let tri2 = top4.length >= 4 ? [top4[0], top4[1], top4[3]].sort((a, b) => a - b).join('=') : ''; 
+    return { tritan, trifuku: [tri1, tri2].filter(t => t.length > 0).join(', ') };
+} 
+
 function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers, displayLineSegments) { 
     displayBankTendency(); 
-    const finalScores = Object.keys(seitenreiIntegratedScores).map(id => ({ id: Number(id), score: seitenreiIntegratedScores[id] / detailedScenarioResults.length }));
+    
+    const finalScores = Object.keys(seitenreiIntegratedScores).map(id => ({ id: Number(id), score: seitenreiIntegratedScores[id] / 3 }));
     const allScores = finalScores.map(p => p.score);
     const maxScore = Math.max(...allScores); const minScore = Math.min(...allScores); 
     const playerIdToScore = {}; finalScores.forEach(p => playerIdToScore[p.id] = p.score);
 
+    // ライン表示
     const lineDisplay = document.getElementById('line-display'); 
     let displayHtml = ''; 
     displayLineSegments.forEach((seg) => {
@@ -410,6 +472,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     });
     if (lineDisplay) lineDisplay.innerHTML = displayHtml; 
 
+    // 競りサマリー
     let seriSummaryHtml = '';
     if (allSeriInfos.length > 0) {
         seriSummaryHtml += `<div style="padding: 10px; margin-bottom: 15px; border: 2px solid #c07777; background-color: #fcf0f0; border-radius: 6px;"><h4>⚠️ 競り発生！</h4>`;
@@ -417,11 +480,13 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         seriSummaryHtml += `<p style="font-size: 0.9em; color: #c07777;">※体力消耗減点適用済</p></div>`;
     }
 
+    // 天雲指数 ＆ 壱耀演出
     const tenunData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores, allScenarioResults, participatingPlayers); 
     const tenunHtml = window.generateTamakiTenunHTML(tenunData.tenunIndex, false, null); 
     const tenunOutput = document.getElementById('tenun-index-output'); 
     if (tenunOutput) tenunOutput.innerHTML = tenunHtml + tenunData.superiorHtml; 
 
+    // シナリオ別詳細
     const scenarioOutput = document.getElementById('scenario-output'); 
     if (scenarioOutput) { 
         scenarioOutput.innerHTML = seriSummaryHtml + detailedScenarioResults.map(s => { 
@@ -430,14 +495,16 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         }).join(''); 
     } 
 
-    const seitenreiRanking = Object.keys(seitenreiIntegratedScores).map(id => ({ id: Number(id), score: seitenreiIntegratedScores[id] / detailedScenarioResults.length })).sort((a, b) => b.score - a.score); 
+    // 静天霊出力
+    const seitenreiRanking = Object.keys(seitenreiIntegratedScores).map(id => ({ id: Number(id), score: seitenreiIntegratedScores[id] / 3 })).sort((a, b) => b.score - a.score); 
     const sTop3 = seitenreiRanking.slice(0, 3).map(p => p.id); const sTop4 = seitenreiRanking.slice(0, 4).map(p => p.id);
     const sTri1 = [...sTop4.slice(0, 3)].sort((a,b)=>a-b).join('=');
     const sTri2 = sTop4.length >= 4 ? [sTop4[0], sTop4[1], sTop4[3]].sort((a,b)=>a-b).join('=') : 'N/A';
     const seitenreiOutput = document.getElementById('seitenrei-output'); 
     if (seitenreiOutput) seitenreiOutput.innerHTML = `三連単: <strong>${sTop3[0]}-${sTop3[1]}-${sTop3[2]}, ${sTop3[0]}-${sTop3[2]}-${sTop3[1]}</strong><br>三連複: <strong>${sTri1}, ${sTri2}</strong>`; 
 
-    const koutenreiRanking = Object.keys(koutenreiIntegratedScores).map(id => ({ id: Number(id), score: koutenreiIntegratedScores[id] / detailedScenarioResults.length })).sort((a, b) => b.score - a.score); 
+    // 光天霊出力
+    const koutenreiRanking = Object.keys(koutenreiIntegratedScores).map(id => ({ id: Number(id), score: koutenreiIntegratedScores[id] / 3 })).sort((a, b) => b.score - a.score); 
     const kTop4 = koutenreiRanking.slice(0, 4).map(p => p.id); const kLeader = kTop4[3];
     const kTri = kLeader ? [[kLeader, kTop4[0], kTop4[1]], [kLeader, kTop4[0], kTop4[2]], [kLeader, kTop4[1], kTop4[2]]].map(x=>x.sort((a,b)=>a-b).join('=')).join(', ') : 'N/A';
     const koutenreiOutput = document.getElementById('koutenrei-output'); 
