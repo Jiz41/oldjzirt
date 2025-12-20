@@ -902,28 +902,17 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
                     }
                 }
 
-                 if (isIntegrated) {
-                    logMessage(`[ICHIOU] 壱耀晴乾ノ象 発動条件クリア: 選手ID ${axisPlayer.id}`);
+                if (isIntegrated) {
+                    logMessage(`[ICHIOU] 壱耀晴乾ノ象 発動条件クリア: 選手ID ${axisPlayer.id} (天運${tenunIndex}_差し)`);
                     
-                    // 改行(<br><br>)を入れ、IDを明示的に表示するHTMLを追加
-                    superiorMessage = `<br><br><div class="ichiyo-id-display">【壱耀対象：選手${axisPlayer.id}】</div>` 
-                                    + window.generateTamakiTenunHTML(tenunIndex, true, axisPlayer.id);
+                    superiorMessage = window.generateTamakiTenunHTML(tenunIndex, true, axisPlayer.id);;
                 }
             }
         }
     }
 
-     // 通常メッセージと、一行空けた壱耀メッセージを統合
-    const finalMessage = oracleMessage + superiorMessage;
-    
-    logMessage(`[TENUN] 晴天/荒天 上位3名一致数: ${matchCount}名。天雲指数: ${tenunIndex}`); 
-    
-    // 【修正】ichiyoPlayerId を追加して戻す
-    return { 
-        tenunIndex, 
-        message: finalMessage, 
-        ichiyoPlayerId: (axisPlayer ? axisPlayer.id : null) 
-    };  
+    // 既存のメッセージに、発令メッセージがあれば追記
+    oracleMessage += superiorMessage;
     
     // 💡 ログ出力: 天雲指数の値のみを出力（係数非公開ルールに抵触しない）
     logMessage(`[TENUN] 晴天/荒天 上位3名一致数: ${matchCount}名。天雲指数: ${tenunIndex}`); 
@@ -1080,7 +1069,7 @@ function getTextColor(rgbColor) {
 }
 
 
-function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers, displayLineSegments, tenunIndexData) {
+function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers, displayLineSegments) { 
     displayBankTendency(); 
 
     // ---------------------------------------------------------- 
@@ -1183,29 +1172,25 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     }
 
     // ---------------------------------------------------------- 
-    // ★ 天雲指数 (たまきシステム) の統合表示 ★ 
+    // ★ 天雲指数 (占い師メッセージ) の計算と表示 ★ 
     // ---------------------------------------------------------- 
-    // ※ 手順2で呼び出し元から tenunData (第10引数) として渡されている想定です
-    // もし引数を増やしていない場合は、ここでもう一度計算結果を取得します
     const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores, allScenarioResults, participatingPlayers); 
-    
     const tenunIndex = tenunIndexData.tenunIndex; 
-    const isIchiyo = tenunIndexData.message.includes('tenun-ichiyo') || tenunIndexData.message.includes('ichiyo-emblem'); 
-    const ichiyoId = tenunIndexData.ichiyoPlayerId; // 💡 追加：注目選手のID
+    const oracleMessage = tenunIndexData.message; 
 
-    // 1. 画面の枠を生成して表示
+    let messageClass = ''; 
+    if (tenunIndex === 0) messageClass = 'tenun-stable'; 
+    else if (tenunIndex === 33) messageClass = 'tenun-mild'; 
+    else if (tenunIndex === 67) messageClass = 'tenun-alert'; 
+    else if (tenunIndex === 100) messageClass = 'tenun-severe'; 
+
+    const tenunHtml = window.generateTamakiTenunHTML(tenunIndex, false, null); 
+        
     const tenunOutput = document.getElementById('tenun-index-output'); 
     if (tenunOutput) { 
-        // 枠組みと背景色、神託メッセージを表示
-        tenunOutput.innerHTML = tenunIndexData.message; 
-    }
+        tenunOutput.innerHTML = tenunHtml; 
+    } 
 
-    // 2. たまきのセリフシステムを実行（IDを渡すように修正）
-    if (typeof displayTamakiMessage === 'function') {
-        // 💡 第3引数に ichiyoId を追加することで、たまきが選手番号を認識できるようになります
-        displayTamakiMessage(tenunIndex, isIchiyo, ichiyoId);
-    }
-  
     // ---------------------------------------------------------- 
     // シナリオ詳細 (変更なし)
     const scenarioOutput = document.getElementById('scenario-output'); 
