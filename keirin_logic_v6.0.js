@@ -1185,23 +1185,25 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // ---------------------------------------------------------- 
     // ★ 天雲指数 (たまきシステム) の統合表示 ★ 
     // ---------------------------------------------------------- 
+    // ※ 手順2で呼び出し元から tenunData (第10引数) として渡されている想定です
+    // もし引数を増やしていない場合は、ここでもう一度計算結果を取得します
     const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores, allScenarioResults, participatingPlayers); 
-    const tenunIndex = tenunIndexData.tenunIndex; 
     
-    // 壱耀判定：メッセージ内に ID が含まれているかチェック
-    // window.generateTamakiTenunHTML 内で生成されたHTMLに 'tenun-ichiyo' があるかで判定
+    const tenunIndex = tenunIndexData.tenunIndex; 
     const isIchiyo = tenunIndexData.message.includes('tenun-ichiyo') || tenunIndexData.message.includes('ichiyo-emblem'); 
+    const ichiyoId = tenunIndexData.ichiyoPlayerId; // 💡 追加：注目選手のID
 
-   // 1. 画面の枠を生成して表示
+    // 1. 画面の枠を生成して表示
     const tenunOutput = document.getElementById('tenun-index-output'); 
     if (tenunOutput) { 
-        // Logic.js 上部で統合したメッセージ（tenunIndexData.message）をそのまま表示に使う
+        // 枠組みと背景色、神託メッセージを表示
         tenunOutput.innerHTML = tenunIndexData.message; 
     }
 
-    // 2. たまきの音声/セリフシステムに「壱耀フラグ」を渡して実行
+    // 2. たまきのセリフシステムを実行（IDを渡すように修正）
     if (typeof displayTamakiMessage === 'function') {
-        displayTamakiMessage(tenunIndex, isIchiyo);
+        // 💡 第3引数に ichiyoId を追加することで、たまきが選手番号を認識できるようになります
+        displayTamakiMessage(tenunIndex, isIchiyo, ichiyoId);
     }
   
     // ---------------------------------------------------------- 
