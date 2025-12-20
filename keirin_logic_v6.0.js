@@ -913,11 +913,17 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
         }
     }
 
-    // 通常メッセージと、一行空けた壱耀メッセージを統合
+     // 通常メッセージと、一行空けた壱耀メッセージを統合
     const finalMessage = oracleMessage + superiorMessage;
     
     logMessage(`[TENUN] 晴天/荒天 上位3名一致数: ${matchCount}名。天雲指数: ${tenunIndex}`); 
-    return { tenunIndex, message: finalMessage }; 
+    
+    // 【修正】ichiyoPlayerId を追加して戻す
+    return { 
+        tenunIndex, 
+        message: finalMessage, 
+        ichiyoPlayerId: (axisPlayer ? axisPlayer.id : null) 
+    };  
     
     // 💡 ログ出力: 天雲指数の値のみを出力（係数非公開ルールに抵触しない）
     logMessage(`[TENUN] 晴天/荒天 上位3名一致数: ${matchCount}名。天雲指数: ${tenunIndex}`); 
