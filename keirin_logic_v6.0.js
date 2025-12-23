@@ -1145,15 +1145,10 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // ---------------------------------------------------------- 
     // ★ 天雲指数 (Tamakiメッセージ) の表示 ★ 
     // ---------------------------------------------------------- 
-    // ✅ 修正：内部での calculateTenunIndex 再計算を完全に削除しました。
-    // 引数として受け取った tenunIndexData をそのまま使います。
+    // ✅ 計算済みの tenunIndexData をそのまま表示。余計な追記（appendIchiyoComment）は行わない。
     const tenunOutput = document.getElementById('tenun-index-output'); 
     if (tenunOutput && tenunIndexData) { 
         tenunOutput.innerHTML = tenunIndexData.message; 
-        
-        if (typeof appendIchiyoComment === 'function') {
-            appendIchiyoComment();
-        }
     } 
 
     // ---------------------------------------------------------- 
