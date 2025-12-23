@@ -197,3 +197,23 @@ const TAMAKI_CSS = `
 
 window.generateTamakiTenunHTML = generateTamakiTenunHTML;
 window.TAMAKI_CSS = TAMAKI_CSS;
+
+/**
+ * 壱耀（0_差し）の判定結果を受け取り、現在のセリフに「気づき」を追記する
+ */
+function appendIchiyoComment() {
+    // 1. 壱耀の判定関数が存在するかチェック（安全策）
+    if (typeof calculateSuperiorityList === 'function') {
+        const ichiyoList = calculateSuperiorityList();
+        
+        // 2. 「0_差し」が含まれている場合のみ処理
+        if (ichiyoList.includes("0_差し")) {
+            const speechElement = document.getElementById('tamaki-speech-text');
+            if (speechElement) {
+                // 現在のセリフを保持しつつ、改行して「…あら？」を追加
+                const extraMsg = "\n\n……あら？ 指数の裏側に「壱耀（いちよう）」の兆しが見えますぅ。この構成、統計的にとっても興味深いですねぇ。";
+                speechElement.innerText += extraMsg;
+            }
+        }
+    }
+}
