@@ -141,7 +141,7 @@ function generateTamakiTenunHTML(tenunIndex, isIchiyo = false, playerId = null) 
                 </div>
                 <div class="tamaki-speech-bubble">
                     <div class="tamaki-name">🌸 七曜院パラドキサ環</div>
-                    <div class="tamaki-speech-text">${speech}</div>
+                    <div class="tamaki-speech-text" id="tamaki-speech-text">${speech}</div>
                 </div>
             </div>
         </div>`;
@@ -213,6 +213,23 @@ function appendIchiyoComment() {
                 // 現在のセリフを保持しつつ、改行して「…あら？」を追加
                 const extraMsg = "\n\n……あら？ 指数の裏側に「壱耀（いちよう）」の兆しが見えますぅ。この構成、統計的にとっても興味深いですねぇ。";
                 speechElement.innerText += extraMsg;
+            }
+        }
+    }
+}
+
+function appendIchiyoComment() {
+    if (typeof calculateSuperiorityList === 'function') {
+        const ichiyoList = calculateSuperiorityList();
+        if (ichiyoList.includes("0_差し")) {
+            const speechElement = document.getElementById('tamaki-speech-text');
+            if (speechElement) {
+                // ichiyoリストからランダムに1つ選ぶ
+                const ichiyoSpeeches = TAMAKI_SPEECHES.ichiyo;
+                const selectedExtra = ichiyoSpeeches[Math.floor(Math.random() * ichiyoSpeeches.length)];
+                
+                // 既存の指数のセリフを消さずに、改行して「気づき」を追記
+                speechElement.innerText += "\n\n" + selectedExtra;
             }
         }
     }
