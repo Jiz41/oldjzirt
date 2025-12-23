@@ -137,7 +137,6 @@ function generateTamakiTenunHTML(tenunIndex, isIchiyo = false, playerId = null) 
 
     return `
         <span class="tenun-title" style="font-weight: bold; font-size: 1.1em; color: #8b6d00; ${titleStyle} margin-bottom: 10px; display: block;">${titleText}</span>
-        <span class="tenun-title" style="font-weight: bold; font-size: 1.1em; color: #8b6d00; margin-top: 25px; margin-bottom: 10px; display: block;">天雲指数</span>
         <div class="tenun-index-container ${cardClass}">
             <div class="tamaki-display">
                 <div class="tamaki-character">
