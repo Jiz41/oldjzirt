@@ -1184,17 +1184,21 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     else if (tenunIndex === 67) messageClass = 'tenun-alert'; 
     else if (tenunIndex === 100) messageClass = 'tenun-severe'; 
 
-    const tenunHtml = window.generateTamakiTenunHTML(tenunIndex, false, null); 
-        
+    // 1. まず判定データを取得（ここですでに壱耀の判定は終わっている）
+    const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores, allScenarioResults, participatingPlayers); 
+    const tenunIndex = tenunIndexData.tenunIndex; 
+
+    // 2. 重要：generateTamakiTenunHTML をここで「再生成」せず、
+    // calculateTenunIndex が計算した「結果（message）」を直接表示に使う
     const tenunOutput = document.getElementById('tenun-index-output'); 
     if (tenunOutput) { 
-        tenunOutput.innerHTML = tenunHtml; 
-        
-        if (typeof appendIchiyoComment === 'function') {
-            appendIchiyoComment();
-        }
-    } 
-
+    // calculateTenunIndex 内で構築された oracleMessage (HTML) を流し込む
+    tenunOutput.innerHTML = tenunIndexData.message; 
+    
+    if (typeof appendIchiyoComment === 'function') {
+        appendIchiyoComment();
+    }
+} 
     // ---------------------------------------------------------- 
     // シナリオ詳細 (変更なし)
     const scenarioOutput = document.getElementById('scenario-output'); 
