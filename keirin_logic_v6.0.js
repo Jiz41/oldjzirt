@@ -1189,6 +1189,10 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     const tenunOutput = document.getElementById('tenun-index-output'); 
     if (tenunOutput) { 
         tenunOutput.innerHTML = tenunHtml; 
+        
+        if (typeof appendIchiyoComment === 'function') {
+            appendIchiyoComment();
+        }
     } 
 
     // ---------------------------------------------------------- 
