@@ -911,12 +911,11 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
         }
     }
 
-    // 既存のメッセージに、発令メッセージがあれば追記
-    oracleMessage += superiorMessage;
+    // ✅ 修正：古い文章(oracleMessage)を無視し、TamakiのHTMLを優先して返す
+    const finalHtml = superiorMessage || window.generateTamakiTenunHTML(tenunIndex, false, null);
     
-    // 💡 ログ出力: 天雲指数の値のみを出力（係数非公開ルールに抵触しない）
-    logMessage(`[TENUN] 晴天/荒天 上位3名一致数: ${matchCount}名。天雲指数: ${tenunIndex}`); 
-    return { tenunIndex, message: oracleMessage }; // ← 修正後の message を返す
+    logMessage(`[TENUN] 天雲指数: ${tenunIndex}`); 
+    return { tenunIndex, message: finalHtml }; 
 } 
 
 // メイン計算関数 (calculatePrediction)
@@ -1170,21 +1169,17 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             </div>
         `;
     }
-
-        // ---------------------------------------------------------- 
-    // ★ 天雲指数 (占い師メッセージ) の計算と表示 ★ 
     // ---------------------------------------------------------- 
-    // 1. 判定データを取得（ここで壱耀の判定も完了し、HTMLが含まれた message が返る）
+    // ★ 天雲指数 (Tamakiメッセージ) の計算と表示 ★ 
+    // ---------------------------------------------------------- 
+    // ✅ 修正：二重宣言を削除し、計算と表示を1回ずつに整理
     const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores, allScenarioResults, participatingPlayers); 
-    const tenunIndex = tenunIndexData.tenunIndex; 
 
-    // 2. 表示先の要素を取得
     const tenunOutput = document.getElementById('tenun-index-output'); 
     if (tenunOutput) { 
-        // calculateTenunIndex 内で構築された HTML（oracleMessage + superiorMessage）を直接流し込む
+        // 既に calculateTenunIndex 側で作成済みの HTML を表示するだけ
         tenunOutput.innerHTML = tenunIndexData.message; 
         
-        // 追加コメント関数があれば実行
         if (typeof appendIchiyoComment === 'function') {
             appendIchiyoComment();
         }
