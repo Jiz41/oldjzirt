@@ -134,7 +134,7 @@ function getPlayerData() {
 async function loadBankData() { 
     try { 
         logMessage("[INIT] bankdata.jsonの読み込みを開始します..."); 
-        const response = await fetch('/file=bankdata.json'); 
+        const response = await fetch('bankdata.json'); 
         if (!response.ok) { 
             logMessage(`[ERROR] bankdata.jsonの読み込みに失敗しました: HTTP status ${response.status}`); 
             throw new Error('Bank data failed to load.'); 
