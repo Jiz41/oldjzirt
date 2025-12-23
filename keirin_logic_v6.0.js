@@ -1154,6 +1154,55 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         tenunOutput.innerHTML = tenunIndexData.message; 
     } 
 
+  // ============================
+// ☀️ 晴天令 買い目表示
+// ============================
+
+const seitenreiRanking = Object.keys(seitenreiIntegratedScores)
+  .map(id => ({ id: Number(id), score: seitenreiIntegratedScores[id] }))
+  .sort((a, b) => b.score - a.score);
+
+const seitenreiBets = generateSeitenreiBets(seitenreiRanking);
+const seitenreiBox = document.getElementById('seitenrei-output');
+
+if (seitenreiBox && seitenreiBets) {
+  let html = '<h4>☀️ 晴天令</h4><strong>三連単</strong><ul>';
+  seitenreiBets.sanrentan.forEach(b =>
+    html += `<li>${formatOrderedBet(b)}</li>`
+  );
+  html += '</ul><strong>三連複</strong><ul>';
+  seitenreiBets.sanrenpuku.forEach(b =>
+    html += `<li>${formatSanrenpuku(b)}</li>`
+  );
+  html += '</ul>';
+  seitenreiBox.innerHTML = html;
+}
+
+// ============================
+// ⛈️ 荒天令 買い目表示
+// ============================
+
+const koutenreiRanking = Object.keys(koutenreiIntegratedScores)
+  .map(id => ({ id: Number(id), score: koutenreiIntegratedScores[id] }))
+  .sort((a, b) => b.score - a.score);
+
+const L = koutenreiRanking.length >= 4 ? koutenreiRanking[3].id : null;
+const koutenreiBets = generateKoutenreiBets(koutenreiRanking, L);
+const koutenreiBox = document.getElementById('koutenrei-output');
+
+if (koutenreiBox && koutenreiBets) {
+  let html = '<h4>⛈️ 荒天令</h4><strong>三連複</strong><ul>';
+  koutenreiBets.sanrenpuku.forEach(b =>
+    html += `<li>${formatSanrenpuku(b)}</li>`
+  );
+  html += '</ul><strong>二連単</strong><ul>';
+  koutenreiBets.nirentan.forEach(b =>
+    html += `<li>${formatOrderedBet(b)}</li>`
+  );
+  html += '</ul>';
+  koutenreiBox.innerHTML = html;
+}
+  
     // ---------------------------------------------------------- 
     // シナリオ詳細の表示
     const scenarioOutput = document.getElementById('scenario-output'); 
@@ -1165,17 +1214,58 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         }).join(''); 
     } 
 
-    // --- ☀️ 晴天令 (安定推奨) の表示 --- 
-    const seitenreiRanking = Object.keys(seitenreiIntegratedScores).map(id => ({ id: Number(id), score: seitenreiIntegratedScores[id] / detailedScenarioResults.length })).sort((a, b) => b.score - a.score); 
-    const seitenTop3 = seitenreiRanking.slice(0, 3).map(p => p.id); 
-    const seitenTritan = [`${seitenTop3[0]}-${seitenTop3[1]}-${seitenTop3[2]}`, `${seitenTop3[0]}-${seitenTop3[2]}-${seitenTop3[1]}`, `${seitenTop3[1]}-${seitenTop3[0]}-${seitenTop3[2]}`].join(', '); 
-    const seitenreiOutput = document.getElementById('seitenrei-output'); 
-    if (seitenreiOutput) { seitenreiOutput.innerHTML = `三連単: <strong>${seitenTritan}</strong>`; } 
+// ============================
+// 買い目フォーマット
+// ============================
 
-    // --- ⛈️ 荒天令 (高配当狙い) の表示 --- 
-    const koutenreiRanking = Object.keys(koutenreiIntegratedScores).map(id => ({ id: Number(id), score: koutenreiIntegratedScores[id] / detailedScenarioResults.length, rank: 0 })).sort((a, b) => b.score - a.score); 
-    koutenreiRanking.forEach((p, index) => p.rank = index + 1); 
-    const koutenLeader = koutenreiRanking.length >= 4 ? koutenreiRanking[3].id : 'N/A'; 
-    const koutenreiOutput = document.getElementById('koutenrei-output'); 
-    if (koutenreiOutput) { koutenreiOutput.innerHTML = `⚫ 特異点 : **${koutenLeader}**`; }
+function formatOrderedBet(bet) {
+  return bet.join('-');
+}
+
+function formatSanrenpuku(bet) {
+  return bet.slice().sort((a, b) => a - b).join('=');
+}
+
+// ============================
+// 晴天令 買い目生成
+// ============================
+
+function generateSeitenreiBets(ranking) {
+  if (!ranking || ranking.length < 3) return null;
+  const r1 = ranking[0].id;
+  const r2 = ranking[1].id;
+  const r3 = ranking[2].id;
+
+  return {
+    sanrentan: [
+      [r1, r2, r3],
+      [r2, r1, r3],
+      [r1, r3, r2],
+      [r2, r3, r1],
+    ],
+    sanrenpuku: [[r1, r2, r3]],
+  };
+}
+
+// ============================
+// 荒天令 買い目生成
+// ============================
+
+function generateKoutenreiBets(ranking, L) {
+  if (!ranking || ranking.length < 3 || !L) return null;
+  const r1 = ranking[0].id;
+  const r2 = ranking[1].id;
+  const r3 = ranking[2].id;
+
+  return {
+    sanrenpuku: [
+      [r1, r2, L],
+      [r1, r3, L],
+    ],
+    nirentan: [
+      [r1, L],
+      [L, r1],
+      [r1, r3],
+    ],
+  };
 }
