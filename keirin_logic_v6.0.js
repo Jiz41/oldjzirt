@@ -907,11 +907,14 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
         }
     }
 
-    // 最終判定：専用メッセージがなければ通常版を生成
-    const finalHtml = (superiorMessage !== '') ? superiorMessage : window.generateTamakiTenunHTML(tenunIndex, false, null);
-    
-    logMessage(`[TENUN] 天雲指数: ${tenunIndex} / 壱耀発動: ${superiorMessage !== ''}`); 
-    return { tenunIndex, message: finalHtml }; 
+// 💡 修正：基本メッセージを常に生成
+const basicHtml = window.generateTamakiTenunHTML(tenunIndex, false, null);
+
+// 💡 修正：基本 + 壱耀（ある場合）を連結
+const finalHtml = basicHtml + superiorMessage;
+
+logMessage(`[TENUN] 天雲指数: ${tenunIndex} / 壱耀発動: ${superiorMessage !== ''}`); 
+return { tenunIndex, message: finalHtml };
 } 
 
 // メイン計算関数 (calculatePrediction) 
