@@ -1009,7 +1009,15 @@ async function calculatePrediction() {
     // --- IV. 最終結果の統合と表示 --- 
     const detailedScenarioResults = koutenreiModeSelected ? koutenreiResults.allScenarioResults : seitenreiResults.allScenarioResults; 
 
-    // 💡 修正: allSeriInfos と displayLineSegments を渡す
+    // ✅ 1. ここで計算を実行し、変数 finalTenunData に入れる
+    const finalTenunData = calculateTenunIndex(
+        seitenreiResults.integratedScores, 
+        koutenreiResults.integratedScores, 
+        seitenreiResults.allScenarioResults, 
+        participatingPlayers
+    );
+
+    // ✅ 2. displayResults の最後に finalTenunData を追加して渡す
     displayResults( 
         detailedScenarioResults, 
         seitenreiResults.integratedScores, 
@@ -1019,7 +1027,8 @@ async function calculatePrediction() {
         finalOrderedPlayerIds, 
         seitenreiResults.allScenarioResults, 
         participatingPlayers,
-        displayLineSegments 
+        displayLineSegments,
+        finalTenunData 
     ); 
     
     const resultsContainer = document.getElementById('results-container'); 
@@ -1067,7 +1076,8 @@ function getTextColor(rgbColor) {
 }
 
 
-function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers, displayLineSegments) { 
+// ✅ 修正版：引数の最後に tenunIndexData を受け取るように変更
+function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers, displayLineSegments, tenunIndexData) { 
     displayBankTendency(); 
 
     // ---------------------------------------------------------- 
@@ -1088,7 +1098,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     });
 
     // ---------------------------------------------------------- 
-    // ★ V7.3: ライン強度 (強弱グラデーション) の視覚化 (矢印表示対応) ★ 
+    // ★ V7.3: ライン強度 (強弱グラデーション) の視覚化 ★ 
     // ---------------------------------------------------------- 
     const lineDisplay = document.getElementById('line-display'); 
     let displayHtml = ''; 
@@ -1097,194 +1107,77 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         if (segment.type === 'single') {
             const id = segment.id;
             const score = playerIdToScore[id]; 
-            
             if (score === undefined) return; 
-
             const rgbColor = getStrengthColor(score, minScore, maxScore);
             const textColor = getTextColor(rgbColor);
-            
-            let style = `background-color: ${rgbColor}; color: ${textColor};`;
-            
-            displayHtml += `<span class="line-box strength-color" style="${style}">${id}</span>`;
-            
+            displayHtml += `<span class="line-box strength-color" style="background-color: ${rgbColor}; color: ${textColor};">${id}</span>`;
         } else if (segment.type === 'seri') {
             const followerId = segment.follower; 
             const contenderId = segment.contender; 
-            
             const scoreF = playerIdToScore[followerId];
             const scoreC = playerIdToScore[contenderId];
-            
             if (scoreF === undefined || scoreC === undefined) return; 
-            
             const rgbColorF = getStrengthColor(scoreF, minScore, maxScore);
             const textColorF = getTextColor(rgbColorF);
-
             const rgbColorC = getStrengthColor(scoreC, minScore, maxScore);
             const textColorC = getTextColor(rgbColorC);
-
-            displayHtml += `<span class="seri-segment">(`;
-            displayHtml += `<span class="line-box strength-color" style="background-color: ${rgbColorF}; color: ${textColorF};">${followerId}</span>`;
-            displayHtml += `<span class="seri-arrow">←</span>`; 
-            displayHtml += `<span class="line-box strength-color" style="background-color: ${rgbColorC}; color: ${textColorC};">${contenderId}</span>`;
-            displayHtml += `)</span>`;
+            displayHtml += `<span class="seri-segment">(<span class="line-box strength-color" style="background-color: ${rgbColorF}; color: ${textColorF};">${followerId}</span><span class="seri-arrow">←</span><span class="line-box strength-color" style="background-color: ${rgbColorC}; color: ${textColorC};">${contenderId}</span>)</span>`;
         }
     });
     
     if (lineDisplay) { 
         lineDisplay.innerHTML = displayHtml; 
     } 
-    logMessage(`[COLOR] ライン表示を強弱グラデーションカラーに更新しました。 Max: ${maxScore.toFixed(2)}, Min: ${minScore.toFixed(2)}`);
 
     // ---------------------------------------------------------- 
-    // ★ 競りサマリーの表示 (修正: 複数の競りを自然な文章で表示) ★ 
+    // ★ 競りサマリーの表示 ★ 
     // ----------------------------------------------------------
     let seriSummaryHtml = '';
-    
     if (allSeriInfos.length > 0) {
-        seriSummaryHtml += `
-            <div style="padding: 10px; margin-bottom: 15px; border: 2px solid #c07777; background-color: #fcf0f0; border-radius: 6px;">
-            <h4>⚠️ 競り発生！ (並び: ${document.getElementById('line-input').value})</h4>
-        `;
-        
+        seriSummaryHtml += `<div style="padding: 10px; margin-bottom: 15px; border: 2px solid #c07777; background-color: #fcf0f0; border-radius: 6px;"><h4>⚠️ 競り発生！</h4>`;
         allSeriInfos.forEach((info, index) => {
-            const followerId = info.follower;
-            const contenderId = info.contender;
-            const winnerId = info.winner;
-            
             let prefix = (index === 0) ? '最初の競りは、' : '<strong>さらに、</strong>';
-            
-            seriSummaryHtml += `
-                <p>
-                    ${prefix}選手<strong>${followerId}</strong> (イン) vs 選手<strong>${contenderId}</strong> (アウト) です。
-                    予測勝者は **選手${winnerId}** です。
-                </p>
-            `;
+            seriSummaryHtml += `<p>${prefix}選手<strong>${info.follower}</strong> vs 選手<strong>${info.contender}</strong>。予測勝者は **選手${info.winner}** です。</p>`;
         });
-        
-        seriSummaryHtml += `
-            <p style="font-size: 0.9em; color: #c07777;">
-                ※ アウト側（競り敗者）の選手、および競り勝者（イン側）の選手には、**全て**の競り並びに対して体力消耗による減点補正が適用されています。
-            </p>
-            </div>
-        `;
+        seriSummaryHtml += `<p style="font-size: 0.9em; color: #c07777;">※体力消耗による減点補正が適用されています。</p></div>`;
     }
-    // ---------------------------------------------------------- 
-    // ★ 天雲指数 (Tamakiメッセージ) の計算と表示 ★ 
-    // ---------------------------------------------------------- 
-    // ✅ 修正：二重宣言を削除し、計算と表示を1回ずつに整理
-    const tenunIndexData = calculateTenunIndex(seitenreiIntegratedScores, koutenreiIntegratedScores, allScenarioResults, participatingPlayers); 
 
+    // ---------------------------------------------------------- 
+    // ★ 天雲指数 (Tamakiメッセージ) の表示 ★ 
+    // ---------------------------------------------------------- 
+    // ✅ 修正：内部での calculateTenunIndex 再計算を完全に削除しました。
+    // 引数として受け取った tenunIndexData をそのまま使います。
     const tenunOutput = document.getElementById('tenun-index-output'); 
-    if (tenunOutput) { 
-        // 既に calculateTenunIndex 側で作成済みの HTML を表示するだけ
+    if (tenunOutput && tenunIndexData) { 
         tenunOutput.innerHTML = tenunIndexData.message; 
         
         if (typeof appendIchiyoComment === 'function') {
             appendIchiyoComment();
         }
     } 
-    // ---------------------------------------------------------- 
 
     // ---------------------------------------------------------- 
-    // シナリオ詳細 (変更なし)
+    // シナリオ詳細の表示
     const scenarioOutput = document.getElementById('scenario-output'); 
     if (scenarioOutput) { 
         scenarioOutput.innerHTML = seriSummaryHtml;
-        
         scenarioOutput.innerHTML += detailedScenarioResults.map(s => { 
             const wagers = generateScenarioWagers(s.results); 
-            return ` 
-                <div class="scenario-detail"> 
-                    <h4>${s.scenario}シミュレーション</h4> 
-                    <p><strong>三連単 (3点):</strong> ${wagers.tritan}</p> 
-                    <p><strong>三連複 (2点):</strong> ${wagers.trifuku}</p> 
-                    <table> 
-                        <tr><th>選手ID</th><th>評価</th><th class="hide-score-rank">スコア</th><th class="hide-score-rank">順位</th></tr> 
-                        ${s.results.map((p) => ` 
-                            <tr> 
-                                <td>${p.id}</td> 
-                                <td><strong>${p.grade}${p.strength_mark}</strong></td> 
-                                <td class="hide-score-rank">${p.final_score.toFixed(3)}</td> 
-                                <td class="hide-score-rank">${p.id === s.results[0].id ? '1位' : ''}</td> 
-                            </tr> 
-                        `).join('')} 
-                    </table> 
-                </div> `; 
+            return `<div class="scenario-detail"><h4>${s.scenario}シミュレーション</h4><p><strong>三連単:</strong> ${wagers.tritan}</p><p><strong>三連複:</strong> ${wagers.trifuku}</p><table><tr><th>選手ID</th><th>評価</th></tr>${s.results.map((p) => `<tr><td>${p.id}</td><td><strong>${p.grade}${p.strength_mark}</strong></td></tr>`).join('')}</table></div>`; 
         }).join(''); 
     } 
 
-    // --- ☀️ 晴天令 (安定推奨) の表示 (変更なし) --- 
+    // --- ☀️ 晴天令 (安定推奨) の表示 --- 
     const seitenreiRanking = Object.keys(seitenreiIntegratedScores).map(id => ({ id: Number(id), score: seitenreiIntegratedScores[id] / detailedScenarioResults.length })).sort((a, b) => b.score - a.score); 
     const seitenTop3 = seitenreiRanking.slice(0, 3).map(p => p.id); 
-    const seitenTop4 = seitenreiRanking.slice(0, 4).map(p => p.id); 
-    
-    const seitenTritan = [ 
-        `${seitenTop3[0]}-${seitenTop3[1]}-${seitenTop3[2]}`, 
-        `${seitenTop3[0]}-${seitenTop3[2]}-${seitenTop3[1]}`, 
-        `${seitenTop3[1]}-${seitenTop3[0]}-${seitenTop3[2]}` 
-    ].join(', '); 
-    
-    const triSeiten1 = [...seitenTop4.slice(0, 3)].sort((a, b) => a - b).join('='); 
-    
-    let triSeiten2; 
-    if (seitenTop4.length >= 4) { 
-        triSeiten2 = [seitenTop4[0], seitenTop4[1], seitenTop4[3]].sort((a, b) => a - b).join('='); 
-    } else { 
-        triSeiten2 = 'データ不足'; 
-    } 
-    
-    const seitenTrifuku = [triSeiten1, triSeiten2].join(', '); 
-    
+    const seitenTritan = [`${seitenTop3[0]}-${seitenTop3[1]}-${seitenTop3[2]}`, `${seitenTop3[0]}-${seitenTop3[2]}-${seitenTop3[1]}`, `${seitenTop3[1]}-${seitenTop3[0]}-${seitenTop3[2]}`].join(', '); 
     const seitenreiOutput = document.getElementById('seitenrei-output'); 
-    if (seitenreiOutput) { 
-        seitenreiOutput.innerHTML = ` 
-            三連単 (3点): <strong>${seitenTritan}</strong><br> 
-            三連複 (2点): <strong>${seitenTrifuku}</strong> `; 
-    } 
+    if (seitenreiOutput) { seitenreiOutput.innerHTML = `三連単: <strong>${seitenTritan}</strong>`; } 
 
-    // --- ⛈️ 荒天令 (高配当狙い) の表示 (変更なし) --- 
-    const koutenreiRanking = Object.keys(koutenreiIntegratedScores).map(id => ({ id: Number(id), score: koutenreiIntegratedScores[id] / detailedScenarioResults.length, rank: 0 
-    })).sort((a, b) => b.score - a.score); 
-    
+    // --- ⛈️ 荒天令 (高配当狙い) の表示 --- 
+    const koutenreiRanking = Object.keys(koutenreiIntegratedScores).map(id => ({ id: Number(id), score: koutenreiIntegratedScores[id] / detailedScenarioResults.length, rank: 0 })).sort((a, b) => b.score - a.score); 
     koutenreiRanking.forEach((p, index) => p.rank = index + 1); 
-
-    const koutenTop3 = koutenreiRanking.slice(0, 3).map(p => p.id); 
-    const koutenTop4 = koutenreiRanking.slice(0, 4).map(p => p.id); 
-    
-    const koutenLeader = koutenTop4.length >= 4 ? koutenTop4[3] : null; 
-    let koutenTrifuku = []; 
-
-    if (koutenLeader) { 
-        koutenTrifuku.push([koutenLeader, koutenTop3[0], koutenTop3[1]].sort((a, b) => a - b).join('=')); 
-        koutenTrifuku.push([koutenLeader, koutenTop3[0], koutenTop3[2]].sort((a, b) => a - b).join('=')); 
-        koutenTrifuku.push([koutenLeader, koutenTop3[1], koutenTop3[2]].sort((a, b) => a - b).join('=')); 
-    } 
-
-    const middleWaveRiders = koutenreiRanking.filter(p => p.rank === 5 || p.rank === 6).map(p => p.id); 
-    
-    if (middleWaveRiders.length > 0) { 
-        const mainWaveRider = middleWaveRiders[0]; 
-
-        const axis1 = koutenTop3[0]; 
-        const axis2 = koutenTop3.length >= 2 ? koutenTop3[1] : null; 
-        const firmHimo = koutenLeader; 
-
-            if (axis1 && firmHimo && mainWaveRider) { 
-            if (koutenTrifuku.length < 6) { 
-                koutenTrifuku.push([mainWaveRider, axis1, firmHimo].sort((a, b) => a - b).join('=')); 
-            } 
-            if (axis2 && koutenTrifuku.length < 6) { 
-                koutenTrifuku.push([mainWaveRider, axis2, firmHimo].sort((a, b) => a - b).join('=')); 
-            } 
-        } 
-    } 
-
-    const finalKoutenTrifuku = koutenTrifuku.slice(0, 6).join(', '); 
-    
+    const koutenLeader = koutenreiRanking.length >= 4 ? koutenreiRanking[3].id : 'N/A'; 
     const koutenreiOutput = document.getElementById('koutenrei-output'); 
-    if (koutenreiOutput) { 
-        koutenreiOutput.innerHTML = ` 
-            ⚫ 特異点 : **${koutenLeader ? koutenLeader : 'N/A'}**<br> 
-            三連複 (${koutenTrifuku.slice(0, 6).length}点): <strong>${finalKoutenTrifuku}</strong> `; 
-    }
+    if (koutenreiOutput) { koutenreiOutput.innerHTML = `⚫ 特異点 : **${koutenLeader}**`; }
 }
