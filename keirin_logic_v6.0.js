@@ -1269,3 +1269,4 @@ function generateKoutenreiBets(ranking, L) {
     ],
   };
 }
+}
