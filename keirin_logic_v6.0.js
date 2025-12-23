@@ -877,7 +877,6 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
     // --- 壱耀晴乾ノ象 (いちようせいかんのしょう) 発令ロジック ---
     let superiorMessage = ''; 
 
-    // ✅ 厳格な判定：天雲指数が「0」の場合のみ中に入る
     if (tenunIndex === 0) {
         const superiorStyle = '追'; 
         const axisPlayer = participatingPlayers.find(p => 
@@ -885,7 +884,6 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
         );
 
         if (axisPlayer) {
-            // キーを確実に "0_差し" に固定してチェック
             const compositeKey = "0_差し"; 
             const isStatisticallySuperior = SUPERIOR_PATTERNS_FINAL_LIST.includes(compositeKey);
 
@@ -896,8 +894,6 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
                 if (sashiScenario && sashiScenario.results.length >= 2) {
                     const top1 = sashiScenario.results[0].id;
                     const top2 = sashiScenario.results[1].id;
-                    
-                    // 軸選手が差しシナリオで1位か2位にいるか
                     if (axisPlayer.id === top1 || axisPlayer.id === top2) {
                         isIntegrated = true; 
                     }
@@ -905,26 +901,21 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
 
                 if (isIntegrated) {
                     logMessage(`[ICHIOU] 壱耀晴乾ノ象 発動条件クリア: 選手ID ${axisPlayer.id}`);
-                    // ここで初めてHTMLを生成する
                     superiorMessage = window.generateTamakiTenunHTML(tenunIndex, true, axisPlayer.id);
                 }
             }
         }
     }
 
-    // ✅ 最終出力：superiorMessage が空（条件未達）なら、必ず false（通常版）を生成する
+    // 最終判定：専用メッセージがなければ通常版を生成
     const finalHtml = (superiorMessage !== '') ? superiorMessage : window.generateTamakiTenunHTML(tenunIndex, false, null);
     
     logMessage(`[TENUN] 天雲指数: ${tenunIndex} / 壱耀発動: ${superiorMessage !== ''}`); 
     return { tenunIndex, message: finalHtml }; 
 } 
 
-    // ✅ 修正：古い文章(oracleMessage)を無視し、TamakiのHTMLを優先して返す
-    const finalHtml = superiorMessage || window.generateTamakiTenunHTML(tenunIndex, false, null);
-    
-    logMessage(`[TENUN] 天雲指数: ${tenunIndex}`); 
-    return { tenunIndex, message: finalHtml }; 
-} 
+// メイン計算関数 (calculatePrediction) 
+// ここから下は元のコードのまま
 
 // メイン計算関数 (calculatePrediction)
 async function calculatePrediction() { 
