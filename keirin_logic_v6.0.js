@@ -1195,7 +1195,7 @@ if (koutenreiBox && koutenreiBets) {
   koutenreiBets.sanrenpuku.forEach(b =>
     html += `<li>${formatSanrenpuku(b)}</li>`
   );
-  html += '</ul><strong>二連単</strong><ul>';
+  html += '</ul><strong>二車単</strong><ul>';
   koutenreiBets.nirentan.forEach(b =>
     html += `<li>${formatOrderedBet(b)}</li>`
   );
