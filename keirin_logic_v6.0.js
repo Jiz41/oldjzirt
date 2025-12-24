@@ -79,12 +79,19 @@ const SUPERIOR_PATTERNS_FINAL_LIST = calculateSuperiorityList();
 // ロギング関数
 function logMessage(message) { 
     const logArea = document.getElementById('debug-log'); 
+    if (!logArea) return;
+
     const timestamp = new Date().toLocaleTimeString('ja-JP', { hour12: false }); 
-    if (logArea) { 
-        logArea.innerHTML += `[${timestamp}] ${message}<br>`; 
-        logArea.scrollTop = logArea.scrollHeight; 
-    } 
+    
+    // 1. innerHTMLではなく、より軽量なinsertAdjacentHTMLを使用
+    logArea.insertAdjacentHTML('beforeend', `[${timestamp}] ${message}<br>`);
+    
+    // 2. スクロール処理を「ブラウザが暇な時」に後回しにする (これが重要！)
+    requestAnimationFrame(() => {
+        logArea.scrollTop = logArea.scrollHeight;
+    });
 } 
+
 
 // getPlayerData 関数 (選手データのUIからの読み込み)
 function getPlayerData() { 
