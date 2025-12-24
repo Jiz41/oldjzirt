@@ -1277,3 +1277,15 @@ function generateKoutenreiBets(ranking, L) {
   };
 }
 }
+
+// 全てのセレクトボックスに対して、変更が終わったらフォーカスを外す設定
+document.querySelectorAll('select').forEach(select => {
+    select.addEventListener('change', () => {
+        // 1. フォーカスを外してブラウザの迷いを断ち切る
+        select.blur();
+        
+        // 2. ほんの少しだけスクロール位置を微調整して、強制的に再描画させる
+        window.scrollBy(0, 1);
+        window.scrollBy(0, -1);
+    });
+});
