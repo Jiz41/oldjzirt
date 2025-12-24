@@ -24,6 +24,7 @@ body {
     will-change: transform;
 }
 
+      <div class="keep-alive-dot"></div>
 
         .container {
             width: calc(100% - 20px);
@@ -35,7 +36,25 @@ body {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
             box-sizing: border-box;
         }
-        
+
+.keep-alive-dot {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 1px;
+    height: 1px;
+    background-color: transparent;
+    pointer-events: none;
+    z-index: -1;
+    animation: keep-alive 0.1s infinite;
+}
+
+@keyframes keep-alive {
+    0% { opacity: 1; }
+    50% { opacity: 0.99; }
+    100% { opacity: 1; }
+}
+
         header {
             padding: 15px 15px 0 15px;
             margin-top: 0; 
