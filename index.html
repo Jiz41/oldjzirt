@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>華耀天輪 真・自在律 V7.3 - Mobile (Friendly)</title>
     <style>
-        html, body {
-            overflow-x: hidden;
-            width: 100%;
-        }
+        html {
+    overflow-y: scroll; /* 常にスクロールバーの領域を確保して計算を安定させる */
+}
+body {
+    overflow-x: clip;   /* hiddenより軽量な切り取り命令 */
+    min-height: 101vh; /* 常に少しだけスクロールできる状態にして、Chromeのサボりを防ぐ */
+}
 
         body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
