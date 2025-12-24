@@ -1198,14 +1198,22 @@ const koutenreiBets = generateKoutenreiBets(koutenreiRanking, L);
 const koutenreiBox = document.getElementById('koutenrei-output');
 
 if (koutenreiBox && koutenreiBets) {
-  let html = '<h4>⛈️ 荒天令</h4><strong>三連複</strong><ul>';
+  let html = '<h4>⛈️ 荒天令</h4>';
+
+  if (L) {
+    html += `<p><strong>⚫ 特異点：</strong>${L}</p>`;
+  }
+
+  html += '<strong>三連複</strong><ul>';
   koutenreiBets.sanrenpuku.forEach(b =>
     html += `<li>${formatSanrenpuku(b)}</li>`
   );
+
   html += '</ul><strong>二車単</strong><ul>';
   koutenreiBets.nirentan.forEach(b =>
     html += `<li>${formatOrderedBet(b)}</li>`
   );
+
   html += '</ul>';
   koutenreiBox.innerHTML = html;
 }
