@@ -3,746 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>華耀天輪 真・自在律 V7.3 - Mobile (Friendly)</title>
+    <title>華耀天輪 真・自在律 V7.4 - Mobile (Optimized)</title>
     <style>
         html {
-    overflow-y: scroll; /* 常にスクロールバーの領域を確保して計算を安定させる */
-}
-body {
-    overflow-x: clip;   /* hiddenより軽量な切り取り命令 */
-    min-height: 101vh; /* 常に少しだけスクロールできる状態にして、Chromeのサボりを防ぐ */
-}
-
+            overflow-y: scroll;
+        }
         body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    padding-bottom: 30px;
-    background-color: #fbf8f5;
-    color: #333;
-    -webkit-overflow-scrolling: touch;
-    will-change: transform;
-}
-
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 30px;
+            background-color: #fbf8f5;
+            color: #333;
+            -webkit-overflow-scrolling: touch;
+            overflow-x: clip;
+            overscroll-behavior-y: contain;
+        }
         .container {
             width: calc(100% - 20px);
             max-width: 600px;
             margin: 10px auto;
             background-color: #ffffff;
-            padding: 0;
+            padding: 15px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
             box-sizing: border-box;
         }
-
-.keep-alive-dot {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 1px;
-    height: 1px;
-    background-color: transparent;
-    pointer-events: none;
-    z-index: -1;
-    animation: keep-alive 0.1s infinite;
-}
-
-@keyframes keep-alive {
-    0% { opacity: 1; }
-    50% { opacity: 0.99; }
-    100% { opacity: 1; }
-}
-
-        header {
-            padding: 15px 15px 0 15px;
-            margin-top: 0; 
-            border-radius: 8px 8px 0 0;
-            background-color: #ffffff;
-        }
-        
-        .subtitle {
-            font-size: 0.8em;
-            color: #98b498;
-            font-style: italic;
-            text-align: center;
-            letter-spacing: 0.1em;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        h1 {
-            font-size: 1.5em;
-            color: #698b69;
-            border-bottom: 3px solid #98b498;
-            padding: 10px 0 10px 0;
-            margin-top: 0;
-            border-radius: 0 0 8px 8px;
-            text-align: center;
-        }
-
-        #maxim-display-container {
-            text-align: center;
-            padding: 8px 15px; 
-            margin: 0 0 10px 0; 
-        }
-        
-        #maxim-display-container p {
-            margin: 0;
-            padding: 0;
-            font-style: italic;
-            font-weight: 300;
-            color: #444; 
-            line-height: 1.4;
-        }
-        
-        #maxim-display-container .maxim-text {
-            font-size: 0.9em;
-        }
-
-        #maxim-display-container .maxim-speaker {
-            font-size: 0.75em;
-            color: #888;
-        }
-        
         h2 {
             font-size: 1.2em;
-            color: #698b69;
-            border-bottom: 2px solid #b3c7b3;
-            padding: 15px 15px 5px 15px;
-            margin-top: 20px;
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 8px;
+            color: #2c3e50;
         }
-
-        .input-group, .result-section {
-            margin: 0 15px 20px 15px;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background-color: #fcfcf0;
-            box-sizing: border-box;
-        }
-
-        .manual-header, .debug-log-header {
-            font-size: 1.05em;
-            color: #698b69;
-            padding: 10px 15px;
-            margin-top: 10px;
-            cursor: pointer;
-            user-select: none;
-            font-weight: bold;
-            border-top: 1px solid #e0e0e0;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .manual-content {
-            display: none;
-            padding: 15px;
-            margin: 0 15px 15px 15px;
-            background-color: #ffffff;
-            border-left: 3px solid #b3c7b3;
-            border-right: 3px solid #b3c7b3;
-            font-size: 0.9em;
-            line-height: 1.6;
-        }
-
-        .manual-content h3 {
-            font-size: 1.1em;
-            color: #557755;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 3px;
-            margin-top: 15px;
-        }
-
-        .manual-content table {
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 5px;
+            margin-bottom: 10px;
         }
-
-        .manual-content th, .manual-content td {
+        th, td {
             border: 1px solid #eee;
-            padding: 5px;
-            text-align: left;
-            vertical-align: top;
-            font-size: 0.85em;
-        }
-
-        .manual-content th {
-            background-color: #f7f7f7;
-            width: 30%;
-        }
-
-        .manual-content ul {
-            padding-left: 20px;
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
-
-        .manual-content li {
-            margin-bottom: 2px;
-        }
-
-        .debug-log-header {
-            font-size: 1.0em;
-            color: #888;
-            border-bottom: 1px solid #e0e0e0;
-            padding: 10px 15px 5px 15px;
-            margin-top: 15px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .debug-log {
-            display: none;
-            background-color: #384e38;
-            color: #f0fff0;
-            padding: 10px;
-            height: 100px;
-            overflow-y: scroll;
-            font-family: 'Courier New', Courier, monospace;
-            border-radius: 5px;
-            font-size: 0.75em;
-            max-width: 600px;
-            margin: 0 auto 15px auto;
-        }
-
-        .input-item {
-            margin-bottom: 15px;
-        }
-
-        .input-item label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #5a5a5a;
-        }
-
-        select, input[type="number"], input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #dcdcdc;
-            border-radius: 4px;
-            font-size: 1em;
-            background-color: #ffffff;
-        }
-
-        .local-switch-group {
-            display: flex;
-            align-items: center;
-            padding: 5px 0;
-            margin-bottom: 5px;
-            font-size: 0.95em;
-            color: #555;
-            border-top: 1px dashed #e0e0e0;
-            border-bottom: 1px dashed #e0e0e0;
-        }
-
-        .local-switch-group input[type="checkbox"] {
-            width: auto;
-            margin-right: 8px;
-            margin-left: 0;
-            transform: scale(1.1);
-            vertical-align: middle;
-        }
-
-        .player-input-list {
-            margin-top: 10px;
-        }
-
-        .player-row {
-            border: 1px solid #e0e0e0;
-            padding: 0;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            background-color: #ffffff;
-            overflow: hidden;
-            contain: content;
-            backface-visibility: hidden;
-        }
-
-        .player-header {
-            font-weight: bold;
-            font-size: 1.0em;
-            color: #333;
-            padding: 8px 10px;
-            margin-bottom: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .id-1 .player-header { background-color: #ffffff; color: #333; }
-        .id-2 .player-header { background-color: #f0f0f0; color: #333; }
-        .id-3 .player-header { background-color: #fff0f0; color: #333; }
-        .id-4 .player-header { background-color: #f0f8ff; color: #333; }
-        .id-5 .player-header { background-color: #fffaf0; color: #333; }
-        .id-6 .player-header { background-color: #f0fff0; color: #333; }
-        .id-7 .player-header { background-color: #fff5ee; color: #333; }
-        
-        .local-group {
-            display: flex;
-            align-items: center;
-            font-size: 0.75em;
-            color: #698b69;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        .local-group input[type="checkbox"] {
-            width: auto;
-            margin-left: 4px;
-            margin-right: 2px;
-            transform: scale(1.1);
-        }
-
-        .player-fields {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            padding: 8px 10px;
-        }
-
-        .player-field {
-            flex: 1 1 23%;
-            min-width: 50px;
-            box-sizing: border-box;
-        }
-
-        .player-field label {
-            display: block;
-            font-size: 0.7em;
-            color: #666;
-            margin-bottom: 2px;
-        }
-
-        .player-field input, .player-field select {
-            width: 100%;
-            padding: 3px 5px;
-            box-sizing: border-box;
-            font-size: 0.85em;
-        }
-
-        .sb-group {
-            display: flex;
-            gap: 6px;
-            font-size: 0.75em;
-        }
-
-        .sb-group label {
-            display: inline-flex;
-            align-items: center;
-            font-weight: normal;
-            color: #666;
-        }
-
-        .sb-group input[type="radio"] {
-            width: auto;
-            margin-left: 2px;
-        }
-
-        .line-display {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 5px;
-            align-items: center;
-        }
-
-        .line-box {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 0.9em;
-            transition: background-color 0.5s, color 0.5s;
-            line-height: 1.5;
-        }
-
-        .seri-segment {
-            display: inline-flex;
-            align-items: center;
-            font-size: 0.9em;
-            font-weight: bold;
-            border: 1px dashed #b3c7b3;
-            border-radius: 4px;
-            padding: 1px 3px;
-            margin-right: 5px;
-        }
-        
-        .seri-arrow {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #c07777;
-            margin: 0 2px;
-        }
-
-        #bank-tendency-display {
-            margin-top: 5px;
-            margin-bottom: 10px;
-            padding: 5px 0;
-            font-size: 0.95em;
-            color: #698b69;
-            font-weight: bold;
-        }
-
-        .scenario-detail table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            margin-top: 10px;
-        }
-
-        .scenario-detail th, .scenario-detail td {
-            border: 1px solid #efefef;
-            padding: 6px 3px;
+            padding: 6px 4px;
             text-align: center;
             font-size: 0.85em;
-            word-break: break-all;
         }
-
-        .scenario-detail th { background-color: #f7f7f7; color: #555; }
-        .hide-score-rank { display: none !important; }
-
-        .recommendation {
-            padding: 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            margin-top: 10px;
-            font-size: 0.95em;
-            line-height: 1.6;
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
         }
-
-        #seitenrei-output { background-color: #e6f5e6; border-left: 5px solid #698b69; color: #444; }
-        #koutenrei-output { background-color: #fcf0f0; border-left: 5px solid #c07777; color: #444; }
-
-        .scenario-detail {
-            border: 1px dashed #dcdcdc;
-            padding: 12px;
-            margin-top: 15px;
-            border-radius: 6px;
-        }
-
-        .scenario-detail h4 {
-            font-size: 1.05em;
-            margin: 0 0 10px 0;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 5px;
-            color: #698b69;
-        }
-
-        button {
+        input[type="number"], input[type="text"], select {
             width: 100%;
-            padding: 14px;
-            background-color: #698b69;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 15px;
-            font-size: 1.05em;
-            transition: background-color 0.3s;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
         }
-
+        .player-row:nth-child(even) {
+            background-color: #fafafa;
+        }
+        #debug-log {
+            background-color: #1a1a1a;
+            color: #00ff00;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.75em;
+            height: 150px;
+            overflow-y: auto;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
         #results-container {
             display: none;
-            opacity: 0;
-            transition: opacity 0.5s;
         }
-
         #results-container.visible {
             display: block;
-            opacity: 1;
         }
-
-        /* 💡 天雲指数コンテナのデザイン */
-        .tenun-index-container {
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: left;
-            border: 2px dashed #d6a300;
-            background-color: #fff9e6;
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
         }
-        
-        .tenun-title {
-            font-weight: bold;
-            font-size: 0.95em;
-            color: #8b6d00;
-            margin-bottom: 10px;
-            display: block;
-            border-bottom: 1px solid rgba(139, 109, 0, 0.2);
-            padding-bottom: 5px;
-        }
-
-        .tenun-stable { border: 2px solid #557755 !important; background-color: #e6f5e6 !important; }
-        .tenun-stable .tenun-title { color: #557755 !important; border-bottom: 1px solid rgba(85, 119, 85, 0.2); }
-        
-        .tenun-mild { border: 2px dashed #698b69 !important; background-color: #f7fff7 !important; }
-        .tenun-mild .tenun-title { color: #698b69 !important; border-bottom: 1px solid rgba(105, 139, 105, 0.2); }
-
-        .tenun-alert { border: 2px dashed #d6a300 !important; background-color: #fff9e6 !important; }
-        .tenun-alert .tenun-title { color: #d6a300 !important; border-bottom: 1px solid rgba(214, 163, 0, 0.2); }
-
-        .tenun-severe { border: 2px solid #c07777 !important; background-color: #fcf0f0 !important; }
-        .tenun-severe .tenun-title { color: #c07777 !important; border-bottom: 1px solid rgba(192, 119, 119, 0.2); }
-
-        .copyright-footer {
-            text-align: center;
-            font-size: 0.75em;
-            color: #aaa;
-            margin-top: 20px;
-            width: 100%;
-            padding: 15px; 
-            box-sizing: border-box;
-        }
-
-        /* ------------------------------------------------------------
-           🚨 たまきちゃん画像サイズ強制制御設定
-        ------------------------------------------------------------ */
-        .tamaki-display {
-            display: flex !important;
-            flex-direction: row !important;
-            align-items: flex-start !important;
-        }
-
-        .tamaki-character {
-            width: 75px !important;
-            min-width: 75px !important;
-            max-width: 75px !important;
-            height: auto !important;
-            margin-right: 12px !important;
-            flex-shrink: 0 !important;
-        }
-
-        .tamaki-image {
-            width: 100% !important;
-            height: auto !important;
-            display: block !important;
-        }
-
-        .tamaki-speech-bubble {
-            flex: 1 !important;
-            min-width: 0 !important;
-            background: white;
-            border: 2px solid #d6a300;
-            border-radius: 12px;
-            padding: 10px;
-            font-size: 0.9em;
-            line-height: 1.4;
-            box-sizing: border-box;
-            position: relative;
-        }
-
-        @media (max-width: 600px) {
-            .tamaki-character { width: 70px !important; min-width: 70px !important; }
+        @media (max-width: 480px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <div class="subtitle">演算制御多重交響体</div>
-            <h1>華耀天輪 真・自在律</h1>
-        </header>
-        
-        <div id="maxim-display-container"></div>
-
-        <div class="manual-header" onclick="toggleManual()">
-            <span id="manual-toggle-icon">▶</span> 📖 操作説明書・マニュアル
-        </div>
-        <div class="manual-content" id="manual-content">
-            <h2>⚙️ ツールの全体構成と基本操作</h2>
-            <p>このツールは、入力されたレース情報と選手データに基づき、複数の展開パターンをシミュレーションし、独自ロジックで評価した予想結果（晴天令/荒天令）を提供するモバイル向け競輪予想支援ツールです。</p>
-            <h3>🎛️ レース/選手情報入力エリア</h3>
-            <table>
+        <h2>選手情報入力</h2>
+        <table>
+            <thead>
                 <tr>
-                    <th>項目</th>
-                    <th>目的</th>
+                    <th>車</th>
+                    <th>得点</th>
+                    <th>脚</th>
+                    <th>W</th>
+                    <th>3走</th>
+                    <th>S</th>
+                    <th>B</th>
+                    <th>欠</th>
                 </tr>
-                <tr>
-                    <td>**レースタイプ/級班**</td>
-                    <td>計算係数の調整（S級、A級、ガールズなど）を行います。</td>
-                </tr>
-                <tr>
-                    <td>**バンク名**</td>
-                    <td>開催バンクを選択します。展開傾向が自動で結果エリアに表示されます。</td>
-                </tr>
-                <tr>
-                    <td>**全体並び**</td>
-                    <td>確定したライン構成をカンマ区切りで入力します（例: `123,45,67`）。</td>
-                </tr>
-                <tr>
-                    <td>**地元スイッチ**</td>
-                    <td>**地元選手**がいる場合にONにすることで、**地元利（恩義や番組配慮）**を加味した補正係数（$C_{local}$）が適用されます。</td>
-                </tr>
-            </table>
-
-            <h3>📝 ライン構成における「競り」の記述</h3>
-            <p>「全体並び」の入力において、**競り**が発生しているラインを表現する場合、以下の特別な記述ルールを適用します。</p>
-            <table>
-                <tr>
-                    <th>記述ルール</th>
-                    <th>意味</th>
-                </tr>
-                <tr>
-                    <td>**競られる選手**の後ろに、**競る選手を半角カッコで囲んで**記入します。</td>
-                    <td>競りが発生した箇所をシステムに正確に伝達し、競合パターンのシミュレーションに反映させます。</td>
-                </tr>
-            </table>
-            <ul>
-                <li>**記述例1 (1番手で競り):** <code>1(3)2, 45</code></li>
-                <li>**記述例2 (3番手で競り):** <code>123(4), 56</code></li>
-            </ul>
-            <p>※競りが発生した場合、結果表示エリアでは選手IDが連続して表示されます。</p>
-
-            <h3>📝 選手個別データの入力</h3>
-            <table>
-                <tr>
-                    <th>項目</th>
-                    <th>説明</th>
-                </tr>
-                <tr>
-                    <td>**地元**</td>
-                    <td>その選手が**開催バンクの地元選手**である場合にチェックを入れます。</td>
-                </tr>
-                <tr>
-                    <td>**S 1位 / B 1位**</td>
-                    <td>**S（上がり）**と**B（バック）**の1着候補を、それぞれ1名選択します。</td>
-                </tr>
-                <tr>
-                    <td>**脚質**</td>
-                    <td>選手の脚質を選択（`逃先`、`差マ`、`捲り`）。</td>
-                </tr>
-                <tr>
-                    <td>**得点 (R)**</td>
-                    <td>競走得点を入力します。</td>
-                </tr>
-                <tr>
-                    <td>**W印**</td>
-                    <td>専門紙や予想サイトなどの**評価（◎、〇、△など）**を入力します。</td>
-                </tr>
-                <tr>
-                    <td>**直近3走**</td>
-                    <td>直近3レースの着順を**最新の着順から**入力します（例: `111`）。</td>
-                </tr>
-            </table>
-            <h3>📊 予想結果・推奨買い目エリア</h3>
-            <ul>
-                <li>**晴天令 (安定推奨):** 最も安定し、堅い決着が予想される推奨買い目です。</li>
-                <li>**荒天令 (高配当狙い):** 波乱の可能性が高く、高配当が期待できる展開パターンを重視した推奨買い目です。</li>
-            </ul>
-        </div>
-
-        <h2>🎛️ レース/選手情報入力</h2>
-        <div class="input-group">
-            <div class="input-item">
-                <label for="race-type">レースタイプ/級班:</label>
-                <select id="race-type">
-                    <option value="girls">🚴‍♀️ ガールズ競輪</option>
-                    <option value="s-kyu">🏆 S級</option>
-                    <option value="a-kyu">A級</option>
-                    <option value="a-chal">A級チャレンジ</option>
-                </select>
-            </div>
-            <div class="input-item">
-                <label for="bank-name">バンク名:</label>
-                <select id="bank-name" onchange="displayBankTendency()"></select>
-            </div>
-            <p><strong>選手データ入力 (7名)</strong></p>
-            <div class="player-input-list" id="player-data">
+            </thead>
+            <tbody id="player-table-body">
+                <!-- 1番車から9番車までループ生成 -->
                 <script>
-                    const defaultScores = [105.50, 103.20, 101.80, 99.50, 98.00, 97.20, 95.10];
-                    const defaultRecent = ["111", "211", "444", "333", "555", "666", "777"];
-                    for(let i=1; i<=7; i++) {
+                    for (let i = 1; i <= 9; i++) {
                         document.write(`
-                        <div class="player-row id-${i}" data-id="${i}">
-                            <div class="player-header">
-                                <span>選手ID ${i}</span>
-                                <div class="local-group"><label for="local-${i}">地元:</label><input type="checkbox" id="local-${i}" class="is-local"></div>
-                                <div class="local-group" style="color: #c07777; margin-left: 10px;"><label for="scratch-${i}">欠場:</label><input type="checkbox" id="scratch-${i}" class="is-scratch"></div>
-                                <div class="sb-group">
-                                    <label>S 1位: <input type="radio" name="s-leader" class="s1" data-id="${i}"></label>
-                                    <label>B 1位: <input type="radio" name="b-leader" class="b1" data-id="${i}" ${i===3?'checked':''}></label>
-                                </div>
-                            </div>
-                            <div class="player-fields">
-                                <div class="player-field"><label>脚質</label><select class="style"><option value="自">逃先</option><option value="追">差マ</option><option value="両">捲り</option></select></div>
-                                <div class="player-field"><label>得点 (R)</label><input type="number" class="score" value="${defaultScores[i-1].toFixed(2)}"></div>
-                                <div class="player-field"><label>W印</label><select class="wmark"><option value="◎">◎</option><option value="〇">〇</option><option value="✕">✕</option><option value="△" ${i===3?'selected':''}>△</option><option value="無" ${i!==3?'selected':''}>無</option></select></div>
-                                <div class="player-field"><label>直近3走</label><input type="text" class="recent" value="${defaultRecent[i-1]}"></div>
-                            </div>
-                        </div>`);
+                            <tr class="player-row" data-id="${i}">
+                                <td>${i}</td>
+                                <td><input type="number" class="score" step="0.1" oninput="debouncedCalculate()"></td>
+                                <td>
+                                    <select class="style" onchange="debouncedCalculate()">
+                                        <option value="自">自</option>
+                                        <option value="両">両</option>
+                                        <option value="追" selected>追</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" class="wmark" oninput="debouncedCalculate()"></td>
+                                <td><input type="text" class="recent" oninput="debouncedCalculate()"></td>
+                                <td><input type="radio" name="s-leader" data-id="${i}" onchange="debouncedCalculate()"></td>
+                                <td><input type="radio" name="b-leader" data-id="${i}" onchange="debouncedCalculate()"></td>
+                                <td><input type="checkbox" class="is-scratch" onchange="debouncedCalculate()"></td>
+                            </tr>
+                        `);
                     }
                 </script>
-            </div>
-            <div class="input-item">
-                <label for="line-input">全体並び: (例: 123,45,67)</label>
-                <input type="text" id="line-input" value="1,2,3,4,5,6,7">
-            </div>
-            <div class="local-switch-group">
-                <input type="checkbox" id="local-switch">
-                <label for="local-switch">🎌 **地元スイッチ ON**</label>
-            </div>
-            <button onclick="calculatePrediction()">🚀 予想を計算 (実行)</button>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="container">
+        <h2>レース設定</h2>
+        <div style="margin-bottom: 10px;">
+            <label>ライン構成:</label>
+            <input type="text" id="line-input" placeholder="例: 123,45,67" oninput="debouncedCalculate()">
         </div>
-
-        <div id="results-container">
-            <h2>📊 予想結果・推奨買い目</h2>
-            <div class="result-section">
-                <div id="bank-tendency-display"></div>
-                <h3>🔗 ライン強度（強弱グラデーション）</h3>
-                <div id="line-display" class="line-display">計算結果待ち...</div>
-                
-                <div id="tenun-index-output">
-                    <span class="tenun-title" style="font-weight: bold; margin-bottom: 8px; display: block;">天雲指数</span>
-                </div>
-
-                <h3>☀️ 晴天令 (安定推奨)</h3>
-                <div class="recommendation" id="seitenrei-output">計算結果待ち...</div>
-                <h3>⛈️ 荒天令 (波乱推奨)</h3>
-                <div class="recommendation" id="koutenrei-output">計算結果待ち...</div>
-                <h3>展開別シミュレーション詳細</h3>
-                <div id="scenario-output"></div>
+        <div style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+                <label>級班:</label>
+                <select id="race-type" onchange="debouncedCalculate()">
+                    <option value="s-kyu">S級</option>
+                    <option value="a-kyu" selected>A級</option>
+                    <option value="a-chal">A級チャレンジ</option>
+                    <option value="girls">ガールズ</option>
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label>バンク:</label>
+                <select id="bank-name" onchange="debouncedCalculate()"></select>
             </div>
         </div>
+        <div id="bank-tendency-display" style="margin-top: 10px; font-size: 0.9em; color: #666;"></div>
     </div>
 
-    <div class="debug-log-header" onclick="toggleDebugLog()">
-        <span id="log-toggle-icon">▶</span> 🛠️ デバッグ・処理ログ
+    <div class="container">
+        <div id="line-display"></div>
     </div>
-    <div class="debug-log" id="debug-log">
-        [TOOL START] ツール起動。すべての係数とロジックを読み込みました。<br>
-        [INFO] bankdata.jsonの読み込みを待機しています...
+
+    <div class="container" id="results-container">
+        <div id="tenun-index-output"></div>
+        <div class="results-grid">
+            <div id="seitenrei-output"></div>
+            <div id="koutenrei-output"></div>
+        </div>
+        <div id="scenario-output"></div>
     </div>
-    
-    <div style="text-align: center; margin-bottom: 5px;">
-        <a href="manual_details.html" target="_blank" style="font-size: 0.85em; color: #a37200; text-decoration: underline;">
-            📖ツール利用ガイド・各項目の解説はこちら
-        </a>
+
+    <div class="container">
+        <h2>デバッグログ</h2>
+        <div id="debug-log"></div>
     </div>
-    
-    <footer class="copyright-footer">
-        <a href="https://note.com/kytnrnsnjzitr/n/nbc069a03d13c" target="_blank">免責事項・利用規約</a>
-        <span style="margin: 0 5px;"> | </span> 
-        <span>(C)2025 Mushyn Reagan</span>
-    </footer>    
-    <script>
-        function toggleDebugLog() {
-            const logElement = document.getElementById('debug-log');
-            const iconElement = document.getElementById('log-toggle-icon');
-            if (logElement.style.display === 'block') { logElement.style.display = 'none'; iconElement.textContent = '▶'; }
-            else { logElement.style.display = 'block'; iconElement.textContent = '▼'; }
-        }
-        function toggleManual() {
-            const manualElement = document.getElementById('manual-content');
-            const iconElement = document.getElementById('manual-toggle-icon');
-            if (manualElement.style.display === 'block') { manualElement.style.display = 'none'; iconElement.textContent = '▶'; }
-            else { manualElement.style.display = 'block'; iconElement.textContent = '▼'; }
-        }
-    </script>
+
+    <script src="tamaki_speech.js"></script>
     <script src="keirin_logic_v6.0.js"></script>
-    <script src="meigen.js"></script>
-    <script src="tamaki_speech.js"></script>  
 </body>
 </html>
