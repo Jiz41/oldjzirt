@@ -41,35 +41,28 @@ let BANK_DATA = {};
 // 確定した優位性の閾値 (中立的中率 2.06% 以上)
 const SUPERIORITY_THRESHOLD_RATE = 0.0206;
 
-// 複合集計データ（天運指数 x 脚質ごとの三連単3点買い的中率）
-// ※ 現状はコード内に直接定義
+// 1. キーを「33_差し」に書き換える
 const RAW_COMPOSITE_STATS = [
-    { pattern_key: "0_差し", hit_rate: 0.0309 },
+    { pattern_key: "33_差し", hit_rate: 0.0309 },
     { pattern_key: "33_逃げ", hit_rate: 0.0206 },
-    // ... 他のデータが続くが、このロジックでは targetPatterns以外は無視される
 ];
 
-/**
- * 過去データから優位性の高い複合パターンを抽出し、リストを生成する関数。
- * @returns {string[]} 優位性が確認された複合パターンのキー配列 (ここでは ["0_差し"] のみ)
- */
 function calculateSuperiorityList() {
     const superiorPatterns = [];
-    // 【最終決定】優位なパターンとして決定されたキー
-    const targetPatterns = ["0_差し"];
+    // 2. ターゲットを「33_差し」に書き換える
+    const targetPatterns = ["33_差し"];
 
     for (const data of RAW_COMPOSITE_STATS) {
         const key = data.pattern_key;
         const rate = data.hit_rate;
 
-        // ターゲットパターンに一致し、かつ閾値を超えているかチェック
         if (targetPatterns.includes(key) && rate >= SUPERIORITY_THRESHOLD_RATE) {
             superiorPatterns.push(key);
         }
     }
-    
     return superiorPatterns;
 }
+
 
 // 判定ロジックが使用する最終的な優位性リスト (初期ロード時に一度だけ実行される想定)
 const SUPERIOR_PATTERNS_FINAL_LIST = calculateSuperiorityList();
