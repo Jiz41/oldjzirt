@@ -877,14 +877,14 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
     // --- 壱耀晴乾ノ象 (いちようせいかんのしょう) 発令ロジック ---
     let superiorMessage = ''; 
 
-    if (tenunIndex === 0) {
+    if (tenunIndex === 33) {
         const superiorStyle = '追'; 
         const axisPlayer = participatingPlayers.find(p => 
             p.style === superiorStyle && (p.wmark === '◎' || p.wmark === '〇')
         );
 
         if (axisPlayer) {
-            const compositeKey = "0_差し"; 
+            const compositeKey = "33_差し"; 
             const isStatisticallySuperior = SUPERIOR_PATTERNS_FINAL_LIST.includes(compositeKey);
 
             if (isStatisticallySuperior) {
