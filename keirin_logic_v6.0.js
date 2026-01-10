@@ -1257,7 +1257,7 @@ function generateSeitenreiBets(ranking) {
 }
 
 /**
- * 自在律 V8.0：荒天令 買い目生成（診断書に基づき完全修正）
+ * 荒天令 買い目生成（診断書に基づき完全修正）
  */
 function generateKoutenreiBets(ranking, L) {
   // 💡 修正の要：引数 L は数値(ID)のため、配列操作には ranking を使用する
