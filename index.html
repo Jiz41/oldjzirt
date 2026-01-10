@@ -577,6 +577,25 @@ h1 { display: none; } /* テキストのh1は隠す */
         @media (max-width: 600px) {
             .tamaki-character { width: 70px !important; min-width: 70px !important; }
         }
+        .bug-report-container {
+    text-align: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-top: 1px solid #ddd;
+}
+.bug-button {
+    display: inline-block;
+    padding: 10px 25px;
+    background-color: #d93025; /* 注意を引く赤系 */
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+.bug-button:hover {
+    background-color: #a50e0e;
+}
+
     </style>
 </head>
 <body>
@@ -763,6 +782,13 @@ h1 { display: none; } /* テキストのh1は隠す */
         </a>
     </div>
     
+    <div class="bug-report-container">
+    <p>不具合の報告はこちらから</p>
+    <a href="https://forms.gle/f2uW4UxpGpeT9n8g6" target="_blank" rel="noopener noreferrer" class="bug-button">
+        不具合を報告する
+    </a>
+    </div>
+  
     <footer class="copyright-footer">
         <a href="https://note.com/kytnrnsnjzitr/n/nbc069a03d13c" target="_blank">免責事項・利用規約</a>
         <span style="margin: 0 5px;"> | </span> 
