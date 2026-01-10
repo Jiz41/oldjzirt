@@ -53,11 +53,11 @@ body {
     100% { opacity: 1; }
 }
 
-        header {
-            padding: 15px 15px 0 15px;
-            margin-top: 0; 
-            border-radius: 8px 8px 0 0;
-            background-color: #ffffff;
+        <header>
+    <div class="subtitle">演算制御多重交響体</div>
+    <img src="title.png" alt="華耀天輪 真・自在律" class="title-image">
+</header>
+
         }
         
         .subtitle {
@@ -454,6 +454,20 @@ body {
             display: block;
             opacity: 1;
         }
+
+      /* タイトル画像のレスポンシブ設定 */
+.title-image {
+    width: 100%;
+    max-width: 100%; /* コンテナ幅（600px）に追従 */
+    height: auto;
+    display: block;
+    margin: 10px auto 0;
+}
+
+/* 既存のh1タグは非表示にするか、画像に置き換えるため削除 */
+h1 {
+    display: none; 
+}
 
         /* 💡 天雲指数コンテナのデザイン */
         .tenun-index-container {
