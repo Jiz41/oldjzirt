@@ -56,7 +56,8 @@ body {
         <header>
     <div class="subtitle">演算制御多重交響体</div>
     <img src="title.png" alt="華耀天輪 真・自在律" class="title-image">
-    </header>
+</header>
+
 
         }
         
@@ -70,10 +71,20 @@ body {
             border-bottom: 1px solid #f0f0f0;
         }
         
-        /* 既存のh1タグは非表示にするか、画像に置き換えるため削除 */
-        h1 {
-            display: none; 
-        }
+        /* 元の h1 記述をこれに置き換え */
+h1 {
+    display: none; 
+}
+
+/* タイトル画像のレスポンシブ設定を追加 */
+.title-image {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
 
         #maxim-display-container {
             text-align: center;
