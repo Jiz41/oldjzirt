@@ -1156,10 +1156,9 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         tenunOutput.innerHTML = tenunIndexData.message; 
     } 
 
-  // ============================
+// ============================
 // ☀️ 晴天令 買い目表示
 // ============================
-
 const seitenreiRanking = Object.keys(seitenreiIntegratedScores)
   .map(id => ({ id: Number(id), score: seitenreiIntegratedScores[id] }))
   .sort((a, b) => b.score - a.score);
@@ -1169,13 +1168,9 @@ const seitenreiBox = document.getElementById('seitenrei-output');
 
 if (seitenreiBox && seitenreiBets) {
   let html = '<h4>☀️ 晴天令</h4><strong>三連単</strong><ul>';
-  seitenreiBets.sanrentan.forEach(b =>
-    html += `<li>${formatOrderedBet(b)}</li>`
-  );
+  seitenreiBets.sanrentan.forEach(b => html += `<li>${formatOrderedBet(b)}</li>`);
   html += '</ul><strong>三連複</strong><ul>';
-  seitenreiBets.sanrenpuku.forEach(b =>
-    html += `<li>${formatSanrenpuku(b)}</li>`
-  );
+  seitenreiBets.sanrenpuku.forEach(b => html += `<li>${formatSanrenpuku(b)}</li>`);
   html += '</ul>';
   seitenreiBox.innerHTML = html;
 }
@@ -1183,138 +1178,69 @@ if (seitenreiBox && seitenreiBets) {
 // ============================
 // ⛈️ 荒天令 買い目表示
 // ============================
-
 const koutenreiRanking = Object.keys(koutenreiIntegratedScores)
   .map(id => ({ id: Number(id), score: koutenreiIntegratedScores[id] }))
   .sort((a, b) => b.score - a.score);
 
-const L = koutenreiRanking.length >= 4 ? koutenreiRanking[3].id : null;
-const koutenreiBets = generateKoutenreiBets(koutenreiRanking, L);
+// 修正：第2引数には車番ではなく、選手データ配列(participatingPlayers)を渡す
+const koutenreiBets = generateKoutenreiBets(koutenreiRanking, participatingPlayers);
 const koutenreiBox = document.getElementById('koutenrei-output');
 
 if (koutenreiBox && koutenreiBets) {
-  let html = '<h4>⛈️ 荒天令</h4>';
-
-  if (L) {
-    html += `<p><strong>⚫ 特異点：</strong>${L}</p>`;
-  }
-
-  html += '<strong>三連複</strong><ul>';
-  koutenreiBets.sanrenpuku.forEach(b =>
-    html += `<li>${formatSanrenpuku(b)}</li>`
-  );
-
+  const L_id = koutenreiBets.nirentan[0][1]; // 特異点Lの車番
+  let html = `<h4>⛈️ 荒天令</h4><p><strong>⚫ 特異点：</strong>${L_id}</p><strong>三連複</strong><ul>`;
+  koutenreiBets.sanrenpuku.forEach(b => html += `<li>${formatSanrenpuku(b)}</li>`);
   html += '</ul><strong>二車単</strong><ul>';
-  koutenreiBets.nirentan.forEach(b =>
-    html += `<li>${formatOrderedBet(b)}</li>`
-  );
-
+  koutenreiBets.nirentan.forEach(b => html += `<li>${formatOrderedBet(b)}</li>`);
   html += '</ul>';
   koutenreiBox.innerHTML = html;
 }
   
-    // ---------------------------------------------------------- 
-    // シナリオ詳細の表示
-    const scenarioOutput = document.getElementById('scenario-output'); 
-    if (scenarioOutput) { 
-        scenarioOutput.innerHTML = seriSummaryHtml;
-        scenarioOutput.innerHTML += detailedScenarioResults.map(s => { 
-            const wagers = generateScenarioWagers(s.results); 
-            return `<div class="scenario-detail"><h4>${s.scenario}シミュレーション</h4><p><strong>三連単:</strong> ${wagers.tritan}</p><p><strong>三連複:</strong> ${wagers.trifuku}</p><table><tr><th>選手ID</th><th>評価</th></tr>${s.results.map((p) => `<tr><td>${p.id}</td><td><strong>${p.grade}${p.strength_mark}</strong></td></tr>`).join('')}</table></div>`; 
-        }).join(''); 
-    } 
+// シナリオ詳細表示
+const scenarioOutput = document.getElementById('scenario-output'); 
+if (scenarioOutput) { 
+    scenarioOutput.innerHTML = seriSummaryHtml + detailedScenarioResults.map(s => { 
+        const wagers = generateScenarioWagers(s.results); 
+        return `<div class="scenario-detail"><h4>${s.scenario}シミュレーション</h4><p><strong>三連単:</strong> ${wagers.tritan}</p><p><strong>三連複:</strong> ${wagers.trifuku}</p><table><tr><th>選手ID</th><th>評価</th></tr>${s.results.map((p) => `<tr><td>${p.id}</td><td><strong>${p.grade}${p.strength_mark}</strong></td></tr>`).join('')}</table></div>`; 
+    }).join(''); 
+} 
 
-// ============================
-// 買い目フォーマット
-// ============================
+// --- 以下、重複を排除した関数定義 ---
 
-function formatOrderedBet(bet) {
-  return bet.join('-');
-}
+function formatOrderedBet(bet) { return bet.join('-'); }
+function formatSanrenpuku(bet) { return bet.slice().sort((a, b) => a - b).join('='); }
 
-function formatSanrenpuku(bet) {
-  return bet.slice().sort((a, b) => a - b).join('=');
-}
-
-// ============================
-// 晴天令 買い目生成
-// ============================
 function generateSeitenreiBets(ranking) {
   if (!ranking || ranking.length < 3) return null;
-  const r1 = ranking[0].id;
-  const r2 = ranking[1].id;
-  const r3 = ranking[2].id;
-
+  const r1 = ranking[0].id, r2 = ranking[1].id, r3 = ranking[2].id;
   return {
-    sanrentan: [
-      [r1, r2, r3],
-      [r2, r1, r3],
-      [r1, r3, r2],
-      [r2, r3, r1],
-    ],
+    sanrentan: [[r1, r2, r3], [r2, r1, r3], [r1, r3, r2], [r2, r3, r1]],
     sanrenpuku: [[r1, r2, r3]],
   };
 }
 
-/**
- * 荒天令 買い目生成（完全修正・実行確認済み）
- */
-function generateKoutenreiBets(ranking, L) {
-    // 💡 修正の要: 外部から渡された L (数値) ではなく、ranking (配列) を名簿として使う
-    const listForScan = ranking; 
-
-    if (!ranking || ranking.length < 3) return null;
-
-    // 💡 A=1位, B=2位, C=3位 を正しく取得
-    const A = ranking[0];
-    const B = ranking[1];
-    const C = ranking[2];
-
-    // 1. Lの選定（4位以下から「表情」をスキャン）
+function generateKoutenreiBets(ranking, candidates) {
+    if (!ranking || ranking.length < 3 || !candidates) return null;
+    const A = ranking[0], B = ranking[1], C = ranking[2];
     const lCandidates = ranking.slice(3).map(p => {
-        let lScore = 0;
-        if (p.is_b1) lScore += 10;
-        if (p.is_s1) lScore += 5;
-        if (p.id >= 6 && (p.style === '捲' || p.style === '追')) lScore += 3;
-
-        // 💡 listForScan (配列) に対して .filter を実行。これでエラーは出ません。
-        const linePos = listForScan.filter(c => (c.line_id || 0) === (p.line_id || 0) && c.score > p.score).length + 1;
-
-        if (linePos >= 3) lScore += 2; 
-        return { ...p, lScore };
+        let s = 0;
+        if (p.is_b1) s += 10; if (p.is_s1) s += 5;
+        if (p.id >= 6 && (p.style === '捲' || p.style === '追')) s += 3;
+        const pos = candidates.filter(c => (c.line_id || 0) === (p.line_id || 0) && c.score > p.score).length + 1;
+        if (pos >= 3) s += 2;
+        return { ...p, lScore: s };
     });
-
-    // スコア順に並び替え
     lCandidates.sort((a, b) => b.lScore - a.lScore);
-
-    // 2. 特異点Lを確定（スキャンで見つかればその1番目、いなければ本来の4位）
-    let targetL = (lCandidates.length > 0 && lCandidates[0].lScore > 0)
-        ? lCandidates[0]
-        : ranking[3];
-
-    if (!targetL) return null;
-
-    // 3. 買い目の生成（A-L, L-A, C-A）
+    const targetL = (lCandidates.length > 0 && lCandidates[0].lScore > 0) ? lCandidates[0] : ranking[3];
     return {
-        sanrenpuku: [
-            [A.id, B.id, targetL.id],
-            [A.id, C.id, targetL.id]
-        ],
-        nirentan: [
-            [A.id, targetL.id], 
-            [targetL.id, A.id], 
-            [C.id, A.id]         
-        ]
+        sanrenpuku: [[A.id, B.id, targetL.id], [A.id, C.id, targetL.id]],
+        nirentan: [[A.id, targetL.id], [targetL.id, A.id], [C.id, A.id]]
     };
 }
 
-// 全てのセレクトボックスに対して、変更が終わったらフォーカスを外す設定
 document.querySelectorAll('select').forEach(select => {
     select.addEventListener('change', () => {
-        // 1. フォーカスを外してブラウザの迷いを断ち切る
         select.blur();
-        
-        // 2. ほんの少しだけスクロール位置を微調整して、強制的に再描画させる
         window.scrollBy(0, 1);
         window.scrollBy(0, -1);
     });
