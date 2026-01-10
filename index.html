@@ -577,23 +577,28 @@ h1 { display: none; } /* テキストのh1は隠す */
         @media (max-width: 600px) {
             .tamaki-character { width: 70px !important; min-width: 70px !important; }
         }
-        .bug-report-container {
+.bug-report-container {
     text-align: center;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-top: 1px solid #ddd;
+    padding: 10px; /* 全体の余白を半分に */
+    background-color: #fdfdfd;
 }
+
 .bug-button {
     display: inline-block;
-    padding: 10px 10px;
-    background-color: #d93025; /* 注意を引く赤系 */
+    padding: 6px 16px; /* ボタン内部の余白を縮小 */
+    background-color: #666666; /* 主張を抑えたグレー系（ホバーで変化） */
     color: #ffffff;
     text-decoration: none;
-    border-radius: 5px;
-    font-weight: bold;
+    border-radius: 3px; /* 角丸をシャープに */
+    font-size: 13px; /* 文字を小さく */
+    font-weight: normal;
+    border: 1px solid #555555;
+    transition: 0.2s; /* 変化を滑らかに */
 }
+
 .bug-button:hover {
-    background-color: #a50e0e;
+    background-color: #d93025; /* ホバー時のみ警告色にする演出 */
+    border-color: #a50e0e;
 }
 
     </style>
