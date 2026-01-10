@@ -1341,7 +1341,7 @@ function generateKoutenreiBets(ranking, L) {
     ]
   };
 }
-
+}
 
 // 全てのセレクトボックスに対して、変更が終わったらフォーカスを外す設定
 document.querySelectorAll('select').forEach(select => {
