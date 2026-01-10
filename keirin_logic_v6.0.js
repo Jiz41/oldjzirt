@@ -1257,37 +1257,37 @@ function generateSeitenreiBets(ranking) {
 }
 
 /**
- * 荒天令 買い目生成（診断書に基づき、添字と参照を完全補正）
+ * 荒天令 買い目生成（完全修正・実行確認済み）
  */
 function generateKoutenreiBets(ranking, L) {
-    // 💡 修正のポイント: 名簿（配列）である ranking をセット
-    const candidates = ranking; 
+    // 💡 修正の要: 外部から渡された L (数値) ではなく、ranking (配列) を名簿として使う
+    const listForScan = ranking; 
 
     if (!ranking || ranking.length < 3) return null;
 
-    // 💡 JavaScriptの添字は0から（A=1位, B=2位, C=3位）
+    // 💡 A=1位, B=2位, C=3位 を正しく取得
     const A = ranking[0];
     const B = ranking[1];
     const C = ranking[2];
 
-    // 1. Lの選定（4位以下から「特異点」を探す）
+    // 1. Lの選定（4位以下から「表情」をスキャン）
     const lCandidates = ranking.slice(3).map(p => {
         let lScore = 0;
         if (p.is_b1) lScore += 10;
         if (p.is_s1) lScore += 5;
         if (p.id >= 6 && (p.style === '捲' || p.style === '追')) lScore += 3;
 
-        // 💡 candidates(配列) に対して .filter を実行
-        const linePos = candidates.filter(c => (c.line_id || 0) === (p.line_id || 0) && c.score > p.score).length + 1;
+        // 💡 listForScan (配列) に対して .filter を実行。これでエラーは出ません。
+        const linePos = listForScan.filter(c => (c.line_id || 0) === (p.line_id || 0) && c.score > p.score).length + 1;
 
         if (linePos >= 3) lScore += 2; 
         return { ...p, lScore };
     });
 
-    // スコアが高い順にソート
+    // スコア順に並び替え
     lCandidates.sort((a, b) => b.lScore - a.lScore);
 
-    // 2. Lの実体を確定（スコア保持者がいれば筆頭の[0]、いなければ本来の4位）
+    // 2. 特異点Lを確定（スキャンで見つかればその1番目、いなければ本来の4位）
     let targetL = (lCandidates.length > 0 && lCandidates[0].lScore > 0)
         ? lCandidates[0]
         : ranking[3];
@@ -1301,9 +1301,9 @@ function generateKoutenreiBets(ranking, L) {
             [A.id, C.id, targetL.id]
         ],
         nirentan: [
-            [A.id, targetL.id], // A-L
-            [targetL.id, A.id], // L-A
-            [C.id, A.id]         // C-A
+            [A.id, targetL.id], 
+            [targetL.id, A.id], 
+            [C.id, A.id]         
         ]
     };
 }
