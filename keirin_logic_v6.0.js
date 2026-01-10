@@ -1221,7 +1221,7 @@ function generateSeitenreiBets(ranking) {
 }
 
 function generateKoutenreiBets(ranking, candidates) {
-    if (!ranking || ranking.length < 4 || !candidates) return null;
+    if (!ranking || ranking.length < 3 || !candidates) return null;
     const A = ranking[0], B = ranking[1], C = ranking[2];
     
     const lCandidates = ranking.slice(3).map(p => {
@@ -1241,15 +1241,17 @@ function generateKoutenreiBets(ranking, candidates) {
         return { ...p, lScore: s };
     });
     
-        const targetL = (lCandidates.length > 0 && lCandidates[0].lScore > 0) 
+    lCandidates.sort((a, b) => b.lScore - a.lScore);
+    const targetL = (lCandidates.length > 0 && lCandidates[0].lScore > 0) 
         ? lCandidates[0] 
-        : (ranking.length > 3 ? ranking[3] : ranking[2]);
+        : ranking[3];
     
     return {
         sanrenpuku: [[A.id, B.id, targetL.id], [A.id, C.id, targetL.id]],
         nirentan: [[A.id, targetL.id], [targetL.id, A.id], [C.id, A.id]]
     };
 }
+  
 // UIイベント設定（displayResultsの外に出す）
 document.querySelectorAll('select').forEach(select => {
     select.addEventListener('change', () => {
