@@ -1260,3 +1260,4 @@ document.querySelectorAll('select').forEach(select => {
         window.scrollBy(0, -1);
     });
 });
+｝
