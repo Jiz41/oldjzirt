@@ -1239,7 +1239,6 @@ function formatSanrenpuku(bet) {
 // ============================
 // 晴天令 買い目生成
 // ============================
-
 function generateSeitenreiBets(ranking) {
   if (!ranking || ranking.length < 3) return null;
   const r1 = ranking[0].id;
@@ -1252,53 +1251,14 @@ function generateSeitenreiBets(ranking) {
       [r2, r1, r3],
       [r1, r3, r2],
       [r2, r3, r1],
-    ],function generateKoutenreiBets(ranking, L) {
-  const candidates = L; 
-  if (!ranking || ranking.length < 3 || !candidates) return null;
-
-  const A = ranking[0];
-  const B = ranking[1];
-  const C = ranking[2];
-
-  // 1. Lの選定
-  const lCandidates = ranking.slice(3).map(p => {
-    let lScore = 0;
-    if (p.is_b1) lScore += 10;
-    if (p.is_s1) lScore += 5;
-    if (p.id >= 6 && (p.style === '捲' || p.style === '追')) lScore += 3;
-    
-    const linePos = candidates.filter(c => c.line_id === p.line_id && c.score > p.score).length + 1;
-    if (linePos >= 3) lScore += 2;
-
-    return { ...p, lScore };
-  });
-
-  lCandidates.sort((a, b) => b.lScore - a.lScore);
-
-  let targetL = (lCandidates.length > 0 && lCandidates[0].lScore > 0) 
-                ? lCandidates[0] 
-                : ranking[3];
-
-  if (!targetL) return null;
-
-  // 2. 買い目の生成
-  return {
-    sanrenpuku: [
-      [A.id, B.id, targetL.id],
-      [A.id, C.id, targetL.id]
     ],
-    nirentan: [
-      [A.id, targetL.id],
-      [targetL.id, A.id],
-      [C.id, A.id]
-    ]
-  };
-}
-
     sanrenpuku: [[r1, r2, r3]],
   };
 }
 
+// ============================
+// 自在律 V8.0：荒天令 買い目生成
+// ============================
 function generateKoutenreiBets(ranking, L) {
   const candidates = L; 
   if (!ranking || ranking.length < 3 || !candidates) return null;
@@ -1307,7 +1267,7 @@ function generateKoutenreiBets(ranking, L) {
   const B = ranking[1];
   const C = ranking[2];
 
-  // 1. Lの選定
+  // 1. Lの選定（表情スキャン）
   const lCandidates = ranking.slice(3).map(p => {
     let lScore = 0;
     if (p.is_b1) lScore += 10;
@@ -1328,7 +1288,7 @@ function generateKoutenreiBets(ranking, L) {
 
   if (!targetL) return null;
 
-  // 2. 買い目の生成
+  // 2. 買い目の生成（A-L, L-A, C-A）
   return {
     sanrenpuku: [
       [A.id, B.id, targetL.id],
@@ -1340,7 +1300,6 @@ function generateKoutenreiBets(ranking, L) {
       [C.id, A.id]
     ]
   };
-}
 }
 
 // 全てのセレクトボックスに対して、変更が終わったらフォーカスを外す設定
