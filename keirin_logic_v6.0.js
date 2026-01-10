@@ -704,7 +704,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     logMessage("[C_suicide] V7.1 自滅消耗ペナルティの計算を開始...");
     // ... ライン評価ロジックは変更なし ...
         // 階級別の設定値を参照するように変更
-    const SUICIDE_PENALTY = settings.SUICIDE_LIMIT; 
+    const SUICIDE_PENALTY = COEFFICIENT_SETTINGS.SUICIDE_LIMIT; 
     const BOOTY_BONUS = 1.05;      
     let isSuicideRiskDetected = false;
     let suicideRiskLineMembers = new Set();
