@@ -54,7 +54,41 @@ body {
 }
 
         }
-        
+
+      header {
+    padding: 20px 0 10px 0; /* 上下の余白を調整 */
+    text-align: center;
+    background-color: #ffffff;
+}
+
+.subtitle {
+    font-size: 0.75em; /* より小さく繊細に */
+    color: #98b498;
+    font-style: italic;
+    text-align: center;
+    letter-spacing: 0.2em; /* 文字間隔を広げて高級感を出す */
+    margin: 0 40px 10px 40px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #e0eee0; /* 非常に薄い緑の線 */
+}
+
+.title-image-container {
+    padding: 0 15px; /* 画像が端に当たりすぎないよう調整 */
+}
+
+.title-image {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    /* 画像の下に「優しい緑の線」を復元 */
+    border-bottom: 3px solid #98b498;
+    padding-bottom: 10px;
+}
+
+h1 { display: none; } /* テキストのh1は隠す */
+
         .subtitle {
             font-size: 0.8em;
             color: #98b498;
@@ -64,11 +98,6 @@ body {
             padding-bottom: 5px;
             border-bottom: 1px solid #f0f0f0;
         }
-        
-        /* 元の h1 記述をこれに置き換え */
-h1 {
-    display: none; 
-}
 
 /* タイトル画像のレスポンシブ設定を追加 */
 .title-image {
@@ -551,13 +580,13 @@ h1 {
     </style>
 </head>
 <body>
-    <div class="container">
-                <header>
-    <div class="subtitle">演算制御多重交響体</div>
-    <img src="title.png" alt="華耀天輪 真・自在律" class="title-image">
-</header>
-
-        
+<div class="container">
+    <header>
+        <div class="subtitle">演算制御多重交響体</div>
+        <div class="title-image-container">
+            <img src="title.png" alt="華耀天輪 真・自在律" class="title-image">
+        </div>
+    </header>    
         <div id="maxim-display-container"></div>
 
         <div class="manual-header" onclick="toggleManual()">
