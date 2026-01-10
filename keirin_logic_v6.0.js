@@ -7,11 +7,12 @@
 // ------------------------------------------------------------------------------------
 const COEFFICIENT_SETTINGS = {
     // R_BIAS: 得点傾斜補正 / RECENT_WEIGHT: 3走着順の影響度 / COOP_WEIGHT: ライン結束力
-    's-kyu': { R_BIAS: 1.15, RECENT_WEIGHT: 0.90, COOP_WEIGHT: 1.20, IS_GIRLS: false },
-    'a-kyu': { R_BIAS: 1.00, RECENT_WEIGHT: 1.00, COOP_WEIGHT: 1.00, IS_GIRLS: false },
-    'a-chal': { R_BIAS: 0.90, RECENT_WEIGHT: 1.20, COOP_WEIGHT: 0.80, IS_GIRLS: false },
-    'girls': { R_BIAS: 1.00, RECENT_WEIGHT: 1.10, COOP_WEIGHT: 1.00, IS_GIRLS: true },
-}; 
+    's-kyu': { R_BIAS: 1.15, RECENT_WEIGHT: 0.90, COOP_WEIGHT: 1.20, IS_GIRLS: false, SUICIDE_LIMIT: 0.97 }, // 0.97に緩和
+    'a-kyu': { R_BIAS: 1.00, RECENT_WEIGHT: 1.00, COOP_WEIGHT: 1.00, IS_GIRLS: false, SUICIDE_LIMIT: 0.93 }, // 0.93に緩和
+    'a-chal': { R_BIAS: 0.90, RECENT_WEIGHT: 1.20, COOP_WEIGHT: 0.80, IS_GIRLS: false, SUICIDE_LIMIT: 0.90 }, // 現状維持
+    'girls': { R_BIAS: 1.00, RECENT_WEIGHT: 1.10, COOP_WEIGHT: 1.00, IS_GIRLS: true, SUICIDE_LIMIT: 1.00 },  // 減点なし
+};
+
 
 const C_MARK_VALUES = { // ガールズ競輪におけるエースマーク選手（番手）へのライン係数
     HIGH: 1.12, 
@@ -702,7 +703,8 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     // 10. C_suicide (自滅消耗ペナルティ：Weight印集中リスク) 
     logMessage("[C_suicide] V7.1 自滅消耗ペナルティの計算を開始...");
     // ... ライン評価ロジックは変更なし ...
-    const SUICIDE_PENALTY = 0.90; 
+        // 階級別の設定値を参照するように変更
+    const SUICIDE_PENALTY = settings.SUICIDE_LIMIT; 
     const BOOTY_BONUS = 1.05;      
     let isSuicideRiskDetected = false;
     let suicideRiskLineMembers = new Set();
