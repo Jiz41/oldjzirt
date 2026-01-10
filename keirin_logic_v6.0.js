@@ -1203,7 +1203,8 @@ if (scenarioOutput) {
         const wagers = generateScenarioWagers(s.results); 
         return `<div class="scenario-detail"><h4>${s.scenario}シミュレーション</h4><p><strong>三連単:</strong> ${wagers.tritan}</p><p><strong>三連複:</strong> ${wagers.trifuku}</p><table><tr><th>選手ID</th><th>評価</th></tr>${s.results.map((p) => `<tr><td>${p.id}</td><td><strong>${p.grade}${p.strength_mark}</strong></td></tr>`).join('')}</table></div>`; 
     }).join(''); 
-} 
+  } 
+ }
 
 // --- 以下、重複を排除した関数定義 ---
 
@@ -1260,4 +1261,3 @@ document.querySelectorAll('select').forEach(select => {
         window.scrollBy(0, -1);
     });
 });
-｝
