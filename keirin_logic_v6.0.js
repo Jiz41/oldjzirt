@@ -1262,23 +1262,50 @@ function generateSeitenreiBets(ranking) {
 // ============================
 
 function generateKoutenreiBets(ranking, L) {
-  if (!ranking || ranking.length < 3 || !L) return null;
-  const r1 = ranking[0].id;
-  const r2 = ranking[1].id;
-  const r3 = ranking[2].id;
+  // ここでの「L」は引数名として維持しますが、中身は全選手データ(candidates)として扱います
+  const candidates = L; 
+  if (!ranking || ranking.length < 3 || !candidates) return null;
 
+  const A = ranking[0];
+  const B = ranking[1];
+  const C = ranking[2];
+
+  // --- 1. Lの表情スキャン（4位以下から選定） ---
+  const lCandidates = ranking.slice(3).map(p => {
+    let lScore = 0;
+    if (p.is_b1) lScore += 10;                     // 特攻のB1
+    if (p.is_s1) lScore += 5;                      // 位置取りのS1
+    if (p.id >= 6 && (p.style === '捲' || p.style === '追')) lScore += 3; // 死に枠伏兵
+    
+    // 3番手判定
+    const linePos = candidates.filter(c => c.line_id === p.line_id && c.score > p.score).length + 1;
+    if (linePos >= 3) lScore += 2;
+
+    return { ...p, lScore };
+  });
+
+  lCandidates.sort((a, b) => b.lScore - a.lScore);
+
+  // --- 2. Lの実体を確定 ---
+  // スコアがある奴がいればその筆頭、いなければランキング4位
+  let targetL = (lCandidates.length > 0 && lCandidates[0].lScore > 0) 
+                ? lCandidates[0] 
+                : ranking[3];
+
+  if (!targetL) return null;
+
+  // --- 3. 買い目の生成（A-L, L-A, C-A） ---
   return {
     sanrenpuku: [
-      [r1, r2, L],
-      [r1, r3, L],
+      [A.id, B.id, targetL.id],
+      [A.id, C.id, targetL.id],
     ],
     nirentan: [
-      [r1, L],
-      [L, r1],
-      [r1, r3],
+      [A.id, targetL.id], // A-L
+      [targetL.id, A.id], // L-A
+      [C.id, A.id]        // C-A
     ],
   };
-}
 }
 
 // 全てのセレクトボックスに対して、変更が終わったらフォーカスを外す設定
