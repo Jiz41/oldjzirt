@@ -1209,12 +1209,11 @@ if (scenarioOutput) {
 
 
 function formatOrderedBet(bet) { return bet.join('-'); }
-
 function formatSanrenpuku(bet) { return bet.slice().sort((a, b) => a - b).join('='); }
 
 function generateSeitenreiBets(ranking) {
     if (!ranking || ranking.length < 3) return null;
-    const r1 = ranking.id, r2 = ranking[17].id, r3 = ranking[18].id;
+    const r1 = ranking[0].id, r2 = ranking[1].id, r3 = ranking[2].id;
     return {
         sanrentan: [[r1, r2, r3], [r2, r1, r3], [r1, r3, r2], [r2, r3, r1]],
         sanrenpuku: [[r1, r2, r3]],
@@ -1222,25 +1221,36 @@ function generateSeitenreiBets(ranking) {
 }
 
 function generateKoutenreiBets(ranking, candidates) {
-    if (!ranking || ranking.length < 3 || !candidates) return null;
-    const A = ranking, B = ranking[17], C = ranking[18];
+    if (!ranking || ranking.length < 4 || !candidates) return null;
+    const A = ranking[0], B = ranking[1], C = ranking[2];
+    
     const lCandidates = ranking.slice(3).map(p => {
         let s = 0;
-        if (p.is_b1) s += 10; if (p.is_s1) s += 5;
-        if (p.id >= 6 && (p.style === '捲' || p.style === '追')) s += 3;
-        // candidatesは配列なのでfilterは動作します
-        const pos = candidates.filter(c => (c.line_id || 0) === (p.line_id || 0) && c.score > p.score).length + 1;
-        if (pos >= 3) s += 2;
+        if (p.is_b1) s += 10; 
+        if (p.is_s1) s += 5;
+        if (p.id >= 6 && (p.style === '両' || p.style === '追')) s += 3;
+        
+        const playerData = candidates.find(c => c.id === p.id);
+        if (playerData) {
+            const pos = candidates.filter(c => 
+                (c.line_id || 0) === (playerData.line_id || 0) && 
+                c.score > playerData.score
+            ).length + 1;
+            if (pos >= 3) s += 2;
+        }
         return { ...p, lScore: s };
     });
+    
     lCandidates.sort((a, b) => b.lScore - a.lScore);
-    const targetL = (lCandidates.length > 0 && lCandidates.lScore > 0) ? lCandidates : ranking[19];
+    const targetL = (lCandidates.length > 0 && lCandidates[0].lScore > 0) 
+        ? lCandidates[0] 
+        : ranking[3];
+    
     return {
         sanrenpuku: [[A.id, B.id, targetL.id], [A.id, C.id, targetL.id]],
         nirentan: [[A.id, targetL.id], [targetL.id, A.id], [C.id, A.id]]
     };
 }
-
 // UIイベント設定（displayResultsの外に出す）
 document.querySelectorAll('select').forEach(select => {
     select.addEventListener('change', () => {
