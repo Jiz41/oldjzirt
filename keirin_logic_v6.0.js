@@ -1241,10 +1241,9 @@ function generateKoutenreiBets(ranking, candidates) {
         return { ...p, lScore: s };
     });
     
-    lCandidates.sort((a, b) => b.lScore - a.lScore);
-    const targetL = (lCandidates.length > 0 && lCandidates[0].lScore > 0) 
+        const targetL = (lCandidates.length > 0 && lCandidates[0].lScore > 0) 
         ? lCandidates[0] 
-        : ranking[3];
+        : (ranking.length > 3 ? ranking[3] : ranking[2]);
     
     return {
         sanrenpuku: [[A.id, B.id, targetL.id], [A.id, C.id, targetL.id]],
