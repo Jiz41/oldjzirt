@@ -1257,53 +1257,55 @@ function generateSeitenreiBets(ranking) {
 }
 
 /**
- * 荒天令 買い目生成（診断書に基づき完全修正）
+ * 荒天令 買い目生成（診断書に基づき、添字と参照を完全補正）
  */
 function generateKoutenreiBets(ranking, L) {
-  // 💡 修正の要：引数 L は数値(ID)のため、配列操作には ranking を使用する
-  const candidates = ranking; 
-  if (!ranking || ranking.length < 3 || !candidates) return null;
+    // 💡 修正のポイント: 名簿（配列）である ranking をセット
+    const candidates = ranking; 
 
-  const A = ranking[0];
-  const B = ranking[1];
-  const C = ranking[2];
+    if (!ranking || ranking.length < 3) return null;
 
-  // 1. Lの選定（表情スキャン：4位以下から「特異点」を探す）
-  const lCandidates = ranking.slice(3).map(p => {
-    let lScore = 0;
-    if (p.is_b1) lScore += 10;                     // 特攻のB1
-    if (p.is_s1) lScore += 5;                      // 位置取りのS1
-    if (p.id >= 6 && (p.style === '捲' || p.style === '追')) lScore += 3; // 死に枠伏兵
-    
-    // 💡 診断書通りの修正：candidates(ranking) をフィルタリング
-    const linePos = candidates.filter(c => c.line_id === p.line_id && c.score > p.score).length + 1;
-    if (linePos >= 3) lScore += 2;                 // 三番手評価
+    // 💡 JavaScriptの添字は0から（A=1位, B=2位, C=3位）
+    const A = ranking[0];
+    const B = ranking[1];
+    const C = ranking[2];
 
-    return { ...p, lScore };
-  });
+    // 1. Lの選定（4位以下から「特異点」を探す）
+    const lCandidates = ranking.slice(3).map(p => {
+        let lScore = 0;
+        if (p.is_b1) lScore += 10;
+        if (p.is_s1) lScore += 5;
+        if (p.id >= 6 && (p.style === '捲' || p.style === '追')) lScore += 3;
 
-  // スコアが高い順にソート
-  lCandidates.sort((a, b) => b.lScore - a.lScore);
+        // 💡 candidates(配列) に対して .filter を実行
+        const linePos = candidates.filter(c => (c.line_id || 0) === (p.line_id || 0) && c.score > p.score).length + 1;
 
-  // 2. Lの実体を確定（スコア保持者がいればその筆頭、いなければ本来の4位）
-  let targetL = (lCandidates.length > 0 && lCandidates[0].lScore > 0) 
-                ? lCandidates[0] 
-                : ranking[3];
+        if (linePos >= 3) lScore += 2; 
+        return { ...p, lScore };
+    });
 
-  if (!targetL) return null;
+    // スコアが高い順にソート
+    lCandidates.sort((a, b) => b.lScore - a.lScore);
 
-  // 3. 買い目の生成（A-L, L-A, C-A）
-  return {
-    sanrenpuku: [
-      [A.id, B.id, targetL.id],
-      [A.id, C.id, targetL.id]
-    ],
-    nirentan: [
-      [A.id, targetL.id], // A-L
-      [targetL.id, A.id], // L-A
-      [C.id, A.id]        // C-A
-    ]
-  };
+    // 2. Lの実体を確定（スコア保持者がいれば筆頭の[0]、いなければ本来の4位）
+    let targetL = (lCandidates.length > 0 && lCandidates[0].lScore > 0)
+        ? lCandidates[0]
+        : ranking[3];
+
+    if (!targetL) return null;
+
+    // 3. 買い目の生成（A-L, L-A, C-A）
+    return {
+        sanrenpuku: [
+            [A.id, B.id, targetL.id],
+            [A.id, C.id, targetL.id]
+        ],
+        nirentan: [
+            [A.id, targetL.id], // A-L
+            [targetL.id, A.id], // L-A
+            [C.id, A.id]         // C-A
+        ]
+    };
 }
 
 // 全てのセレクトボックスに対して、変更が終わったらフォーカスを外す設定
