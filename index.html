@@ -727,8 +727,8 @@ h1 { display: none; } /* テキストのh1は隠す */
                                 <div class="local-group"><label for="local-${i}">地元:</label><input type="checkbox" id="local-${i}" class="is-local"></div>
                                 <div class="local-group" style="color: #c07777; margin-left: 10px;"><label for="scratch-${i}">欠場:</label><input type="checkbox" id="scratch-${i}" class="is-scratch"></div>
                                 <div class="sb-group">
-                                    <label>S 1位: <input type="radio" name="s-leader" class="s1" data-id="${i}"></label>
-                                    <label>B 1位: <input type="radio" name="b-leader" class="b1" data-id="${i}" ${i===3?'checked':''}></label>
+                                    <label>S 1位: <input type="radio" name="s-leader" class="s1" data-id="${i}" ${i===1?'checked':''}></label>
+                                    <label>B 1位: <input type="radio" name="b-leader" class="b1" data-id="${i}" ${i===1?'checked':''}></label>
                                 </div>
                             </div>
                             <div class="player-fields">
