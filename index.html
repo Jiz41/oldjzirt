@@ -601,6 +601,120 @@ h1 { display: none; } /* テキストのh1は隠す */
     border-color: #a50e0e;
 }
 
+      /* ------------------------------------------------------------
+   華耀天輪 真・自在律：プロフェッショナル・スキン
+   (HTML構造は一切変更せず、スタイルのみを洗練)
+------------------------------------------------------------ */
+
+body {
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    background-color: #f0f0ed; /* 和紙のような落ち着いた地色 */
+    color: #333;
+    line-height: 1.7;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+.container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05); /* 浮かせすぎない自然な影 */
+    border-radius: 0; /* 角丸を廃止してプロ感を出す */
+}
+
+/* ヘッダー：中央揃えを維持しつつ余白で高級感を出す */
+header {
+    padding: 40px 0 20px 0;
+    background-color: #fff;
+}
+
+.subtitle {
+    font-size: 0.7rem !important;
+    letter-spacing: 0.4em !important; /* 文字間を広げ「品」を出す */
+    color: #999 !important;
+    border-bottom: none !important; /* 安価な線を廃止 */
+    margin: 0 0 10px 0 !important;
+    font-style: normal !important;
+}
+
+.title-image {
+    max-width: 75% !important;
+    border-bottom: 2px solid #384e38 !important; /* 墨緑の細線で引き締める */
+    padding-bottom: 15px !important;
+}
+
+/* 入力エリア：枠線を減らし、面で分ける */
+.input-group, .result-section {
+    margin: 20px 15px !important;
+    padding: 20px !important;
+    border: none !important; /* 囲み線を廃止 */
+    background-color: #f9f9f7 !important; /* 非常に薄いベージュ */
+    border-radius: 4px;
+}
+
+/* 選手入力行：魔法のiらんど最大の要因「パステル背景」を排除 */
+.player-row {
+    border: none !important;
+    border-bottom: 1px solid #eee !important;
+    background-color: #fff !important; /* 背景は白に統一 */
+    margin-bottom: 5px !important;
+    border-left: 4px solid #ccc; /* 識別用の縦線 */
+}
+
+/* IDごとの背景色指定を「左端の縦線」に変換して情報を整理 */
+.id-1 { border-left-color: #333 !important; }
+.id-2 { border-left-color: #888 !important; }
+.id-3 { border-left-color: #d9534f !important; } /* 勝負の赤 */
+.id-4 { border-left-color: #428bca !important; } /* 知性の青 */
+.id-5 { border-left-color: #f0ad4e !important; } /* 注意の黄 */
+.id-6 { border-left-color: #5cb85c !important; } /* 安全の緑 */
+.id-7 { border-left-color: #a977c0 !important; }
+
+.player-header {
+    background-color: transparent !important; /* ヘッダーの背景色を消す */
+    padding: 8px 10px !important;
+    font-size: 0.85rem !important;
+}
+
+/* 入力パーツ：モダンなフラットデザインへ */
+select, input {
+    border: 1px solid #ddd !important;
+    border-radius: 2px !important;
+    padding: 10px !important;
+    font-size: 0.95rem !important;
+    box-shadow: none !important;
+}
+
+/* ボタン：ツールとしての重厚感 */
+button {
+    background-color: #384e38 !important; /* 濃い松葉色 */
+    color: #fff !important;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+    padding: 18px !important;
+    border-radius: 0 !important;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: #2a3a2a !important;
+}
+
+/* 天雲指数：独自性を守りつつ洗練 */
+.tenun-index-container {
+    border-radius: 0 !important;
+    border-width: 0 0 0 6px !important; /* 左の縦線のみ強調 */
+}
+
+/* マニュアル・ログ */
+.manual-header, .debug-log-header {
+    background-color: #eee !important;
+    border: none !important;
+    font-size: 0.9rem !important;
+}
+
     </style>
 </head>
 <body>
