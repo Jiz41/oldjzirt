@@ -627,6 +627,28 @@ body { background-color: #f2f2ee !important; }
 /* ボタンを重厚な松葉色へ */
 button { background-color: #384e38 !important; border-radius: 0 !important; font-weight: bold !important; letter-spacing: 0.2em !important; padding: 14px !important; }
 
+      /* --- 華耀天輪：計算ボタン・タクタイルエフェクト --- */
+
+/* 1. 通常状態：静かな力強さ */
+button {
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 2px 0 #2a3a2a !important; /* ボタンの厚み */
+}
+
+/* 2. ホバー時：わずかに浮き上がり、準備完了を知らせる */
+button:hover {
+    background-color: #2a3a2a !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* 3. 押した瞬間：物理的に沈み込む（クリック感の演出） */
+button:active {
+    transform: translateY(2px);
+    box-shadow: 0 0 0 transparent !important; /* 厚みが消える */
+}
+
     </style>
 </head>
 <body>
