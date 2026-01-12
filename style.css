@@ -283,7 +283,7 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
     }
 
-    /* --- 選手データ：色分けの復活と夜用調整 --- */
+    /* --- 選手データ：色分けと夜用調整 --- */
     .player-row { background-color: #252525 !important; border-color: rgba(255, 255, 255, 0.05) !important; }
     .id-1 { border-left: 6px solid #9ca3af !important; } /* グレー系を少し落とす */
     .id-2 { border-left: 6px solid #555555 !important; } /* 黒を少し持ち上げる */
@@ -334,5 +334,11 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
     /* 内部のテキスト（ラジオボタン横など） */
     .sb-group label {
         color: #cccccc !important;
+    }
+  
+      /* --- 操作説明の見出し（外枠の線）を白系の光に反転 --- */
+    .manual-header, .debug-log-header {
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
   }
