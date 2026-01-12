@@ -89,7 +89,26 @@ h1 { display: none; }
 #maxim-display-container .maxim-text { font-size: 0.9em; }
 #maxim-display-container .maxim-speaker { font-size: 0.75em; color: #888; }
 
-h2 { font-size: 1.2em; color: #698b69; border-bottom: 2px solid #b3c7b3; padding: 15px 15px 5px 15px; margin-top: 20px; }
+h2 {
+    font-size: 1.2em;
+    color: #698b69;
+    padding: 15px 15px 8px 15px; /* 下の余白をわずかに微調整 */
+    margin-top: 25px;            /* 上にゆとりを持たせて「抜け」を作る */
+    border-bottom: none !important; /* 従来の硬い線を消去 */
+    position: relative;
+    letter-spacing: 0.1em;       /* 見出しに品格を出すための字間 */
+}
+
+h2::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 15px;                 /* 文字の開始位置に合わせる */
+    width: 80%;                 /* 100%にせず、あえて短く消すのが粋 */
+    height: 2px;                /* 厚みは維持して存在感を出す */
+    background: linear-gradient(90deg, #b3c7b3 0%, rgba(179, 199, 179, 0) 100%);
+    border-radius: 2px;
+}
 .input-group, .result-section { margin: 0 15px 20px 15px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #fcfcf0; box-sizing: border-box; }
 
 .manual-header, .debug-log-header { font-size: 1.05em; color: #698b69; padding: 10px 15px; margin-top: 10px; cursor: pointer; user-select: none; font-weight: bold; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; }
