@@ -326,8 +326,24 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
     #koutenrei-output { background-color: #2e1b1b !important; color: #e6d0d0 !important; }
     .tamaki-speech-bubble { background: #252525 !important; color: #e0e0e0 !important; border-color: #8b6d00 !important; }
     .tenun-index-container { background-color: #2a2410 !important; border-color: #8b6d00 !important; }
-}
 
+      /* --- 選手データの文字色を明るく反転 --- */
+    .player-header {
+        color: #e0e0e0 !important; /* 溶け込みを防止する明るいグレー */
+        border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    /* 各入力項目のラベルも読みやすく補正 */
+    .player-field label {
+        color: #a0b0a0 !important; /* 柔らかな緑がかった白 */
+    }
+
+    /* 内部のテキスト（ラジオボタン横など） */
+    .sb-group label {
+        color: #cccccc !important;
+    }
+  }
+      
     </style>
 </head>
 <body>
