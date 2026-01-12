@@ -111,14 +111,77 @@ h2::after {
 }
 .input-group, .result-section { margin: 0 15px 20px 15px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #fcfcf0; box-sizing: border-box; }
 
-.manual-header, .debug-log-header { font-size: 1.05em; color: #698b69; padding: 10px 15px; margin-top: 10px; cursor: pointer; user-select: none; font-weight: bold; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; }
-.manual-content { display: none; padding: 15px; margin: 0 15px 15px 15px; background-color: #ffffff; border-left: 3px solid #b3c7b3; border-right: 3px solid #b3c7b3; font-size: 0.9em; line-height: 1.6; }
-.manual-content h3 { font-size: 1.1em; color: #557755; border-bottom: 1px solid #e0e0e0; padding-bottom: 3px; margin-top: 15px; }
-.manual-content table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-.manual-content th, .manual-content td { border: 1px solid #eee; padding: 5px; text-align: left; vertical-align: top; font-size: 0.85em; }
-.manual-content th { background-color: #f7f7f7; width: 30%; }
-.manual-content ul { padding-left: 20px; margin-top: 5px; margin-bottom: 5px; }
-.manual-content li { margin-bottom: 2px; }
+/* --- ヘッダー：背景親和性を高める透過境界線定義 --- */
+.manual-header, .debug-log-header {
+    font-size: 1.05em;
+    color: #698b69;
+    padding: 12px 15px; /* 余白を広げ、視覚的な圧迫を軽減 */
+    margin-top: 10px;
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
+    /* 背景の白に馴染ませ、境界を空気のように軽く見せる透過1px線 */
+    border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+/* --- コンテンツエリア：マットな質感と最小限の強調 --- */
+.manual-content {
+    display: none;
+    padding: 15px;
+    margin: 0 15px 15px 15px;
+    background-color: #ffffff;
+    /* 左右の強調を抑え、外面のマット感に同期させた淡い境界 */
+    border-left: 3px solid rgba(179, 199, 179, 0.5) !important;
+    border-right: 1px solid rgba(179, 199, 179, 0.2) !important;
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+/* --- 内部の見出し：情報の区切りを示す最小限の線 --- */
+.manual-content h3 {
+    font-size: 1.1em;
+    color: #557755;
+    /* 情報の階層を壊さないよう、極薄の透過線で区切る */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
+    padding-bottom: 5px;
+    margin-top: 15px;
+}
+
+/* --- 内部テーブル：視覚負荷を軽減する構造線 --- */
+.manual-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+}
+
+.manual-content th, .manual-content td {
+    /* セル境界を背景色とほぼ同化させ、文字の可読性を優先 */
+    border: 1px solid rgba(0, 0, 0, 0.03) !important;
+    padding: 8px 5px;
+    text-align: left;
+    vertical-align: top;
+    font-size: 0.85em;
+}
+
+.manual-content th {
+    /* ヘッダー背景を淡いマットグレーに設定し、表の構造を明示 */
+    background-color: #fdfdfb;
+    color: #698b69;
+    width: 30%;
+}
+
+/* --- リスト要素：余白の最適化 --- */
+.manual-content ul {
+    padding-left: 20px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.manual-content li {
+    margin-bottom: 4px; /* 行間のリズムを整え、読みやすさを向上 */
+}
+
 
 .debug-log-header { font-size: 1.0em; color: #888; border-bottom: 1px solid #e0e0e0; padding: 10px 15px 5px 15px; margin-top: 15px; cursor: pointer; user-select: none; }
 .debug-log { display: none; background-color: #384e38; color: #f0fff0; padding: 10px; height: 100px; overflow-y: scroll; font-family: 'Courier New', Courier, monospace; border-radius: 5px; font-size: 0.75em; max-width: 600px; margin: 0 auto 15px auto; }
