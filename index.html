@@ -257,8 +257,26 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
 .tamaki-speech-bubble { flex: 1 !important; min-width: 0 !important; background: white; border: 2px solid #d6a300; border-radius: 12px; padding: 10px; font-size: 0.9em; line-height: 1.4; box-sizing: border-box; position: relative; }
 @media (max-width: 600px) { .tamaki-character { width: 70px !important; min-width: 70px !important; } }
 
-.bug-report-container { text-align: center; padding: 10px; background-color: #fdfdfd; }
-.bug-button { display: inline-block; padding: 6px 16px; background-color: #666666; color: #ffffff; text-decoration: none; border-radius: 3px; font-size: 13px; border: 1px solid #555555; transition: 0.2s; }
+/* --- 不具合報告：背景に完全同化させ、ノイズを排除（共通設定） --- */
+.bug-report-container {
+    text-align: center;
+    padding: 20px 10px;
+    background-color: transparent !important; /* 常に背景色を透過 */
+    border: none !important;                  /* 枠線も排除 */
+}
+
+.bug-button {
+    display: inline-block;
+    padding: 8px 20px;
+    background-color: #666666;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 6px; /* 少し丸みのある角 */
+    font-size: 13px;
+    border: 1px solid rgba(0,0,0,0.1);
+    transition: 0.2s;
+}
+
 .bug-button:hover { background-color: #d93025; border-color: #a50e0e; }
 
 .copyright-footer { text-align: center; font-size: 0.75em; color: #aaa; margin-top: 20px; width: 100%; padding: 15px; box-sizing: border-box; }
