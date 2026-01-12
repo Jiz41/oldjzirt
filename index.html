@@ -263,81 +263,51 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
 
 .copyright-footer { text-align: center; font-size: 0.75em; color: #aaa; margin-top: 20px; width: 100%; padding: 15px; box-sizing: border-box; }
 
-/* ==========================================
-   8. 2025年ミッドナイト・マット：完全同期ダークモード
-   ========================================== */
 @media (prefers-color-scheme: dark) {
     /* --- 全体空間 --- */
-    body {
-        background-color: #121212 !important;
-        color: #e0e0e0 !important;
-    }
+    body { background-color: #121212 !important; color: #e0e0e0 !important; }
     .container {
         background-color: #1e1e1e !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
     }
 
+    /* --- 選手データ：色分けの復活と夜用調整 --- */
+    .player-row { background-color: #252525 !important; border-color: rgba(255, 255, 255, 0.05) !important; }
+    .id-1 { border-left: 6px solid #9ca3af !important; } /* グレー系を少し落とす */
+    .id-2 { border-left: 6px solid #555555 !important; } /* 黒を少し持ち上げる */
+    .id-3 { border-left: 6px solid #d64d55 !important; } /* 赤 */
+    .id-4 { border-left: 6px solid #4a80c0 !important; } /* 青 */
+    .id-5 { border-left: 6px solid #dab03f !important; } /* 黄 */
+    .id-6 { border-left: 6px solid #5a965a !important; } /* 緑 */
+    .id-7 { border-left: 6px solid #f39c12 !important; } /* 橙 */
+
+    /* --- 説明書（マニュアル）：枠線を白っぽく強調 --- */
+    .manual-content { background-color: #2a2a2a !important; }
+    .manual-content th, .manual-content td {
+        /* 枠線を「黒系」から「白系（透過）」へ変更 */
+        border: 1px solid rgba(255, 255, 255, 0.12) !important; 
+    }
+    .manual-content th { background-color: #333333 !important; color: #8fb68f !important; }
+    .manual-content h3 { color: #a3c9a3 !important; border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important; }
+
     /* --- 入力エリア・共通パーツ --- */
-    .input-group, .result-section, .player-row, .scenario-detail {
+    .input-group, .result-section, .scenario-detail {
         background-color: #252525 !important;
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
-        color: #e0e0e0 !important;
     }
-    
-    /* 共通ラベル色 */
-    label, .input-item label, .player-field label, .subtitle {
-        color: #a0b0a0 !important;
-    }
-
-    /* 入力フォーム本体（パキッと見えるよう調整） */
+    label, .input-item label, .player-field label, .subtitle { color: #a0b0a0 !important; }
     select, input[type="number"], input[type="text"], textarea {
         background-color: #2d2d2d !important;
-        color: #ffffff !important; /* 文字はハッキリ白 */
+        color: #ffffff !important;
         border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    }
-    input::placeholder { color: #666 !important; }
-
-    /* --- マニュアル・デバッグ --- */
-    .manual-header, .debug-log-header {
-        color: #8fb68f !important;
-        border-color: rgba(255, 255, 255, 0.08) !important;
-    }
-    .manual-content {
-        background-color: #2a2a2a !important;
-    }
-    .manual-content th {
-        background-color: #333333 !important;
-        color: #8fb68f !important;
-    }
-
-    /* --- 選手データ（IDカラーの保護） --- */
-    .player-header {
-        color: #e0e0e0 !important;
-        border-bottom-color: rgba(255, 255, 255, 0.05) !important;
     }
 
     /* --- 予想出力・たまきちゃん --- */
-    #seitenrei-output { background-color: #1b2e1b !important; color: #d0e6d0 !important; border-left-color: #698b69 !important; }
-    #koutenrei-output { background-color: #2e1b1b !important; color: #e6d0d0 !important; border-left-color: #c07777 !important; }
-    
-    .tamaki-speech-bubble {
-        background: #252525 !important;
-        color: #e0e0e0 !important;
-        border-color: #8b6d00 !important;
-    }
-    .tenun-index-container {
-        background-color: #2a2410 !important;
-        border-color: #8b6d00 !important;
-    }
-    .tenun-title { color: #d6a300 !important; }
-
-    /* --- 特殊効果：画像とボタンの調整 --- */
-    .title-image { filter: brightness(0.9); }
-    button {
-        background-color: #4a7a4a !important; /* 夜間に映える鮮やかな松葉色 */
-        box-shadow: 0 2px 0 #2a3a2a !important;
-    }
+    #seitenrei-output { background-color: #1b2e1b !important; color: #d0e6d0 !important; }
+    #koutenrei-output { background-color: #2e1b1b !important; color: #e6d0d0 !important; }
+    .tamaki-speech-bubble { background: #252525 !important; color: #e0e0e0 !important; border-color: #8b6d00 !important; }
+    .tenun-index-container { background-color: #2a2410 !important; border-color: #8b6d00 !important; }
 }
 
     </style>
