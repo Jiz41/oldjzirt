@@ -176,7 +176,25 @@ h2::after {
 }
 
 
-.debug-log-header { font-size: 1.0em; color: #888; border-bottom: 1px solid #e0e0e0; padding: 10px 15px 5px 15px; margin-top: 15px; cursor: pointer; user-select: none; }
+/* --- デバッグログ見出し：サイズ縮小と左寄せの極致 --- */
+.debug-log-header {
+    font-size: 0.7em !important; /* 従来の約2/3に縮小 */
+    color: #888;
+    padding: 10px 5px 5px 5px;   /* 左右余白を最小化して左へ寄せる */
+    margin-top: 15px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* ダークモード時の色調整もセットで追記 */
+@media (prefers-color-scheme: dark) {
+    .debug-log-header {
+        color: #666 !important; /* 文字をさらに暗くして存在感を抑える */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+}
+
 .debug-log { display: none; background-color: #384e38; color: #f0fff0; padding: 10px; height: 100px; overflow-y: scroll; font-family: 'Courier New', Courier, monospace; border-radius: 5px; font-size: 0.75em; max-width: 600px; margin: 0 auto 15px auto; }
 
 /* ==========================================
