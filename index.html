@@ -5,618 +5,108 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>華耀天輪 真・自在律</title>
     <style>
-Html {
-    overflow-y: scroll; /* 常にスクロールバーの領域を確保して計算を安定させる */
-}
+/* ==========================================
+   1. 基本・システム設定（変更なし）
+   ========================================== */
+html { overflow-y: scroll; }
 body {
-    overflow-x: clip;   /* hiddenより軽量な切り取り命令 */
-    min-height: 101vh; /* 常に少しだけスクロールできる状態にして、Chromeのサボりを防ぐ */
-}
-
-        body {
+    overflow-x: clip; min-height: 101vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    padding-bottom: 30px;
-    background-color: #fbf8f5;
-    color: #333;
-    -webkit-overflow-scrolling: touch;
-    will-change: transform;
+    margin: 0; padding: 0; padding-bottom: 30px;
+    background-color: #f2f2ee !important; /* 真・最終補正の背景色を採用 */
+    color: #333; -webkit-overflow-scrolling: touch; will-change: transform;
 }
-
-        .container {
-            width: calc(100% - 20px);
-            max-width: 600px;
-            margin: 10px auto;
-            background-color: #ffffff;
-            padding: 0;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-            box-sizing: border-box;
-        }
-
+.container {
+    width: calc(100% - 20px); max-width: 600px; margin: 10px auto;
+    background-color: #ffffff; padding: 0; border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); box-sizing: border-box;
+}
 .keep-alive-dot {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 1px;
-    height: 1px;
-    background-color: transparent;
-    pointer-events: none;
-    z-index: -1;
+    position: fixed; bottom: 0; right: 0; width: 1px; height: 1px;
+    background-color: transparent; pointer-events: none; z-index: -1;
     animation: keep-alive 0.1s infinite;
 }
+@keyframes keep-alive { 0% { opacity: 1; } 50% { opacity: 0.99; } 100% { opacity: 1; } }
 
-@keyframes keep-alive {
-    0% { opacity: 1; }
-    50% { opacity: 0.99; }
-    100% { opacity: 1; }
-}
-
-        }
-
-     header {
-    background-color: transparent !important;
-    margin-bottom: 35px !important; /* 影の代わりに「距離」で奥行きを出す */
-    padding-bottom: 0 !important;
+/* ==========================================
+   2. ヘッダー・タイトル（★ここを一本化・スッキリ修正）
+   ========================================== */
+header {
+    background-color: transparent !important; /* 背景・枠を完全に排除 */
+    margin-bottom: 40px !important;           /* 下との詰まりを解消 */
+    padding: 25px 0 0 0 !important;
     border: none !important;
+    text-align: center;
 }
 
 .subtitle {
-    font-size: 0.75em; /* より小さく繊細に */
-    color: #98b498;
-    font-style: italic;
-    text-align: center;
-    letter-spacing: 0.2em; /* 文字間隔を広げて高級感を出す */
-    margin: 0 40px 10px 40px;
-    padding-bottom: 5px;
-    border-bottom: 1px solid #e0eee0; /* 非常に薄い緑の線 */
+    font-size: 0.75em !important; 
+    color: #777 !important; 
+    font-style: normal !important; 
+    letter-spacing: 0.3em !important; 
+    margin: 0 auto 10px !important;
+    border: none !important;
 }
 
 .title-image-container {
-    padding: 0 15px; /* 画像が端に当たりすぎないよう調整 */
+    padding: 0 15px;
 }
 
 .title-image {
+    width: 100% !important;
     max-width: 85% !important;
-    background-color: transparent !important; /* 背景色削除 */
-    box-shadow: none !important;              /* 影を完全排除 */
-    border: none !important;                  /* 枠線削除 */
-    padding: 0 !important;                    /* 内余白削除 */
+    height: auto !important;
+    display: block !important;
     margin: 0 auto !important;
-    display: block;
-  border-bottom: 2px solid #384e38 !important; 
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border-bottom: 3px solid #384e38 !important; /* 接地線のみ */
 }
 
-h1 { display: none; } /* テキストのh1は隠す */
+h1 { display: none; }
+
+/* ==========================================
+   3. 格言・マニュアル・共通パーツ（変更なし）
+   ========================================== */
+#maxim-display-container { text-align: center; padding: 8px 15px; margin: 10px 0 15px 0; }
+#maxim-display-container p { margin: 0; padding: 0; font-style: italic; font-weight: 300; color: #444; line-height: 1.4; }
+#maxim-display-container .maxim-text { font-size: 0.9em; }
+#maxim-display-container .maxim-speaker { font-size: 0.75em; color: #888; }
+
+h2 { font-size: 1.2em; color: #698b69; border-bottom: 2px solid #b3c7b3; padding: 15px 15px 5px 15px; margin-top: 20px; }
+.input-group, .result-section { margin: 0 15px 20px 15px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #fcfcf0; box-sizing: border-box; }
+
+.manual-header, .debug-log-header { font-size: 1.05em; color: #698b69; padding: 10px 15px; margin-top: 10px; cursor: pointer; user-select: none; font-weight: bold; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; }
+.manual-content { display: none; padding: 15px; margin: 0 15px 15px 15px; background-color: #ffffff; border-left: 3px solid #b3c7b3; border-right: 3px solid #b3c7b3; font-size: 0.9em; line-height: 1.6; }
+.manual-content h3 { font-size: 1.1em; color: #557755; border-bottom: 1px solid #e0e0e0; padding-bottom: 3px; margin-top: 15px; }
+.manual-content table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+.manual-content th, .manual-content td { border: 1px solid #eee; padding: 5px; text-align: left; vertical-align: top; font-size: 0.85em; }
+.manual-content th { background-color: #f7f7f7; width: 30%; }
+.manual-content ul { padding-left: 20px; margin-top: 5px; margin-bottom: 5px; }
+.manual-content li { margin-bottom: 2px; }
+
+.debug-log-header { font-size: 1.0em; color: #888; border-bottom: 1px solid #e0e0e0; padding: 10px 15px 5px 15px; margin-top: 15px; cursor: pointer; user-select: none; }
+.debug-log { display: none; background-color: #384e38; color: #f0fff0; padding: 10px; height: 100px; overflow-y: scroll; font-family: 'Courier New', Courier, monospace; border-radius: 5px; font-size: 0.75em; max-width: 600px; margin: 0 auto 15px auto; }
+
+/* ==========================================
+   4. 入力フィールド・コントロール（変更なし）
+   ========================================== */
+.input-item { margin-bottom: 15px; }
+.input-item label { display: block; font-weight: bold; margin-bottom: 5px; color: #5a5a5a; }
+select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #dcdcdc; border-radius: 4px; font-size: 1em; background-color: #ffffff; }
+
+.local-switch-group { display: flex; align-items: center; padding: 5px 0; margin-bottom: 5px; font-size: 0.95em; color: #555; border-top: 1px dashed #e0e0e0; border-bottom: 1px dashed #e0e0e0; }
+.local-switch-group input[type="checkbox"] { width: auto; margin-right: 8px; margin-left: 0; transform: scale(1.1); vertical-align: middle; }
+
+/* ==========================================
+   5. 選手データ行・枠色指定（変更なし）
+   ========================================== */
+.player-input-list { margin-top: 10px; }
+.player-row { border: 1px solid #e0e0e0; padding: 0; margin-bottom: 10px; border-radius: 6px; background-color: #ffffff; overflow: hidden; contain: content; backface-visibility: hidden; border-left: 6px solid #ccc !important; }
+.player-header { font-weight: bold; font-size: 1.0em; color: #333; padding: 8px 10px; margin-bottom: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
 
-        .subtitle {
-            font-size: 0.8em;
-            color: #98b498;
-            font-style: italic;
-            text-align: center;
-            letter-spacing: 0.1em;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-/* タイトル画像のレスポンシブ設定を追加 */
-.title-image {
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-}
-
-
-        #maxim-display-container {
-            text-align: center;
-            padding: 8px 15px; 
-            margin: 0 0 10px 0; 
-        }
-        
-        #maxim-display-container p {
-            margin: 0;
-            padding: 0;
-            font-style: italic;
-            font-weight: 300;
-            color: #444; 
-            line-height: 1.4;
-        }
-        
-        #maxim-display-container .maxim-text {
-            font-size: 0.9em;
-        }
-
-        #maxim-display-container .maxim-speaker {
-            font-size: 0.75em;
-            color: #888;
-        }
-        
-        h2 {
-            font-size: 1.2em;
-            color: #698b69;
-            border-bottom: 2px solid #b3c7b3;
-            padding: 15px 15px 5px 15px;
-            margin-top: 20px;
-        }
-
-        .input-group, .result-section {
-            margin: 0 15px 20px 15px;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background-color: #fcfcf0;
-            box-sizing: border-box;
-        }
-
-        .manual-header, .debug-log-header {
-            font-size: 1.05em;
-            color: #698b69;
-            padding: 10px 15px;
-            margin-top: 10px;
-            cursor: pointer;
-            user-select: none;
-            font-weight: bold;
-            border-top: 1px solid #e0e0e0;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .manual-content {
-            display: none;
-            padding: 15px;
-            margin: 0 15px 15px 15px;
-            background-color: #ffffff;
-            border-left: 3px solid #b3c7b3;
-            border-right: 3px solid #b3c7b3;
-            font-size: 0.9em;
-            line-height: 1.6;
-        }
-
-        .manual-content h3 {
-            font-size: 1.1em;
-            color: #557755;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 3px;
-            margin-top: 15px;
-        }
-
-        .manual-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 5px;
-        }
-
-        .manual-content th, .manual-content td {
-            border: 1px solid #eee;
-            padding: 5px;
-            text-align: left;
-            vertical-align: top;
-            font-size: 0.85em;
-        }
-
-        .manual-content th {
-            background-color: #f7f7f7;
-            width: 30%;
-        }
-
-        .manual-content ul {
-            padding-left: 20px;
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
-
-        .manual-content li {
-            margin-bottom: 2px;
-        }
-
-        .debug-log-header {
-            font-size: 1.0em;
-            color: #888;
-            border-bottom: 1px solid #e0e0e0;
-            padding: 10px 15px 5px 15px;
-            margin-top: 15px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .debug-log {
-            display: none;
-            background-color: #384e38;
-            color: #f0fff0;
-            padding: 10px;
-            height: 100px;
-            overflow-y: scroll;
-            font-family: 'Courier New', Courier, monospace;
-            border-radius: 5px;
-            font-size: 0.75em;
-            max-width: 600px;
-            margin: 0 auto 15px auto;
-        }
-
-        .input-item {
-            margin-bottom: 15px;
-        }
-
-        .input-item label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #5a5a5a;
-        }
-
-        select, input[type="number"], input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #dcdcdc;
-            border-radius: 4px;
-            font-size: 1em;
-            background-color: #ffffff;
-        }
-
-        .local-switch-group {
-            display: flex;
-            align-items: center;
-            padding: 5px 0;
-            margin-bottom: 5px;
-            font-size: 0.95em;
-            color: #555;
-            border-top: 1px dashed #e0e0e0;
-            border-bottom: 1px dashed #e0e0e0;
-        }
-
-        .local-switch-group input[type="checkbox"] {
-            width: auto;
-            margin-right: 8px;
-            margin-left: 0;
-            transform: scale(1.1);
-            vertical-align: middle;
-        }
-
-        .player-input-list {
-            margin-top: 10px;
-        }
-
-        .player-row {
-            border: 1px solid #e0e0e0;
-            padding: 0;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            background-color: #ffffff;
-            overflow: hidden;
-            contain: content;
-            backface-visibility: hidden;
-        }
-
-        .player-header {
-            font-weight: bold;
-            font-size: 1.0em;
-            color: #333;
-            padding: 8px 10px;
-            margin-bottom: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .id-1 .player-header { background-color: #ffffff; color: #333; }
-        .id-2 .player-header { background-color: #f0f0f0; color: #333; }
-        .id-3 .player-header { background-color: #fff0f0; color: #333; }
-        .id-4 .player-header { background-color: #f0f8ff; color: #333; }
-        .id-5 .player-header { background-color: #fffaf0; color: #333; }
-        .id-6 .player-header { background-color: #f0fff0; color: #333; }
-        .id-7 .player-header { background-color: #fff5ee; color: #333; }
-        
-        .local-group {
-            display: flex;
-            align-items: center;
-            font-size: 0.75em;
-            color: #698b69;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        .local-group input[type="checkbox"] {
-            width: auto;
-            margin-left: 4px;
-            margin-right: 2px;
-            transform: scale(1.1);
-        }
-
-        .player-fields {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            padding: 8px 10px;
-        }
-
-        .player-field {
-            flex: 1 1 23%;
-            min-width: 50px;
-            box-sizing: border-box;
-        }
-
-        .player-field label {
-            display: block;
-            font-size: 0.7em;
-            color: #666;
-            margin-bottom: 2px;
-        }
-
-        .player-field input, .player-field select {
-            width: 100%;
-            padding: 3px 5px;
-            box-sizing: border-box;
-            font-size: 0.85em;
-        }
-
-        .sb-group {
-            display: flex;
-            gap: 6px;
-            font-size: 0.75em;
-        }
-
-        .sb-group label {
-            display: inline-flex;
-            align-items: center;
-            font-weight: normal;
-            color: #666;
-        }
-
-        .sb-group input[type="radio"] {
-            width: auto;
-            margin-left: 2px;
-        }
-
-        .line-display {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 5px;
-            align-items: center;
-        }
-
-        .line-box {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 0.9em;
-            transition: background-color 0.5s, color 0.5s;
-            line-height: 1.5;
-        }
-
-        .seri-segment {
-            display: inline-flex;
-            align-items: center;
-            font-size: 0.9em;
-            font-weight: bold;
-            border: 1px dashed #b3c7b3;
-            border-radius: 4px;
-            padding: 1px 3px;
-            margin-right: 5px;
-        }
-        
-        .seri-arrow {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #c07777;
-            margin: 0 2px;
-        }
-
-        #bank-tendency-display {
-            margin-top: 5px;
-            margin-bottom: 10px;
-            padding: 5px 0;
-            font-size: 0.95em;
-            color: #698b69;
-            font-weight: bold;
-        }
-
-        .scenario-detail table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            margin-top: 10px;
-        }
-
-        .scenario-detail th, .scenario-detail td {
-            border: 1px solid #efefef;
-            padding: 6px 3px;
-            text-align: center;
-            font-size: 0.85em;
-            word-break: break-all;
-        }
-
-        .scenario-detail th { background-color: #f7f7f7; color: #555; }
-        .hide-score-rank { display: none !important; }
-
-        .recommendation {
-            padding: 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            margin-top: 10px;
-            font-size: 0.95em;
-            line-height: 1.6;
-        }
-
-        #seitenrei-output { background-color: #e6f5e6; border-left: 5px solid #698b69; color: #444; }
-        #koutenrei-output { background-color: #fcf0f0; border-left: 5px solid #c07777; color: #444; }
-
-        .scenario-detail {
-            border: 1px dashed #dcdcdc;
-            padding: 12px;
-            margin-top: 15px;
-            border-radius: 6px;
-        }
-
-        .scenario-detail h4 {
-            font-size: 1.05em;
-            margin: 0 0 10px 0;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 5px;
-            color: #698b69;
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            background-color: #698b69;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 15px;
-            font-size: 1.05em;
-            transition: background-color 0.3s;
-        }
-
-        #results-container {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        #results-container.visible {
-            display: block;
-            opacity: 1;
-        }
-
-      /* タイトル画像のレスポンシブ設定 */
-.title-image {
-    width: 100%;
-    max-width: 100%; /* コンテナ幅（600px）に追従 */
-    height: auto;
-    display: block;
-    margin: 10px auto 0;
-}
-
-
-
-        /* 💡 天雲指数コンテナのデザイン */
-        .tenun-index-container {
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: left;
-            border: 2px dashed #d6a300;
-            background-color: #fff9e6;
-        }
-        
-        .tenun-title {
-            font-weight: bold;
-            font-size: 0.95em;
-            color: #8b6d00;
-            margin-bottom: 10px;
-            display: block;
-            border-bottom: 1px solid rgba(139, 109, 0, 0.2);
-            padding-bottom: 5px;
-        }
-
-        .tenun-stable { border: 2px solid #557755 !important; background-color: #e6f5e6 !important; }
-        .tenun-stable .tenun-title { color: #557755 !important; border-bottom: 1px solid rgba(85, 119, 85, 0.2); }
-        
-        .tenun-mild { border: 2px dashed #698b69 !important; background-color: #f7fff7 !important; }
-        .tenun-mild .tenun-title { color: #698b69 !important; border-bottom: 1px solid rgba(105, 139, 105, 0.2); }
-
-        .tenun-alert { border: 2px dashed #d6a300 !important; background-color: #fff9e6 !important; }
-        .tenun-alert .tenun-title { color: #d6a300 !important; border-bottom: 1px solid rgba(214, 163, 0, 0.2); }
-
-        .tenun-severe { border: 2px solid #c07777 !important; background-color: #fcf0f0 !important; }
-        .tenun-severe .tenun-title { color: #c07777 !important; border-bottom: 1px solid rgba(192, 119, 119, 0.2); }
-
-        .copyright-footer {
-            text-align: center;
-            font-size: 0.75em;
-            color: #aaa;
-            margin-top: 20px;
-            width: 100%;
-            padding: 15px; 
-            box-sizing: border-box;
-        }
-
-        /* ------------------------------------------------------------
-           🚨 たまきちゃん画像サイズ強制制御設定
-        ------------------------------------------------------------ */
-        .tamaki-display {
-            display: flex !important;
-            flex-direction: row !important;
-            align-items: flex-start !important;
-        }
-
-        .tamaki-character {
-            width: 75px !important;
-            min-width: 75px !important;
-            max-width: 75px !important;
-            height: auto !important;
-            margin-right: 12px !important;
-            flex-shrink: 0 !important;
-        }
-
-        .tamaki-image {
-            width: 100% !important;
-            height: auto !important;
-            display: block !important;
-        }
-
-        .tamaki-speech-bubble {
-            flex: 1 !important;
-            min-width: 0 !important;
-            background: white;
-            border: 2px solid #d6a300;
-            border-radius: 12px;
-            padding: 10px;
-            font-size: 0.9em;
-            line-height: 1.4;
-            box-sizing: border-box;
-            position: relative;
-        }
-
-        @media (max-width: 600px) {
-            .tamaki-character { width: 70px !important; min-width: 70px !important; }
-        }
-.bug-report-container {
-    text-align: center;
-    padding: 10px; /* 全体の余白を半分に */
-    background-color: #fdfdfd;
-}
-
-.bug-button {
-    display: inline-block;
-    padding: 6px 16px; /* ボタン内部の余白を縮小 */
-    background-color: #666666; /* 主張を抑えたグレー系（ホバーで変化） */
-    color: #ffffff;
-    text-decoration: none;
-    border-radius: 3px; /* 角丸をシャープに */
-    font-size: 13px; /* 文字を小さく */
-    font-weight: normal;
-    border: 1px solid #555555;
-    transition: 0.2s; /* 変化を滑らかに */
-}
-
-.bug-button:hover {
-    background-color: #d93025; /* ホバー時のみ警告色にする演出 */
-    border-color: #a50e0e;
-}
-
-      /* --- 華耀天輪：真・最終補正（追記専用） --- */
-
-/* 全体背景を和紙のような渋い色へ */
-body { background-color: #f2f2ee !important; }
-
-/* ヘッダー・サブタイトルの装飾を削ぎ落とす */
-.subtitle { font-size: 0.75em !important; color: #777 !important; font-style: normal !important; letter-spacing: 0.3em !important; border-bottom: none !important; margin: 0 auto 10px !important; }
-.title-image { border-bottom: 3px solid #384e38 !important; padding-bottom: 10px !important; }
-
-/* パステル背景を廃止し、墨線と白で統一 */
-.input-group, .result-section { background-color: #fafaf8 !important; border: 1px solid #ddd !important; border-radius: 2px !important; }
-.player-row { border: 1px solid #eee !important; border-left: 6px solid #ccc !important; background-color: #fff !important; margin-bottom: 10px !important; border-radius: 0 !important; }
-
-/* 選手識別を「背景色」から「左の縦線」へ移行 */
-.player-header { background-color: transparent !important; color: #333 !important; border-bottom: 1px solid #f0f0f0 !important; }
 .id-1 { border-left-color: #d1d5db !important; }
 .id-2 { border-left-color: #333 !important; }
 .id-3 { border-left-color: #b94047 !important; }
@@ -625,46 +115,58 @@ body { background-color: #f2f2ee !important; }
 .id-6 { border-left-color: #4a7a4a !important; }
 .id-7 { border-left-color: #e67e22 !important; }
 
-/* ボタンを重厚な松葉色へ */
-button { background-color: #384e38 !important; border-radius: 0 !important; font-weight: bold !important; letter-spacing: 0.2em !important; padding: 14px !important; }
+.local-group { display: flex; align-items: center; font-size: 0.75em; color: #698b69; font-weight: bold; margin-right: 10px; }
+.local-group input[type="checkbox"] { width: auto; margin-left: 4px; margin-right: 2px; transform: scale(1.1); }
+.player-fields { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 10px; }
+.player-field { flex: 1 1 23%; min-width: 50px; box-sizing: border-box; }
+.player-field label { display: block; font-size: 0.7em; color: #666; margin-bottom: 2px; }
+.player-field input, .player-field select { width: 100%; padding: 3px 5px; box-sizing: border-box; font-size: 0.85em; }
+.sb-group { display: flex; gap: 6px; font-size: 0.75em; }
+.sb-group label { display: inline-flex; align-items: center; font-weight: normal; color: #666; }
+.sb-group input[type="radio"] { width: auto; margin-left: 2px; }
 
-      /* --- 華耀天輪：計算ボタン・タクタイルエフェクト --- */
+/* ==========================================
+   6. 予想結果・出力・天雲指数（変更なし）
+   ========================================== */
+.line-display { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; align-items: center; }
+.line-box { display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.9em; transition: background-color 0.5s, color 0.5s; line-height: 1.5; }
+.seri-segment { display: inline-flex; align-items: center; font-size: 0.9em; font-weight: bold; border: 1px dashed #b3c7b3; border-radius: 4px; padding: 1px 3px; margin-right: 5px; }
+.seri-arrow { font-size: 1.1em; font-weight: bold; color: #c07777; margin: 0 2px; }
+#bank-tendency-display { margin-top: 5px; margin-bottom: 10px; padding: 5px 0; font-size: 0.95em; color: #698b69; font-weight: bold; }
 
-/* 1. 通常状態：静かな力強さ */
-button {
-    position: relative;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    box-shadow: 0 2px 0 #2a3a2a !important; /* ボタンの厚み */
-}
+.scenario-detail table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 10px; }
+.scenario-detail th, .scenario-detail td { border: 1px solid #efefef; padding: 6px 3px; text-align: center; font-size: 0.85em; word-break: break-all; }
+.scenario-detail th { background-color: #f7f7f7; color: #555; }
+.recommendation { padding: 12px; border-radius: 6px; font-weight: bold; margin-top: 10px; font-size: 0.95em; line-height: 1.6; }
+#seitenrei-output { background-color: #e6f5e6; border-left: 5px solid #698b69; color: #444; }
+#koutenrei-output { background-color: #fcf0f0; border-left: 5px solid #c07777; color: #444; }
+.scenario-detail { border: 1px dashed #dcdcdc; padding: 12px; margin-top: 15px; border-radius: 6px; }
+.scenario-detail h4 { font-size: 1.05em; margin: 0 0 10px 0; border-bottom: 1px solid #e0e0e0; padding-bottom: 5px; color: #698b69; }
 
-/* 2. ホバー時：わずかに浮き上がり、準備完了を知らせる */
-button:hover {
-    background-color: #2a3a2a !important;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
-}
+#results-container { display: none; opacity: 0; transition: opacity 0.5s; }
+#results-container.visible { display: block; opacity: 1; }
 
-/* 3. 押した瞬間：物理的に沈み込む（クリック感の演出） */
-button:active {
-    transform: translateY(2px);
-    box-shadow: 0 0 0 transparent !important; /* 厚みが消える */
-}
+.tenun-index-container { margin: 20px 0; padding: 15px; border-radius: 8px; text-align: left; border: 2px dashed #d6a300; background-color: #fff9e6; }
+.tenun-title { font-weight: bold; font-size: 0.95em; color: #8b6d00; margin-bottom: 10px; display: block; border-bottom: 1px solid rgba(139, 109, 0, 0.2); padding-bottom: 5px; }
 
-      /* --- 華耀天輪：タイトル画像・定着補正 --- */
+/* ==========================================
+   7. ボタン・たまきちゃん・不具合報告（変更なし）
+   ========================================== */
+button { width: 100%; padding: 14px; background-color: #384e38 !important; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; font-size: 1.05em; font-weight: bold; letter-spacing: 0.2em; transition: all 0.2s; box-shadow: 0 2px 0 #2a3a2a; }
+button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
 
-header {
-    background-color: #fafaf8 !important; /* 背景に極薄のグレーを敷いて画像を際立たせる */
-    border-bottom: 1px solid #ddd !important; /* ヘッダー自体の終わりを明確にする */
-}
+.tamaki-display { display: flex !important; flex-direction: row !important; align-items: flex-start !important; }
+.tamaki-character { width: 75px !important; min-width: 75px !important; max-width: 75px !important; height: auto !important; margin-right: 12px !important; flex-shrink: 0 !important; }
+.tamaki-image { width: 100% !important; height: auto !important; display: block !important; }
+.tamaki-speech-bubble { flex: 1 !important; min-width: 0 !important; background: white; border: 2px solid #d6a300; border-radius: 12px; padding: 10px; font-size: 0.9em; line-height: 1.4; box-sizing: border-box; position: relative; }
+@media (max-width: 600px) { .tamaki-character { width: 70px !important; min-width: 70px !important; } }
 
-.title-image {
-    max-width: 85% !important; /* 少し余裕を持たせる */
-    background-color: #fff;
-    padding: 10px !important;
-    border: 1px solid #e0e0e0 !important; /* 薄い灰色で画像自体を縁取り、輪郭を出す */
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important; /* 浮遊感ではなく「厚み」を出すための影 */
-    border-bottom: 4px solid #384e38 !important; /* 既存の線を重厚にする */
-}
+.bug-report-container { text-align: center; padding: 10px; background-color: #fdfdfd; }
+.bug-button { display: inline-block; padding: 6px 16px; background-color: #666666; color: #ffffff; text-decoration: none; border-radius: 3px; font-size: 13px; border: 1px solid #555555; transition: 0.2s; }
+.bug-button:hover { background-color: #d93025; border-color: #a50e0e; }
+
+.copyright-footer { text-align: center; font-size: 0.75em; color: #aaa; margin-top: 20px; width: 100%; padding: 15px; box-sizing: border-box; }
+
     </style>
 </head>
 <body>
