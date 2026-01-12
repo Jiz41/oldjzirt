@@ -307,6 +307,36 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
     }
 }
+          /* --- 入力欄：夜間でも目が疲れないマットな質感 --- */
+    input, select, textarea {
+        background-color: #2a2a2a !important; /* コンテナより一段明るいグレー */
+        color: #e0e0e0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important; /* 繊細な光の枠線 */
+        border-radius: 8px !important;
+    }
+
+    /* プレースホルダー（入力ヒント）も暗く */
+    input::placeholder, textarea::placeholder {
+        color: #777777 !important;
+    }
+
+    /* --- ボタン：夜間に映える松葉色 --- */
+    button, .btn {
+        background-color: #3d5c3d !important; /* 少し深みのある緑 */
+        color: #ffffff !important;
+        border: none !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    button:hover, .btn:hover {
+        background-color: #4a6e4a !important;
+        filter: brightness(1.1);
+    }
+
+    /* --- ラベルやテキスト --- */
+    label {
+        color: #b0c4b0 !important; /* 柔らかい緑がかったグレー */
+    }
 
     </style>
 </head>
