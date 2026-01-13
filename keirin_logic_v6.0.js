@@ -34,13 +34,17 @@ const SERI_WIN_BONUS = 0.05;           // 競り勝ち選手への微増補正
 let BANK_DATA = {}; 
 
 //Kukuru
-function getKururuAdjustment(playerId, bankData, lineInput) {
-    const vElem = document.getElementById('wind-speed');
-    const dElem = document.getElementById('wind-direction');
-    if (!vElem || !dElem || !bankData) return 1.0;
+function getKururuAdjustment(p, direction, speed, isGirls, lineInput) {
+    const playerId = p.id;
 
-    const v = parseFloat(vElem.value) || 0;
-    const selectedDir = dElem.value; // "南西" などが正しく入る
+    // 1. 基本チェック（無風や屋内、引数不足なら補正なし）
+    if (!direction || speed === undefined || speed <= 1.0 || direction === 'none') {
+        return 1.0;
+    }
+
+    // 2. 変数名をロジックに合わせる
+    const v = speed;           // 風速 8m など
+    const selectedDir = direction; // "北" など
     
     if (v <= 1.0 || selectedDir === 'none' || bankData.indoor) {
         return 1.0;
