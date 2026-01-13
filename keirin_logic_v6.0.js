@@ -855,28 +855,18 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, ap
 
     basePlayers.forEach(p => integratedScores[p.id] = 0); // basePlayersは欠場選手を含まない
 
-    scenarios.forEach(scenario => { 
-        const cDCoeffs = getScenarioCoeffs(scenario); 
-        let scenarioPlayers = JSON.parse(JSON.stringify(basePlayers)); 
-        const logPrefix = applyKoutenrei ? '[KOUTEN-SCN]' : '[SEITEN-SCN]';
-
-        logMessage(`${logPrefix} シナリオ: ${scenario} の計算を開始。`); 
-
-        // 1. 基礎係数の適用（C_L, C_W, C_R, C_S1, C_B1, C_Eなど）
         scenarioPlayers.forEach(p => { 
             // 1. 基礎能力の計算
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e; 
             
-                       // --- ここから差し替え ---
             // 風情報の定義（bankDataから取得）
             const direction = bankData ? bankData.direction : '無風';
             const speed = bankData ? bankData.speed : 0;
             const isGirls = settings ? settings.IS_GIRLS : false;
 
-            // 重要：lineInput を第5引数に渡すことで「単騎」を脱却
+            // 重要：lineInput を第5引数に渡し、p.id ではなく p (オブジェクト) を渡す
             const kururuAdj = getKururuAdjustment(p, direction, speed, isGirls, lineInput);
             p.final_score *= kururuAdj;
-            // --- ここまで ---
 
             // 3. ログ出力（補正後の値を表示）
             logMessage(`${logPrefix} 選手ID ${p.id}: 基礎＋風遮蔽(kururu:${kururuAdj.toFixed(3)})適用後のスコアは ${p.final_score.toFixed(3)}`);
