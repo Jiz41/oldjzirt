@@ -1075,21 +1075,21 @@ async function calculatePrediction() {
         p.c_e = keirinBias; 
       });
     // --- III. シミュレーション実行 & IV. 最終結果の統合と表示 --- 
-    try {
+try {
         // 1. 最新のライン入力を取得
         const currentLineInputForCalc = document.getElementById('line-input').value; 
         logMessage(`[DEBUG] シミュレーション開始: ラインデータ "${currentLineInputForCalc}"`);
 
-        // 1.5 UIから風速と風向きを取得（追加）
+        // ✅ 追加：UIから現在の風速・風向きを取得
         const windSpeed = parseFloat(document.getElementById('wind-speed').value) || 0;
         const windDirection = document.getElementById('wind-direction').value;
 
-        // 2. 実行（末尾に windSpeed と windDirection を追加）
+        // ✅ 修正：第7・第8引数として windSpeed, windDirection を追加
         const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, false, currentLineInputForCalc, windSpeed, windDirection); 
-        logMessage("[CALC] 晴天令 (安定) シミュレーションが完了しました。"); 
+        logMessage(`[CALC] 晴天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`); 
 
         const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, true, currentLineInputForCalc, windSpeed, windDirection); 
-        logMessage("[CALC] 荒天令 (波乱) シミュレーションが完了しました。"); 
+        logMessage(`[CALC] 荒天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`); 
 
         // 3. 統合（ここも try の中に入れる必要があります）
         const detailedScenarioResults = koutenreiModeSelected ? koutenreiResults.allScenarioResults : seitenreiResults.allScenarioResults; 
