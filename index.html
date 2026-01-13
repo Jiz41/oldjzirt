@@ -7,6 +7,34 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  
+  <div id="maintenance-overlay" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 2147483647;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto;
+">
+    <div style="
+        color: #ffffff;
+        font-family: sans-serif;
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        padding: 20px;
+        border: 2px solid #ffffff;
+        background: rgba(0, 0, 0, 0.5);
+    ">
+        只今工事中です👷‍♀
+    </div>
+</div>
+
 <div class="container">
     <header>
         <div class="subtitle">演算制御多重交響体</div>
