@@ -51,24 +51,30 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
     let kp = v <= 4.0 ? (v - 1.0) * 0.025 : Math.min(0.075 + (v - 4.0) * 0.045, 0.28);
     kp *= straightBonus;
 
-    // --- 位置特定 ---
-    let positionShield = 1.0; 
-    let posLabel = "単騎";
-    if (lineInput) {
-        const segments = lineInput.split(/[,、]/);
-        for (let i = 0; i < segments.length; i++) {
-            const playerIds = segments[i].replace(/[\(\)]/g, "").match(/\d+/g);
-            if (playerIds) {
-                const pos = playerIds.indexOf(playerId.toString());
-                if (pos !== -1) {
-                    if (pos === 0) { positionShield = 0.60; posLabel = "先行"; }
-                    else if (pos === 1) { positionShield = 0.50; posLabel = "番手"; }
-                    else { positionShield = 0.40; posLabel = "3番手以降"; }
-                    break;
-                }
+// --- 位置特定 ---
+let positionShield = 1.0; 
+let posLabel = "単騎";
+if (lineInput) {
+    const segments = lineInput.split(/[,、]/);
+    for (let i = 0; i < segments.length; i++) {
+        // matchで抽出したID配列を数値配列に変換しておく
+        const playerIds = segments[i].replace(/[\(\)]/g, "").match(/\d+/g);
+        if (playerIds) {
+            // 文字列・数値どちらでも比較できるように == を使用、または String に統一
+            const pos = playerIds.findIndex(id => String(id) === String(playerId));
+            
+            if (pos !== -1) {
+                if (pos === 0) { positionShield = 0.60; posLabel = "先行"; }
+                else if (pos === 1) { positionShield = 0.50; posLabel = "番手"; }
+                else { positionShield = 0.40; posLabel = "3番手以降"; }
+                break;
             }
         }
     }
+}
+  
+// ログ出力の追加（検証用）
+logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 位置[${posLabel}] -> 風補正実行`);
 
     // --- 【重要】ベクトル演算：jsonの「H向かい風」等の表記に対応 ---
     const map = BANK_DATA .wind_direction_map || {};
