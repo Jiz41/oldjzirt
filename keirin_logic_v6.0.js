@@ -1064,6 +1064,7 @@ async function calculatePrediction() {
         else if (p.style === '追') biasKey = '差し'; 
         const keirinBias = bankData.keirin_bias[biasKey] || 1.0; 
         p.c_e = keirinBias; 
+      });
            // --- III. シミュレーション実行 (晴天令と荒天令の同時実行) --- 
     try {
         // 1. 最新のライン入力を取得
