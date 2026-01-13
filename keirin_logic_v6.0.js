@@ -1066,11 +1066,15 @@ async function calculatePrediction() {
         p.c_e = keirinBias; 
         // 🌪️ 風補正介入
 try {
-    const currentLineInput = document.getElementById('line-input').value;
-    p.c_e *= getKururuAdjustment(p.id, bankData, currentLineInput);
-} catch (e) {
-    console.error("kururu error:", e);
-}
+    // --- 修正：呼び出し直前に再取得とログ確認を行う ---
+    const currentLineInput = document.getElementById('line-input').value; 
+    console.log("DEBUG: passing lineInput to simulation:", currentLineInput);
+    logMessage(`[DEBUG] シミュレーションに渡すラインデータ: ${currentLineInput}`);
+
+    const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, false, currentLineInput);
+    const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, true, currentLineInput);
+    // ----------------------------------------------
+
 
         logMessage(`[C_BASIC] 選手ID ${p.id}: 基礎係数 ($C_{W}, C_{R}, C_{S1}, C_{B1}, C_{E}$) の算出が完了しました。`);
     }); 
