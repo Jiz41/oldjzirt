@@ -1042,9 +1042,41 @@ async function calculatePrediction() {
         p.c_e = keirinBias; 
         // 🌪️ ここで風補正
         // 変数 lineInput が無い場合でも動くように、直接取得を組み込みました
-const currentLineInput = document.getElementById('line-input').value;
-p.c_e *= getKururuAdjustment(p.id, bankData, currentLineInput);
+        function getKururuAdjustment(playerId, bankData, lineInput) {
+    const vInput = document.getElementById('wind-speed');
+    const dInput = document.getElementById('wind-direction');
+    if (!vInput || !dInput || !bankData) return 1.0;
 
+    const v = parseFloat(vInput.value) || 0;
+    const selectedDir = dInput.value;
+    if (v <= 1.0 || selectedDir === 'none' || bankData.indoor) return 1.0;
+
+    const straightBonus = (bankData.straight || 50) / 50; 
+    let kp = v <= 4.0 ? (v - 1.0) * 0.025 : Math.min(0.075 + (v - 4.0) * 0.045, 0.28);
+    kp *= straightBonus;
+
+    let positionShield = 1.0; 
+    if (lineInput) {
+        const segments = lineInput.split(/[,、]/).map(l => l.trim());
+        for (const seg of segments) {
+            // カッコ内の数字も外の数字もすべて抽出し、playerIdの並び順を確認する
+            const playerIds = seg.replace(/[\(\)]/g, "").match(/\d+/g);
+            if (playerIds) {
+                const pos = playerIds.indexOf(playerId.toString());
+                if (pos !== -1) {
+                    // 6・5・4・4 のダメージ軽減率を適用
+                    positionShield = (pos === 0) ? 0.60 : (pos === 1) ? 0.50 : 0.40;
+                    break;
+                }
+            }
+        }
+    }
+    const map = bankData.wind_direction_map || {};
+    const dirType = map[selectedDir] || "";
+    let vector = (dirType.includes("追い")) ? 1.0 : (dirType.includes("向かい") ? -1.0 : -0.2);
+
+    return 1.0 + (vector * kp * (bankData.alpha || 1.0) * positionShield);
+}
 
         logMessage(`[C_BASIC] 選手ID ${p.id}: 基礎係数 ($C_{W}, C_{R}, C_{S1}, C_{B1}, C_{E}$) の算出が完了しました。`);
     }); 
