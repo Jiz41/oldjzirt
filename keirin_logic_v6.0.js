@@ -34,14 +34,13 @@ const SERI_WIN_BONUS = 0.05;           // 競り勝ち選手への微増補正
 let BANK_DATA = {}; 
 
 // Kukuru
-function getKururuAdjustment(playerId, bankData, lineupText) {
+function getKururuAdjustment(playerId, bankData, lineInput) {
     const vInput = document.getElementById('wind-speed');
     const dInput = document.getElementById('wind-direction');
     if (!vInput || !dInput || !bankData) return 1.0;
 
     const v = parseFloat(vInput.value) || 0;
     const selectedDir = dInput.value;
-
     if (v <= 1.0 || selectedDir === 'none' || bankData.indoor) return 1.0;
 
     const straightBonus = (bankData.straight || 50) / 50; 
@@ -49,11 +48,10 @@ function getKururuAdjustment(playerId, bankData, lineupText) {
     kp *= straightBonus;
 
     let positionShield = 1.0; 
-    if (lineupText) {
-        // カッコの除去処理をより安全な記述に修正
-        const lines = lineupText.split(/[,、]/).map(l => l.trim());
+    if (lineInput) {
+        const lines = lineInput.split(/[,、]/).map(l => l.trim());
         for (const line of lines) {
-            const playerIds = line.replace(/[\(\)]/g, "").match(/\d+/g); // ここを修正
+            const playerIds = line.replace(/[\(\)]/g, "").match(/\d+/g);
             if (playerIds) {
                 const pos = playerIds.indexOf(playerId.toString());
                 if (pos !== -1) {
@@ -63,6 +61,12 @@ function getKururuAdjustment(playerId, bankData, lineupText) {
             }
         }
     }
+    const map = bankData.wind_direction_map || {};
+    const dirType = map[selectedDir] || "";
+    let vector = dirType.includes("追い") ? 1.0 : dirType.includes("向かい") ? -1.0 : -0.2;
+
+    return 1.0 + (vector * kp * (bankData.alpha || 1.0) * positionShield);
+}
 
     const map = bankData.wind_direction_map || {};
     const dirType = map[selectedDir] || "";
@@ -1037,7 +1041,10 @@ async function calculatePrediction() {
         const keirinBias = bankData.keirin_bias[biasKey] || 1.0; 
         p.c_e = keirinBias; 
         // 🌪️ ここで風補正
-        p.c_e *= getKururuAdjustment(p.id, bankData, lineupText);
+        // 変数 lineInput が無い場合でも動くように、直接取得を組み込みました
+const currentLineInput = document.getElementById('line-input').value;
+p.c_e *= getKururuAdjustment(p.id, bankData, currentLineInput);
+
 
         logMessage(`[C_BASIC] 選手ID ${p.id}: 基礎係数 ($C_{W}, C_{R}, C_{S1}, C_{B1}, C_{E}$) の算出が完了しました。`);
     }); 
