@@ -33,46 +33,54 @@ const SERI_WIN_BONUS = 0.05;           // 競り勝ち選手への微増補正
 // バンクデータを格納するグローバル変数
 let BANK_DATA = {}; 
 
-// Kukuru
+//Kukuru
 function getKururuAdjustment(playerId, bankData, lineInput) {
-    const vInput = document.getElementById('wind-speed');
-    const dInput = document.getElementById('wind-direction');
-    if (!vInput || !dInput || !bankData) return 1.0;
+    const vElem = document.getElementById('wind-speed');
+    const dElem = document.getElementById('wind-direction');
+    if (!vElem || !dElem || !bankData) return 1.0;
 
-    const v = parseFloat(vInput.value) || 0;
-    const selectedDir = dInput.value;
+    const v = parseFloat(vElem.value) || 0;
+    const selectedDir = dElem.value;
     if (v <= 1.0 || selectedDir === 'none' || bankData.indoor) return 1.0;
 
+    // 1. 強度勾配
     const straightBonus = (bankData.straight || 50) / 50; 
-    let kp = v <= 4.0 ? (v - 1.0) * 0.025 : Math.min(0.075 + (v - 4.0) * 0.045, 0.28);
+    let kp = 0;
+    if (v <= 4.0) {
+        kp = (v - 1.0) * 0.025;
+    } else {
+        kp = Math.min(0.075 + (v - 4.0) * 0.045, 0.28);
+    }
     kp *= straightBonus;
 
+    // 2. 6・5・4・4 シールド
     let positionShield = 1.0; 
     if (lineInput) {
-        const lines = lineInput.split(/[,、]/).map(l => l.trim());
-        for (const line of lines) {
-            const playerIds = line.replace(/[\(\)]/g, "").match(/\d+/g);
+        const segments = lineInput.split(/[,、]/);
+        for (let i = 0; i < segments.length; i++) {
+            const seg = segments[i].trim();
+            const playerIds = seg.replace(/[\(\)]/g, "").match(/\d+/g);
             if (playerIds) {
                 const pos = playerIds.indexOf(playerId.toString());
                 if (pos !== -1) {
-                    positionShield = (pos === 0) ? 0.60 : (pos === 1) ? 0.50 : 0.40;
+                    if (pos === 0) positionShield = 0.60;
+                    else if (pos === 1) positionShield = 0.50;
+                    else positionShield = 0.40;
                     break;
                 }
             }
         }
     }
-    const map = bankData.wind_direction_map || {};
-    const dirType = map[selectedDir] || "";
-    let vector = dirType.includes("追い") ? 1.0 : dirType.includes("向かい") ? -1.0 : -0.2;
 
-    return 1.0 + (vector * kp * (bankData.alpha || 1.0) * positionShield);
-}
-
+    // 3. ベクトル演算 (三項演算子を廃止し、安全な if 文へ)
     const map = bankData.wind_direction_map || {};
     const dirType = map[selectedDir] || "";
     let vector = -0.2; 
-    if (dirType.includes("追い")) vector = 1.0;
-    else if (dirType.includes("向かい")) vector = -1.0;
+    if (dirType.indexOf("追い") !== -1) {
+        vector = 1.0;
+    } else if (dirType.indexOf("向かい") !== -1) {
+        vector = -1.0;
+    }
 
     return 1.0 + (vector * kp * (bankData.alpha || 1.0) * positionShield);
 }
@@ -1040,42 +1048,12 @@ async function calculatePrediction() {
         else if (p.style === '追') biasKey = '差し'; 
         const keirinBias = bankData.keirin_bias[biasKey] || 1.0; 
         p.c_e = keirinBias; 
-        // 🌪️ ここで風補正
-        // 変数 lineInput が無い場合でも動くように、直接取得を組み込みました
-        function getKururuAdjustment(playerId, bankData, lineInput) {
-    const vInput = document.getElementById('wind-speed');
-    const dInput = document.getElementById('wind-direction');
-    if (!vInput || !dInput || !bankData) return 1.0;
-
-    const v = parseFloat(vInput.value) || 0;
-    const selectedDir = dInput.value;
-    if (v <= 1.0 || selectedDir === 'none' || bankData.indoor) return 1.0;
-
-    const straightBonus = (bankData.straight || 50) / 50; 
-    let kp = v <= 4.0 ? (v - 1.0) * 0.025 : Math.min(0.075 + (v - 4.0) * 0.045, 0.28);
-    kp *= straightBonus;
-
-    let positionShield = 1.0; 
-    if (lineInput) {
-        const segments = lineInput.split(/[,、]/).map(l => l.trim());
-        for (const seg of segments) {
-            // カッコ内の数字も外の数字もすべて抽出し、playerIdの並び順を確認する
-            const playerIds = seg.replace(/[\(\)]/g, "").match(/\d+/g);
-            if (playerIds) {
-                const pos = playerIds.indexOf(playerId.toString());
-                if (pos !== -1) {
-                    // 6・5・4・4 のダメージ軽減率を適用
-                    positionShield = (pos === 0) ? 0.60 : (pos === 1) ? 0.50 : 0.40;
-                    break;
-                }
-            }
-        }
-    }
-    const map = bankData.wind_direction_map || {};
-    const dirType = map[selectedDir] || "";
-    let vector = (dirType.includes("追い")) ? 1.0 : (dirType.includes("向かい") ? -1.0 : -0.2);
-
-    return 1.0 + (vector * kp * (bankData.alpha || 1.0) * positionShield);
+        // 🌪️ 風補正介入
+try {
+    const currentLineInput = document.getElementById('line-input').value;
+    p.c_e *= getKururuAdjustment(p.id, bankData, currentLineInput);
+} catch (e) {
+    console.error("kururu error:", e);
 }
 
         logMessage(`[C_BASIC] 選手ID ${p.id}: 基礎係数 ($C_{W}, C_{R}, C_{S1}, C_{B1}, C_{E}$) の算出が完了しました。`);
