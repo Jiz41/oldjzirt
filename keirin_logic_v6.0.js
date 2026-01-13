@@ -761,7 +761,12 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     logMessage("[C_suicide] V7.1 自滅消耗ペナルティの計算を開始...");
     // ... ライン評価ロジックは変更なし ...
         // 階級別の設定値を参照するように変更
-    const SUICIDE_PENALTY = COEFFICIENT_SETTINGS.SUICIDE_LIMIT; 
+    // ✅ 修正点: 設定値が取れない場合の安全装置を追加
+    let SUICIDE_PENALTY = 0.90; // デフォルトで10%減点
+    if (typeof COEFFICIENT_SETTINGS !== 'undefined' && COEFFICIENT_SETTINGS.SUICIDE_LIMIT) {
+        SUICIDE_PENALTY = COEFFICIENT_SETTINGS.SUICIDE_LIMIT;
+    }
+    
     const BOOTY_BONUS = 1.05;      
     let isSuicideRiskDetected = false;
     let suicideRiskLineMembers = new Set();
@@ -817,10 +822,11 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
     if (isSuicideRiskDetected) {
         tempPlayers.forEach(p => { 
             if (suicideRiskLineMembers.has(p.id)) {
-                // p.final_score *= SUICIDE_PENALTY; // 係数値は非公開
-                p.final_score *= SUICIDE_PENALTY; // スコアに適用
-                logMessage(`[C_suicide] 選手ID ${p.id} に消耗ペナルティを適用。`);
-            } else {
+        // ここで SUICIDE_PENALTY が数値であることを保証する
+        p.score *= SUICIDE_PENALTY; 
+        logMessage(`[C_suicide] 選手ID ${p.id} に消耗ペナルティ(${SUICIDE_PENALTY})を適用。`);
+    } 
+            else {
                 const lineIndex = playerIdToLineIndex[p.id];
                 if (lineIndex !== undefined && lineEvaluations[lineIndex].lineLength >= 2) {
                      // p.final_score *= BOOTY_BONUS; // 係数値は非公開
