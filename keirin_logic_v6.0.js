@@ -54,14 +54,17 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
 // --- 位置特定 ---
 let positionShield = 1.0; 
 let posLabel = "単騎";
+
 if (lineInput) {
     const segments = lineInput.split(/[,、]/);
     for (let i = 0; i < segments.length; i++) {
-        // matchで抽出したID配列を数値配列に変換しておく
-        const playerIds = segments[i].replace(/[\(\)]/g, "").match(/\d+/g);
-        if (playerIds) {
-            // 文字列・数値どちらでも比較できるように == を使用、または String に統一
-            const pos = playerIds.findIndex(id => String(id) === String(playerId));
+        // カンマ区切りの各塊（例: "123"）を1文字ずつの数値配列に変換
+        // 例: "123" -> [1, 2, 3]
+        const cleanSegment = segments[i].replace(/[^\d]/g, ""); // 数字以外を排除
+        const playerIds = cleanSegment.split("").map(Number); 
+
+        if (playerIds.length > 0) {
+            const pos = playerIds.indexOf(Number(playerId)); // 数値同士で比較
             
             if (pos !== -1) {
                 if (pos === 0) { positionShield = 0.60; posLabel = "先行"; }
