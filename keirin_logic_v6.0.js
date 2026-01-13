@@ -842,7 +842,7 @@ function calculate_koutenrei_bias(players, scenario, bankData) {
 } 
 
 // runScenarioSimulation 関数 (シナリオ別シミュレーションの実行)
-function runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, applyKoutenrei) { 
+function runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, applyKoutenrei, lineInput) { 
     const scenarios = ['先行有利', '捲り有利', '差し有利']; 
     const allScenarioResults = []; 
     const integratedScores = {}; 
@@ -858,8 +858,15 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, ap
 
         // 1. 基礎係数の適用（C_L, C_W, C_R, C_S1, C_B1, C_Eなど）
         scenarioPlayers.forEach(p => { 
+            // 1. 基礎能力の計算
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e; 
-            logMessage(`${logPrefix} 選手ID ${p.id}: 基礎係数適用後のスコアは ${p.final_score.toFixed(3)}`);
+            
+            // 2. 【追加】Kururu 風遮蔽補正を適用
+            const kururuAdj = getKururuAdjustment(p.id, bankData, lineInput);
+            p.final_score *= kururuAdj;
+
+            // 3. ログ出力（補正後の値を表示）
+            logMessage(`${logPrefix} 選手ID ${p.id}: 基礎＋風遮蔽(kururu:${kururuAdj.toFixed(3)})適用後のスコアは ${p.final_score.toFixed(3)}`);
         }); 
 
         // 2. 競り補正の適用
@@ -1070,10 +1077,10 @@ try {
 
     // --- III. シミュレーション実行 (晴天令と荒天令の同時実行) --- 
     // 💡 修正: allSeriInfos を渡す
-    const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, false); 
+    const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, false, lineInput); 
     logMessage("[CALC] 晴天令 (安定) シミュレーションが完了しました。"); 
     // 💡 修正: allSeriInfos を渡す
-    const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, true); 
+    const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, true, lineInput); 
     logMessage("[CALC] 荒天令 (波乱) シミュレーションが完了しました。"); 
 
     // --- IV. 最終結果の統合と表示 --- 
