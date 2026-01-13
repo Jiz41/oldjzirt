@@ -893,9 +893,9 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, ap
         assignFinalGrades(scenarioPlayers); 
         allScenarioResults.push({ scenario, results: scenarioPlayers }); 
     }); 
+    });
 
     return { allScenarioResults, integratedScores };
-} 
 
 // calculateTenunIndex 関数 (天雲指数の算出)
 function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResults, participatingPlayers) { 
