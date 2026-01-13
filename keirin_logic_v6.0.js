@@ -848,7 +848,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA) {
 } 
 
 // runScenarioSimulation 関数 (シナリオ別シミュレーションの実行)
-function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, applyKoutenrei, lineInput) { 
+function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, applyKoutenrei, lineInput,  windSpeed, windDirection) { 
     const scenarios = ['先行有利', '捲り有利', '差し有利']; 
     const allScenarioResults = []; 
     const integratedScores = {}; 
@@ -865,9 +865,9 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
             // 1. 基礎能力の計算
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e; 
 
-            // 風情報の定義（BANK_DATAから取得）
-            const direction = BANK_DATA ? BANK_DATA.direction : '無風';
-            const speed = BANK_DATA ? BANK_DATA.speed : 0;
+            // 2. 風情報の定義
+            const direction = windDirection || (BANK_DATA ? BANK_DATA.direction : '無風');
+            const speed = (windSpeed !== undefined) ? windSpeed : (BANK_DATA ? BANK_DATA.speed : 0);
             const isGirls = settings ? settings.IS_GIRLS : false;
 
             // 全て小文字の BANK_DATA を渡す
