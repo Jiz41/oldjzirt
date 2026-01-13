@@ -218,22 +218,22 @@
                 <select id="bank-name" onchange="displayBankTendency()"></select>
             </div>
 
-          <div id="kururu-ui" style="border-left: 4px solid #d4af37; padding: 10px; margin: 15px 0; background: rgba(212, 175, 55, 0.03); border-radius: 0 5px 5px 0;">
-    <label style="font-weight: bold; color: #a37200; display: block; margin-bottom: 5px;">🌪️ kururu（動的環境演算）</label>
-    <div style="display: flex; gap: 8px;">
+         <div class="input-item" id="kururu-ui-container" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 15px;">
+    <label style="font-weight: bold; display: block; margin-bottom: 5px;">風向き・風速</label>
+    <div style="display: flex; gap: 10px;">
         <div style="flex: 1;">
-            <span style="font-size: 0.75em; color: #666;">風速(m)</span>
-            <input type="number" id="wind-speed" value="0" min="0" max="15" step="0.5" style="width: 100%; box-sizing: border-box; padding: 4px;">
-        </div>
-        <div style="flex: 2;">
-            <span style="font-size: 0.75em; color: #666;">風向</span>
-            <select id="wind-direction" style="width: 100%; box-sizing: border-box; padding: 4px;">
+            <label for="wind-direction" style="font-size: 0.8em; color: #555;">風向</label>
+            <select id="wind-direction" style="width: 100%; padding: 5px;">
                 <option value="none">🍃 無風/屋内</option>
                 <option value="北">北</option><option value="北東">北東</option>
                 <option value="東">東</option><option value="南東">南東</option>
                 <option value="南">南</option><option value="南西">南西</option>
                 <option value="西">西</option><option value="北西">北西</option>
             </select>
+        </div>
+        <div style="flex: 1;">
+            <label for="wind-speed" style="font-size: 0.8em; color: #555;">風速(m)</label>
+            <input type="number" id="wind-speed" value="0" min="0" max="15" step="0.5" style="width: 100%; padding: 5px; box-sizing: border-box;">
         </div>
     </div>
 </div>
