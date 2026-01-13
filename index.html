@@ -6,56 +6,8 @@
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
-<div id="hf-maintenance-shield" style="display: none;">
-    <div style="
-        position: fixed !important;
-        inset: 0 !important;
-        width: 100vw !important;
-        height: 100dvh !important;
-        background-color: rgba(0, 0, 0, 0.85) !important;
-        z-index: 2147483647 !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        pointer-events: auto !important;
-    ">
-        <div style="
-            color: white !important;
-            font-size: 28px !important;
-            font-weight: bold !important;
-            padding: 40px !important;
-            border: 4px solid white !important;
-            background: black !important;
-            border-radius: 15px !important;
-        ">
-            只今工事中です 👷‍♀️
-        </div>
-    </div>
-</div>
-
-<script>
-    (function() {
-        // URLの末尾が「?edit=true」なら何もしない
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('oudon') === 'tabetai') {
-            console.log("確認用：ロックを解除しました。");
-            return; 
-        }
-
-        // それ以外（通常アクセス）はロック発動
-        const shield = document.getElementById('hf-maintenance-shield');
-        shield.style.display = 'block';
-        document.body.classList.add('locked-body');
-        document.body.appendChild(shield);
-        
-        window.onscroll = function() { window.scrollTo(0, 0); };
-    })();
-</script>
-
 <body>
   
-
 <div class="container">
     <header>
         <div class="subtitle">演算制御多重交響体</div>
@@ -68,12 +20,11 @@
         <div class="manual-header" onclick="toggleManual()">
             <span id="manual-toggle-icon">▶</span> 📖 操作説明書・マニュアル
         </div>
-        <div class="manual-content" id="manual-content">
+<div class="manual-content" id="manual-content">
     <h2>⚙️ ツールの全体構成と基本操作</h2>
-    <p>このツールは、入力されたレース情報と選手データに基づき、複数の展開パターンをシミュレーションし、独自ロジックで評価した予想結果を提供するモバイル向け競輪予想支援ツールです。以下の手順に従って入力を行ってください。</p>
+    <p>このツールは、入力されたレース情報と選手データに基づき、複数の展開パターンをシミュレーションし、独自ロジックで評価した予想結果を提供するモバイル向け競輪予想支援ツールです。</p>
 
     <h3>1. レース基本情報の入力（土台を作る）</h3>
-    <p>計算のベースとなる係数と、バンク固有の特性を決定します。</p>
     <table>
         <thead>
             <tr>
@@ -85,19 +36,24 @@
         <tbody>
             <tr>
                 <td><b>級班</b></td>
-                <td>ガールズ / S級 / A級 / A級チャレンジ</td>
-                <td>選択した級班に応じて、計算に使用される<b>計算係数が最適化</b>されます。</td>
+                <td>ガールズ / S級 / A級等</td>
+                <td>級班に応じた計算係数の最適化。</td>
             </tr>
             <tr>
                 <td><b>バンク名</b></td>
-                <td>開催バンク名を選択</td>
-                <td>バンク特有の<b>展開傾向（逃げ・差し有利等）が自動抽出</b>され、結果エリアに反映されます。</td>
+                <td>開催場所を選択</td>
+                <td>バンク固有の展開傾向（逃げ・差し等）を自動抽出。</td>
+            </tr>
+            <tr>
+                <td><b>風向・風速</b></td>
+                <td>8方位 / 0.5m単位</td>
+                <td><b>V8.0 捌風旋炉 枢</b>：風によるライン位置別のスタミナ損耗（kururu係数）を演算。</td>
             </tr>
         </tbody>
     </table>
+    <p style="font-size: 0.85em;">※風情報は <a href="https://tenki.jp/lite/leisure/horse/" target="_blank">tenki.jp</a> や <a href="https://kazekeirin.info/" target="_blank">風競輪.info</a> を参照。無風や屋内時は「無風/屋内」を選択してください。</p>
 
     <h3>2. 選手個別データの入力（精度を高める）</h3>
-    <p>出走7名の詳細ステータスを入力します。各行の項目を左から順に埋めてください。</p>
     <table>
         <thead>
             <tr>
@@ -110,28 +66,27 @@
             <tr>
                 <td><b>地元 / 欠場</b></td>
                 <td>チェックボックス</td>
-                <td><b>地元利の個別補正</b>、または欠場選手の計算除外を処理します。</td>
+                <td>地元利の個別補正、および欠場選手の計算除外。</td>
             </tr>
             <tr>
                 <td><b>脚質 / 得点</b></td>
                 <td>逃先・差マ・捲り / 競走得点</td>
-                <td>選手の基本戦術と機力を評価し、<b>シミュレーションの基礎</b>とします。</td>
+                <td>選手の基本戦術と機力の評価。</td>
             </tr>
             <tr>
                 <td><b>W印 / 3走</b></td>
-                <td>◎〇△✕等 / 直近着順(111)</td>
-                <td>専門紙による客観評価と、<b>近況のリズム（調子）</b>を指数に加味します。</td>
+                <td>◎〇△✕等 / 直近着順</td>
+                <td>専門紙評価と近況のリズムを指数に加味。</td>
             </tr>
             <tr>
                 <td><b>S 1位 / B 1位</b></td>
-                <td>ラジオボタンで1名ずつ指定</td>
-                <td><b>S（スタンディング）</b>とB（バック）の1着候補を特定し、展開の核を決定します。</td>
+                <td>ラジオボタン指定</td>
+                <td>スタンディングとバックの1着候補から展開の核を決定。</td>
             </tr>
         </tbody>
     </table>
 
-    <h3>3. 展開（ライン構成）の入力：記述ルール</h3>
-    <p>「全体並び」エリアに、ライン構成と補正の最終判断を入力します。</p>
+    <h3>3. 展開（ライン構成）の入力</h3>
     <table>
         <thead>
             <tr>
@@ -144,22 +99,22 @@
             <tr>
                 <td><b>基本並び</b></td>
                 <td><code>123,45,67</code></td>
-                <td>ラインをカンマで区切ります。結果エリアに<b>ライン強度がグラデーション</b>で表示されます。</td>
+                <td>ラインをカンマ区切りで入力。強度をグラデーション表示。</td>
             </tr>
             <tr>
                 <td><b>競り発生</b></td>
                 <td><code>1(3)2, 45</code></td>
-                <td><b>カッコ内の選手が競り</b>を挑むと認識。強度の減衰や展開の紛れを反映させます。</td>
+                <td>カッコ内を競り選手と認識。展開の紛れを反映。</td>
             </tr>
             <tr>
                 <td><b>🎌地元スイッチ</b></td>
-                <td>チェックをON</td>
-                <td>地元選手への恩義や番組配慮を加味した<b>地元利補正を全体計算に適用</b>します。</td>
+                <td>チェックON</td>
+                <td>地元勢への恩義や番組構成を加味した全体補正。</td>
             </tr>
         </tbody>
     </table>
 
-    <h3>4. 予想の実行とアウトプット（結果を受け取る）</h3>
+    <h3>4. 予想の実行とアウトプット</h3>
     <table>
         <thead>
             <tr>
@@ -170,28 +125,22 @@
         <tbody>
             <tr>
                 <td><b>☀️ 晴天令</b></td>
-                <td><b>安定推奨</b>：最も安定し、堅い決着が予想される推奨買い目です。</td>
+                <td><b>安定推奨</b>：最も支持率と物理条件が安定した推奨買い目。</td>
             </tr>
             <tr>
                 <td><b>⛈️ 荒天令</b></td>
-                <td><b>高配当狙い</b>：波乱の可能性を重視し、紛れを含んだ推奨買い目です。</td>
+                <td><b>高配当狙い</b>：自滅消耗や風の影響による波乱狙い。</td>
             </tr>
             <tr>
                 <td><b>天雲指数</b></td>
-                <td>独自ロジックによる期待値。全体のパワーバランスを数値化します。</td>
+                <td>独自ロジックによる期待値。全体のパワーバランスを数値化。</td>
             </tr>
             <tr>
                 <td><b>処理ログ</b></td>
-                <td>ツール内部でどのような計算ステップが行われたかを確認できます。</td>
+                <td>物理演算や各選手の補正ステップの確認。</td>
             </tr>
         </tbody>
     </table>
-
-    <h3>5. サポート・規約</h3>
-    <ul>
-        <li><b>不具合報告：</b> 動作に問題がある場合は、ページ下部の報告ボタンよりお知らせください。</li>
-        <li><b>免責事項：</b> 利用の際は必ず<b>ページ最下部</b>にあるリンクより利用規約（note）を確認してください。</li>
-    </ul>
 </div>
 
         <h2>🎛️ レース/選手情報入力</h2>
@@ -233,7 +182,6 @@
         <a href="https://kazekeirin.info/" target="_blank" style="color: #0066cc; text-decoration: none;">風競輪.info</a> で競輪場の風向風速を調べて下さい
     </div>
 </div>
-
 
             <p><strong>選手データ入力 (7名)</strong></p>
             <div class="player-input-list" id="player-data">
