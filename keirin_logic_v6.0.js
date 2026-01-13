@@ -1080,11 +1080,15 @@ async function calculatePrediction() {
         const currentLineInputForCalc = document.getElementById('line-input').value; 
         logMessage(`[DEBUG] シミュレーション開始: ラインデータ "${currentLineInputForCalc}"`);
 
-        // 2. 実行（これらは try の中でしか生きられません）
-        const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, false, currentLineInputForCalc); 
+        // 1.5 UIから風速と風向きを取得（追加）
+        const windSpeed = parseFloat(document.getElementById('wind-speed').value) || 0;
+        const windDirection = document.getElementById('wind-direction').value;
+
+        // 2. 実行（末尾に windSpeed と windDirection を追加）
+        const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, false, currentLineInputForCalc, windSpeed, windDirection); 
         logMessage("[CALC] 晴天令 (安定) シミュレーションが完了しました。"); 
 
-        const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, true, currentLineInputForCalc); 
+        const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, true, currentLineInputForCalc, windSpeed, windDirection); 
         logMessage("[CALC] 荒天令 (波乱) シミュレーションが完了しました。"); 
 
         // 3. 統合（ここも try の中に入れる必要があります）
