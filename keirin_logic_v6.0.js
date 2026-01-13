@@ -33,7 +33,8 @@ const SERI_WIN_BONUS = 0.05;           // 競り勝ち選手への微増補正
 // バンクデータを格納するグローバル変数
 let BANK_DATA = {}; 
 
-function getKururuAdjustment(p, direction, speed, isGirls, lineInput) {
+//kururu
+function getKururuAdjustment(p, direction, speed, isGirls, lineInput, bankdata) {
     const playerId = p.id;
 
     // 1. 引数を直接チェック（無風・引数不足なら補正なし 1.0）
@@ -869,8 +870,8 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, ap
             const speed = bankData ? bankData.speed : 0;
             const isGirls = settings ? settings.IS_GIRLS : false;
 
-            // 重要：lineInput を第5引数に渡し、p.id ではなく p (オブジェクト) を渡す
-            const kururuAdj = getKururuAdjustment(p, direction, speed, isGirls, lineInput);
+            // 全て小文字の bankdata を渡す
+            const kururuAdj = getKururuAdjustment(p, direction, speed, isGirls, lineInput, bankdata);
             p.final_score *= kururuAdj;
 
             // 3. ログ出力（補正後の値を表示）
