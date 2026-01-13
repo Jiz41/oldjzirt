@@ -13,7 +13,6 @@ const COEFFICIENT_SETTINGS = {
     'girls': { R_BIAS: 1.00, RECENT_WEIGHT: 1.10, COOP_WEIGHT: 1.00, IS_GIRLS: true, SUICIDE_LIMIT: 1.00 },  // 減点なし
 };
 
-
 const C_MARK_VALUES = { // ガールズ競輪におけるエースマーク選手（番手）へのライン係数
     HIGH: 1.12, 
     MEDIUM: 1.08, 
@@ -43,25 +42,21 @@ function getKururuAdjustment(playerId, bankData, lineupText) {
     const v = parseFloat(vInput.value) || 0;
     const selectedDir = dInput.value;
 
-    // バンクごとの「風の抜けやすさ(alpha)」と「屋内判定」を反映
     if (v <= 1.0 || selectedDir === 'none' || bankData.indoor) return 1.0;
 
-    // 1. 強度勾配 (bankData.straight を加味)
-    // 直線が長いほど、風の抵抗を受ける時間が長くなるため影響が増大する
     const straightBonus = (bankData.straight || 50) / 50; 
     let kp = v <= 4.0 ? (v - 1.0) * 0.025 : Math.min(0.075 + (v - 4.0) * 0.045, 0.28);
     kp *= straightBonus;
 
-    // 2. 6・5・4・4 位置シールド（ライン解析）
     let positionShield = 1.0; 
     if (lineupText) {
+        // カッコの除去処理をより安全な記述に修正
         const lines = lineupText.split(/[,、]/).map(l => l.trim());
         for (const line of lines) {
-            const cleanLine = line.replace(/\(|\)/g, "").match(/\d/g);
-            if (cleanLine) {
-                const pos = cleanLine.indexOf(playerId.toString());
+            const playerIds = line.replace(/[\(\)]/g, "").match(/\d+/g); // ここを修正
+            if (playerIds) {
+                const pos = playerIds.indexOf(playerId.toString());
                 if (pos !== -1) {
-                    // ここに 6-5-4-4 を適用
                     positionShield = (pos === 0) ? 0.60 : (pos === 1) ? 0.50 : 0.40;
                     break;
                 }
@@ -69,24 +64,14 @@ function getKururuAdjustment(playerId, bankData, lineupText) {
         }
     }
 
-    // 3. bankData.wind_direction_map を元にしたベクトル演算
-    // バンクごとの固有の風向き特性を読み込む
     const map = bankData.wind_direction_map || {};
     const dirType = map[selectedDir] || "";
-    let vector = -0.2; // 基本（横風等）
+    let vector = -0.2; 
+    if (dirType.includes("追い")) vector = 1.0;
+    else if (dirType.includes("向かい")) vector = -1.0;
 
-    if (dirType.includes("追い")) {
-        vector = 1.0; // 追い風はプラスに作用
-    } else if (dirType.includes("向かい")) {
-        vector = -1.0; // 向かい風はマイナスに作用
-    }
-
-    // 最終計算：bankData.alpha(風圧係数) を乗算して完成
-    const finalAdjustment = 1.0 + (vector * kp * (bankData.alpha || 1.0) * positionShield);
-
-    return finalAdjustment;
+    return 1.0 + (vector * kp * (bankData.alpha || 1.0) * positionShield);
 }
-
 
 // ====================================================================================
 // 💥 壱耀晴乾ノ象 (いちようせいかんのしょう) 判定ロジック (事前計算)
