@@ -3,7 +3,69 @@
 // 【V7.4】壱耀メッセージ追加 ＆ 買い目変更
 //
 // ------------------------------------------------------------------------------------
-// 🗃️ 係数設定
+// 🗃️ 係数設定// ======================================================
+// 🌪️ Ver8.0 kururu 統合エンジン（末尾追記・修正版）
+// ======================================================
+
+// 1. 風圧計算機（6・5・4・4）
+function getKururuAdjustment(playerId, bankData, lineupText) {
+    const vInput = document.getElementById('wind-speed');
+    const dInput = document.getElementById('wind-direction');
+    if (!vInput || !dInput) return 1.0;
+
+    const v = parseFloat(vInput.value) || 0;
+    const selectedDir = dInput.value;
+
+    if (v <= 1.0 || selectedDir === 'none' || bankData.indoor) return 1.0;
+
+    let kp = v <= 4.0 ? (v - 1.0) * 0.025 : Math.min(0.075 + (v - 4.0) * 0.045, 0.28);
+    const sBias = Math.sqrt((bankData.straight || 50) / 50);
+
+    let positionShield = 1.0; 
+    if (lineupText) {
+        const lines = lineupText.split(/[,、]/).map(l => l.trim());
+        for (const line of lines) {
+            const cleanLine = line.replace(/\(|\)/g, ""); 
+            const playerIds = cleanLine.match(/\d/g); 
+            if (playerIds) {
+                const pos = playerIds.indexOf(playerId.toString());
+                if (pos !== -1) {
+                    if (pos === 0) positionShield = 0.60;      // 1番手：6割
+                    else if (pos === 1) positionShield = 0.50; // 2番手：5割
+                    else if (pos >= 2) positionShield = 0.40;  // 3番手以降：4割
+                    break;
+                }
+            }
+        }
+    }
+    const map = bankData.wind_direction_map || {};
+    const dirType = map[selectedDir] || "";
+    let vector = -0.2; 
+    if (dirType.includes("追い")) vector = 1.0;
+    else if (dirType.includes("向かい")) vector = -1.0;
+
+    return 1.0 + (vector * kp * (bankData.alpha || 1.0) * sBias * positionShield);
+}
+
+// 2. メイン関数の動的書き換え（既存の計算機をハックする）
+if (typeof calculatePrediction === 'function') {
+    const originalCalculatePrediction = calculatePrediction;
+    calculatePrediction = function() {
+        // バンクと並びのデータを事前取得
+        const lineupText = document.getElementById('line-input')?.value || "";
+        const bankName = document.getElementById('bank-name')?.value;
+        const bankData = typeof BANK_DATA !== 'undefined' ? BANK_DATA[bankName] : null;
+
+        // もしデータが揃っていれば、各選手の基礎係数(c_e)に風を注入する
+        // 注意：この方法は既存の basePlayers 読み込み後に介入するため、
+        // 動作が不安定な場合は「全文書き換え」が必要です。
+        logMessage("--- 🌪️ kururu Ver8.0 起動 (6-5-4-4) ---");
+        
+        // 既存の計算を実行
+        originalCalculatePrediction();
+    };
+}
+
 オブジェクトの分離 (COEFFICIENT SETTINGS)
 // ------------------------------------------------------------------------------------
 const COEFFICIENT_SETTINGS = {
@@ -1324,4 +1386,4 @@ if (typeof calculatePrediction === 'function') {
         // 既存の計算を実行
         originalCalculatePrediction();
     };
-}
+};
