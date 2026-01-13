@@ -34,6 +34,59 @@ const SERI_WIN_BONUS = 0.05;           // 競り勝ち選手への微増補正
 // バンクデータを格納するグローバル変数
 let BANK_DATA = {}; 
 
+// Kukuru
+function getKururuAdjustment(playerId, bankData, lineupText) {
+    const vInput = document.getElementById('wind-speed');
+    const dInput = document.getElementById('wind-direction');
+    if (!vInput || !dInput || !bankData) return 1.0;
+
+    const v = parseFloat(vInput.value) || 0;
+    const selectedDir = dInput.value;
+
+    // バンクごとの「風の抜けやすさ(alpha)」と「屋内判定」を反映
+    if (v <= 1.0 || selectedDir === 'none' || bankData.indoor) return 1.0;
+
+    // 1. 強度勾配 (bankData.straight を加味)
+    // 直線が長いほど、風の抵抗を受ける時間が長くなるため影響が増大する
+    const straightBonus = (bankData.straight || 50) / 50; 
+    let kp = v <= 4.0 ? (v - 1.0) * 0.025 : Math.min(0.075 + (v - 4.0) * 0.045, 0.28);
+    kp *= straightBonus;
+
+    // 2. 6・5・4・4 位置シールド（ライン解析）
+    let positionShield = 1.0; 
+    if (lineupText) {
+        const lines = lineupText.split(/[,、]/).map(l => l.trim());
+        for (const line of lines) {
+            const cleanLine = line.replace(/\(|\)/g, "").match(/\d/g);
+            if (cleanLine) {
+                const pos = cleanLine.indexOf(playerId.toString());
+                if (pos !== -1) {
+                    // ここに 6-5-4-4 を適用
+                    positionShield = (pos === 0) ? 0.60 : (pos === 1) ? 0.50 : 0.40;
+                    break;
+                }
+            }
+        }
+    }
+
+    // 3. bankData.wind_direction_map を元にしたベクトル演算
+    // バンクごとの固有の風向き特性を読み込む
+    const map = bankData.wind_direction_map || {};
+    const dirType = map[selectedDir] || "";
+    let vector = -0.2; // 基本（横風等）
+
+    if (dirType.includes("追い")) {
+        vector = 1.0; // 追い風はプラスに作用
+    } else if (dirType.includes("向かい")) {
+        vector = -1.0; // 向かい風はマイナスに作用
+    }
+
+    // 最終計算：bankData.alpha(風圧係数) を乗算して完成
+    const finalAdjustment = 1.0 + (vector * kp * (bankData.alpha || 1.0) * positionShield);
+
+    return finalAdjustment;
+}
+
 
 // ====================================================================================
 // 💥 壱耀晴乾ノ象 (いちようせいかんのしょう) 判定ロジック (事前計算)
@@ -353,8 +406,6 @@ function parseLineInput(lineInput, allPlayers) {
     return { lines, allSeriInfos, orderedPlayerIds: uniqueOrderedPlayerIds, displayLineSegments };
 }
 // ====================================================================================
-
-
 // ========== ライン強度計算 (calculateLineCoeffs) - C_L (ライン結束力係数)の計算 ==========
 /**
  * ライン強度係数 C_L の計算を行う。同時に、欠場選手の除外とラインの再構築を行う。
@@ -922,6 +973,7 @@ return { tenunIndex, message: finalHtml };
 // メイン計算関数 (calculatePrediction) 
 // ここから下は元のコードのまま
 
+
 // メイン計算関数 (calculatePrediction)
 async function calculatePrediction() { 
     // 【演出追加】計算の前に「異相因果境界収束中」を表示
@@ -999,7 +1051,9 @@ async function calculatePrediction() {
         else if (p.style === '追') biasKey = '差し'; 
         const keirinBias = bankData.keirin_bias[biasKey] || 1.0; 
         p.c_e = keirinBias; 
-        
+        // 🌪️ ここで風補正
+        p.c_e *= getKururuAdjustment(p.id, bankData, lineupText);
+
         logMessage(`[C_BASIC] 選手ID ${p.id}: 基礎係数 ($C_{W}, C_{R}, C_{S1}, C_{B1}, C_{E}$) の算出が完了しました。`);
     }); 
 
