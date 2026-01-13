@@ -867,15 +867,16 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, ap
             // 1. 基礎能力の計算
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e; 
             
-            // 2. 【追加】Kururu 風遮蔽補正を適用
-// p.id ではなく p (オブジェクト) を渡し、bankDataから風情報を展開して渡します
-const direction = bankData ? bankData.direction : '無風';
-const speed = bankData ? bankData.speed : 0;
-const isGirls = settings ? settings.IS_GIRLS : false;
+                       // --- ここから差し替え ---
+            // 風情報の定義（bankDataから取得）
+            const direction = bankData ? bankData.direction : '無風';
+            const speed = bankData ? bankData.speed : 0;
+            const isGirls = settings ? settings.IS_GIRLS : false;
 
-const kururuAdj = getKururuAdjustment(p, direction, speed, isGirls, lineInput);
-p.final_score *= kururuAdj;
-
+            // 重要：lineInput を第5引数に渡すことで「単騎」を脱却
+            const kururuAdj = getKururuAdjustment(p, direction, speed, isGirls, lineInput);
+            p.final_score *= kururuAdj;
+            // --- ここまで ---
 
             // 3. ログ出力（補正後の値を表示）
             logMessage(`${logPrefix} 選手ID ${p.id}: 基礎＋風遮蔽(kururu:${kururuAdj.toFixed(3)})適用後のスコアは ${p.final_score.toFixed(3)}`);
