@@ -1064,34 +1064,20 @@ async function calculatePrediction() {
         else if (p.style === '追') biasKey = '差し'; 
         const keirinBias = bankData.keirin_bias[biasKey] || 1.0; 
         p.c_e = keirinBias; 
-        // 🌪️ 風補正介入
-try {
-    // --- 修正：呼び出し直前に再取得とログ確認を行う ---
-    const currentLineInput = document.getElementById('line-input').value; 
-    console.log("DEBUG: passing lineInput to simulation:", currentLineInput);
-    logMessage(`[DEBUG] シミュレーションに渡すラインデータ: ${currentLineInput}`);
+           // --- III. シミュレーション実行 (晴天令と荒天令の同時実行) --- 
+    try {
+        // 1. 最新のライン入力を取得
+        const currentLineInputForCalc = document.getElementById('line-input').value; 
+        logMessage(`[DEBUG] シミュレーション開始: ラインデータ "${currentLineInputForCalc}" を使用。`);
 
-    const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, false, currentLineInput);
-    const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, true, currentLineInput);
-    // ----------------------------------------------
+        // 2. 晴天令の実行
+        const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, false, currentLineInputForCalc); 
+        logMessage("[CALC] 晴天令 (安定) シミュレーションが完了しました。"); 
 
-
-        logMessage(`[C_BASIC] 選手ID ${p.id}: 基礎係数 ($C_{W}, C_{R}, C_{S1}, C_{B1}, C_{E}$) の算出が完了しました。`);
-    }); 
-
-    // --- III. シミュレーション実行 (晴天令と荒天令の同時実行) --- 
-    // 💡 確実に「現在の」入力値を取得して渡す
-    const currentLineInputForCalc = document.getElementById('line-input').value; 
-    logMessage(`[DEBUG] シミュレーション実行: ラインデータ "${currentLineInputForCalc}" を投入。`);
-
-    // 引数を currentLineInputForCalc に統一
-    const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, false, currentLineInputForCalc); 
-    logMessage("[CALC] 晴天令 (安定) シミュレーションが完了しました。"); 
-
-    const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, true, currentLineInputForCalc); 
-    logMessage("[CALC] 荒天令 (波乱) シミュレーションが完了しました。"); 
-
-
+        // 3. 荒天令の実行
+        const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, true, currentLineInputForCalc); 
+        logMessage("[CALC] 荒天令 (波乱) シミュレーションが完了しました。"); 
+       
     // --- IV. 最終結果の統合と表示 --- 
     const detailedScenarioResults = koutenreiModeSelected ? koutenreiResults.allScenarioResults : seitenreiResults.allScenarioResults; 
 
