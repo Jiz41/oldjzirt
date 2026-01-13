@@ -1080,12 +1080,17 @@ try {
     }); 
 
     // --- III. シミュレーション実行 (晴天令と荒天令の同時実行) --- 
-    // 💡 修正: allSeriInfos を渡す
-    const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, false, lineInput); 
+    // 💡 確実に「現在の」入力値を取得して渡す
+    const currentLineInputForCalc = document.getElementById('line-input').value; 
+    logMessage(`[DEBUG] シミュレーション実行: ラインデータ "${currentLineInputForCalc}" を投入。`);
+
+    // 引数を currentLineInputForCalc に統一
+    const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, false, currentLineInputForCalc); 
     logMessage("[CALC] 晴天令 (安定) シミュレーションが完了しました。"); 
-    // 💡 修正: allSeriInfos を渡す
-    const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, true, lineInput); 
+
+    const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, true, currentLineInputForCalc); 
     logMessage("[CALC] 荒天令 (波乱) シミュレーションが完了しました。"); 
+
 
     // --- IV. 最終結果の統合と表示 --- 
     const detailedScenarioResults = koutenreiModeSelected ? koutenreiResults.allScenarioResults : seitenreiResults.allScenarioResults; 
