@@ -41,20 +41,25 @@ function getKururuAdjustment(playerId, bankData, lineInput) {
 
     const v = parseFloat(vElem.value) || 0;
     const selectedDir = dElem.value;
-    if (v <= 1.0 || selectedDir === 'none' || bankData.indoor) return 1.0;
-
-    // 1. 強度勾配
-    const straightBonus = (bankData.straight || 50) / 50; 
-    let kp = 0;
-    if (v <= 4.0) {
-        kp = (v - 1.0) * 0.025;
-    } else {
-        kp = Math.min(0.075 + (v - 4.0) * 0.045, 0.28);
+    
+    // 無風・屋内判定のログ
+    if (v <= 1.0 || selectedDir === 'none' || bankData.indoor) {
+        if (typeof logMessage === 'function') logMessage(`[kururu] 選手${playerId}: 無風または屋内バンクのため風補正をスキップします。`);
+        return 1.0;
     }
+
+    // 1. 強度勾配とバンク特性の読み込みログ
+    if (typeof logMessage === 'function') {
+        logMessage(`[kururu] 選手${playerId}: bankData（alpha/straight）に基づき風圧ダメージ勾配を算出中...`);
+    }
+
+    const straightBonus = (bankData.straight || 50) / 50; 
+    let kp = v <= 4.0 ? (v - 1.0) * 0.025 : Math.min(0.075 + (v - 4.0) * 0.045, 0.28);
     kp *= straightBonus;
 
-    // 2. 6・5・4・4 シールド
+    // 2. 位置解析ログ
     let positionShield = 1.0; 
+    let posLabel = "単騎または特定不能";
     if (lineInput) {
         const segments = lineInput.split(/[,、]/);
         for (let i = 0; i < segments.length; i++) {
@@ -63,26 +68,38 @@ function getKururuAdjustment(playerId, bankData, lineInput) {
             if (playerIds) {
                 const pos = playerIds.indexOf(playerId.toString());
                 if (pos !== -1) {
-                    if (pos === 0) positionShield = 0.60;
-                    else if (pos === 1) positionShield = 0.50;
-                    else positionShield = 0.40;
+                    if (pos === 0) { positionShield = 0.60; posLabel = "先行位置（6割減衰）"; }
+                    else if (pos === 1) { positionShield = 0.50; posLabel = "番手位置（5割減衰）"; }
+                    else { positionShield = 0.40; posLabel = "3番手以降（4割減衰）"; }
                     break;
                 }
             }
         }
     }
+    if (typeof logMessage === 'function') logMessage(`[kururu] 選手${playerId}: ライン位置「${posLabel}」を特定。風除け効果を適用。`);
 
-    // 3. ベクトル演算 (三項演算子を廃止し、安全な if 文へ)
+    // 3. ベクトル演算ログ
     const map = bankData.wind_direction_map || {};
-    const dirType = map[selectedDir] || "";
+    const dirType = map[selectedDir] || "不明";
     let vector = -0.2; 
     if (dirType.indexOf("追い") !== -1) {
         vector = 1.0;
+        if (typeof logMessage === 'function') logMessage(`[kururu] 選手${playerId}: 風向「${dirType}」により加速バイアスを決定。`);
     } else if (dirType.indexOf("向かい") !== -1) {
         vector = -1.0;
+        if (typeof logMessage === 'function') logMessage(`[kururu] 選手${playerId}: 風向「${dirType}」により減速デバフを決定。`);
+    } else {
+        if (typeof logMessage === 'function') logMessage(`[kururu] 選手${playerId}: 風向「${dirType}」は横風成分として処理。`);
     }
 
-    return 1.0 + (vector * kp * (bankData.alpha || 1.0) * positionShield);
+    const finalAdj = 1.0 + (vector * kp * (bankData.alpha || 1.0) * positionShield);
+
+    // 完了ログ
+    if (typeof logMessage === 'function') {
+        logMessage(`[kururu] 選手${playerId}: 全ての風補正計算を完了し、基礎係数 C_E に統合しました。`);
+    }
+
+    return finalAdj;
 }
 
 // ====================================================================================
