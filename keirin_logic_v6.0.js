@@ -1081,7 +1081,7 @@ async function calculatePrediction() {
        
     // --- IV. 最終結果の統合と表示 --- 
     const detailedScenarioResults = koutenreiModeSelected ? koutenreiResults.allScenarioResults : seitenreiResults.allScenarioResults; 
-
+    }
     // ✅ 1. ここで計算を実行し、変数 finalTenunData に入れる
     const finalTenunData = calculateTenunIndex(
         seitenreiResults.integratedScores, 
