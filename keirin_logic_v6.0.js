@@ -855,10 +855,16 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, ap
 
     basePlayers.forEach(p => integratedScores[p.id] = 0); // basePlayersは欠場選手を含まない
 
-        scenarioPlayers.forEach(p => { 
+        scenarios.forEach(scenario => { 
+        const cDCoeffs = getScenarioCoeffs(scenario); 
+        let scenarioPlayers = JSON.parse(JSON.stringify(basePlayers)); 
+        const logPrefix = applyKoutenrei ? '[KOUTEN-SCN]' : '[SEITEN-SCN]';
+
+          scenarioPlayers.forEach(p => { 
+            
             // 1. 基礎能力の計算
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e; 
-            
+
             // 風情報の定義（bankDataから取得）
             const direction = bankData ? bankData.direction : '無風';
             const speed = bankData ? bankData.speed : 0;
@@ -871,7 +877,7 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, ap
             // 3. ログ出力（補正後の値を表示）
             logMessage(`${logPrefix} 選手ID ${p.id}: 基礎＋風遮蔽(kururu:${kururuAdj.toFixed(3)})適用後のスコアは ${p.final_score.toFixed(3)}`);
         }); 
-
+      
         // 2. 競り補正の適用
         scenarioPlayers = applySeriCorrection(scenarioPlayers, allSeriInfos);
 
@@ -893,9 +899,9 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, ap
         assignFinalGrades(scenarioPlayers); 
         allScenarioResults.push({ scenario, results: scenarioPlayers }); 
     }); 
-    });
 
     return { allScenarioResults, integratedScores };
+  }
 
 // calculateTenunIndex 関数 (天雲指数の算出)
 function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResults, participatingPlayers) { 
