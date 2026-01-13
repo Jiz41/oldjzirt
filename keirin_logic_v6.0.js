@@ -1065,52 +1065,56 @@ async function calculatePrediction() {
         const keirinBias = bankData.keirin_bias[biasKey] || 1.0; 
         p.c_e = keirinBias; 
       });
-           // --- III. シミュレーション実行 (晴天令と荒天令の同時実行) --- 
+    // --- III. シミュレーション実行 & IV. 最終結果の統合と表示 --- 
     try {
         // 1. 最新のライン入力を取得
         const currentLineInputForCalc = document.getElementById('line-input').value; 
-        logMessage(`[DEBUG] シミュレーション開始: ラインデータ "${currentLineInputForCalc}" を使用。`);
+        logMessage(`[DEBUG] シミュレーション開始: ラインデータ "${currentLineInputForCalc}"`);
 
-        // 2. 晴天令の実行
+        // 2. 実行（これらは try の中でしか生きられません）
         const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, false, currentLineInputForCalc); 
         logMessage("[CALC] 晴天令 (安定) シミュレーションが完了しました。"); 
 
-        // 3. 荒天令の実行
         const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, bankData, true, currentLineInputForCalc); 
         logMessage("[CALC] 荒天令 (波乱) シミュレーションが完了しました。"); 
-       
-    // --- IV. 最終結果の統合と表示 --- 
-    const detailedScenarioResults = koutenreiModeSelected ? koutenreiResults.allScenarioResults : seitenreiResults.allScenarioResults; 
-    }
-    // ✅ 1. ここで計算を実行し、変数 finalTenunData に入れる
-    const finalTenunData = calculateTenunIndex(
-        seitenreiResults.integratedScores, 
-        koutenreiResults.integratedScores, 
-        seitenreiResults.allScenarioResults, 
-        participatingPlayers
-    );
 
-    // ✅ 2. displayResults の最後に finalTenunData を追加して渡す
-    displayResults( 
-        detailedScenarioResults, 
-        seitenreiResults.integratedScores, 
-        koutenreiResults.integratedScores, 
-        bankName,
-        allSeriInfos, 
-        finalOrderedPlayerIds, 
-        seitenreiResults.allScenarioResults, 
-        participatingPlayers,
-        displayLineSegments,
-        finalTenunData 
-    ); 
-    
-    const resultsContainer = document.getElementById('results-container'); 
-    if (resultsContainer) { 
-        resultsContainer.classList.add('visible'); 
-    } 
-    
-    logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
-} 
+        // 3. 統合（ここも try の中に入れる必要があります）
+        const detailedScenarioResults = koutenreiModeSelected ? koutenreiResults.allScenarioResults : seitenreiResults.allScenarioResults; 
+
+        const finalTenunData = calculateTenunIndex(
+            seitenreiResults.integratedScores, 
+            koutenreiResults.integratedScores, 
+            seitenreiResults.allScenarioResults, 
+            participatingPlayers
+        );
+
+        // 4. 表示
+        displayResults( 
+            detailedScenarioResults, 
+            seitenreiResults.integratedScores, 
+            koutenreiResults.integratedScores, 
+            bankName,
+            allSeriInfos, 
+            finalOrderedPlayerIds, 
+            seitenreiResults.allScenarioResults, 
+            participatingPlayers,
+            displayLineSegments,
+            finalTenunData 
+        ); 
+        
+        const resultsContainer = document.getElementById('results-container'); 
+        if (resultsContainer) { 
+            resultsContainer.classList.add('visible'); 
+        } 
+        
+        logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
+
+    } catch (error) {
+        // 何かエラーがあったらここに逃がす
+        console.error("計算実行中にエラー:", error);
+        logMessage(`[ERROR] 計算中断: ${error.message}`);
+    }
+} // <--- calculatePrediction 関数の最後
 
 // ========== 表示関数: displayResults (複数競り表示と文章修正) ==========
 // 以下、表示に関する関数は、機能ロジックに影響がないため、元のコードを維持し、ログ出力のみを強化
