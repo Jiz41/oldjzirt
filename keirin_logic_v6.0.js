@@ -33,22 +33,17 @@ const SERI_WIN_BONUS = 0.05;           // 競り勝ち選手への微増補正
 // バンクデータを格納するグローバル変数
 let BANK_DATA = {}; 
 
-//Kukuru
 function getKururuAdjustment(p, direction, speed, isGirls, lineInput) {
     const playerId = p.id;
 
-    // 1. 基本チェック（無風や屋内、引数不足なら補正なし）
-    if (!direction || speed === undefined || speed <= 1.0 || direction === 'none') {
+    // 1. 引数を直接チェック（無風・引数不足なら補正なし 1.0）
+    if (!direction || speed === undefined || speed <= 1.0 || direction === 'none' || direction === '無風') {
         return 1.0;
     }
 
-    // 2. 変数名をロジックに合わせる
-    const v = speed;           // 風速 8m など
-    const selectedDir = direction; // "北" など
-    
-    if (v <= 1.0 || selectedDir === 'none' || bankData.indoor) {
-        return 1.0;
-    }
+    // 2. 変数名を内部ロジックに適合させる
+    const v = speed;           // 北風 8m なら 8 が入る
+    const selectedDir = direction; // "北" が入る
 
     // --- 物理パラメータ算出 ---
     const straightBonus = (bankData.straight || 50) / 50; 
