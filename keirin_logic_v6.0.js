@@ -1019,7 +1019,7 @@ async function calculatePrediction() {
     const raceType = document.getElementById('race-type').value; 
     const settings = COEFFICIENT_SETTINGS[raceType]; 
     const bankName = document.getElementById('bank-name').value; 
-    const BANK_DATA = BANK_DATA[bankName]; 
+    const selectedBank = BANK_DATA[bankName];  
     
     if (!BANK_DATA) { 
         logMessage(`[ERROR] バンク名 "${bankName}" のデータが見つかりません。計算を中止します。`); 
@@ -1071,7 +1071,7 @@ async function calculatePrediction() {
         if (p.style === '自') biasKey = '先行'; 
         else if (p.style === '両') biasKey = '捲り'; 
         else if (p.style === '追') biasKey = '差し'; 
-        const keirinBias = BANK_DATA.keirin_bias[biasKey] || 1.0; 
+        const keirinBias = selectedBank.keirin_bias[biasKey] || 1.0; 
         p.c_e = keirinBias; 
       });
     // --- III. シミュレーション実行 & IV. 最終結果の統合と表示 --- 
@@ -1081,10 +1081,10 @@ async function calculatePrediction() {
         logMessage(`[DEBUG] シミュレーション開始: ラインデータ "${currentLineInputForCalc}"`);
 
         // 2. 実行（これらは try の中でしか生きられません）
-        const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, false, currentLineInputForCalc); 
+        const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, false, currentLineInputForCalc); 
         logMessage("[CALC] 晴天令 (安定) シミュレーションが完了しました。"); 
 
-        const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, true, currentLineInputForCalc); 
+        const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, true, currentLineInputForCalc); 
         logMessage("[CALC] 荒天令 (波乱) シミュレーションが完了しました。"); 
 
         // 3. 統合（ここも try の中に入れる必要があります）
