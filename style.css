@@ -372,36 +372,45 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
     box-sizing: border-box !important;
 }
 
-.share-label-tiny { font-size: 10px; color: #888; font-weight: bold; margin-right: 2px; }
+.share-label-tiny { 
+    font-size: 10px; 
+    color: #888; 
+    font-weight: bold; 
+    margin-right: 2px;
+    /* 文字もアイコンの高さに合わせるため微調整 */
+    transform: translateY(1px); 
+}
 
-/* ボタンの基本設定 */
+/* ボタンの基本設定：位置を下げ、余白を詰める */
 .share-outer-final button {
-    width: 30px !important; height: 30px !important;
-    padding: 0 !important; margin: 0 !important;
-    border: none !important; border-radius: 6px !important;
-    cursor: pointer !important; color: white !important;
-    display: flex !important; align-items: center !important; justify-content: center !important;
+    width: 30px !important; 
+    height: 30px !important;
+    padding: 0 !important; 
+    margin: 0 !important;
+    border: none !important; 
+    border-radius: 6px !important;
+    cursor: pointer !important; 
+    display: flex !important; 
+    align-items: center !important; 
+    justify-content: center !important;
     
     /* 戻る時の動きを滑らかにする */
     transition: transform 0.1s ease !important; 
     box-shadow: none !important;
-}
-
-/* ホバー：色は少し変えるが、動き（浮き）は削除 */
-.share-outer-final button:hover {
-    opacity: 0.85 !important;
-    transform: none !important; /* 浮かせない */
+    
+    /* ボタン自体をさらに下へオフセット */
+    position: relative !important;
+    top: 3px !important; 
 }
 
 /* アクティブ：押した瞬間にポチッと沈む */
 .share-outer-final button:active {
-    transform: translateY(2px) !important; /* 2px下に沈む */
+    transform: translateY(2px) !important; 
     opacity: 1.0 !important;
-    transition: transform 0.05s !important; /* 押す時はより素早く */
+    transition: transform 0.05s !important; 
 }
 
-.btn-x-tiny { background-color: #000 !important; }
-.btn-line-tiny { background-color: #06C755 !important; }
-.btn-copy-tiny { background-color: #777 !important; }
-
- }
+/* 背景を透明にする場合（アイコンに色がついていればこれ） */
+.btn-x-tiny, .btn-line-tiny, .btn-copy-tiny { 
+    background-color: transparent !important; 
+}
