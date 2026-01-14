@@ -375,14 +375,13 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
     position: relative !important; top: 5px !important; transition: transform 0.1s ease !important;
     background-color: #ffffff !important; /* ライトモード背景 */
 }
-.icon-x-fix { fill: #000000 !important; }
-.icon-copy-fix { stroke: #000000 !important; } /* ここを黒に固定 */
-
+/* ダークモード時の色反転設定 */
 @media (prefers-color-scheme: dark) {
-    .btn-final-fixed { background-color: #000000 !important; border-color: #444 !important; }
+    .btn-share-box { 
+        background-color: #000000 !important; 
+        border-color: #444444 !important; 
+    }
     .icon-x-fix { fill: #ffffff !important; }
     .icon-copy-fix { stroke: #ffffff !important; }
 }
-.btn-final-fixed:active { transform: translateY(2px) !important; }
-
 }
