@@ -29,7 +29,7 @@
     "wind_direction_map": null,
     "_archived_legacy_notes": { "ドーム無風": 1.10 }
   },
-  "🐥取手": {
+  "🐓取手": {
     "length": 400, "straight": 54.8, "straight_deviation": 50.9, "canto": 31.5, "width_home": 11.0, "width_back": 10.0, "width_center": 8.0, "alpha": 1.01, "indoor": false,
     "keirin_bias": { "先行": 0.95, "捲り": 1.05, "差し": 1.05 },
     "wind_direction_map": { "南西": "H向かい風", "北東": "H追い風", "北西": "H→B横風", "南東": "B→H横風" },
