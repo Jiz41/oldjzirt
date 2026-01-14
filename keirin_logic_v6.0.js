@@ -49,25 +49,26 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
     const v = speed;           // 北風 8m なら 8 が入る
     const selectedDir = direction; // "北" が入る
 
-    // --- 物理パラメータ算出 (V8.1-Pre: 三相累乗モデル) ---
+       // --- 物理パラメータ算出 (V8.2: 枢・深淵崩壊モデル) ---
     const straightBonus = (BANK_DATA.straight || 50) / 50;
     let kp;
 
     if (v <= 3.0) {
-        // Zone 1: 0〜3m (静穏域 - リニアに地力スコアを削る)
-        kp = v * 0.025; 
-    } else if (v <= 6.0) {
-        // Zone 2: 4〜6m (臨界域 - 1.5乗で加速。番手が千切れ、ラインが崩れ始める)
-        // 3m地点の0.075から滑らかに接続
-        kp = 0.075 + Math.pow((v - 3.0), 1.5) * 0.05;
+        // Zone 1: 3mまでは「地力重視」だが目盛りはタイトに
+        kp = v * 0.05; 
+    } else if (v <= 7.0) {
+        // Zone 2: 4〜7m 臨界域。目盛りを凝縮し、7mで崩壊の入り口(約0.5)へ
+        // (4mで約0.23, 7mで0.51)
+        kp = 0.15 + Math.pow((v - 3.0), 2.0) * 0.0225; 
+        // ※係数は接続調整済み
+        kp = 0.15 + Math.pow((v - 3.0), 1.8) * 0.085;
     } else {
-        // Zone 3: 7m〜 (崩壊域 - 2乗で爆発。リミッター解除。単騎・後方の独壇場)
-        // 6m地点の約0.225からキャップなしで上昇
-        kp = 0.225 + Math.pow((v - 6.0), 2.0) * 0.08;
+        // Zone 3: 7m超 崩壊域。3乗で「深度」が加速。
+        // 7m(約0.5) -> 8m(約0.8) -> 10m(約2.5) 
+        kp = 0.51 + Math.pow((v - 7.0), 3.0) * 0.3;
     }
 
     kp *= straightBonus;
-
 
 // --- 位置特定 ---
 let positionShield = 1.0; 
