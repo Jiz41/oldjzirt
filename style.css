@@ -360,57 +360,53 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
         border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
   
-/* 共有ボタン全体の配置（変更なし） */
-.share-outer-final {
+.share-align-fixed {
     display: flex !important;
-    align-items: center !important;
     justify-content: flex-end !important;
+    align-items: center !important;
     gap: 8px !important;
     max-width: 600px !important;
-    margin: 10px auto 30px auto !important;
-    padding-right: 12px !important;
+    margin: 18px auto 5px auto !important; /* 下余白をさらにタイトに */
+    padding-right: 15px !important;
     box-sizing: border-box !important;
 }
 
 .share-label-tiny { 
-    font-size: 10px; 
-    color: #888; 
-    font-weight: bold; 
-    margin-right: 2px;
-    /* 文字もアイコンの高さに合わせるため微調整 */
-    transform: translateY(1px); 
+    font-size: 10px; color: #888; font-weight: bold;
+    transform: translateY(4px); 
 }
 
-/* ボタンの基本設定：位置を下げ、余白を詰める */
-.share-outer-final button {
-    width: 30px !important; 
-    height: 30px !important;
-    padding: 0 !important; 
-    margin: 0 !important;
-    border: none !important; 
-    border-radius: 6px !important;
-    cursor: pointer !important; 
-    display: flex !important; 
-    align-items: center !important; 
-    justify-content: center !important;
-    
-    /* 戻る時の動きを滑らかにする */
-    transition: transform 0.1s ease !important; 
-    box-shadow: none !important;
-    
-    /* ボタン自体をさらに下へオフセット */
+.btn-custom-border {
+    all: unset !important;
+    cursor: pointer !important;
+    width: 30px !important; height: 30px !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    border-radius: 6px !important; /* 角丸 */
+    border: 1px solid !important; /* 1px線 */
     position: relative !important;
-    top: 3px !important; 
+    top: 5px !important; /* 位置をさらに下げ */
+    transition: transform 0.1s ease, background-color 0.2s !important;
 }
 
-/* アクティブ：押した瞬間にポチッと沈む */
-.share-outer-final button:active {
-    transform: translateY(2px) !important; 
-    opacity: 1.0 !important;
-    transition: transform 0.05s !important; 
+/* ライトモード設定 */
+.btn-custom-border {
+    background-color: #ffffff !important;
+    border-color: #ddd !important;
+}
+.icon-main { fill: #000000 !important; }
+.icon-stroke { stroke: #000000 !important; }
+
+/* ダークモード設定 */
+@media (prefers-color-scheme: dark) {
+    .btn-custom-border {
+        background-color: #000000 !important;
+        border-color: #444 !important; /* 暗闇で目立ちすぎない細線 */
+    }
+    .icon-main { fill: #ffffff !important; }
+    .icon-stroke { stroke: #ffffff !important; }
 }
 
-/* 背景を透明にする場合（アイコンに色がついていればこれ） */
-.btn-x-tiny, .btn-line-tiny, .btn-copy-tiny { 
-    background-color: transparent !important; 
+.btn-custom-border:active {
+    transform: translateY(2px) !important;
+}
 }
