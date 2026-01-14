@@ -49,10 +49,25 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
     const v = speed;           // 北風 8m なら 8 が入る
     const selectedDir = direction; // "北" が入る
 
-    // --- 物理パラメータ算出 ---
-    const straightBonus = (BANK_DATA.straight || 50) / 50; 
-    let kp = v <= 4.0 ? (v - 1.0) * 0.025 : Math.min(0.075 + (v - 4.0) * 0.045, 0.28);
+    // --- 物理パラメータ算出 (V8.1-Pre: 三相累乗モデル) ---
+    const straightBonus = (BANK_DATA.straight || 50) / 50;
+    let kp;
+
+    if (v <= 3.0) {
+        // Zone 1: 0〜3m (静穏域 - リニアに地力スコアを削る)
+        kp = v * 0.025; 
+    } else if (v <= 6.0) {
+        // Zone 2: 4〜6m (臨界域 - 1.5乗で加速。番手が千切れ、ラインが崩れ始める)
+        // 3m地点の0.075から滑らかに接続
+        kp = 0.075 + Math.pow((v - 3.0), 1.5) * 0.05;
+    } else {
+        // Zone 3: 7m〜 (崩壊域 - 2乗で爆発。リミッター解除。単騎・後方の独壇場)
+        // 6m地点の約0.225からキャップなしで上昇
+        kp = 0.225 + Math.pow((v - 6.0), 2.0) * 0.08;
+    }
+
     kp *= straightBonus;
+
 
 // --- 位置特定 ---
 let positionShield = 1.0; 
