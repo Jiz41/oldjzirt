@@ -892,24 +892,29 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
 
     basePlayers.forEach(p => integratedScores[p.id] = 0); // basePlayersは欠場選手を含まない
 
-        scenarios.forEach(scenario => { 
+    scenarios.forEach(scenario => { 
         const cDCoeffs = getScenarioCoeffs(scenario); 
         let scenarioPlayers = JSON.parse(JSON.stringify(basePlayers)); 
         const logPrefix = applyKoutenrei ? '[KOUTEN-SCN]' : '[SEITEN-SCN]';
 
-          scenarioPlayers.forEach(p => { 
-            
+        // --- 追加：speedの定義をここ（ループの外）に移動 ---
+        const direction = windDirection || (BANK_DATA ? BANK_DATA.direction : '無風');
+        const speed = (windSpeed !== undefined) ? windSpeed : (BANK_DATA ? BANK_DATA.speed : 0);
+        const isGirls = settings ? settings.IS_GIRLS : false;
+        // ----------------------------------------------
+
+        scenarioPlayers.forEach(p => { 
             // 1. 基礎能力の計算
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e; 
 
-            // 2. 風情報の定義
-            const direction = windDirection || (BANK_DATA ? BANK_DATA.direction : '無風');
-            const speed = (windSpeed !== undefined) ? windSpeed : (BANK_DATA ? BANK_DATA.speed : 0);
-            const isGirls = settings ? settings.IS_GIRLS : false;
+            // 2. 風情報の定義 (ここは削除するか、上の変数を使用する)
+            // const direction = ... (削除)
+            // const speed = ... (削除)
+            // const isGirls = ... (削除)
 
-            // 全て小文字の BANK_DATA を渡す
+            // 全て大文字の BANK_DATA を渡す
             const kururuAdj = getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA);
-            p.final_score *= kururuAdj;
+
 
             // 3. ログ出力（補正後の値を表示）
             logMessage(`${logPrefix} 選手ID ${p.id}: 基礎＋風遮蔽(kururu:${kururuAdj.toFixed(3)})適用後のスコアは ${p.final_score.toFixed(3)}`);
