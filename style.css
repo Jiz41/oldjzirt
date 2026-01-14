@@ -379,14 +379,37 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
 .btn-custom-border {
     all: unset !important;
     cursor: pointer !important;
-    width: 30px !important; height: 30px !important;
-    display: flex !important; align-items: center !important; justify-content: center !important;
-    border-radius: 6px !important; /* 角丸 */
-    border: 1px solid !important; /* 1px線 */
+    /* スマホで伸びるのを物理的に阻止する */
+    width: 30px !important; 
+    height: 30px !important;
+    min-width: 30px !important; /* これを追加 */
+    max-width: 30px !important; /* これを追加 */
+    flex-shrink: 0 !important;   /* これを追加（親要素に潰されるのを防ぐ） */
+    
+    display: flex !important; 
+    align-items: center !important; 
+    justify-content: center !important;
+    border-radius: 6px !important;
+    border: 1px solid !important;
     position: relative !important;
-    top: 5px !important; /* 位置をさらに下げ */
-    transition: transform 0.1s ease, background-color 0.2s !important;
+    top: 5px !important;
+    transition: transform 0.1s ease !important;
 }
+
+/* スマホ等、画面が狭い時でも絶対に横並びを維持 */
+.share-align-fixed {
+    display: flex !important;
+    flex-direction: row !important; /* 縦並びを禁止 */
+    flex-wrap: nowrap !important;   /* 改行を禁止 */
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 8px !important;
+    max-width: 600px !important;
+    margin: 18px auto 5px auto !important;
+    padding-right: 15px !important;
+    box-sizing: border-box !important;
+}
+
 
 /* ライトモード設定 */
 .btn-custom-border {
