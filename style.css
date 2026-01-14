@@ -362,35 +362,27 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
   
 /* ボタンを右端に寄せ、全体を下げるための土台 */
 .share-align-fixed {
-    display: flex !important;
-    justify-content: flex-end !important;
-    align-items: center !important;
-    gap: 8px !important;
-    max-width: 600px !important;
-    /* 上のマージンを18pxにして位置を下げ、下を5pxにして詰め直した */
-    margin: 18px auto 5px auto !important; 
-    padding-right: 15px !important;
-    box-sizing: border-box !important;
+    display: flex !important; justify-content: flex-end !important; align-items: center !important;
+    gap: 8px !important; max-width: 600px !important; margin: 18px auto 5px auto !important;
+    padding-right: 15px !important; box-sizing: border-box !important;
 }
+.share-label-tiny { font-size: 10px; color: #888; font-weight: bold; transform: translateY(4px); }
 
-/* ラベル（SHARE）の位置調整 */
-.share-label-tiny { 
-    font-size: 10px !important; 
-    color: #888 !important; 
-    font-weight: bold !important; 
-    transform: translateY(3px) !important; 
+.btn-final-fixed {
+    all: unset !important; cursor: pointer !important; width: 30px !important; height: 30px !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    border-radius: 6px !important; border: 1px solid #ddd !important;
+    position: relative !important; top: 5px !important; transition: transform 0.1s ease !important;
+    background-color: #ffffff !important; /* ライトモード背景 */
 }
-
-/* --- ここから下は、先ほど送ったボタンの色設定 --- */
-.btn-final-fixed { background-color: #ffffff !important; border-color: #ddd !important; }
 .icon-x-fix { fill: #000000 !important; }
-.icon-copy-fix { stroke: #000000 !important; }
+.icon-copy-fix { stroke: #000000 !important; } /* ここを黒に固定 */
 
 @media (prefers-color-scheme: dark) {
     .btn-final-fixed { background-color: #000000 !important; border-color: #444 !important; }
     .icon-x-fix { fill: #ffffff !important; }
     .icon-copy-fix { stroke: #ffffff !important; }
 }
-.btn-final-fixed:active { transform: translateY(6px) !important; }
+.btn-final-fixed:active { transform: translateY(2px) !important; }
 
 }
