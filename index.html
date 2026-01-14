@@ -245,74 +245,54 @@
 <div class="share-align-fixed">
   <span class="share-label-tiny">SHARE</span>
   
-  <button onclick="execShareX()" class="btn-tiny" style="background-color: transparent; all: unset; cursor: pointer;">
-    <svg viewBox="0 0 24 24" width="16" height="16" style="filter: drop-shadow(0px 0px 1px rgba(255,255,255,0.8));">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" fill="currentColor" class="icon-x"></path>
-    </svg>
+  <button onclick="execShareX()" class="btn-custom-border">
+    <svg viewBox="0 0 24 24" width="16" height="16" class="icon-main"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
   </button>
 
-  <button onclick="execShareLine()" class="btn-tiny" style="background-color: transparent; all: unset; cursor: pointer;">
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="#06C755" style="filter: drop-shadow(0px 0px 0.5px rgba(0,0,0,0.1));">
-      <path d="M24 10.304c0-4.369-4.705-7.923-10.5-7.923S3 5.935 3 10.304c0 3.913 3.73 7.18 8.775 7.818.341.073.805.226.921.518.106.265.07.679.034 0.947l-.149.894c-.045.27-.211 1.054.912.575 1.123-.479 6.064-3.57 8.271-6.111C23.081 13.528 24 12.012 24 10.304z"></path>
-    </svg>
+  <button onclick="execShareLine()" class="btn-custom-border">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="#06C755"><path d="M24 10.304c0-4.369-4.705-7.923-10.5-7.923S3 5.935 3 10.304c0 3.913 3.73 7.18 8.775 7.818.341.073.805.226.921.518.106.265.07.679.034 0.947l-.149.894c-.045.27-.211 1.054.912.575 1.123-.479 6.064-3.57 8.271-6.111C23.081 13.528 24 12.012 24 10.304z"></path></svg>
   </button>
 
-  <button onclick="execCopy()" class="btn-tiny" style="background-color: transparent; all: unset; cursor: pointer;">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-copy" style="filter: drop-shadow(0px 0px 0.5px rgba(0,0,0,0.1));">
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-    </svg>
+  <button onclick="execCopy()" class="btn-custom-border">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-stroke"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
   </button>
 </div>
 
-<style>
-/* ライトモード（通常）の色指定 */
-.icon-x { fill: #333; }
-.icon-copy { stroke: #666; }
-
-/* ダークモード時の色反転 */
-@media (prefers-color-scheme: dark) {
-    .icon-x { fill: #eee; }
-    .icon-copy { stroke: #aaa; }
-    .share-label-tiny { color: #555; }
-}
-</style>
-
-<style>
-.share-align-fixed {
-    display: flex !important;
-    justify-content: flex-end !important; /* 右寄せ */
-    align-items: center !important;
-    gap: 6px !important;
-    max-width: 600px !important;
-    margin: 10px auto 30px auto !important;
-    padding-right: 15px !important; /* コンテナの右端とツラを合わせる */
-    box-sizing: border-box !important;
-}
-.share-label-tiny { font-size: 10px; color: #888; font-weight: bold; margin-right: 2px; }
-
-/* 個別のボタン設定 */
-.btn-tiny {
-    width: 30px !important;
-    height: 30px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 4px !important;
-    transition: transform 0.1s ease !important;
-}
-.btn-tiny:active {
-    transform: translateY(2px) !important; /* 押し込み */
-}
-</style>
-
-<script>
+  <script>
+// 共有するテキストとURLの設定
 const S_TXT = "【データ解析型・競輪予想ツール：華耀天輪 真自在律】\n\nデータで有利な買い目を提案します📊\n完全無料・スマホ対応。ツールはこちら👇";
 const S_URL = "https://huggingface.co/spaces/Jiz41/Jiz41r1t5u";
 
-function execShareX() { window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(S_TXT) + "&url=" + encodeURIComponent(S_URL), '_blank'); }
-function execShareLine() { window.open("https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(S_URL) + "&text=" + encodeURIComponent(S_TXT), '_blank'); }
-function execCopy() { navigator.clipboard.writeText(S_TXT + "\n" + S_URL).then(function(){ alert("コピーしました！"); }); }
+// X（Twitter）共有
+function execShareX() {
+    const url = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(S_TXT) + "&url=" + encodeURIComponent(S_URL);
+    window.open(url, '_blank');
+}
+
+// LINE共有
+function execShareLine() {
+    const url = "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(S_URL) + "&text=" + encodeURIComponent(S_TXT);
+    window.open(url, '_blank');
+}
+
+// クリップボードにコピー
+function execCopy() {
+    const fullText = S_TXT + "\n" + S_URL;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(fullText).then(function() {
+            alert("クリップボードにコピーしました！");
+        }).catch(function() {
+            // 代替のコピー方法（古いブラウザや環境用）
+            const textArea = document.createElement("textarea");
+            textArea.value = fullText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textArea);
+            alert("コピーしました！");
+        });
+    }
+}
 </script>
 
     <div class="debug-log-header" onclick="toggleDebugLog()">
