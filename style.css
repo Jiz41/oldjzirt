@@ -359,37 +359,49 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
         border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
-.share-outer-align {
+  
+/* 共有ボタン全体の配置（変更なし） */
+.share-outer-final {
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
-    gap: 5px !important;
+    gap: 8px !important;
     max-width: 600px !important;
-    margin: 10px auto 25px auto !important;
-    padding-right: 10px !important; /* ボックスの右端とツラを合わせる */
+    margin: 10px auto 30px auto !important;
+    padding-right: 12px !important;
     box-sizing: border-box !important;
 }
 
-.share-outer-align button {
-    /* 既存のボタン設定をすべて力ずくで上書き */
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    max-width: 32px !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: none !important;
-    border-radius: 4px !important;
+.share-label-tiny { font-size: 10px; color: #888; font-weight: bold; margin-right: 2px; }
+
+/* ボタンの基本設定 */
+.share-outer-final button {
+    width: 30px !important; height: 30px !important;
+    padding: 0 !important; margin: 0 !important;
+    border: none !important; border-radius: 6px !important;
+    cursor: pointer !important; color: white !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    
+    /* 戻る時の動きを滑らかにする */
+    transition: transform 0.1s ease !important; 
     box-shadow: none !important;
-    transform: none !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+}
+
+/* ホバー：色は少し変えるが、動き（浮き）は削除 */
+.share-outer-final button:hover {
+    opacity: 0.85 !important;
+    transform: none !important; /* 浮かせない */
+}
+
+/* アクティブ：押した瞬間にポチッと沈む */
+.share-outer-final button:active {
+    transform: translateY(2px) !important; /* 2px下に沈む */
+    opacity: 1.0 !important;
+    transition: transform 0.05s !important; /* 押す時はより素早く */
 }
 
 .btn-x-tiny { background-color: #000 !important; }
 .btn-line-tiny { background-color: #06C755 !important; }
 .btn-copy-tiny { background-color: #777 !important; }
-
 
  }
