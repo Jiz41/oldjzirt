@@ -1348,26 +1348,25 @@ function generateSeitenreiBets(ranking) {
     };
 }
 
+// --- 最終決定版：generateKoutenreiBets ---
 function generateKoutenreiBets(ranking, candidates) {
     if (!ranking || ranking.length < 3 || !candidates) return null;
     const A = ranking[0], B = ranking[1], C = ranking[2];
     
     const lCandidates = ranking.slice(3).map(p => {
         let s = 0;
-        // 風と環境を反映した「final_score」を評価の主軸にする
-        // これにより、風で有利になった穴選手が自動的に浮上します
+        // 風と環境を反映したスコアを評価の主軸にする
         s += (p.score / 10); 
-
         if (p.is_b1) s += 10; 
         if (p.is_s1) s += 5;
-        // 特定の車番固定ではなく、脚質とスコアのバランスで特異点を抽出
         if (p.style === '両' || p.style === '追') s += 3;
         
         return { ...p, lScore: s };
     });
 
     lCandidates.sort((a, b) => b.lScore - a.lScore);
-    // 最も「荒天時に伸びる」と計算された選手をL（特異点）とする
+    
+    // 最も「荒天時に伸びる」と計算された選手をL（特異点）とする。候補がいなければ4位を充てる
     const targetL = (lCandidates.length > 0) ? lCandidates[0] : ranking[3];
     
     return {
@@ -1375,19 +1374,8 @@ function generateKoutenreiBets(ranking, candidates) {
         nirentan: [[A.id, targetL.id], [targetL.id, A.id], [C.id, A.id]]
     };
 }
-
-        lCandidates.sort((a, b) => b.lScore - a.lScore);
-    const targetL = (lCandidates.length > 0 && lCandidates[0].lScore > 0) 
-        ? lCandidates[0] 
-        : ranking[3];
-    
-    return {
-        sanrenpuku: [[A.id, B.id, targetL.id], [A.id, C.id, targetL.id]],
-        nirentan: [[A.id, targetL.id], [targetL.id, A.id], [C.id, A.id]]
-    };
-}
   
-// UIイベント設定（displayResultsの外に出す）
+// UIイベント設定
 document.querySelectorAll('select').forEach(select => {
     select.addEventListener('change', () => {
         select.blur();
