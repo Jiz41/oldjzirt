@@ -242,7 +242,8 @@
         </div>
     </div>
 
-  <div class="share-mini-tiny">
+<div class="share-footer-align">
+  <span class="share-label">SHARE</span>
   <button onclick="shareX()" class="btn-x" title="X">
     <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
   </button>
@@ -253,36 +254,6 @@
     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
   </button>
 </div>
-
-<style>
-.share-mini-tiny { display: flex; gap: 5px; max-width: fit-content; margin: 5px 0; }
-.share-mini-tiny button { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: none; border-radius: 4px; cursor: pointer; color: white; padding: 0; }
-.btn-x { background-color: #000; }
-.btn-line { background-color: #06C755; }
-.btn-copy { background-color: #777; }
-</style>
-
-<script>
-(function() {
-  const shareText = "【データ解析型・競輪予想アシストツール：華耀天輪 真自在律】\n\n選手データを入力するだけで\n統計的に有利な買い目を提案します\n\n📊勘じゃなくデータで予想\n✅完全無料\n✅スマホ対応\n✅初心者でも使いやすい\n\nツールはこちら👇";
-  const shareUrl = "https://huggingface.co/spaces/Jiz41/Jiz41r1t5u";
-
-  window.shareX = function() {
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
-  };
-  window.shareLine = function() {
-    window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, '_blank');
-  };
-  window.copyToClipboard = function() {
-    const fullText = shareText + "\n" + shareUrl;
-    navigator.clipboard.writeText(fullText).then(() => {
-      alert("コピーしました！");
-    }).catch(err => {
-      console.error('コピー失敗:', err);
-    });
-  };
-})();
-</script>
 
     <div class="debug-log-header" onclick="toggleDebugLog()">
         <span id="log-toggle-icon">▶</span> 🛠️ デバッグ・処理ログ
