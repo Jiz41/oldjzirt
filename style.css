@@ -360,29 +360,36 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
         border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
 .share-outer-align {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end; /* 右寄せ */
-    gap: 8px;
-    
-    /* ボックス（600px）と同じ幅に制限して中央に寄せる */
-    max-width: 600px;
-    margin: 10px auto 20px auto; 
-    
-    /* ボックスの右端の余白(10px)とボタンの右端を合わせる */
-    padding-right: 10px; 
-    box-sizing: border-box;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 5px !important;
+    max-width: 600px !important;
+    margin: 10px auto 25px auto !important;
+    padding-right: 10px !important; /* ボックスの右端とツラを合わせる */
+    box-sizing: border-box !important;
 }
 
 .share-outer-align button {
+    /* 既存のボタン設定をすべて力ずくで上書き */
     width: 32px !important;
     height: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
     padding: 0 !important;
     margin: 0 !important;
     border: none !important;
     border-radius: 4px !important;
     box-shadow: none !important;
+    transform: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
+.btn-x-tiny { background-color: #000 !important; }
+.btn-line-tiny { background-color: #06C755 !important; }
+.btn-copy-tiny { background-color: #777 !important; }
 
-  }
+
+ }
