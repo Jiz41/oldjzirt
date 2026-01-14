@@ -1310,7 +1310,7 @@ const koutenreiRanking = Object.keys(koutenreiIntegratedScores)
   .sort((a, b) => b.score - a.score);
 
 // 修正：第2引数には車番ではなく、選手データ配列(participatingPlayers)を渡す
-const koutenreiBets = generateKoutenreiBets(koutenreiRanking, participatingPlayers);
+const koutenreiBets = generateKoutenreiBets(koutenreiRanking, koutenreiRanking); 
 const koutenreiBox = document.getElementById('koutenrei-output');
 
 if (koutenreiBox && koutenreiBets) {
