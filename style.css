@@ -359,44 +359,30 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
         border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
-  .share-footer-align {
+.share-outer-align {
     display: flex;
     align-items: center;
     justify-content: flex-end; /* 右寄せ */
-    gap: 6px;
-    margin: 10px 15px 25px 0;   /* 右端を15px（他と統一）に設定 */
-    padding-top: 10px;
+    gap: 8px;
+    
+    /* ボックス（600px）と同じ幅に制限して中央に寄せる */
+    max-width: 600px;
+    margin: 10px auto 20px auto; 
+    
+    /* ボックスの右端の余白(10px)とボタンの右端を合わせる */
+    padding-right: 10px; 
+    box-sizing: border-box;
 }
 
-.share-label {
-    font-size: 10px;
-    font-weight: bold;
-    color: #aaa;
-    letter-spacing: 0.1em;
-    margin-right: 4px;
+.share-outer-align button {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
 }
 
-.share-footer-align button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    color: white;
-    padding: 0;
-    transition: opacity 0.2s;
-}
-
-.share-footer-align button:hover { opacity: 0.7; }
-.btn-x { background-color: #000 !important; box-shadow: none !important; margin: 0 !important; }
-.btn-line { background-color: #06C755 !important; box-shadow: none !important; margin: 0 !important; }
-.btn-copy { background-color: #777 !important; box-shadow: none !important; margin: 0 !important; }
-
-@media (prefers-color-scheme: dark) {
-    .share-label { color: #555; }
-}
 
   }
