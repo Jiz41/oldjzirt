@@ -115,7 +115,7 @@
   },
   "🎣岐阜": {
     "length": 400, "straight": 59.3, "straight_deviation": 56.7, "canto": 32.0, "width_home": 11.0, "width_back": 10.0, "width_center": 8.0, "alpha": 1.10, "indoor": false,
-    "keirin_bias": { "先行": 1.0, "捲り": 1.02, "差し": 1.02 },
+    "keirin_bias": { "先行": 0.98, "捲り": 1.02, "差し": 1.06 },
     "wind_direction_map": { "西": "H向かい風", "東": "H追い風", "北": "H→B横風", "南": "B→H横風" },
     "_archived_legacy_notes": {}
   },
