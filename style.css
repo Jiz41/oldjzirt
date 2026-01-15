@@ -359,29 +359,27 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
         border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
-  
-/* --- 共有ボタンセクション --- */
 
-/* --- 共有ボタンセクション：スマホ対応版 --- */
+/* --- 共有ボタンセクション：最終完全版 --- */
 
-/* 1. 土台：幅を100%にして、コンテナのパディング内で右寄せ */
+/* 1. 土台：デフォルト（ライトモード含む）で右寄せを確定させる */
 .share-align-fixed {
     display: flex !important;
-    justify-content: flex-end !important;
+    justify-content: flex-end !important; /* ライトモードでも右寄せにする */
     align-items: center !important;
     gap: 8px !important;
-    width: 100% !important; /* 600px固定から100%に変更 */
+    width: 100% !important;
     max-width: 600px !important;
     margin: 15px auto 5px auto !important;
     padding-right: 15px !important; 
     box-sizing: border-box !important;
 }
 
-/* 2. ボタン本体：サイズ固定 */
+/* 2. ボタン本体 */
 .btn-share-box {
     all: unset !important;
     cursor: pointer !important;
-    width: 32px !important;  /* スマホで押しやすいよう微増 */
+    width: 32px !important;
     height: 32px !important;
     display: flex !important;
     align-items: center !important;
@@ -393,21 +391,21 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
     transition: transform 0.1s ease !important;
     background-color: #ffffff !important;
     box-sizing: border-box !important;
-    flex-shrink: 0 !important; /* スマホで潰されないように固定 */
+    flex-shrink: 0 !important;
 }
 
-/* 押し込み */
 .btn-share-box:active { transform: translateY(2px) !important; }
 
-/* 3. ダークモード設定 */
+/* 3. ダークモード：色と、念のための右寄せ再宣言 */
 @media (prefers-color-scheme: dark) {
-    #share-area {
-        justify-content: flex-end !important;
+    .share-align-fixed {
+        justify-content: flex-end !important; /* ダークモードでも死守 */
     }
     .btn-share-box { 
         background-color: #000000 !important; 
         border-color: #444444 !important; 
     }
+    /* Xとコピーのアイコン色を白に反転 */
     .icon-x-fix { fill: #ffffff !important; }
     .icon-copy-fix { stroke: #ffffff !important; }
 }
