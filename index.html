@@ -9,21 +9,52 @@
 <body>
 
 <script>
-// --- 簡易予想コピー機能：真・自在律 連携版 (監視強化Ver) ---
 (function() {
     function addCopyButton() {
         const target = document.getElementById('scenario-output');
-        // 箱が見つからない、または既にボタンがある場合は何もしない
         if (!target || document.getElementById('easy-copy-btn')) return;
-
-        // 箱の中に中身（シミュレーション結果）が入っているか確認
         if (target.innerHTML.trim() === "") return;
 
         const btn = document.createElement('button');
         btn.id = 'easy-copy-btn';
-        btn.innerHTML = '📋 予想をコピー（実戦用）';
-        btn.style = "display: block; width: 90%; margin: 20px auto 10px; padding: 14px; background: #1a1a1a; color: #ffffff; border: 1px solid #444; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px;";
+        btn.innerHTML = 'COPY PREDICTION';
         
+        // --- ソリッド & メカニカル・フィードバック定義 ---
+        btn.style = `
+            display: block;
+            width: 160px;
+            margin: 25px auto;
+            padding: 10px 0;
+            background: #000;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 1px;         /* 鋭い角 */
+            font-family: 'Helvetica', sans-serif;
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.25em;
+            cursor: pointer;
+            transition: transform 0.05s, background 0.05s; /* 応答速度を極限まで速く */
+            text-transform: uppercase;
+            outline: none;
+            -webkit-tap-highlight-color: transparent; /* スマホ特有の青枠を消す */
+        `;
+        
+        // 「カチッ」とした押し心地の再現（スペースキーの挙動）
+        btn.onmousedown = () => {
+            btn.style.transform = "scale(0.96) translateY(2px)"; // 物理的な沈み込み
+            btn.style.background = "#fff";                       // 反転（発光）
+            btn.style.color = "#000";
+        };
+        btn.onmouseup = () => {
+            btn.style.transform = "scale(1) translateY(0)";      // 即座に復帰
+            btn.style.background = "#000";
+            btn.style.color = "#fff";
+        };
+        // 指を離した時やスマホでのタッチ対応
+        btn.ontouchstart = btn.onmousedown;
+        btn.ontouchend = btn.onmouseup;
+
         target.appendChild(btn);
 
         btn.onclick = async () => {
@@ -58,15 +89,13 @@
                 const finalText = `${bank} ［レース番号を入力］R\n\n☀️ 晴天令：${sunny}\n⛈️ 荒天令：${rainy}\n\n・展開別\n${scenarioText}\n（${windText}）`;
                 await navigator.clipboard.writeText(finalText);
                 
-                const oldText = btn.innerHTML;
-                btn.innerHTML = '✅ 保存完了';
-                btn.style.background = "#004d40";
-                setTimeout(() => { btn.innerHTML = oldText; btn.style.background = "#1a1a1a"; }, 1500);
-            } catch (err) { alert("コピー失敗"); }
+                // 成功時の控えめなフィードバック
+                const originalText = btn.innerHTML;
+                btn.innerHTML = 'COPIED';
+                setTimeout(() => { btn.innerHTML = originalText; }, 1200);
+            } catch (err) { console.error(err); }
         };
     }
-
-    // 0.5秒ごとに「結果が出たか？」をチェックし続ける（確実なフック）
     setInterval(addCopyButton, 500);
 })();
 </script>
