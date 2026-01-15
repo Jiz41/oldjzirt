@@ -360,7 +360,9 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
         border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
   
-/* 1. 土台の設定（右寄せを確定させる） */
+/* --- 共有ボタンセクション --- */
+
+/* 1. 土台：コンテナ(600px)の中で右寄せを実現 */
 .share-align-fixed {
     display: flex !important;
     justify-content: flex-end !important;
@@ -368,11 +370,11 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
     gap: 8px !important;
     max-width: 600px !important;
     margin: 18px auto 5px auto !important;
-    padding-right: 15px !important;
+    padding-right: 15px !important; /* コンテナ内側の余白に合わせる */
     box-sizing: border-box !important;
 }
 
-/* 2. ボタン本体の設定（クラス名をbtn-share-boxに統一） */
+/* 2. ボタン本体：30px正方形 */
 .btn-share-box {
     all: unset !important;
     cursor: pointer !important;
@@ -390,9 +392,11 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
     box-sizing: border-box !important;
 }
 
-/* 3. ダークモード設定 */
+/* 押し込みアクション */
+.btn-share-box:active { transform: translateY(2px) !important; }
+
+/* 3. ダークモード専用設定（独立したブロックとして定義） */
 @media (prefers-color-scheme: dark) {
-    /* ダークモードで中央に寄るのを防ぐため、右寄せを再宣言 */
     .share-align-fixed {
         justify-content: flex-end !important;
     }
@@ -402,9 +406,4 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
     }
     .icon-x-fix { fill: #ffffff !important; }
     .icon-copy-fix { stroke: #ffffff !important; }
-}
-
-/* 押し込みアクション */
-.btn-share-box:active {
-    transform: translateY(2px) !important;
 }
