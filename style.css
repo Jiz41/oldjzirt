@@ -360,23 +360,42 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
         border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
   
-/* ボタンを右端に寄せ、全体を下げるための土台 */
+/* 1. 土台の設定（右寄せを確定させる） */
 .share-align-fixed {
-    display: flex !important; justify-content: flex-end !important; align-items: center !important;
-    gap: 8px !important; max-width: 600px !important; margin: 18px auto 5px auto !important;
-    padding-right: 15px !important; box-sizing: border-box !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 8px !important;
+    max-width: 600px !important;
+    margin: 18px auto 5px auto !important;
+    padding-right: 15px !important;
+    box-sizing: border-box !important;
 }
-.share-label-tiny { font-size: 10px; color: #888; font-weight: bold; transform: translateY(4px); }
 
-.btn-final-fixed {
-    all: unset !important; cursor: pointer !important; width: 30px !important; height: 30px !important;
-    display: flex !important; align-items: center !important; justify-content: center !important;
-    border-radius: 6px !important; border: 1px solid #ddd !important;
-    position: relative !important; top: 5px !important; transition: transform 0.1s ease !important;
-    background-color: #ffffff !important; /* ライトモード背景 */
+/* 2. ボタン本体の設定（クラス名をbtn-share-boxに統一） */
+.btn-share-box {
+    all: unset !important;
+    cursor: pointer !important;
+    width: 30px !important;
+    height: 30px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    border: 1px solid #ddd !important;
+    position: relative !important;
+    top: 5px !important;
+    transition: transform 0.1s ease !important;
+    background-color: #ffffff !important;
+    box-sizing: border-box !important;
 }
-/* ダークモード時の色反転設定 */
+
+/* 3. ダークモード設定 */
 @media (prefers-color-scheme: dark) {
+    /* ダークモードで中央に寄るのを防ぐため、右寄せを再宣言 */
+    .share-align-fixed {
+        justify-content: flex-end !important;
+    }
     .btn-share-box { 
         background-color: #000000 !important; 
         border-color: #444444 !important; 
@@ -384,4 +403,8 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
     .icon-x-fix { fill: #ffffff !important; }
     .icon-copy-fix { stroke: #ffffff !important; }
 }
+
+/* 押し込みアクション */
+.btn-share-box:active {
+    transform: translateY(2px) !important;
 }
