@@ -8,48 +8,31 @@
 </head>
 <body>
 
-  <script>
-/**
- * 真・自在律 連携：簡易予想コピー機能 (v1.1)
- * 配置：シミュレーション結果箱（#scenario-output）内部
- */
-function injectEasyCopyFeature() {
-    const addBtn = () => {
+<script>
+// --- 簡易予想コピー機能：真・自在律 連携版 (監視強化Ver) ---
+(function() {
+    function addCopyButton() {
         const target = document.getElementById('scenario-output');
-        // 二重生成防止およびターゲット確認
+        // 箱が見つからない、または既にボタンがある場合は何もしない
         if (!target || document.getElementById('easy-copy-btn')) return;
+
+        // 箱の中に中身（シミュレーション結果）が入っているか確認
+        if (target.innerHTML.trim() === "") return;
 
         const btn = document.createElement('button');
         btn.id = 'easy-copy-btn';
         btn.innerHTML = '📋 予想をコピー（実戦用）';
-        
-        // SNSボタンと明確に区別するための実務的デザイン
-        btn.style = `
-            display: block; 
-            width: 90%; 
-            margin: 20px auto 10px; 
-            padding: 14px; 
-            background: #1a1a1a; 
-            color: #ffffff; 
-            border: 1px solid #444; 
-            border-radius: 6px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            font-size: 15px;
-            letter-spacing: 0.05em;
-        `;
+        btn.style = "display: block; width: 90%; margin: 20px auto 10px; padding: 14px; background: #1a1a1a; color: #ffffff; border: 1px solid #444; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px;";
         
         target.appendChild(btn);
 
         btn.onclick = async () => {
             try {
-                // 基本要素取得
                 const bank = document.getElementById('bank-name').value;
                 const windDir = document.getElementById('wind-direction').value;
                 const windSpd = document.getElementById('wind-speed').value;
                 const windText = (windDir === 'none' || windDir === '無風') ? "無風 0m" : `${windDir} ${windSpd}m`;
 
-                // 買い目抽出
                 const getBet = (id) => {
                     const el = document.getElementById(id);
                     if (!el) return "---";
@@ -58,7 +41,6 @@ function injectEasyCopyFeature() {
                 const sunny = getBet('seitenrei-output');
                 const rainy = getBet('koutenrei-output');
 
-                // 展開別抽出
                 let scenarioText = "";
                 document.querySelectorAll('.scenario-detail').forEach(div => {
                     const title = div.querySelector('h4')?.innerText.replace('シミュレーション', '').trim() || "";
@@ -73,40 +55,20 @@ function injectEasyCopyFeature() {
                     if (title) scenarioText += `${title} ${bets}\n`;
                 });
 
-                // フォーマット統合
-                const finalText = `${bank} ［レース番号を入力］R\n\n` +
-                                  `☀️ 晴天令：${sunny}\n` +
-                                  `⛈️ 荒天令：${rainy}\n\n` +
-                                  `・展開別\n${scenarioText}\n` +
-                                  `（${windText}）`;
-
+                const finalText = `${bank} ［レース番号を入力］R\n\n☀️ 晴天令：${sunny}\n⛈️ 荒天令：${rainy}\n\n・展開別\n${scenarioText}\n（${windText}）`;
                 await navigator.clipboard.writeText(finalText);
                 
-                // フィードバック
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '✅ クリップボードに保存完了';
+                const oldText = btn.innerHTML;
+                btn.innerHTML = '✅ 保存完了';
                 btn.style.background = "#004d40";
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.background = "#1a1a1a";
-                }, 1500);
-
-            } catch (err) {
-                console.error("Copy failed:", err);
-            }
+                setTimeout(() => { btn.innerHTML = oldText; btn.style.background = "#1a1a1a"; }, 1500);
+            } catch (err) { alert("コピー失敗"); }
         };
-    };
+    }
 
-    // calculatePredictionを拡張
-    const originalCalculate = window.calculatePrediction;
-    window.calculatePrediction = async function() {
-        if (originalCalculate) await originalCalculate();
-        // 描画が確実に終わるタイミングで実行
-        setTimeout(addBtn, 400); 
-    };
-}
-
-injectEasyCopyFeature();
+    // 0.5秒ごとに「結果が出たか？」をチェックし続ける（確実なフック）
+    setInterval(addCopyButton, 500);
+})();
 </script>
 
 <div class="container">
