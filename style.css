@@ -360,22 +360,23 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
         border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
 
-/* --- 共有ボタンセクション：最終完全版 --- */
+/* --- 共有ボタン：最終防衛策 --- */
 
-/* 1. 土台：デフォルト（ライトモード含む）で右寄せを確定させる */
-.share-align-fixed {
+/* ID（#share-area）を使って、ライト・ダーク問わず右寄せを強制 */
+#share-area {
     display: flex !important;
-    justify-content: flex-end !important; /* ライトモードでも右寄せにする */
+    flex-direction: row !important;
+    justify-content: flex-end !important; /* 右端へ */
     align-items: center !important;
     gap: 8px !important;
     width: 100% !important;
     max-width: 600px !important;
     margin: 15px auto 5px auto !important;
-    padding-right: 15px !important; 
+    padding-right: 15px !important;
     box-sizing: border-box !important;
 }
 
-/* 2. ボタン本体 */
+/* ボタン本体：ライトモード（デフォルト） */
 .btn-share-box {
     all: unset !important;
     cursor: pointer !important;
@@ -386,26 +387,19 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
     justify-content: center !important;
     border-radius: 6px !important;
     border: 1px solid #ddd !important;
-    position: relative !important;
-    top: 5px !important;
-    transition: transform 0.1s ease !important;
     background-color: #ffffff !important;
     box-sizing: border-box !important;
     flex-shrink: 0 !important;
+    position: relative !important;
+    top: 5px !important;
 }
 
-.btn-share-box:active { transform: translateY(2px) !important; }
-
-/* 3. ダークモード：色と、念のための右寄せ再宣言 */
+/* ダークモード：色の上書き */
 @media (prefers-color-scheme: dark) {
-    .share-align-fixed {
-        justify-content: flex-end !important; /* ダークモードでも死守 */
-    }
     .btn-share-box { 
         background-color: #000000 !important; 
         border-color: #444444 !important; 
     }
-    /* Xとコピーのアイコン色を白に反転 */
     .icon-x-fix { fill: #ffffff !important; }
     .icon-copy-fix { stroke: #ffffff !important; }
 }
