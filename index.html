@@ -266,7 +266,8 @@ function execShareX() {
     window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(S_TXT) + "&url=" + encodeURIComponent(S_URL), '_blank');
 }
 function execShareLine() {
-    window.open("https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(S_URL), '_blank');
+    const lineUrl = "https://line.me/R/share?text=" + encodeURIComponent(S_TXT + "\n" + S_URL);
+    window.open(lineUrl, '_blank');
 }
 function execCopy() {
     const t = S_TXT + "\n" + S_URL;
