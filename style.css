@@ -359,6 +359,7 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
         border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
+}
 
 /* --- 共有ボタン：最終防衛策 --- */
 /* ID（#share-area）を使って、ライト・ダーク問わず右寄せを強制 */
