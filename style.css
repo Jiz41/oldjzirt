@@ -361,7 +361,6 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
     }
 
 /* --- 共有ボタン：最終防衛策 --- */
-
 /* ID（#share-area）を使って、ライト・ダーク問わず右寄せを強制 */
 #share-area {
     display: flex !important;
