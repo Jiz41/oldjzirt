@@ -362,24 +362,27 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
   
 /* --- 共有ボタンセクション --- */
 
-/* 1. 土台：コンテナ(600px)の中で右寄せを実現 */
+/* --- 共有ボタンセクション：スマホ対応版 --- */
+
+/* 1. 土台：幅を100%にして、コンテナのパディング内で右寄せ */
 .share-align-fixed {
     display: flex !important;
     justify-content: flex-end !important;
     align-items: center !important;
     gap: 8px !important;
+    width: 100% !important; /* 600px固定から100%に変更 */
     max-width: 600px !important;
-    margin: 18px auto 5px auto !important;
-    padding-right: 15px !important; /* コンテナ内側の余白に合わせる */
+    margin: 15px auto 5px auto !important;
+    padding-right: 15px !important; 
     box-sizing: border-box !important;
 }
 
-/* 2. ボタン本体：30px正方形 */
+/* 2. ボタン本体：サイズ固定 */
 .btn-share-box {
     all: unset !important;
     cursor: pointer !important;
-    width: 30px !important;
-    height: 30px !important;
+    width: 32px !important;  /* スマホで押しやすいよう微増 */
+    height: 32px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -390,14 +393,15 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
     transition: transform 0.1s ease !important;
     background-color: #ffffff !important;
     box-sizing: border-box !important;
+    flex-shrink: 0 !important; /* スマホで潰されないように固定 */
 }
 
-/* 押し込みアクション */
+/* 押し込み */
 .btn-share-box:active { transform: translateY(2px) !important; }
 
-/* 3. ダークモード専用設定（独立したブロックとして定義） */
+/* 3. ダークモード設定 */
 @media (prefers-color-scheme: dark) {
-    .share-align-fixed {
+    #share-area {
         justify-content: flex-end !important;
     }
     .btn-share-box { 
