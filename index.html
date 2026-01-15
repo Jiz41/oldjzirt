@@ -17,7 +17,7 @@
 
         const btn = document.createElement('button');
         btn.id = 'easy-copy-btn';
-        btn.innerHTML = 'COPY PREDICTION';
+        btn.innerHTML = '予想結果をコピー;
         
         // --- ソリッド & メカニカル・フィードバック定義 ---
         btn.style = `
@@ -91,7 +91,7 @@
                 
                 // 成功時の控えめなフィードバック
                 const originalText = btn.innerHTML;
-                btn.innerHTML = 'COPIED';
+                btn.innerHTML = 'コピー完了';
                 setTimeout(() => { btn.innerHTML = originalText; }, 1200);
             } catch (err) { console.error(err); }
         };
