@@ -6,6 +6,79 @@
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="style.css">
 </head>
+<style id="maintenance-style">
+    /* ロック用スタイル：背景を動かさない */
+    .locked-body {
+        overflow: hidden !important;
+        height: 100dvh !important;
+        margin: 0 !important;
+    }
+
+    #hf-maintenance-shield {
+        display: none; /* デフォルトは非表示、JSで判定 */
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100dvh !important;
+        background-color: rgba(0, 0, 0, 0.85) !important;
+        z-index: 2147483647 !important;
+        pointer-events: auto !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+    }
+
+    .maintenance-msg-box {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        color: #ffffff !important;
+        font-family: sans-serif !important;
+        font-size: 28px !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        padding: 40px !important;
+        border: 4px solid #ffffff !important;
+        background: #000 !important;
+        border-radius: 15px !important;
+        min-width: 300px !important;
+        box-shadow: 0 0 50px rgba(0,0,0,0.5) !important;
+    }
+</style>
+
+<div id="hf-maintenance-shield">
+    <div class="maintenance-msg-box">
+        只今工事中です 👷‍♀️
+    </div>
+</div>
+
+<script>
+    (function() {
+        // URLパラメータのチェック（うどん認証）
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('oudon') === 'tabetai') {
+            console.log("ケンさん確認用：うどん認証成功。ロックを解除しました。");
+            return; // 何もせずに終了
+        }
+
+        // 認証がない場合はロックを発動
+        const shield = document.getElementById('hf-maintenance-shield');
+        if (shield) {
+            // 要素を確実に最前面（body直下）へ移動
+            document.body.appendChild(shield);
+            shield.style.display = 'block';
+            document.body.classList.add('locked-body');
+            
+            // スクロールを0に固定（ダメ押し）
+            window.onscroll = function() { window.scrollTo(0, 0); };
+            
+            // タッチデバイスでのスクロールも防止
+            document.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+            }, { passive: false });
+        }
+    })();
+</script>  
 <body>
 
 <script>
