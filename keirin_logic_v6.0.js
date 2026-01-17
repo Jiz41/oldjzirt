@@ -1322,6 +1322,7 @@ return {
         sanrenpuku: [
             [r[0], r[1], r[2]]  // 1=2=3
         ]
+}
 
 function generateKoutenreiBets(ranking) {
     if (!ranking || ranking.length < 4) return null;
