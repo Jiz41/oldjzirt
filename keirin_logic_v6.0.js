@@ -961,7 +961,6 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
 }
 
 function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResults, participatingPlayers) { 
-    // ランキングの算出
     const seitenreiRanking = Object.keys(seitenreiScores).map(id => ({ id: Number(id), score: seitenreiScores[id] })).sort((a, b) => b.score - a.score); 
     const koutenreiRanking = Object.keys(koutenreiScores).map(id => ({ id: Number(id), score: koutenreiScores[id] })).sort((a, b) => b.score - a.score); 
     
@@ -973,31 +972,34 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
     const koutenTop3 = koutenreiRanking.slice(0, 3).map(p => p.id); 
 
     let matchCount = 0; 
-    koutenTop3.forEach(id => { 
-        if (seitenTop3.has(id)) { matchCount++; } 
-    }); 
+    koutenTop3.forEach(id => { if (seitenTop3.has(id)) { matchCount++; } }); 
 
     const tenunIndexMap = { 3: 0, 2: 33, 1: 67, 0: 100 };
     const tIndex = tenunIndexMap[matchCount] ?? 50;
 
-    // --- ☀️ 【壱耀】判定 ＆ 描画（ここから下を差し替え） ---
+    // --- ☀️ 【壱耀】判定フェーズ ---
     const windSpeed = parseFloat(document.getElementById('wind-speed').value) || 0;
     let targetPlayerId = null;
 
-    if (tIndex <= 33 && windSpeed <= 3.0) {
+    // 修正：指数は「33」丁度、風速は「2.0」以下
+    if (tIndex === 33 && windSpeed <= 2.0) {
         const top4 = seitenreiRanking.slice(0, 4);
         const target = top4.find(p => {
             const playerInfo = participatingPlayers.find(pp => pp.id === p.id);
             if (!playerInfo) return false;
-            return (playerInfo.wmark === '◎' || playerInfo.wmark === '〇') && (playerInfo.style === '差' || playerInfo.style === '両');
+            
+            // 内部値「追」（差マ）かつ、◎または〇
+            const isSashiMark = (playerInfo.style === '追');
+            const hasGoodMark = (playerInfo.wmark === '◎' || playerInfo.wmark === '〇');
+            
+            return isSashiMark && hasGoodMark;
         });
         if (target) { targetPlayerId = target.id; }
     }
 
-    // 1. 通常メッセージの生成（第2引数はfalse）
+    // --- 描画フェーズ ---
     let finalHtml = window.generateTamakiTenunHTML(tIndex, false, null);
 
-    // 2. 壱耀が検知された場合、下にボックスを連結（第2引数はtrue、第3に車番を渡す）
     if (targetPlayerId !== null) {
         const ichiyoHtml = window.generateTamakiTenunHTML(tIndex, true, targetPlayerId);
         finalHtml += ichiyoHtml; 
