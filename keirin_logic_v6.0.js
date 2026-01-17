@@ -1014,13 +1014,6 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
     return { tenunIndex: tIndex, message: finalHtml };
 }
 
-    // 第2引数を isIchiyoDetected に書き換えることで特殊口上が発動します
-    const finalHtml = window.generateTamakiTenunHTML(tIndex, isIchiyoDetected, null);
-
-    logMessage(`[TENUN] 天雲指数: ${tIndex} / 壱耀演出: ${isIchiyoDetected ? 'ON' : 'OFF'}`); 
-    return { tenunIndex: tIndex, message: finalHtml };
-}
-
 // メイン計算関数 (calculatePrediction) 
 // ここから下は元のコードのまま
 
