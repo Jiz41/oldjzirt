@@ -1340,11 +1340,15 @@ function generateSeitenreiBets(ranking) {
     };
 }
 
-function generateKoutenreiBets(ranking, candidates) {
-    if (!ranking || ranking.length < 3) return null;
-    const A = ranking[0], B = ranking[1], C = ranking[2];
+function generateKoutenreiBets(ranking) {
+    if (!ranking || ranking.length < 4) return null;
+
+    // 上位3名を明確に定義
+    const A = ranking[0];
+    const B = ranking[1];
+    const C = ranking[2];
     
-    // 4位以下の選手を「特異点候補」として評価
+    // 4位以下の選手（index 3以降）だけを「特異点候補」として抽出
     const lCandidates = ranking.slice(3).map(p => {
         let s = 0;
         s += (p.score / 10); 
@@ -1352,19 +1356,18 @@ function generateKoutenreiBets(ranking, candidates) {
         if (p.is_s1) s += 5;
         if (p.style === '両' || p.style === '追') s += 3;
         
-        // デバッグログ：候補者のスコアを可視化
         logMessage(`[特異点L候補] ${p.id}番車: Lスコア ${s.toFixed(2)}`);
-        
         return { ...p, lScore: s };
     });
 
+    // Lスコアが高い順に並び替え
     lCandidates.sort((a, b) => b.lScore - a.lScore);
     
-    // 最もlScoreが高い選手をLとする
+    // 候補がいればその1位を、いなければ安全策として元の4位(ranking[3])をLとする
     const targetL = (lCandidates.length > 0) ? lCandidates[0] : ranking[3];
     
     if (targetL) {
-        logMessage(`[特異点L決定] ${targetL.id}番車を荒天令の軸として選出`);
+        logMessage(`[特異点L決定] 軸選手${A.id}に対し、波乱の鍵として${targetL.id}番車を選出`);
     }
     
     return {
@@ -1374,7 +1377,6 @@ function generateKoutenreiBets(ranking, candidates) {
     };
 }
 
-  
 // UIイベント設定
 document.querySelectorAll('select').forEach(select => {
     select.addEventListener('change', () => {
