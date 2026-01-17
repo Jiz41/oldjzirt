@@ -1003,17 +1003,14 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
     if (target) {
         // 条件合致者がいる場合のみ、壱耀フラグを立てる
         isIchiyoDetected = true; 
-        logMessage(`[壱耀ログ] 💥発動対象: ${target.id});
+                logMessage(`[壱耀ログ] 💥発動対象: ${target.id}`); // 閉じ引用符と括弧を追加
     } else {
-        // 該当者がいない場合は、静かに通常フラグ(false)を維持する
         isIchiyoDetected = false; 
     }
 
-    // たまきメッセージ生成（isIchiyoDetectedがfalseなら通常メッセージのみ出力される）
     const finalHtml = window.generateTamakiTenunHTML(tIndex, isIchiyoDetected, null);
-
     return { tenunIndex: tIndex, message: finalHtml };
-}
+} // <--- calculateTenunIndex をここで閉じる
 
 // メイン計算関数 (calculatePrediction) 
 // ここから下は元のコードのまま
