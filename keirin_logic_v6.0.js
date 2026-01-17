@@ -999,18 +999,19 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
             return hasGoodMark && isSashiStyle;
         });
 
-        if (target) {
-            isIchiyoDetected = true;
-            logMessage(`[壱耀ログ] 💥全条件合致！ 発動対象: ${target.id}番車 (印:${target.wmark} 脚質:${target.style})`);
-        } else {
-            logMessage(`[壱耀ログ] 指数・風は合致しましたが、上位4名に印持ちの差し選手がいません。`);
-        }
+            // --- 壱耀の最終判定 ---
+    if (target) {
+        // 条件合致者がいる場合のみ、壱耀フラグを立てる
+        isIchiyoDetected = true; 
+        logMessage(`[壱耀ログ] 💥発動対象: ${target.id});
+    } else {
+        // 該当者がいない場合は、静かに通常フラグ(false)を維持する
+        isIchiyoDetected = false; 
     }
 
-    // たまきちゃんのメッセージ生成（第2引数で壱耀演出を制御）
+    // たまきメッセージ生成（isIchiyoDetectedがfalseなら通常メッセージのみ出力される）
     const finalHtml = window.generateTamakiTenunHTML(tIndex, isIchiyoDetected, null);
 
-    logMessage(`[TENUN] 天雲指数: ${tIndex} / 壱耀演出: ${isIchiyoDetected ? 'ON' : 'OFF'}`); 
     return { tenunIndex: tIndex, message: finalHtml };
 }
 
