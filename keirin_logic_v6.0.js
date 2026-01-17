@@ -980,7 +980,7 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
     const tenunIndexMap = { 3: 0, 2: 33, 1: 67, 0: 100 };
     const tIndex = tenunIndexMap[matchCount] ?? 50;
 
-    // --- ☀️ 【壱耀】判定：指数33 ＆ 印(◎/〇) ＆ 差し/両 ＆ 風3m以下 ---
+    // --- ☀️ 【壱耀】判定：天雲指数33以下 ＆ 地力 ＆ 属性条件 ---
     const windSpeed = parseFloat(document.getElementById('wind-speed').value) || 0;
     let isIchiyoDetected = false;
 
@@ -992,25 +992,22 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
             const playerInfo = participatingPlayers.find(pp => pp.id === p.id);
             if (!playerInfo) return false;
             
-            // 指示条件：印が◎または〇、且つ脚質が差しまたは両
+            // 人の条件：印が◎または〇、且つ脚質が差しまたは両
             const hasGoodMark = (playerInfo.wmark === '◎' || playerInfo.wmark === '〇');
             const isSashiStyle = (playerInfo.style === '差' || playerInfo.style === '両');
             
             return hasGoodMark && isSashiStyle;
         });
 
-            // --- 壱耀の最終判定 ---
-    if (target) {
-        // 条件合致者がいる場合のみ、壱耀フラグを立てる
-        isIchiyoDetected = true; 
-                logMessage(`[壱耀ログ] 💥発動対象: ${target.id}`); // 閉じ引用符と括弧を追加
-    } else {
-        isIchiyoDetected = false; 
+        if (target) {
+            isIchiyoDetected = true; 
+            logMessage(`[壱耀ログ] 💥発動対象: ${target.id}`);
+        }
     }
 
     const finalHtml = window.generateTamakiTenunHTML(tIndex, isIchiyoDetected, null);
     return { tenunIndex: tIndex, message: finalHtml };
-} // <--- calculateTenunIndex をここで閉じる
+}
 
 // メイン計算関数 (calculatePrediction) 
 // ここから下は元のコードのまま
