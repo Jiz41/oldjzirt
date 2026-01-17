@@ -1309,8 +1309,13 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
 function formatOrderedBet(bet) { return bet.join('-'); }
 function formatSanrenpuku(bet) { return bet.slice().sort((a, b) => a - b).join('='); }
 
-// ★ここに追加：晴天令の計算ロジック
-return {
+function generateSeitenreiBets(ranking) {
+    if (!ranking || ranking.length < 3) return null;
+    
+    // IDのみの配列 (r[0]=1位, r[1]=2位, r[2]=3位)
+    const r = ranking.map(p => p.id);
+
+    return {
         // 三連単: 指定の4点
         sanrentan: [
             [r[0], r[1], r[2]], // 1-2-3
@@ -1322,6 +1327,7 @@ return {
         sanrenpuku: [
             [r[0], r[1], r[2]]  // 1=2=3
         ]
+    };
 }
 
 function generateKoutenreiBets(ranking) {
