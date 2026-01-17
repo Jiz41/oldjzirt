@@ -1147,7 +1147,7 @@ try {
         console.error("計算実行中にエラー:", error);
         logMessage(`[ERROR] 計算中断: ${error.message}`);
     }
-} // <--- calculatePrediction 関数の最後
+} 
 
 // ========== 表示関数: displayResults (複数競り表示と文章修正) ==========
 // 以下、表示に関する関数は、機能ロジックに影響がないため、元のコードを維持し、ログ出力のみを強化
@@ -1324,7 +1324,6 @@ if (scenarioOutput) {
  }
 
 // --- 以下、重複を排除した関数定義 ---
-
 
 function formatOrderedBet(bet) { return bet.join('-'); }
 function formatSanrenpuku(bet) { return bet.slice().sort((a, b) => a - b).join('='); }
