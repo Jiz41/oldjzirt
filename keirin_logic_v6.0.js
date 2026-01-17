@@ -961,51 +961,58 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
 }
 
 function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResults, participatingPlayers) { 
-    const seitenreiRanking = Object.keys(seitenreiScores).map(id => ({ id: Number(id), score: seitenreiScores[id] })).sort((a, b) => b.score - a.score); 
-    const koutenreiRanking = Object.keys(koutenreiScores).map(id => ({ id: Number(id), score: koutenreiScores[id] })).sort((a, b) => b.score - a.score); 
+    // 1. データパイプの修復：選手データ全体を保持したランキングを生成
+    const seitenreiRanking = Object.keys(seitenreiScores).map(id => {
+        const pData = participatingPlayers.find(pp => pp.id === Number(id));
+        return { ...pData, final_score: seitenreiScores[id] };
+    }).sort((a, b) => b.final_score - a.final_score);
+
+    const koutenreiRanking = Object.keys(koutenreiScores).map(id => {
+        const pData = participatingPlayers.find(pp => pp.id === Number(id));
+        return { ...pData, final_score: koutenreiScores[id] };
+    }).sort((a, b) => b.final_score - a.final_score);
     
-    if (seitenreiRanking.length < 3 || koutenreiRanking.length < 3) { 
-        return { tenunIndex: 50, message: 'データ不足のため指数算出不可' }; 
-    } 
+    if (seitenreiRanking.length < 3 || koutenreiRanking.length < 3) {
+        return { tenunIndex: 50, message: 'データ不足のため指数算出不可', rankingWithData: [], koutenRankingWithData: [] }; 
+    }
     
+    // 2. 指数計算ロジック
     const seitenTop3 = new Set(seitenreiRanking.slice(0, 3).map(p => p.id)); 
     const koutenTop3 = koutenreiRanking.slice(0, 3).map(p => p.id); 
-
     let matchCount = 0; 
     koutenTop3.forEach(id => { if (seitenTop3.has(id)) { matchCount++; } }); 
-
     const tenunIndexMap = { 3: 0, 2: 33, 1: 67, 0: 100 };
     const tIndex = tenunIndexMap[matchCount] ?? 50;
 
-    // --- ☀️ 【壱耀】判定フェーズ ---
+    // 3. ☀️ 【壱耀】判定：1位限定・指数33・風3.0m以下・差マ
     const windSpeed = parseFloat(document.getElementById('wind-speed').value) || 0;
     let targetPlayerId = null;
 
-    // 修正：指数は「33」丁度、風速は「2.0」以下
-    if (tIndex === 33 && windSpeed <= 2.0) {
-        const top4 = seitenreiRanking.slice(0, 4);
-        const target = top4.find(p => {
-            const playerInfo = participatingPlayers.find(pp => pp.id === p.id);
-            if (!playerInfo) return false;
-            
-            // 内部値「追」（差マ）かつ、◎または〇
-            const isSashiMark = (playerInfo.style === '追');
-            const hasGoodMark = (playerInfo.wmark === '◎' || playerInfo.wmark === '〇');
-            
-            return isSashiMark && hasGoodMark;
-        });
-        if (target) { targetPlayerId = target.id; }
+    if (tIndex === 33 && windSpeed <= 3.0) {
+        const firstPlayer = seitenreiRanking[0]; // ファイナルスコア1位のみが権利を持つ
+        if (firstPlayer) {
+            // 人（技術）：脚質が「差」または「マ」
+            const isSashiMa = (firstPlayer.style === '追' || firstPlayer.style === '両');
+            if (isSashiMa) {
+                targetPlayerId = firstPlayer.id;
+                logMessage(`【壱耀】1位 ${targetPlayerId}番車に天命を確認。条件合致。`);
+            }
+        }
     }
 
-    // --- 描画フェーズ ---
+    // 4. HTML生成
     let finalHtml = window.generateTamakiTenunHTML(tIndex, false, null);
-
     if (targetPlayerId !== null) {
-        const ichiyoHtml = window.generateTamakiTenunHTML(tIndex, true, targetPlayerId);
-        finalHtml += ichiyoHtml; 
+        finalHtml += window.generateTamakiTenunHTML(tIndex, true, targetPlayerId);
     }
 
-    return { tenunIndex: tIndex, message: finalHtml };
+    // 後続の特異点判定でデータ入りのランキングを使えるよう、戻り値に含める
+    return { 
+        tenunIndex: tIndex, 
+        message: finalHtml, 
+        rankingWithData: seitenreiRanking, 
+        koutenRankingWithData: koutenreiRanking 
+    };
 }
 
 // メイン計算関数 (calculatePrediction) 
@@ -1181,7 +1188,6 @@ function getTextColor(rgbColor) {
 }
 
 
-// ✅ 修正版：引数の最後に tenunIndexData を受け取るように変更
 function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers, displayLineSegments, tenunIndexData) { 
     displayBankTendency(); 
 
@@ -1190,7 +1196,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // ---------------------------------------------------------- 
     const finalScores = Object.keys(seitenreiIntegratedScores).map(id => ({ 
         id: Number(id), 
-        score: seitenreiIntegratedScores[id] / detailedScenarioResults.length 
+        score: seitenreiIntegratedScores[id] / 3 
     }));
     
     const allScores = finalScores.map(p => p.score);
@@ -1250,117 +1256,77 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // ---------------------------------------------------------- 
     // ★ 天雲指数 (Tamakiメッセージ) の表示 ★ 
     // ---------------------------------------------------------- 
-    // ✅ 計算済みの tenunIndexData をそのまま表示。余計な追記（appendIchiyoComment）は行わない。
     const tenunOutput = document.getElementById('tenun-index-output'); 
     if (tenunOutput && tenunIndexData) { 
         tenunOutput.innerHTML = tenunIndexData.message; 
     } 
 
-// ============================
-// ☀️ 晴天令 買い目表示
-// ============================
-const seitenreiRanking = Object.keys(seitenreiIntegratedScores)
-  .map(id => ({ id: Number(id), score: seitenreiIntegratedScores[id] }))
-  .sort((a, b) => b.score - a.score);
-
-const seitenreiBets = generateSeitenreiBets(seitenreiRanking);
-const seitenreiBox = document.getElementById('seitenrei-output');
-
-if (seitenreiBox && seitenreiBets) {
-  let html = '<h4>☀️ 晴天令</h4><strong>三連単</strong><ul>';
-  seitenreiBets.sanrentan.forEach(b => html += `<li>${formatOrderedBet(b)}</li>`);
-  html += '</ul><strong>三連複</strong><ul>';
-  seitenreiBets.sanrenpuku.forEach(b => html += `<li>${formatSanrenpuku(b)}</li>`);
-  html += '</ul>';
-  seitenreiBox.innerHTML = html;
-}
-
-// ============================
-// ⛈️ 荒天令 買い目表示
-// ============================
-const koutenreiRanking = Object.keys(koutenreiIntegratedScores)
-  .map(id => ({ id: Number(id), score: koutenreiIntegratedScores[id] }))
-  .sort((a, b) => b.score - a.score);
-
-// 修正：第2引数には車番ではなく、選手データ配列(participatingPlayers)を渡す
-const koutenreiBets = generateKoutenreiBets(koutenreiRanking, koutenreiRanking); 
-const koutenreiBox = document.getElementById('koutenrei-output');
-
-// displayResults関数内の「荒天令 買い目表示」セクションを修正
-if (koutenreiBox && koutenreiBets) {
-    const L = koutenreiBets.targetL; // 特異点Lの情報を取得
-    
-    let html = `<h4>⛈️ 荒天令</h4>`;
-    
-    // 特異点Lを常設表示（車番と評価値を明示）
-    if (L) {
-        html += `<div style="margin-bottom:10px; padding:5px 10px; border-left:4px solid #2c3e50; background:#f0f0f0;">
-                    <strong>⚫ 特異点L：</strong> <span style="font-size:1.2em; color:#e74c3c;">${L.id}</span>番車
-                 </div>`;
+    // ============================
+    // ☀️ 晴天令 買い目表示
+    // ============================
+    const seitenreiBox = document.getElementById('seitenrei-output');
+    const seitenreiBets = generateSeitenreiBets(tenunIndexData.rankingWithData);
+    if (seitenreiBox && seitenreiBets) {
+        let html = '<h4>☀️ 晴天令</h4><strong>三連単</strong><ul>';
+        seitenreiBets.sanrentan.forEach(b => html += `<li>${formatOrderedBet(b)}</li>`);
+        html += '</ul><strong>三連複</strong><ul>';
+        seitenreiBets.sanrenpuku.forEach(b => html += `<li>${formatSanrenpuku(b)}</li>`);
+        html += '</ul>';
+        seitenreiBox.innerHTML = html;
     }
 
-    html += `<strong>三連複</strong><ul>`;
-    koutenreiBets.sanrenpuku.forEach(b => html += `<li>${formatSanrenpuku(b)}</li>`);
-    html += `</ul><strong>二車単</strong><ul>`;
-    koutenreiBets.nirentan.forEach(b => html += `<li>${formatOrderedBet(b)}</li>`);
-    html += `</ul>`;
-    
-    koutenreiBox.innerHTML = html;
-}
+    // ============================
+    // ⛈️ 荒天令 買い目表示 (特異点L)
+    // ============================
+    const koutenreiBox = document.getElementById('koutenrei-output');
+    const koutenreiBets = generateKoutenreiBets(tenunIndexData.rankingWithData);
+    if (koutenreiBox && koutenreiBets) {
+        const L = koutenreiBets.targetL;
+        let html = `<h4>⛈️ 荒天令</h4>`;
+        if (L) {
+            html += `<p>特異点：${L.id}</p>`;
+        }
+        html += `<strong>三連複</strong><ul>`;
+        koutenreiBets.sanrenpuku.forEach(b => html += `<li>${formatSanrenpuku(b)}</li>`);
+        html += `</ul><strong>二車単</strong><ul>`;
+        koutenreiBets.nirentan.forEach(b => html += `<li>${formatOrderedBet(b)}</li>`);
+        html += `</ul>`;
+        koutenreiBox.innerHTML = html;
+    }
   
-// シナリオ詳細表示
-const scenarioOutput = document.getElementById('scenario-output'); 
-if (scenarioOutput) { 
-    scenarioOutput.innerHTML = seriSummaryHtml + detailedScenarioResults.map(s => { 
-        const wagers = generateScenarioWagers(s.results); 
-        return `<div class="scenario-detail"><h4>${s.scenario}シミュレーション</h4><p><strong>三連単:</strong> ${wagers.tritan}</p><p><strong>三連複:</strong> ${wagers.trifuku}</p><table><tr><th>選手ID</th><th>評価</th></tr>${s.results.map((p) => `<tr><td>${p.id}</td><td><strong>${p.grade}${p.strength_mark}</strong></td></tr>`).join('')}</table></div>`; 
-    }).join(''); 
-  } 
- }
+    // シナリオ詳細表示
+    const scenarioOutput = document.getElementById('scenario-output'); 
+    if (scenarioOutput) { 
+        scenarioOutput.innerHTML = seriSummaryHtml + detailedScenarioResults.map(s => { 
+            const wagers = generateScenarioWagers(s.results); 
+            return `<div class="scenario-detail"><h4>${s.scenario}シミュレーション</h4><p><strong>三連単:</strong> ${wagers.tritan}</p><p><strong>三連複:</strong> ${wagers.trifuku}</p><table><tr><th>選手ID</th><th>評価</th></tr>${s.results.map((p) => `<tr><td>${p.id}</td><td><strong>${p.grade}${p.strength_mark}</strong></td></tr>`).join('')}</table></div>`; 
+        }).join(''); 
+    } 
+}
 
 // --- 以下、重複を排除した関数定義 ---
 
 function formatOrderedBet(bet) { return bet.join('-'); }
 function formatSanrenpuku(bet) { return bet.slice().sort((a, b) => a - b).join('='); }
 
-function generateSeitenreiBets(ranking) {
-    if (!ranking || ranking.length < 3) return null;
-    const r1 = ranking[0].id, r2 = ranking[1].id, r3 = ranking[2].id;
-    return {
-        sanrentan: [[r1, r2, r3], [r2, r1, r3], [r1, r3, r2], [r2, r3, r1]],
-        sanrenpuku: [[r1, r2, r3]],
-    };
-}
-
 function generateKoutenreiBets(ranking) {
     if (!ranking || ranking.length < 4) return null;
 
-    // 上位3名を明確に定義
     const A = ranking[0];
     const B = ranking[1];
     const C = ranking[2];
     
-    // 4位以下の選手（index 3以降）だけを「特異点候補」として抽出
     const lCandidates = ranking.slice(3).map(p => {
         let s = 0;
-        s += (p.score / 10); 
+        s += (p.final_score / 10); 
         if (p.is_b1) s += 10; 
         if (p.is_s1) s += 5;
-        if (p.style === '両' || p.style === '追') s += 3;
-        
-        logMessage(`[特異点L候補] ${p.id}番車: Lスコア ${s.toFixed(2)}`);
+        if (p.style === '追' || p.style === '両') s += 3;
         return { ...p, lScore: s };
     });
 
-    // Lスコアが高い順に並び替え
     lCandidates.sort((a, b) => b.lScore - a.lScore);
-    
-    // 候補がいればその1位を、いなければ安全策として元の4位(ranking[3])をLとする
-    const targetL = (lCandidates.length > 0) ? lCandidates[0] : ranking[3];
-    
-    if (targetL) {
-        logMessage(`[特異点L決定] 軸選手${A.id}に対し、波乱の鍵として${targetL.id}番車を選出`);
-    }
+    const targetL = lCandidates[0];
     
     return {
         targetL: targetL,
