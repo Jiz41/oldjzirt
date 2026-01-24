@@ -984,18 +984,20 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
     const tenunIndexMap = { 3: 0, 2: 33, 1: 67, 0: 100 };
     const tIndex = tenunIndexMap[matchCount] ?? 50;
 
-    // 3. ☀️ 【壱耀】判定：1位限定・指数33・風3.0m以下・差マ
+        // 3. ☀️ 【壱耀】判定：1位限定・指数33・風2.0m以下・差マ・Wmark◎
     const windSpeed = parseFloat(document.getElementById('wind-speed').value) || 0;
     let targetPlayerId = null;
 
-    if (tIndex === 33 && windSpeed <= 3.0) {
-        const firstPlayer = seitenreiRanking[0]; // ファイナルスコア1位のみが権利を持つ
+    if (tIndex === 33 && windSpeed <= 2.0) {
+        const firstPlayer = seitenreiRanking[0];
         if (firstPlayer) {
-            // 人（技術）：脚質が「差」または「マ」
             const isSashiMa = (firstPlayer.style === '追' || firstPlayer.style === '両');
-            if (isSashiMa) {
+            const isWeightTop = (firstPlayer.wmark === '◎');
+
+            if (isSashiMa && isWeightTop) {
                 targetPlayerId = firstPlayer.id;
-                logMessage(`【壱耀】1位 ${targetPlayerId}番車に天命を確認。条件合致。`);
+                // 簡潔・精緻な実務ログへ変更
+                logMessage(`壱耀晴乾ノ象：○${targetPlayerId}`);
             }
         }
     }
