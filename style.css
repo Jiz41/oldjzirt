@@ -232,27 +232,26 @@ select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; bo
 .sb-group label { display: inline-flex; align-items: center; font-weight: normal; color: #666; }
 .sb-group input[type="radio"] { width: auto; margin-left: 2px; }
 
-/* 👑戴冠ボタン：修正版 */
+/* 👑戴冠ボタン：最終安定版（フィルター不使用） */
 .crown-label {
     cursor: pointer;
     font-size: 1.25em;
     display: inline-block;
     transition: all 0.2s ease-out;
-    /* 彩度を落とすのではなく、極限まで薄くして「眠らせる」 */
+    /* 彩度は弄らず、極限まで透けさせて背景に馴染ませる */
     opacity: 0.15; 
-    filter: saturate(0); /* 彩度ゼロ */
     user-select: none;
     line-height: 1;
     -webkit-tap-highlight-color: transparent;
 }
 
-/* 👑点灯時：黄金の覚醒（強制的発色） */
+/* 👑点灯時：100%の濃度で黄金を顕現させる */
 .is-gold-cap:checked + .crown-icon {
     opacity: 1 !important;
-    filter: saturate(1) !important; /* 彩度を戻す */
+    filter: none !important; /* 念のためフィルターを完全除去 */
     text-shadow: 
-        0 0 15px rgba(255, 215, 0, 0.8),
-        0 0 5px rgba(255, 255, 255, 1);
+        0 0 10px rgba(255, 215, 0, 0.8), 
+        0 0 20px rgba(255, 255, 255, 0.4);
     transform: scale(1.3) translateY(-2px);
 }
 
