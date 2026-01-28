@@ -1051,7 +1051,7 @@ async function calculatePrediction() {
         if (isGoldCap && score < 95.0) {
             const originalScore = score;
             score = 95.0; 
-            logMessage(`[ROYAL] 選手${id}: 👑 戴冠（地力再定義: ${originalScore} -> ${score})`);
+            logMessage(`[ROYAL] 選手${id}: 👑 戴冠（地力再定義)`);
         }
 
         players.push({ 
