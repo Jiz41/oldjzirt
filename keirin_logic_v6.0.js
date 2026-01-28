@@ -1028,42 +1028,59 @@ async function calculatePrediction() {
         tenunOutputArea.innerHTML = window.generateTamakiObservingHTML();
     }
     // 描画を反映させるための待機（0.1秒）
+    // 描画を反映させるための待機（0.1秒）
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    // バンクデータ読み込みチェック
-    if (Object.keys(BANK_DATA).length === 0) { 
-        logMessage("[WAIT] バンクデータの読み込みを待機します..."); 
-        await loadBANK_DATA(); 
-        if (Object.keys(BANK_DATA).length === 0) { 
-            logMessage("[FATAL] バンクデータが利用できません。計算を中止します。"); 
-            return; 
-        } 
-    } 
+    /* --- 👑 戴冠＆データ取得統合ブロック（ここから上書き） --- */
+    const players = [];
+    const playerRows = document.querySelectorAll('.player-row'); 
+    const s1Id = document.querySelector('input[name="s-leader"]:checked')?.getAttribute('data-id'); 
+    const b1Id = document.querySelector('input[name="b-leader"]:checked')?.getAttribute('data-id'); 
+
+    playerRows.forEach(row => { 
+        const id = parseInt(row.getAttribute('data-id')); 
+        if (isNaN(id)) return; 
+
+        let score = parseFloat(row.querySelector('.score').value) || 0;
+        const style = row.querySelector('.style').value;
+        const wmark = row.querySelector('.wmark').value.trim();
+        const isScratch = row.querySelector('.is-scratch')?.checked || false;
+        
+        // 【👑 戴冠】スコアの強制引き上げ
+        const isGoldCap = document.getElementById(`goldcap-${id}`)?.checked || false;
+        if (isGoldCap && score < 95.0) {
+            const originalScore = score;
+            score = 95.0; 
+            logMessage(`[ROYAL] 選手${id}: 👑 戴冠（地力再定義: ${originalScore} -> ${score})`);
+        }
+
+        players.push({ 
+            id: id, score: score, style: style, wmark: wmark, 
+            recent: row.querySelector('.recent').value.trim(), 
+            is_s1: id == s1Id, is_b1: id == b1Id, is_scratch: isScratch,
+            c_score_adj: 1.0, c_recent: 1.0, c_wmark: 1.0, c_s1: 1.0, c_b1: 1.0, c_l: 1.0, c_e: 1.0, final_score: 0,
+            seri_coef: score * (SERI_STYLE_BONUS[style] || 1.00) * (wmark === '◎' ? 1.04 : 1.0)
+        }); 
+    });
+
+    if (Object.keys(BANK_DATA).length === 0) await loadBANK_DATA(); 
 
     const raceType = document.getElementById('race-type').value; 
     const settings = COEFFICIENT_SETTINGS[raceType]; 
     const bankName = document.getElementById('bank-name').value; 
     const selectedBank = BANK_DATA[bankName];  
-    
-    if (!BANK_DATA) { 
-        logMessage(`[ERROR] バンク名 "${bankName}" のデータが見つかりません。計算を中止します。`); 
-        return; 
-    } 
-
     const modeSelector = document.getElementById('mode-selector'); 
     const koutenreiModeSelected = modeSelector ? modeSelector.value === 'koutenrei' : false; 
-    
-    let players = getPlayerData(); // 7名分のデータ（is_scratchフラグ付き）を取得
-    logMessage(`[CALC START] ${raceType} / バンク: ${bankName} で計算開始。モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`); 
 
-    // --- I. ライン解析と C_L (ライン・連係係数) の計算 (欠場選手除外と係数計算を同時に行う) --- 
+    logMessage(`[CALC START] ${raceType} / バンク: ${bankName} / モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`); 
+
     const { players: participatingPlayers, allSeriInfos, finalOrderedPlayerIds, displayLineSegments } = calculateLineCoeffs(players, settings); 
 
-    // 欠場により選手がいない場合は計算を終了
     if (participatingPlayers.length === 0) {
         alert("出走選手がいないため、計算を中止しました。");
         return;
     }
+    /* --- 👑 統合ブロックここまで（この後に basePlayers.forEach が続く） --- */
 
     // --- II. 選手固有係数 C_W, C_R, C_S1, C_B1 & C_E の計算 (基礎係数) --- 
     let basePlayers = JSON.parse(JSON.stringify(participatingPlayers)); // 欠場選手が除外されたリストを使用
