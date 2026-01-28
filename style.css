@@ -232,28 +232,29 @@ select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; bo
 .sb-group label { display: inline-flex; align-items: center; font-weight: normal; color: #666; }
 .sb-group input[type="radio"] { width: auto; margin-left: 2px; }
 
-/* 👑戴冠ボタン：最終安定版（フィルター不使用） */
-.crown-label {
-    cursor: pointer;
-    font-size: 1.25em;
-    display: inline-block;
-    transition: all 0.2s ease-out;
-    /* 彩度は弄らず、極限まで透けさせて背景に馴染ませる */
-    opacity: 0.15; 
-    user-select: none;
-    line-height: 1;
-    -webkit-tap-highlight-color: transparent;
+/* チェックボックス本体は完全に消す */
+.is-gold-cap {
+    display: none;
 }
 
-/* 👑点灯時：100%の濃度で黄金を顕現させる */
-.is-gold-cap:checked + .crown-icon {
-    opacity: 1 !important;
-    filter: none !important; /* 念のためフィルターを完全除去 */
-    text-shadow: 
-        0 0 10px rgba(255, 215, 0, 0.8), 
-        0 0 20px rgba(255, 255, 255, 0.4);
-    transform: scale(1.3) translateY(-2px);
+/* 👑の基本状態（グレーアウト） */
+.crown-icon {
+    cursor: pointer;
+    font-size: 1.3em;
+    filter: grayscale(100%); /* 完全に白黒にする */
+    opacity: 0.3;            /* 薄くする */
+    transition: all 0.3s ease;
+    display: inline-block;
 }
+
+/* 👑をタップした時（色がつき、周りが光る） */
+.is-gold-cap:checked + .crown-icon {
+    filter: grayscale(0%);   /* 色を戻す */
+    opacity: 1;              /* 濃さを戻す */
+    text-shadow: 0 0 15px #ffd700, 0 0 25px #ffffff; /* 周りを光らせる */
+    transform: scale(1.2);   /* 少し大きくする */
+}
+
 
 /* ==========================================
    6. 予想結果・出力・天雲指数（変更なし）
