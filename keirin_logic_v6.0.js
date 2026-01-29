@@ -45,9 +45,16 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
         return 1.0;
     }
 
-    // 2. 変数名を内部ロジックに適合させる
-    const v = speed;           // 北風 8m なら 8 が入る
-    const selectedDir = direction; // "北" が入る
+    // ---------------------------------------------------------
+    // 2. 変数名を内部ロジックに適合させる (V8.2 物理層アップデート)
+    // ---------------------------------------------------------
+    // 入力値 speed にバンク固有の beta を掛け、実質風速 v を算出
+    const beta = (BANK_DATA && BANK_DATA.beta) ? BANK_DATA.beta : 1.0;
+    const v = speed * beta; 
+    const selectedDir = direction;
+
+    // ログ出力
+    logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 風速[${speed}m] → 実効[${v.toFixed(2)}m](β:${beta})`);
 
        // --- 物理パラメータ算出 (V8.2: 枢・深淵崩壊モデル) ---
     const straightBonus = (BANK_DATA.straight || 50) / 50;
