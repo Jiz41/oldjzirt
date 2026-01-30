@@ -592,12 +592,6 @@ function generateScenarioWagers(results, v) {
     const r = results.map(p => p.id); 
     let superiorPatternMessage = ""; 
 
-function generateScenarioWagers(results, v) { 
-    if (!results || results.length < 3) return { tritan: '---', trifuku: '---', ichiyo: "" };
-
-    const r = results.map(p => p.id); 
-    let superiorPatternMessage = ""; 
-
     // 1. 地（風速）：kururuが算出した実効風速 v を参照
     const currentV = v; 
 
