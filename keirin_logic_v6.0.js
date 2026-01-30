@@ -935,23 +935,27 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
             // 1. 基礎能力の算出
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e; 
 
-        // 2. 風圧補正(kururu)を算出し、スコアを更新
-        const res = getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA);
-        p.final_score *= res.adj; 
+            // 2. 風圧補正(kururu)を算出し、スコアを更新
+            const res = getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA);
+            p.final_score *= res.adj; 
 
-        // ✅ 修正：この選手が感じた「実効風速 v」を選手データ自身に刻み込む
-        p.v_for_wager = res.v; 
-        const v = res.v; 
+            // ✅ 修正：この選手が感じた風速を保存
+            p.v_for_wager = res.v; 
+            
+            logMessage(`${logPrefix} 選手ID ${p.id}: 風補正込スコア ${p.final_score.toFixed(3)} (kururu:${res.adj.toFixed(3)})`);
+        }); // ← ここでしっかり閉じる！
 
-        logMessage(`${logPrefix} 選手ID ${p.id}: 風補正込スコア ${p.final_score.toFixed(3)} (kururu:${res.adj.toFixed(3)})`);
+        // 3. 買い目判定に使う代表風速 v を取得（1番手の風速を基準とする）
+        const v = scenarioPlayers[0].v_for_wager || 0;
 
-              // 3. 競り補正（風補正後のスコアを継承して計算）
+        // 4. 競り補正
         scenarioPlayers = applySeriCorrection(scenarioPlayers, allSeriInfos);
 
-        // 4. 荒天令（C係数）の適用
+        // 5. 荒天令（C係数）の適用
         if (applyKoutenrei) { 
             scenarioPlayers = calculate_koutenrei_bias(scenarioPlayers, scenario, BANK_DATA, v); 
         }
+
 
         // 5. 脚質係数 C_D の最終適用 ＆ 統合スコア加算
         scenarioPlayers.forEach(p => { 
