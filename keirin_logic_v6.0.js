@@ -41,8 +41,9 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
     const playerId = p.id;
 
     // 1. 引数を直接チェック（無風・引数不足なら補正なし 1.0）
+
     if (!direction || speed === undefined || speed <= 1.0 || direction === 'none' || direction === '無風') {
-        return 1.0;
+    return { adj: 1.0, v: 0 }; 
     }
 
     // ---------------------------------------------------------
@@ -126,7 +127,7 @@ logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 位置[${posLabel
         logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 属性[${dirType}] 位置[${posLabel}] -> 風補正実行`);
     }
 
-    return finalAdj;
+    return { adj: finalAdj, v: v }; 
 }
 
 // ====================================================================================
@@ -933,19 +934,22 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
             // 1. 基礎能力の算出
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e; 
 
-            // 2. 風圧補正(kururu)を算出し、スコアに「乗算」して反映させる（★ここが漏れていました）
-            const kururuAdj = getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA);
-            p.final_score *= kururuAdj; 
+        // 2. 風圧補正(kururu)を算出し、スコアと「新値 v」を確保する
+        const res = getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA);
+        p.final_score *= res.adj; 
 
-            logMessage(`${logPrefix} 選手ID ${p.id}: 風補正込スコア ${p.final_score.toFixed(3)} (kururu:${kururuAdj.toFixed(3)})`);
-        }); 
+        // kururu が算出した「新値 v」をこのシナリオ内での共通変数として確保
+        const v = res.v; 
+
+        logMessage(`${logPrefix} 選手ID ${p.id}: 風補正込スコア ${p.final_score.toFixed(3)} (kururu:${res.adj.toFixed(3)})`);
+
       
         // 3. 競り補正（風補正後のスコアを継承して計算）
         scenarioPlayers = applySeriCorrection(scenarioPlayers, allSeriInfos);
 
         // 4. 荒天令（C係数）の適用
         if (applyKoutenrei) { 
-            scenarioPlayers = calculate_koutenrei_bias(scenarioPlayers, scenario, BANK_DATA, speed); 
+            scenarioPlayers = calculate_koutenrei_bias(scenarioPlayers, scenario, BANK_DATA, v); 
         }
 
         // 5. 脚質係数 C_D の最終適用 ＆ 統合スコア加算
