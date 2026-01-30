@@ -941,17 +941,17 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
             // 1. 基礎能力の算出
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e; 
 
-        // 2. 風圧補正(kururu)を算出し、スコアと「新値 v」を確保する
+        // 2. 風圧補正(kururu)を算出し、スコアを更新
         const res = getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA);
         p.final_score *= res.adj; 
 
-        // kururu が算出した「新値 v」をこのシナリオ内での共通変数として確保
+        // ✅ 修正：この選手が感じた「実効風速 v」を選手データ自身に刻み込む
+        p.v_for_wager = res.v; 
         const v = res.v; 
 
         logMessage(`${logPrefix} 選手ID ${p.id}: 風補正込スコア ${p.final_score.toFixed(3)} (kururu:${res.adj.toFixed(3)})`);
 
-      
-        // 3. 競り補正（風補正後のスコアを継承して計算）
+              // 3. 競り補正（風補正後のスコアを継承して計算）
         scenarioPlayers = applySeriCorrection(scenarioPlayers, allSeriInfos);
 
         // 4. 荒天令（C係数）の適用
@@ -1335,7 +1335,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     const scenarioOutput = document.getElementById('scenario-output'); 
     if (scenarioOutput) { 
         scenarioOutput.innerHTML = seriSummaryHtml + detailedScenarioResults.map(s => { 
-            const wagers = generateScenarioWagers(s.results); 
+            const wagers = generateScenarioWagers(s.results, s.results[0].v_for_wager || 0); 
             return `<div class="scenario-detail"><h4>${s.scenario}シミュレーション</h4><p><strong>三連単:</strong> ${wagers.tritan}</p><p><strong>三連複:</strong> ${wagers.trifuku}</p><table><tr><th>選手ID</th><th>評価</th></tr>${s.results.map((p) => `<tr><td>${p.id}</td><td><strong>${p.grade}${p.strength_mark}</strong></td></tr>`).join('')}</table></div>`; 
         }).join(''); 
     } 
