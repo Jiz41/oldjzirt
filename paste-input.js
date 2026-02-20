@@ -472,10 +472,9 @@
   const ma    = kimatete['マ'] || 0;
 
   const groups = [
-    { value: '自', score: nige },
-    { value: '両', score: maku },
-    { value: '追', score: Math.max(sashi, ma) },
-  ];
+    { value: '逃', score: nige },
+{ value: '自', score: maku },
+{ value: '追', score: Math.max(sashi, ma) },
 
   groups.sort((a, b) => b.score - a.score);
 
