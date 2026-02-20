@@ -596,6 +596,11 @@
       msgs.push(`⚠️ 車番 ${warnCarNos.join(', ')}: 脚質が同数のため手動設定してください`);
     }
 
+    // デバッグ: 各選手の決まり手を表示
+data.players.forEach(p => {
+  msgs.push(`[DEBUG] 車番${p.carNo}: 逃${p.kimatete['逃']} 捲${p.kimatete['捲']} 差${p.kimatete['差']} マ${p.kimatete['マ']}`);
+});
+    
     // --- 手入力案内 ---
     msgs.push('');
     msgs.push('📝 手動入力が必要な項目:');
