@@ -33,10 +33,12 @@ const C_MARK_VALUES = {
 };
 
 const SERI_STYLE_BONUS = {
+    '逃': 1.08,
     '追': 1.05,
     '両': 1.00,
     '自': 0.95
 };
+
 const SERI_FATIGUE_PENALTY_IN  = 0.15;
 const SERI_FATIGUE_PENALTY_OUT = 0.25;
 const SERI_WIN_BONUS           = 0.05;
@@ -192,7 +194,7 @@ function applyTacticalAdjustments(players, bankData, lineInput, seriInfos) {
     players.forEach(p => {
         const pos = positionMap[p.id];
 
-        if (p.style === '自' && canto > cantoThreshold) {
+        if ((p.style === '自' || p.style === '両') && canto > cantoThreshold) {
             p.cantoMakuriPenalty = makuriPenalty;
             logMessage(`[展開層] 選手${p.id}(捲り): カント補正 ×${makuriPenalty.toFixed(2)}`);
         } else {
@@ -701,7 +703,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
         const targetPlayer = tempPlayers.find(pp => pp.score === scoreMax);
         if (targetPlayer) {
             let rivalAutos = 0;
-            tempPlayers.forEach(pp => { if (pp.id !== targetPlayer.id && (pp.style === '自' || pp.style === '両')) rivalAutos++; });
+            tempPlayers.forEach(pp => { if (pp.id !== targetPlayer.id && (pp.style === '逃' || pp.style === '自' || pp.style === '両')) rivalAutos++; });
             if (rivalAutos >= 2) {
                 const targetAdj = 1.0 - (v * 0.007);
                 targetPlayer.final_score *= targetAdj;
@@ -724,7 +726,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
         });
 
         // 7. C_pace
-        const leaderPlayer = tempPlayers.find(pp => pp.style === '自' || pp.style === '両');
+        const leaderPlayer = tempPlayers.find(pp => pp.style === '逃' || pp.style === '自' || pp.style === '両');
         if (leaderPlayer && leaderPlayer.score >= 105.0 && lines.length - 1 >= 2) {
             leaderPlayer.final_score *= 0.96;
             appliedCoeffs.push('C_pace');
@@ -748,7 +750,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
                 const lowScoreThreshold = scoreMin + scoreRange * 0.4;
                 let baseRisk = 1.0;
                 if (p2.score < lowScoreThreshold) baseRisk = 0.95;
-                const attackers = tempPlayers.filter(pp => pp.id !== p2.id && (pp.style === '自' || pp.style === '両')).length;
+                const attackers = tempPlayers.filter(pp => pp.id !== p2.id && (pp.style === '逃' || pp.style === '自' || pp.style === '両')).length;
                 if (attackers >= 2) baseRisk *= 0.95;
                 p2.final_score *= baseRisk;
                 appliedCoeffs.push('C_guard');
@@ -778,7 +780,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
             const player = tempPlayers.find(p => p.id === id);
             if (player) {
                 if (['◎', '〇', '△'].includes(player.wmark)) totalWeightScore += 1;
-                if (player.style === '自' || player.style === '両') hasSelfStarter = true;
+                if (player.style === '逃' || player.style === '自' || player.style === '両') hasSelfStarter = true;
             }
         });
 
@@ -1014,7 +1016,8 @@ async function calculatePrediction() {
         p.c_b1 = p.is_b1 ? 1.015 : 1.0;
 
         let biasKey = '';
-        if      (p.style === '自') biasKey = '先行';
+        if      (p.style === '逃') biasKey = '先行';
+        else if (p.style === '自') biasKey = '捲り';
         else if (p.style === '両') biasKey = '捲り';
         else if (p.style === '追') biasKey = '差し';
         p.c_e = selectedBank.keirin_bias[biasKey] || 1.0;
