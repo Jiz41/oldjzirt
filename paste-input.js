@@ -59,7 +59,7 @@
 
   /** keirin.jp レース種別テキスト → race-type value */
   const RACE_TYPE_MAP = [
-    { pattern: /ガールズ/,          value: 'girls'  },
+    { pattern: /ガールズ|Ｌ級ガ|L級ガ/ ,          value: 'girls'  },
     { pattern: /Ｓ級|S級/,          value: 's-kyu'  },
     { pattern: /Ａ級チ|A級チ/,      value: 'a-chal' },
     { pattern: /Ａ級|A級/,          value: 'a-kyu'  },
@@ -398,7 +398,7 @@
     const normalizedLines = lines.flatMap(l => l.split('\t').map(s => s.trim())).filter(s => s.length > 0);
 
     // 府県/級班/脚質パターン: 例「栃　木/A3A3/追」
-    const prefStylePattern = /^(.{2,6})\/((?:[ASGa-z][0-9]?){2,})\/(逃|捲|差|マ|両|追)$/;
+    const prefStylePattern = /^(.{2,6})\/((?:[ASGLa-z][0-9]?){2,})\/(逃|捲|差|マ|両|追)$/;
     // 競走得点パターン: 数値（小数あり）
     const scorePattern = /^(\d+\.\d+)$/;
     // 車番パターン: 1〜7の単一数字
@@ -716,7 +716,7 @@
       // wind-direction にセット（1m/s以下は無風扱い）
       const dirEl = document.getElementById('wind-direction');
       if (dirEl) {
-        dirEl.value = speedMs <= 1.0 ? 'none' : direction;
+        dirEl.value = speedMs < 1.0 ? 'none' : direction;
         dirEl.dispatchEvent(new Event('change'));
       }
 
