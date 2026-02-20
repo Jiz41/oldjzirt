@@ -475,11 +475,11 @@
                                 </div>
                             </div>
                             <div class="player-fields">
-                                <option value="逃">逃先</option><option value="追">差マ</option><option value="自">捲り</option>
-                                <div class="player-field"><label>得点 (R)</label><input type="number" class="score" value="${defaultScores[i-1].toFixed(2)}"></div>
-                                <div class="player-field"><label>W印</label><select class="wmark"><option value="◎">◎</option><option value="〇">〇</option><option value="✕">✕</option><option value="△" ${i===3?'selected':''}>△</option><option value="無" ${i!==3?'selected':''}>無</option></select></div>
-                                <div class="player-field"><label>直近3走</label><input type="text" class="recent" value="${defaultRecent[i-1]}"></div>
-                            </div>
+    <div class="player-field"><label>脚質</label><select class="style"><option value="逃">逃先</option><option value="追">差マ</option><option value="自">捲り</option></select></div>
+    <div class="player-field"><label>得点 (R)</label><input type="number" class="score" value="${defaultScores[i-1].toFixed(2)}"></div>
+    <div class="player-field"><label>W印</label><select class="wmark"><option value="◎">◎</option><option value="〇">〇</option><option value="✕">✕</option><option value="△" ${i===3?'selected':''}>△</option><option value="無" ${i!==3?'selected':''}>無</option></select></div>
+    <div class="player-field"><label>直近3走</label><input type="text" class="recent" value="${defaultRecent[i-1]}"></div>
+</div>
                         </div>`);
                     }
                 </script>
