@@ -1,0 +1,555 @@
+// ============================================================================
+// 五更斎アメンティア清音：メッセージ生成システム
+// ============================================================================
+// 儀術『赤口呑縁（しゃっこうどんぺり）』の神託を言語化する
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// 🎭 清音ペルソナ定義
+// ----------------------------------------------------------------------------
+
+const KIYONE_PERSONA = {
+    name: '五更斎アメンティア清音',
+    age: '17-20',
+    role: '厭世の観測者',
+    
+    pronouns: {
+        first: 'うち',
+        second: 'あンた'
+    },
+    
+    vocabulary: {
+        soul_density: '魂の濃度',
+        three_thousand_worlds: '三千世界',
+        sediment: '澱',
+        causal_horizon: '因果地平',
+        poison: '毒',
+        distortion: '歪',
+        noise: '雑音',
+        calm: '凪',
+        dignified: '凛',
+        sparks: '火花',
+        door: '扉',
+        sinking: '沈没',
+        density: '密度'
+    },
+    
+    forbidden_words: [
+        '頑張って', '応援', '絶対', '大丈夫', 
+        '的中', '的中おめでとう', '勝てる', '間違いない'
+    ]
+};
+
+// ----------------------------------------------------------------------------
+// 📜 階級別起動メッセージ
+// ----------------------------------------------------------------------------
+
+const KIYONE_GRADE_OPENINGS = {
+    's-kyu': {
+        opening: "……凪だね。\nとても美しく組み上がってる。理が透けて見えるよ。",
+        mood: 'calm'
+    },
+    
+    'a-kyu': {
+        opening: "……少し、歪を感じるね。\n雑音が混じって、計算の式が少しずつ歪み始めてる。\n―うん、これくらいの方が、うちは好きだよ。",
+        mood: 'distorted'
+    },
+    
+    'a-chal': {
+        opening: "……密度が高いね。\n選択肢が多い。可能性が、ギリギリのところで拮抗してる。\nねぇ、あんたはこういうのが好きなの？",
+        mood: 'dense'
+    },
+    
+    'girls': {
+        opening: "…凛としてるね。\n盾を持たない、個のぶつかり合いか。\n理屈が最も鋭く、一直線に地平へ伸びてるよ。",
+        mood: 'dignified'
+    }
+};
+
+// ----------------------------------------------------------------------------
+// 💬 共通メッセージ
+// ----------------------------------------------------------------------------
+
+const KIYONE_COMMON_MESSAGES = {
+    result_presentation: "…うちは無辺の世界を視てきた。\n今から数字だけを並べるよ。信じるも信じないもあンた次第さね",
+    
+    closing: "…そろそろ三千世界の扉が閉まるよ。\nその頭と指先で、\"答え\"にたどり着けるといいねえ…ふふ…",
+    
+    deme_comment: "三千世界の因果地平の彼方じゃ、この並びが沢山見えたね。",
+    
+    chaos_comment: "過程や結果は一つじゃないよ。ほんの少しの『毒』で、未来は容易く形を変えるのさ。",
+    
+    survival_comment: "1番から7番まで、三千世界における各着順の到達回数だよ。"
+};
+
+// ----------------------------------------------------------------------------
+// 🎨 メッセージ生成：メイン関数
+// ----------------------------------------------------------------------------
+
+/**
+ * 清音の完全なメッセージを生成
+ * @param {object} cosmosResult - 赤口呑縁の計算結果
+ * @param {string} grade - 階級
+ * @returns {string} HTML形式のメッセージ
+ */
+function generateKiyoneMessage(cosmosResult, grade) {
+    let html = '';
+    
+    // 1. 起動メッセージ
+    html += generateOpeningMessage(grade);
+    
+    // 2. 結果提示の導入
+    html += generateResultPresentation();
+    
+    // 3. 出現出目
+    html += generateDemeSection(cosmosResult);
+    
+    // 4. 因果分岐
+    html += generateChaosSection(cosmosResult);
+    
+    // 5. 生存濃度
+    html += generateSurvivalSection(cosmosResult);
+    
+    // 6. 締めの言葉
+    html += generateClosingMessage();
+    
+    return html;
+}
+
+// ----------------------------------------------------------------------------
+// 📝 個別セクション生成関数
+// ----------------------------------------------------------------------------
+
+/**
+ * 1. 起動メッセージ
+ */
+function generateOpeningMessage(grade) {
+    const opening = KIYONE_GRADE_OPENINGS[grade] || KIYONE_GRADE_OPENINGS['a-kyu'];
+    
+    return `
+<div class="kiyone-section opening">
+    <div class="kiyone-voice">${opening.opening}</div>
+</div>
+`;
+}
+
+/**
+ * 2. 結果提示の導入
+ */
+function generateResultPresentation() {
+    return `
+<div class="kiyone-section presentation">
+    <div class="kiyone-voice">${KIYONE_COMMON_MESSAGES.result_presentation}</div>
+</div>
+`;
+}
+
+/**
+ * 3. 出現出目セクション
+ */
+function generateDemeSection(cosmosResult) {
+    const topPatterns = cosmosResult.topPatterns || [];
+    
+    let html = `
+<div class="kiyone-section deme">
+    <h4 class="section-title">📜 出現出目</h4>
+    <div class="deme-list">
+`;
+    
+    topPatterns.forEach(pattern => {
+        html += `
+        <div class="deme-item">
+            <span class="deme-pattern">${pattern.pattern}</span>
+            <span class="deme-count">${pattern.count} / 1465</span>
+        </div>
+`;
+    });
+    
+    html += `
+    </div>
+    <div class="kiyone-comment">${KIYONE_COMMON_MESSAGES.deme_comment}</div>
+</div>
+`;
+    
+    return html;
+}
+
+/**
+ * 4. 因果分岐セクション
+ */
+function generateChaosSection(cosmosResult) {
+    const eventStats = cosmosResult.eventStats || [];
+    
+    let html = `
+<div class="kiyone-section chaos">
+    <h4 class="section-title">🌀 因果分岐</h4>
+    <div class="kiyone-comment">${KIYONE_COMMON_MESSAGES.chaos_comment}</div>
+    <div class="chaos-list">
+`;
+    
+    eventStats.forEach(event => {
+        if (event.occurrences > 0) {
+            html += `
+        <div class="chaos-item">
+            <div class="chaos-header">
+                <span class="chaos-name">${event.event}が発生した世界</span>
+                <span class="chaos-count">(${event.occurrences} / 1465)</span>
+            </div>
+`;
+            
+            if (event.mostFrequentPattern) {
+                html += `
+            <div class="chaos-pattern">
+                その際の最多出現: <span class="pattern-text">${event.mostFrequentPattern.pattern}</span>
+                <span class="pattern-count">(${event.mostFrequentPattern.count} / ${event.mostFrequentPattern.totalEventOccurrences})</span>
+            </div>
+`;
+            }
+            
+            html += `
+        </div>
+`;
+        }
+    });
+    
+    html += `
+    </div>
+</div>
+`;
+    
+    return html;
+}
+
+/**
+ * 5. 生存濃度セクション
+ */
+function generateSurvivalSection(cosmosResult) {
+    const statistics = cosmosResult.statistics || [];
+    
+    let html = `
+<div class="kiyone-section survival">
+    <h4 class="section-title">🎨 選手の入着濃度</h4>
+    <div class="kiyone-comment">${KIYONE_COMMON_MESSAGES.survival_comment}</div>
+    <table class="survival-table">
+        <thead>
+            <tr>
+                <th>車番</th>
+                <th>1着入線</th>
+                <th>2着入線</th>
+                <th>3着入線</th>
+                <th>圏外</th>
+            </tr>
+        </thead>
+        <tbody>
+`;
+    
+    // 車番順にソート（1-7）
+    const sortedStats = [...statistics].sort((a, b) => a.id - b.id);
+    
+    sortedStats.forEach(stat => {
+        html += `
+            <tr>
+                <td class="car-number">${stat.id}</td>
+                <td class="rank-1">${stat.winCount} 回</td>
+                <td class="rank-2">${stat.rank2Count} 回</td>
+                <td class="rank-3">${stat.rank3Count} 回</td>
+                <td class="outside">${stat.outsideCount} 回</td>
+            </tr>
+`;
+    });
+    
+    html += `
+        </tbody>
+    </table>
+</div>
+`;
+    
+    return html;
+}
+
+/**
+ * 6. 締めの言葉
+ */
+function generateClosingMessage() {
+    return `
+<div class="kiyone-section closing">
+    <div class="kiyone-voice">${KIYONE_COMMON_MESSAGES.closing}</div>
+</div>
+`;
+}
+
+// ----------------------------------------------------------------------------
+// 🎬 進捗表示メッセージ
+// ----------------------------------------------------------------------------
+
+/**
+ * 計算開始時のメッセージ
+ */
+function generateCalculationStartMessage(grade) {
+    const opening = KIYONE_GRADE_OPENINGS[grade] || KIYONE_GRADE_OPENINGS['a-kyu'];
+    
+    return `
+<div class="kiyone-calculation-start">
+    <div class="kiyone-voice">${opening.opening}</div>
+    <div class="progress-container">
+        <div class="progress-bar-wrapper">
+            <div id="shakkou-progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="shakkou-progress-text" class="progress-text">0 / 1465</div>
+    </div>
+</div>
+`;
+}
+
+// ----------------------------------------------------------------------------
+// 🎨 スタイル定義（CSSとして出力）
+// ----------------------------------------------------------------------------
+
+/**
+ * 清音メッセージ用のCSS
+ */
+const KIYONE_STYLES = `
+/* 清音セクション共通 */
+.kiyone-section {
+    margin: 20px 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #1a0f0a, #2a1810);
+    border-left: 4px solid #8b4513;
+    border-radius: 8px;
+}
+
+/* 清音の声（口上） */
+.kiyone-voice {
+    font-family: 'Noto Serif JP', 'Yu Mincho', 'YuMincho', serif;
+    font-size: 16px;
+    line-height: 1.8;
+    color: #d4af37;
+    font-style: italic;
+    white-space: pre-line;
+    margin: 15px 0;
+    padding: 15px;
+    background: rgba(42, 24, 16, 0.5);
+    border-left: 2px solid #8b6914;
+}
+
+/* 清音のコメント */
+.kiyone-comment {
+    font-family: 'Noto Serif JP', 'Yu Mincho', 'YuMincho', serif;
+    color: #c9a55b;
+    font-style: italic;
+    margin: 15px 0;
+    padding-left: 20px;
+    border-left: 2px solid #8b6914;
+    line-height: 1.6;
+}
+
+/* セクションタイトル */
+.section-title {
+    color: #d4af37;
+    font-size: 20px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #8b4513;
+}
+
+/* 出現出目 */
+.deme-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.deme-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: #1a0f0a;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.deme-item:hover {
+    background: #2a1810;
+}
+
+.deme-pattern {
+    color: #d4af37;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 18px;
+}
+
+.deme-count {
+    color: #8b6914;
+    font-family: monospace;
+    font-size: 16px;
+}
+
+/* 因果分岐 */
+.chaos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.chaos-item {
+    background: #1a0f0a;
+    padding: 15px;
+    border-left: 3px solid #8b4513;
+    border-radius: 5px;
+}
+
+.chaos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.chaos-name {
+    color: #d4af37;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.chaos-count {
+    color: #8b6914;
+    font-family: monospace;
+}
+
+.chaos-pattern {
+    color: #c9a55b;
+    font-size: 14px;
+    padding-left: 15px;
+    margin-top: 8px;
+}
+
+.pattern-text {
+    color: #d4af37;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+.pattern-count {
+    color: #8b6914;
+    font-family: monospace;
+    margin-left: 10px;
+}
+
+/* 生存濃度テーブル */
+.survival-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: #1a0f0a;
+}
+
+.survival-table thead th {
+    background: #2a1810;
+    color: #d4af37;
+    padding: 12px;
+    text-align: center;
+    border-bottom: 2px solid #8b4513;
+    font-weight: bold;
+}
+
+.survival-table tbody td {
+    color: #c9a55b;
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #3a2810;
+}
+
+.survival-table tbody tr:hover {
+    background: #2a1810;
+}
+
+.car-number {
+    font-weight: bold;
+    color: #d4af37 !important;
+}
+
+.rank-1 {
+    color: #e74c3c !important;
+    font-weight: bold;
+}
+
+.rank-2 {
+    color: #3498db !important;
+}
+
+.outside {
+    color: #7f8c8d !important;
+}
+
+/* 進捗表示 */
+.kiyone-calculation-start {
+    padding: 30px;
+    background: linear-gradient(135deg, #1a0f0a, #2a1810);
+    border: 2px solid #8b4513;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.progress-container {
+    margin-top: 20px;
+}
+
+.progress-bar-wrapper {
+    width: 100%;
+    height: 30px;
+    background: #0a0505;
+    border: 1px solid #8b4513;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #d4af37, #8b4513);
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    text-align: center;
+    color: #d4af37;
+    font-family: monospace;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+/* opening/closingの特別スタイル */
+.kiyone-section.opening,
+.kiyone-section.closing {
+    border-left-color: #d4af37;
+}
+
+.kiyone-section.closing {
+    margin-top: 30px;
+}
+`;
+
+/**
+ * スタイルをページに注入
+ */
+function injectKiyoneStyles() {
+    if (document.getElementById('kiyone-styles')) return;
+    
+    const styleElement = document.createElement('style');
+    styleElement.id = 'kiyone-styles';
+    styleElement.textContent = KIYONE_STYLES;
+    document.head.appendChild(styleElement);
+}
+
+// ページ読み込み時にスタイルを注入
+if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectKiyoneStyles);
+    } else {
+        injectKiyoneStyles();
+    }
+}

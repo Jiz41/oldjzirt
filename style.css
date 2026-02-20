@@ -4,13 +4,13 @@
 html { overflow-y: scroll; }
 body {
     overflow-x: clip; min-height: 101vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Noto Sans JP', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0; padding: 0; padding-bottom: 30px;
     background-color: #fafaf8 !important; 
     color: #333; -webkit-overflow-scrolling: touch; will-change: transform;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.05em;
 }
 .container {
     width: calc(100% - 20px);
@@ -20,8 +20,9 @@ body {
     padding: 0;
     border-radius: 12px; 
     box-shadow: 
-        0 4px 6px rgba(56, 78, 56, 0.02),
-        0 15px 35px rgba(56, 78, 56, 0.08) !important;
+        0 2px 4px rgba(56, 78, 56, 0.04),
+        0 8px 20px rgba(56, 78, 56, 0.08),
+        0 16px 40px rgba(56, 78, 56, 0.06) !important;
     border: 1px solid rgba(0, 0, 0, 0.03);
     box-sizing: border-box;
     
@@ -85,24 +86,76 @@ h1 { display: none; }
 h2 {
     font-size: 1.2em;
     color: #698b69;
-    padding: 15px 15px 8px 15px; /* 下の余白をわずかに微調整 */
-    margin-top: 25px;            /* 上にゆとりを持たせて「抜け」を作る */
-    border-bottom: none !important; /* 従来の硬い線を消去 */
+    padding: 15px 15px 8px 22px;
+    margin-top: 25px;
+    border-bottom: none !important;
     position: relative;
-    letter-spacing: 0.1em;       /* 見出しに品格を出すための字間 */
+    letter-spacing: 0.15em;
+}
+
+/* 左側の縦線アクセント */
+h2::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    bottom: 8px;
+    width: 3px;
+    background: linear-gradient(180deg, #b3976d 0%, #698b69 100%);
+    border-radius: 2px;
 }
 
 h2::after {
     content: "";
     position: absolute;
     bottom: 0;
-    left: 15px;                 /* 文字の開始位置に合わせる */
-    width: 80%;                 /* 100%にせず、あえて短く消すのが粋 */
-    height: 2px;                /* 厚みは維持して存在感を出す */
+    left: 15px;
+    width: 80%;
+    height: 2px;
     background: linear-gradient(90deg, #b3c7b3 0%, rgba(179, 199, 179, 0) 100%);
     border-radius: 2px;
 }
-.input-group, .result-section { margin: 0 15px 20px 15px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #fcfcf0; box-sizing: border-box; }
+
+/* h3見出し（晴天令・荒天令など） */
+h3 {
+    font-size: 1.1em;
+    color: #2d4a2d;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.input-group { 
+    margin: 0 15px 20px 15px; 
+    padding: 15px; 
+    border: 1px solid #e0e0e0; 
+    border-radius: 8px; 
+    background: rgba(252, 252, 240, 0.9);
+    box-sizing: border-box;
+    box-shadow: 
+        0 2px 6px rgba(0, 0, 0, 0.06),
+        0 6px 16px rgba(0, 0, 0, 0.04),
+        inset 0 1px 2px rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.result-section { 
+    margin: 0 15px 20px 15px; 
+    padding: 15px; 
+    border: 1px solid #e0e0e0; 
+    border-radius: 8px; 
+    background: 
+        linear-gradient(180deg,
+            #fcfcf0 900px,
+            #d4e3c8 940px,
+            #a8c4a8 980px,
+            #7a9b8e 1010px,
+            #557a6a 1040px,
+            #3d5a6a 1070px,
+            #0a0005 1100px
+        );
+    box-sizing: border-box; 
+}
 
 /* --- ヘッダー：背景親和性を高める透過境界線定義 --- */
 .manual-header, .debug-log-header {
@@ -259,8 +312,25 @@ select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; bo
 /* ==========================================
    6. 予想結果・出力・天雲指数（変更なし）
    ========================================== */
-.line-display { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; align-items: center; }
-.line-box { display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.9em; transition: background-color 0.5s, color 0.5s; line-height: 1.5; }
+.line-display { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; align-items: center; }
+.line-box { 
+    display: inline-block; 
+    padding: 4px 10px; 
+    border-radius: 6px; 
+    font-weight: bold; 
+    font-size: 1em; 
+    transition: all 0.3s ease; 
+    line-height: 1.6;
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.08),
+        0 4px 8px rgba(0, 0, 0, 0.04);
+}
+.line-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 4px 8px rgba(0, 0, 0, 0.12),
+        0 8px 16px rgba(0, 0, 0, 0.08);
+}
 .seri-segment { display: inline-flex; align-items: center; font-size: 0.9em; font-weight: bold; border: 1px dashed #b3c7b3; border-radius: 4px; padding: 1px 3px; margin-right: 5px; }
 .seri-arrow { font-size: 1.1em; font-weight: bold; color: #c07777; margin: 0 2px; }
 #bank-tendency-display { margin-top: 5px; margin-bottom: 10px; padding: 5px 0; font-size: 0.95em; color: #698b69; font-weight: bold; }
@@ -269,15 +339,81 @@ select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; bo
 .scenario-detail th, .scenario-detail td { border: 1px solid #efefef; padding: 6px 3px; text-align: center; font-size: 0.85em; word-break: break-all; }
 .scenario-detail th { background-color: #f7f7f7; color: #555; }
 .recommendation { padding: 12px; border-radius: 6px; font-weight: bold; margin-top: 10px; font-size: 0.95em; line-height: 1.6; }
-#seitenrei-output { background-color: #e6f5e6; border-left: 5px solid #698b69; color: #444; }
-#koutenrei-output { background-color: #fcf0f0; border-left: 5px solid #c07777; color: #444; }
+#seitenrei-output { 
+    background: 
+        linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.7) 100%),
+        repeating-linear-gradient(90deg, 
+            transparent, 
+            transparent 2px, 
+            rgba(105, 139, 105, 0.03) 2px, 
+            rgba(105, 139, 105, 0.03) 3px
+        ),
+        repeating-linear-gradient(0deg, 
+            transparent, 
+            transparent 2px, 
+            rgba(105, 139, 105, 0.03) 2px, 
+            rgba(105, 139, 105, 0.03) 3px
+        ),
+        rgba(230, 245, 230, 0.85);
+    border-left: 5px solid #698b69; 
+    border-right: 2px solid rgba(105, 139, 105, 0.3);
+    color: #1a2a1a;
+    box-shadow: 
+        0 4px 12px rgba(105, 139, 105, 0.15),
+        0 8px 24px rgba(105, 139, 105, 0.08),
+        inset 0 1px 3px rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+#koutenrei-output { 
+    background: 
+        linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.7) 100%),
+        repeating-linear-gradient(90deg, 
+            transparent, 
+            transparent 2px, 
+            rgba(192, 119, 119, 0.03) 2px, 
+            rgba(192, 119, 119, 0.03) 3px
+        ),
+        repeating-linear-gradient(0deg, 
+            transparent, 
+            transparent 2px, 
+            rgba(192, 119, 119, 0.03) 2px, 
+            rgba(192, 119, 119, 0.03) 3px
+        ),
+        rgba(252, 240, 240, 0.85);
+    border-left: 5px solid #c07777; 
+    border-right: 2px solid rgba(192, 119, 119, 0.3);
+    color: #2a1a1a;
+    box-shadow: 
+        0 4px 12px rgba(192, 119, 119, 0.15),
+        0 8px 24px rgba(192, 119, 119, 0.08),
+        inset 0 1px 3px rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
 .scenario-detail { border: 1px dashed #dcdcdc; padding: 12px; margin-top: 15px; border-radius: 6px; }
 .scenario-detail h4 { font-size: 1.05em; margin: 0 0 10px 0; border-bottom: 1px solid #e0e0e0; padding-bottom: 5px; color: #698b69; }
 
 #results-container { display: none; opacity: 0; transition: opacity 0.5s; }
 #results-container.visible { display: block; opacity: 1; }
 
-.tenun-index-container { margin: 20px 0; padding: 15px; border-radius: 8px; text-align: left; border: 2px dashed #d6a300; background-color: #fff9e6; }
+.tenun-index-container { 
+    margin: 20px 0; 
+    padding: 18px; 
+    border-radius: 10px; 
+    text-align: left; 
+    border: 2px dashed #d6a300; 
+    background: 
+        linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.5) 100%),
+        #fff9e6;
+    box-shadow: 
+        0 2px 6px rgba(214, 163, 0, 0.12),
+        0 6px 16px rgba(214, 163, 0, 0.08),
+        0 12px 32px rgba(214, 163, 0, 0.05),
+        inset 0 1px 3px rgba(255, 255, 255, 0.6);
+    color: #5a4500;
+}
+
 .tenun-title { font-weight: bold; font-size: 0.95em; color: #8b6d00; margin-bottom: 10px; display: block; border-bottom: 1px solid rgba(139, 109, 0, 0.2); padding-bottom: 5px; }
 
 /* ==========================================
@@ -289,7 +425,26 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
 .tamaki-display { display: flex !important; flex-direction: row !important; align-items: flex-start !important; }
 .tamaki-character { width: 75px !important; min-width: 75px !important; max-width: 75px !important; height: auto !important; margin-right: 12px !important; flex-shrink: 0 !important; }
 .tamaki-image { width: 100% !important; height: auto !important; display: block !important; }
-.tamaki-speech-bubble { flex: 1 !important; min-width: 0 !important; background: white; border: 2px solid #d6a300; border-radius: 12px; padding: 10px; font-size: 0.9em; line-height: 1.4; box-sizing: border-box; position: relative; }
+.tamaki-speech-bubble { 
+    flex: 1 !important; 
+    min-width: 0 !important; 
+    background: 
+        linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.5) 100%),
+        white; 
+    border: 2px solid #d6a300; 
+    border-radius: 12px; 
+    padding: 12px; 
+    font-size: 0.9em; 
+    line-height: 1.5; 
+    box-sizing: border-box; 
+    position: relative;
+    box-shadow: 
+        0 2px 6px rgba(214, 163, 0, 0.15),
+        0 6px 14px rgba(214, 163, 0, 0.08),
+        0 12px 28px rgba(214, 163, 0, 0.05),
+        inset 0 1px 3px rgba(255, 255, 255, 0.6);
+    color: #333;
+}
 @media (max-width: 600px) { .tamaki-character { width: 70px !important; min-width: 70px !important; } }
 
 /* --- 不具合報告：背景に完全同化させ、ノイズを排除（共通設定） --- */
@@ -355,12 +510,6 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
         color: #ffffff !important;
         border: 1px solid rgba(255, 255, 255, 0.15) !important;
     }
-
-    /* --- 予想出力・たまきちゃん --- */
-    #seitenrei-output { background-color: #1b2e1b !important; color: #d0e6d0 !important; }
-    #koutenrei-output { background-color: #2e1b1b !important; color: #e6d0d0 !important; }
-    .tamaki-speech-bubble { background: #252525 !important; color: #e0e0e0 !important; border-color: #8b6d00 !important; }
-    .tenun-index-container { background-color: #2a2410 !important; border-color: #8b6d00 !important; }
 
       /* --- 選手データの文字色を明るく反転 --- */
     .player-header {

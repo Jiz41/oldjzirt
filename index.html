@@ -5,16 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- 🌌 赤口呑縁：サイバーパンク配色 -->
+    <link rel="stylesheet" href="kiyone_cyberpunk_addon.css">
+
+    <!-- 🌐 PWA設定 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="真自在律">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js');
+        });
+      }
+    </script>
 </head>
 
 <body>
 
+ <!-- <div id="hf-maintenance-shield" style="display: none;">
+    <div style="
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100dvh !important;
+        background-color: rgba(0, 0, 0, 0.85) !important;
+        z-index: 2147483647 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        pointer-events: auto !important;
+    ">
+        <div style="
+            color: white !important;
+            font-size: 28px !important;
+            font-weight: bold !important;
+            padding: 40px !important;
+            border: 4px solid white !important;
+            background: black !important;
+            border-radius: 15px !important;
+        ">
+            只今工事中です 👷‍♀️
+        </div>
+    </div>
+</div>
+
+ <script>
+    (function() {
+        // URLの末尾が「?edit=true」なら何もしない
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('oudon') === 'tabetai') {
+            console.log("確認用：ロックを解除しました。");
+            return; 
+        }
+
+        // それ以外（通常アクセス）はロック発動
+        const shield = document.getElementById('hf-maintenance-shield');
+        shield.style.display = 'block';
+        document.body.classList.add('locked-body');
+        document.body.appendChild(shield);
+        
+        window.onscroll = function() { window.scrollTo(0, 0); };
+    })();
+</script> -->
+
 <script>
 (function() {
     function addCopyButton() {
-        const target = document.getElementById('scenario-output');
+        const target = document.getElementById('copy-button-container');
         if (!target || document.getElementById('easy-copy-btn')) return;
-        if (target.innerHTML.trim() === "") return;
+        const scenarioOutput = document.getElementById('scenario-output');
+        if (!scenarioOutput || scenarioOutput.innerHTML.trim() === "") return;
 
         const btn = document.createElement('button');
         btn.id = 'easy-copy-btn';
@@ -87,7 +153,7 @@
                     if (title) scenarioText += `${title} ${bets}\n`;
                 });
 
-                const finalText = `${bank} ［レース番号を入力］R\n\n☀️ 晴天令：${sunny}\n⛈️ 荒天令：${rainy}\n\n・展開別\n${scenarioText}\n（${windText}）`;
+                const finalText = `${bank} ［レース番号を入力］R\n\n☀️ 晴天令：${sunny}\n⛈️ 荒天令：${rainy}\n\n${scenarioText}\n（${windText}）`;
                 await navigator.clipboard.writeText(finalText);
                 
                 // 成功時の控えめなフィードバック
@@ -241,16 +307,28 @@
         </thead>
         <tbody>
             <tr>
+                <td><b>天雲指数</b></td>
+                <td>独自ロジックによる安定値：七曜院パラドキサ環による単次元的解析。</td>
+            </tr>
+            <tr>
                 <td><b>☀️ 晴天令</b></td>
-                <td><b>安定推奨</b>：最も支持率と物理条件が安定した推奨買い目。</td>
+                <td>最も支持率と物理条件が安定した推奨買い目。</td>
             </tr>
             <tr>
                 <td><b>⛈️ 荒天令</b></td>
-                <td><b>高配当狙い</b>：自滅消耗や風の影響による波乱狙い。</td>
+                <td><b>自滅消耗や風の影響による波乱狙い。</td>
             </tr>
             <tr>
-                <td><b>天雲指数</b></td>
-                <td>独自ロジックによる期待値。全体のパワーバランスを数値化。</td>
+                <td><b>🌌 赤口呑縁</b></td>
+                <td>
+                    <b>1,465の並行世界シミュレーション</b>：五更斎アメンティア清音による多次元展開解析。<br>
+                    <small>
+                        • <b>出現出目</b>：最も頻度の高い決着パターンTOP3を表示<br>
+                        • <b>因果分岐</b>：ライン崩壊や波乱イベント発生時の出目傾向<br>
+                        • <b>選手の生存濃度</b>：各選手の1着〜3着入線回数と圏外率を集計<br>
+                        ※級班ごとに異なる「世界線の重み付け」により、安定志向と波乱志向のバランスを調整
+                    </small>
+                </td>
             </tr>
             <tr>
                 <td><b>処理ログ</b></td>
@@ -258,6 +336,69 @@
             </tr>
         </tbody>
     </table>
+
+    <h3>5. 赤口呑縁（しゃっこうどんぺり）について</h3>
+    <p><b>偽典『赤口呑縁』</b>は、1,465通りの並行世界をシミュレーションし、展開の「揺らぎ」を可視化する解析機構です。</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 30%;">要素</th>
+                <th>説明</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><b>世界線の構成</b></td>
+                <td>
+                    通常展開（晴天令ベース）と波乱展開（荒天令ベース）を級班ごとの比率で混合。<br>
+                    <small>例：S級 = 879通常 + 586波乱 / A級 = 586通常 + 879波乱</small>
+                </td>
+            </tr>
+            <tr>
+                <td><b>”ゆらぎ”の詳細</b></td>
+                <td>
+                    ライン微崩壊・早駆け・風煽り・競り乱れ・落車・ダークホース・新人暴走・捲り自滅など、<br>
+                    展開を変動させる8種のイベントをランダム発生させる。
+                </td>
+            </tr>
+            <tr>
+                <td><b>出現出目</b></td>
+                <td>
+                    1,465回の試行で最も多く出現した決着パターンを、頻度順にTOP3表示。<br>
+                    <small>※頻度が高いほど「その決着に収束しやすい」ことを示す。</small>
+                </td>
+            </tr>
+            <tr>
+                <td><b>因果分岐</b></td>
+                <td>
+                    特定のカオスイベント（ライン崩壊など）が発生した世界線のみを抽出し、<br>
+                    その条件下で最も出やすい決着パターンを分析。<br>
+                    <small>※「波乱時の保険」として活用可能。</small>
+                </td>
+            </tr>
+            <tr>
+                <td><b>生存濃度</b></td>
+                <td>
+                    各選手が1着・2着・3着・圏外にそれぞれ何回入線したかを集計。<br>
+                    <small>※着順分布を見ることで、選手の「安定性」や「ヒモ適性」が判断できる。</small>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>🎯 赤口呑縁の活用方法</h4>
+    <ul style="line-height: 1.8;">
+        <li><b>本命固め</b>：出現出目TOP1が晴天令と一致 → 安定した展開</li>
+        <li><b>ヒモ選択</b>：生存濃度で2着・3着の入線回数が多い選手を狙う</li>
+        <li><b>波乱対策</b>：因果分岐の出目を保険として買う</li>
+        <li><b>買い目の絞り込み</b>：頻度が極端に低い決着（10回未満など）を除外</li>
+    </ul>
+
+    <p style="font-size: 0.85em; color: #999;">
+        ※赤口呑縁は疑似統計的な傾向を示すものであり、実際のレース結果を保証するものではありません。<br>
+        ※計算には数秒かかる場合があります（1,465回のシミュレーション実行のため）。
+    </p>
 </div>
 
         <h2>🎛️ レース/選手情報入力</h2>
@@ -369,8 +510,13 @@
                 <div class="recommendation" id="seitenrei-output">計算結果待ち...</div>
                 <h3>⛈️ 荒天令 (波乱推奨)</h3>
                 <div class="recommendation" id="koutenrei-output">計算結果待ち...</div>
-                <h3>展開別シミュレーション詳細</h3>
-                <div id="scenario-output"></div>
+                <div id="scenario-output">
+    <div id="shakkou-status-board" style="display:none;">
+        <span id="span_0">0</span> / 1465
+    </div>
+</div>
+                <div id="copy-button-container"></div>
+
             </div>
         </div>
     </div>
@@ -417,7 +563,7 @@ function execCopy() {
     </div>
     <div class="debug-log" id="debug-log">
         [TOOL START] ツール起動。すべての係数とロジックを読み込みました。<br>
-        [INFO] bankdata.jsonの読み込みを待機しています...
+        [INFO] bankdata.jsonの読み込みを待機しています...<br>
     </div>
     
     <div style="text-align: center; margin-bottom: 5px;">
@@ -462,9 +608,430 @@ function execCopy() {
         }
     </script>
 
-<script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5u/resolve/main/keirin_logic_v6.0.js" defer></script>
+<!-- ============================================================================
+     🛡️ 入力層堅牢化モジュール - 華耀天輪 真・自在律 入力バリデーション
+     仕様リストに基づく完全実装。keirin_logic より必ず先に定義する。
+     ============================================================================ -->
+<script>
+// ============================================================
+// 🔐 InputGuard : 入力値の正規化・バリデーション・型変換を担う
+//                 全ての入力値はこのモジュールを経由してロジックへ渡す
+// ============================================================
+const InputGuard = (() => {
+
+    // ──────────────────────────────────────────────────────
+    // § 1. 内部ユーティリティ
+    // ──────────────────────────────────────────────────────
+
+    /** 全角数字 → 半角数字へ変換 */
+    function toHalfWidth(str) {
+        return String(str).replace(/[０-９]/g, ch =>
+            String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)
+        );
+    }
+
+    /** デバッグログへの書き込み（debug-log 要素があれば追記） */
+    function log(msg) {
+        const el = document.getElementById('debug-log');
+        if (el) el.innerHTML += `[InputGuard] ${msg}<br>`;
+        console.log('[InputGuard]', msg);
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 2. レース・環境設定系 バリデーション
+    //       対象: id="race-info" 配下の各要素
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * race-type: 未選択ガード
+     * @returns {string|null} 選択値、または null（ロック対象）
+     */
+    function getRaceType() {
+        const el = document.getElementById('race-type');
+        if (!el || !el.value) {
+            log('ERROR: 級班(race-type)が未選択です。計算をロックします。');
+            return null;
+        }
+        return el.value;
+    }
+
+    /**
+     * bank-name: bankdata.json 取得失敗時のフォールバック（400m）
+     * @returns {string} バンク名
+     */
+    function getBankName() {
+        const el = document.getElementById('bank-name');
+        const val = el ? el.value : '';
+        if (!val || val.trim() === '') {
+            log('WARN: バンク名が空値です。デフォルト値(400)を使用します。');
+            return '400';
+        }
+        return val;
+    }
+
+    /**
+     * wind-direction / wind-speed: 論理矛盾の解消
+     * 「none」選択時は wind-speed を強制的に 0 にして disabled 化する。
+     * @returns {{ direction: string, speed: number }}
+     */
+    function getWindInfo() {
+        const dirEl   = document.getElementById('wind-direction');
+        const speedEl = document.getElementById('wind-speed');
+        const dir     = dirEl   ? dirEl.value   : 'none';
+        let   speed   = speedEl ? Number(speedEl.value) : 0;
+
+        if (dir === 'none' || dir === '無風') {
+            if (speedEl) {
+                speedEl.value    = 0;
+                speedEl.disabled = true;
+            }
+            speed = 0;
+            log(`INFO: 風向=無風 → 風速を強制的に 0 にセット。`);
+        } else {
+            if (speedEl) speedEl.disabled = false;
+            // サイレント・コレクト: 0.0〜20.0 の範囲外を補正
+            if (isNaN(speed) || speed < 0)  { log(`WARN: 風速(${speed})が範囲外 → 0 に補正`); speed = 0; }
+            if (speed > 20)                  { log(`WARN: 風速(${speed})が範囲外 → 20 に補正`); speed = 20; }
+            speed = Math.round(speed * 10) / 10; // 小数1桁に丸め
+        }
+        return { direction: dir, speed };
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 3. 選手データ入力系 バリデーション
+    //       対象: class="player-card" / "player-row" 全7スロット
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * .score (得点): 全角→半角変換、NaN/空は0、範囲 0〜130 にサイレント補正
+     * @param {Element} card - 選手カード要素
+     * @param {number}  idx  - 選手番号（ログ用）
+     * @returns {number}
+     */
+    function getScore(card, idx) {
+        const el  = card.querySelector('.score');
+        if (!el) return 0;
+        let raw   = toHalfWidth(el.value);
+        let val   = parseFloat(raw);
+        if (isNaN(val) || el.value.trim() === '') {
+            log(`WARN: 選手${idx}の得点が非数値 → 0 に補正`);
+            val = 0;
+        }
+        if (val < 0)   { log(`WARN: 選手${idx}の得点(${val})が範囲外 → 0 に補正`);   val = 0; }
+        if (val > 130) { log(`WARN: 選手${idx}の得点(${val})が範囲外 → 130 に補正`); val = 130; }
+        return val;
+    }
+
+    /**
+     * .recent (3走): 数字以外を即座に 9 へ置換し、必ず3桁の文字列に整形
+     * @param {Element} card
+     * @param {number}  idx
+     * @returns {string} 例: "192"
+     */
+    function getRecent(card, idx) {
+        const el  = card.querySelector('.recent');
+        if (!el) return '999';
+        // 全角数字を半角変換してから非数字を 9 に置換
+        let raw   = toHalfWidth(el.value);
+        let clean = raw.replace(/[^0-9]/g, '9');  // 欠・休・英字なども全て 9
+        // 3桁に整形（不足は 9 で補填、超過は先頭3桁のみ）
+        while (clean.length < 3) clean += '9';
+        clean = clean.slice(0, 3);
+        if (clean !== raw.slice(0, 3)) {
+            log(`INFO: 選手${idx}の3走成績を正規化: "${el.value}" → "${clean}"`);
+        }
+        el.value = clean; // UIにも反映
+        return clean;
+    }
+
+    /**
+     * .style (脚質): 未選択時のガード
+     * @param {Element} card
+     * @param {number}  idx
+     * @returns {string} "自" | "追" | "両"
+     */
+    function getStyle(card, idx) {
+        const el  = card.querySelector('.style');
+        const val = el ? el.value : '';
+        if (!val || !['自', '追', '両'].includes(val)) {
+            log(`WARN: 選手${idx}の脚質が未選択 → "自" をデフォルト適用`);
+            return '自';
+        }
+        return val;
+    }
+
+    /**
+     * .wmark (W印): 未選択時は "無" を返して未定義エラーを回避
+     * @param {Element} card
+     * @param {number}  idx
+     * @returns {string}
+     */
+    function getWmark(card, idx) {
+        const el  = card.querySelector('.wmark');
+        const val = el ? el.value : '無';
+        return (val && val.trim() !== '') ? val : '無';
+    }
+
+    /**
+     * ラジオボタン排他制御の整合性確認
+     * S1位・B1位がそれぞれ正しく1名選出されているかを検証する。
+     * @returns {{ s1Id: number, b1Id: number, valid: boolean }}
+     */
+    function validateRadioButtons() {
+        const s1Checked = document.querySelectorAll('input[name="s-leader"]:checked');
+        const b1Checked = document.querySelectorAll('input[name="b-leader"]:checked');
+
+        const s1Id = s1Checked.length === 1 ? Number(s1Checked[0].dataset.id) : -1;
+        const b1Id = b1Checked.length === 1 ? Number(b1Checked[0].dataset.id) : -1;
+
+        let valid = true;
+        if (s1Checked.length !== 1) {
+            log(`WARN: S1位ラジオボタンが ${s1Checked.length} 名選択されています（正: 1名）。`);
+            valid = false;
+        }
+        if (b1Checked.length !== 1) {
+            log(`WARN: B1位ラジオボタンが ${b1Checked.length} 名選択されています（正: 1名）。`);
+            valid = false;
+        }
+        return { s1Id, b1Id, valid };
+    }
+
+    /**
+     * 全7選手のデータを一括バリデーションして配列で返す
+     * @returns {Array<Object>}
+     */
+    function getAllPlayersData() {
+        const cards  = document.querySelectorAll('.player-row');
+        const result = [];
+        cards.forEach((card, i) => {
+            const idx      = i + 1;
+            const isScratch = card.querySelector('.is-scratch')?.checked ?? false;
+            result.push({
+                id       : idx,
+                isScratch,
+                score    : getScore(card, idx),
+                recent   : getRecent(card, idx),
+                style    : getStyle(card, idx),
+                wmark    : getWmark(card, idx),
+                isLocal  : card.querySelector('.is-local')?.checked   ?? false,
+                isGoldCap: card.querySelector('.is-gold-cap')?.checked ?? false,
+            });
+        });
+        return result;
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 4. 展開・スイッチ系 バリデーション
+    //       対象: id="line-input-container" 配下
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * line-input: 許可文字以外を一括削除して純粋な並び文字列に浄化
+     * 許可: 1234567 , ( ) [ ] -
+     * @returns {string}
+     */
+    function getLineInput() {
+        const el  = document.getElementById('line-input');
+        if (!el) return '';
+        // 全角数字を半角変換してから不正文字を除去
+        let raw   = toHalfWidth(el.value);
+        let clean = raw.replace(/[^1-9,\(\)\[\]\-]/g, '');
+        if (clean !== raw) {
+            log(`INFO: 並び入力を浄化: "${el.value}" → "${clean}"`);
+            el.value = clean; // UIにも反映
+        }
+        return clean;
+    }
+
+    /**
+     * local-switch: Boolean型として確実に抽出
+     * @returns {boolean}
+     */
+    function getLocalSwitch() {
+        const el = document.getElementById('local-switch');
+        return el ? Boolean(el.checked) : false;
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 5. システム基盤: ReadOnly ロック / アンロック
+    // ──────────────────────────────────────────────────────
+
+    /** 全入力要素を一時的に無効化（計算中のデータ改ざん防止） */
+    function lockAllInputs() {
+        document.querySelectorAll(
+            'input, select, textarea, button'
+        ).forEach(el => {
+            el.dataset.prevDisabled = el.disabled; // 元の状態を保存
+            el.disabled = true;
+        });
+        log('INFO: 計算開始 — 全入力をロックしました。');
+    }
+
+    /** ロックを解除して元の状態へ復元 */
+    function unlockAllInputs() {
+        document.querySelectorAll(
+            'input, select, textarea, button'
+        ).forEach(el => {
+            // 元から disabled だった要素はそのまま維持
+            el.disabled = el.dataset.prevDisabled === 'true';
+        });
+        log('INFO: 計算完了 — 全入力のロックを解除しました。');
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 6. メイン収集関数
+    //       calculatePrediction() から呼び出す統合エントリーポイント
+    //       全値を Number() でサイレント・キャストして返す
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * 全入力値を検証・正規化して構造化オブジェクトとして返す。
+     * バリデーションエラーがあれば { valid: false, errors: [...] } を返す。
+     * @returns {{ valid: boolean, data?: Object, errors?: string[] }}
+     */
+    function collectAndValidate() {
+        const errors = [];
+
+        // 1) 級班チェック
+        const raceType = getRaceType();
+        if (raceType === null) errors.push('級班(race-type)が未選択です。');
+
+        // 2) 風向・風速
+        const wind = getWindInfo();
+
+        // 3) 選手データ
+        const players = getAllPlayersData();
+
+        // 4) ラジオボタン整合性
+        const radio = validateRadioButtons();
+        if (!radio.valid) errors.push('S1位またはB1位のラジオボタンが正しく設定されていません。');
+
+        // 5) 展開入力
+        const lineInput   = getLineInput();
+        const localSwitch = getLocalSwitch();
+
+        if (errors.length > 0) {
+            return { valid: false, errors };
+        }
+
+        return {
+            valid: true,
+            data: {
+                raceType,
+                bankName   : getBankName(),
+                wind,
+                players,
+                radio,
+                lineInput,
+                localSwitch,
+            }
+        };
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 7. 風向セレクト変更時のリアルタイム連動
+    //       ページロード後に wind-direction に監視を設定する
+    // ──────────────────────────────────────────────────────
+    function initWindDirectionWatcher() {
+        const dirEl = document.getElementById('wind-direction');
+        if (!dirEl) return;
+        dirEl.addEventListener('change', () => {
+            getWindInfo(); // バリデーション & disabled 制御を即時実行
+        });
+        // 初期状態の反映
+        getWindInfo();
+    }
+
+    // Public API
+    return {
+        collectAndValidate,
+        lockAllInputs,
+        unlockAllInputs,
+        getWindInfo,
+        getLineInput,
+        getLocalSwitch,
+        getAllPlayersData,
+        initWindDirectionWatcher,
+        log,
+    };
+})();
+
+// DOMContentLoaded 後に風向ウォッチャーを初期化
+document.addEventListener('DOMContentLoaded', () => {
+    InputGuard.initWindDirectionWatcher();
+    InputGuard.log('初期化完了 — 入力層堅牢化モジュール(InputGuard)が起動しました。');
+});
+
+// ============================================================
+// 🔗 calculatePrediction() のラッパー
+//    既存の keirin_logic が同名関数を定義している場合に備え、
+//    元の関数を _originalCalculatePrediction として保存し、
+//    バリデーションを挟んでから呼び出すパターンを採用する。
+//    ※ keirin_logic 側で window.calculatePrediction を上書きするため、
+//      defer スクリプト読み込み完了後に遅延実行でフック。
+// ============================================================
+window.addEventListener('load', () => {
+    const _original = window.calculatePrediction;
+
+    if (typeof _original !== 'function') {
+        InputGuard.log('WARN: calculatePrediction が未定義です。ラッパーのみ設置します。');
+    }
+
+    window.calculatePrediction = function() {
+        // ── バリデーション実行 ──
+        const result = InputGuard.collectAndValidate();
+
+        if (!result.valid) {
+            const msg = '⚠️ 入力エラー:\n' + result.errors.join('\n');
+            alert(msg);
+            InputGuard.log('ERROR: バリデーション失敗 — 計算を中断しました。' + result.errors.join(' / '));
+            return; // 計算をロック
+        }
+
+        // ── 計算中ロック ──
+        InputGuard.lockAllInputs();
+
+        // ── 元の計算関数を非同期で実行し、完了後にアンロック ──
+        if (typeof _original === 'function') {
+            try {
+                const ret = _original.apply(this, arguments);
+                // Promise を返す場合と同期の場合の両方に対応
+                if (ret && typeof ret.then === 'function') {
+                    ret.finally(() => InputGuard.unlockAllInputs());
+                } else {
+                    // 同期処理の場合は少し遅らせてからアンロック（シミュレーション完了を待つ）
+                    setTimeout(() => InputGuard.unlockAllInputs(), 100);
+                }
+            } catch (e) {
+                InputGuard.log('ERROR: 計算中に例外が発生: ' + e.message);
+                InputGuard.unlockAllInputs();
+                throw e;
+            }
+        } else {
+            setTimeout(() => InputGuard.unlockAllInputs(), 100);
+        }
+    };
+
+    InputGuard.log('ラッパー設置完了 — calculatePrediction にバリデーションフックを挿入しました。');
+});
+</script>
+
+<!-- ============================================================================
+     スクリプトの読み込み順序（重要！この順序を厳守）
+     ============================================================================ -->
+
+<!-- 1. メインロジック（keirin_logic）を最初に読み込む -->
+<script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5u/resolve/main/keirin_logic.js" defer></script>
+
+<!-- 2. 補助システム（meigen, tamaki） -->
 <script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5u/resolve/main/meigen.js" defer></script>
 <script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5u/resolve/main/tamaki_speech.js" defer></script>
- 
+
+<!-- 3. 赤口呑縁システム（この順序で読み込む） -->
+<script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5u/resolve/main/kiyone_voice.js" defer></script>
+<script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5u/resolve/main/shakkou_donperi_display.js" defer></script>
+<script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5u/resolve/main/shakkou_donperi_core.js" defer></script>
+<script src="paste-input.js"></script>
+
 </body>
 </html>
