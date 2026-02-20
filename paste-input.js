@@ -306,7 +306,7 @@
       </div>
       <div id="paste-input-body" style="display:none;">
         <div id="paste-input-instructions">
-          ① スマホで keirin.jp を開きます<br>
+          ① keirin.jp のスマホ版ページを開きます<br>
           ② 調べたいレースの出走表ページを表示します<br>
           ③ ページ内のテキストをページ最上部から最下部まですべて選択してコピーします<br>
           　（余分な文字が入っても問題ありません）<br>
