@@ -466,29 +466,27 @@
    * @returns { value: '自'|'両'|'追'|null, warn: boolean }
    */
   function resolveStyle(kimatete) {
-    const nige  = kimatete['逃'] || 0;
-    const maku  = kimatete['捲'] || 0;
-    const sashi = kimatete['差'] || 0;
-    const ma    = kimatete['マ'] || 0;
+  const nige  = kimatete['逃'] || 0;
+  const maku  = kimatete['捲'] || 0;
+  const sashi = kimatete['差'] || 0;
+  const ma    = kimatete['マ'] || 0;
 
-    const groups = [
-      { value: '自', score: nige },
-      { value: '両', score: maku },
-      { value: '追', score: sashi + ma },
-    ];
+  const groups = [
+    { value: '自', score: nige },
+    { value: '両', score: maku },
+    { value: '追', score: Math.max(sashi, ma) },
+  ];
 
-    groups.sort((a, b) => b.score - a.score);
+  groups.sort((a, b) => b.score - a.score);
 
-    if (groups[0].score === 0) {
-      // 全て0 → 判定不能
-      return { value: null, warn: true };
-    }
-    if (groups[0].score === groups[1].score) {
-      // 同数 → 手動設定を促す
-      return { value: null, warn: true };
-    }
-    return { value: groups[0].value, warn: false };
+  if (groups[0].score === 0) {
+    return { value: null, warn: true };
   }
+  if (groups[0].score === groups[1].score) {
+    return { value: null, warn: true };
+  }
+  return { value: groups[0].value, warn: false };
+}
 
   // ============================================================
   // 5. フォームへの反映
