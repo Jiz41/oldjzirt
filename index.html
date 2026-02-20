@@ -753,9 +753,9 @@ const InputGuard = (() => {
     function getStyle(card, idx) {
         const el  = card.querySelector('.style');
         const val = el ? el.value : '';
-        if (!val || !['自', '追', '両'].includes(val)) {
-            log(`WARN: 選手${idx}の脚質が未選択 → "自" をデフォルト適用`);
-            return '自';
+        if (!val || !['逃', '自', '追', '両'].includes(val)) {
+        log(`WARN: 選手${idx}の脚質が未選択 → "逃" をデフォルト適用`);
+        return '逃';
         }
         return val;
     }
