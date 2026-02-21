@@ -164,15 +164,7 @@ function getPlayerPositions(lineInput) {
 // 展開層：カント・イン突き（V9.0）
 // ====================================================================================
 function applyTacticalAdjustments(players, bankData, lineInput, seriInfos) {
-    const canto = bankData.canto || 30;
     const positionMap = getPlayerPositions(lineInput);
-
-    const cantoThreshold = 32;
-    const makuriPenalty = (canto > cantoThreshold) ? 0.67 : 1.0;
-
-    if (canto > cantoThreshold) {
-        logMessage(`[展開層] カント${canto}度 > ${cantoThreshold}度 → 捲りコスト×1.5 (補正係数×0.67)`);
-    }
 
     const warpBoostTargets = [];
 
@@ -193,13 +185,6 @@ function applyTacticalAdjustments(players, bankData, lineInput, seriInfos) {
 
     players.forEach(p => {
         const pos = positionMap[p.id];
-
-        if ((p.style === '自' || p.style === '両') && canto > cantoThreshold) {
-            p.cantoMakuriPenalty = makuriPenalty;
-            logMessage(`[展開層] 選手${p.id}(捲り): カント補正 ×${makuriPenalty.toFixed(2)}`);
-        } else {
-            p.cantoMakuriPenalty = 1.0;
-        }
 
         if (warpBoostTargets.includes(p.id)) {
             p.warpBoost = 1.35;
@@ -665,11 +650,6 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
     tempPlayers.forEach(p => { if (!allRidersInLines.has(p.id)) lines.push([p.id]); });
 
     tempPlayers.forEach(p => {
-        // 1. C_short
-        if (BANK_DATA.length === 333) {
-            p.final_score *= 0.985;
-            appliedCoeffs.push('C_short');
-        }
 
         // 2. C_risk
         const avgScore  = allScores.reduce((a, b) => a + b, 0) / allScores.length;
