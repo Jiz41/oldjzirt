@@ -1016,8 +1016,8 @@ async function calculatePrediction() {
         p.c_b1 = p.is_b1 ? 1.015 : 1.0;
 
         let biasKey = '';
-        if      (p.style === '逃') biasKey = '先行';
-        else if (p.style === '自') biasKey = '捲り';
+        if      (p.style === '自') biasKey = '先行';
+        else if (p.style === '逃') biasKey = '先行';
         else if (p.style === '両') biasKey = '捲り';
         else if (p.style === '追') biasKey = '差し';
         p.c_e = selectedBank.keirin_bias[biasKey] || 1.0;
