@@ -221,12 +221,14 @@ const SUPERIOR_PATTERNS_FINAL_LIST = calculateSuperiorityList();
 // ====================================================================================
 // ロギング
 // ====================================================================================
+let _logScrollTimer = null;
 function logMessage(message) {
     const logArea = document.getElementById('debug-log');
     if (!logArea) return;
     const timestamp = new Date().toLocaleTimeString('ja-JP', { hour12: false });
     logArea.insertAdjacentHTML('beforeend', `[${timestamp}] ${message}<br>`);
-    requestAnimationFrame(() => { logArea.scrollTop = logArea.scrollHeight; });
+    if (_logScrollTimer) clearTimeout(_logScrollTimer);
+    _logScrollTimer = setTimeout(() => { logArea.scrollTop = logArea.scrollHeight; }, 50);
 }
 
 // ====================================================================================
