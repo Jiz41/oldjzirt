@@ -297,14 +297,28 @@ function applyRecklessAttack(players, context) {
 }
 
 function applyWindGust(players, context) {
-    players.forEach(p => {
-        const rand = Math.random();
-        if (rand < 0.33) {
-            p.final_score *= 1.15;
-        } else if (rand < 0.66) {
-            p.final_score *= 0.90;
-        }
-    });
+    const rand = Math.random(); // 突風の方向を1回だけ決定
+    
+    if (rand < 0.33) {
+        // 追い風：先行・自走型に有利
+        players.forEach(p => {
+            if (p.style === '逃' || p.style === '自' || p.style === '両') {
+                p.final_score *= 1.15;
+            } else {
+                p.final_score *= 0.95;
+            }
+        });
+    } else if (rand < 0.66) {
+        // 向かい風：差し・追い込みに有利
+        players.forEach(p => {
+            if (p.style === '追' || p.style === '両') {
+                p.final_score *= 1.15;
+            } else {
+                p.final_score *= 0.90;
+            }
+        });
+    }
+    // 0.66以上：横風（影響なし）
 }
 
 function applySeriUpset(players, context) {
