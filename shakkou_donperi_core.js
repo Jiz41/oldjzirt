@@ -347,7 +347,7 @@ function applyDarkHorse(players, context) {
 }
 
 function applyRookieRampage(players, context) {
-    const rookies = players.filter(p => p.style === '自' || p.style === '両');
+    const rookies = players.filter(p => p.score < 90);
     
     if (rookies.length === 0) return;
     
