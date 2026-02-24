@@ -575,16 +575,13 @@ function generateScenarioWagers(results, v) {
     const tenunText  = document.getElementById('tenun-index-output')?.innerText || "";
     const isTenunZero = tenunText.includes("指数: 0") || tenunText.includes("大安吉日");
 
-    if (isTenunZero && v <= 3.0) {
-        const top4 = results.slice(0, 4);
-        const trueIchiyo = top4.find(p => {
-            const stats = RAW_COMPOSITE_STATS.find(s => s.pattern_key.includes(p.style));
-            return (p.style === '追') && (stats && stats.hit_rate >= 0.0206);
-        });
-        if (trueIchiyo) {
-            superiorPatternMessage = `【壱耀晴乾ノ象】天命、${trueIchiyo.id}番車に収束。`;
-        }
+ if (isTenunZero && v <= 3.0) {
+    const top4 = results.slice(0, 4);
+    const trueIchiyo = top4.find(p => p.style === '追');
+    if (trueIchiyo) {
+        superiorPatternMessage = `【壱耀晴乾ノ象】天命、${trueIchiyo.id}番車に収束。`;
     }
+}
 
     const tritan = [
         `${r[0]}-${r[1]}-${r[2]}`,
