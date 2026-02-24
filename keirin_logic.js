@@ -666,7 +666,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
             appliedCoeffs.push('C_mental');
         }
 
-        // 4. C_recovery
+// 4. C_recovery
         if (p.style === '両' || p.style === '追') {
             const scoreDiffRatio = (p.score - scoreMin) / scoreRange;
             if (scoreDiffRatio > 0.6) {
@@ -675,64 +675,64 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
                 appliedCoeffs.push('C_recovery');
             }
         }
+    });
 
-        // 5. C_target
-        const targetPlayer = tempPlayers.find(pp => pp.score === scoreMax);
-        if (targetPlayer) {
-            let rivalAutos = 0;
-            tempPlayers.forEach(pp => { if (pp.id !== targetPlayer.id && (pp.style === '逃' || pp.style === '自' || pp.style === '両')) rivalAutos++; });
-            if (rivalAutos >= 2) {
-                const targetAdj = 1.0 - (v * 0.007);
-                targetPlayer.final_score *= targetAdj;
-                appliedCoeffs.push('C_target');
+    // 5. C_target
+    const targetPlayer = tempPlayers.find(pp => pp.score === scoreMax);
+    if (targetPlayer) {
+        let rivalAutos = 0;
+        tempPlayers.forEach(pp => { if (pp.id !== targetPlayer.id && (pp.style === '逃' || pp.style === '自' || pp.style === '両')) rivalAutos++; });
+        if (rivalAutos >= 2) {
+            const targetAdj = 1.0 - (v * 0.007);
+            targetPlayer.final_score *= targetAdj;
+            appliedCoeffs.push('C_target');
+        }
+    }
+
+    // 6. C_split
+    lines.forEach(line => {
+        const p1 = tempPlayers.find(pp => pp.id === line[0]);
+        const p2 = tempPlayers.find(pp => pp.id === line[1]);
+        if (p1 && p2) {
+            const relativeDiff = (p1.score - p2.score) / scoreRange;
+            if (relativeDiff >= 0.30) {
+                const penalty = 1.0 - (relativeDiff - 0.30) * 0.15;
+                p2.final_score *= penalty;
+                appliedCoeffs.push('C_split');
             }
         }
+    });
 
-        // 6. C_split
-        lines.forEach(line => {
-            const p1 = tempPlayers.find(pp => pp.id === line[0]);
-            const p2 = tempPlayers.find(pp => pp.id === line[1]);
-            if (p1 && p2) {
-                const relativeDiff = (p1.score - p2.score) / scoreRange;
-                if (relativeDiff >= 0.30) {
-                    const penalty = 1.0 - (relativeDiff - 0.30) * 0.15;
-                    p2.final_score *= penalty;
-                    appliedCoeffs.push('C_split');
-                }
+    // 7. C_pace
+    const leaderPlayer = tempPlayers.find(pp => pp.style === '逃' || pp.style === '自' || pp.style === '両');
+    if (leaderPlayer && leaderPlayer.score >= 105.0 && lines.length - 1 >= 2) {
+        leaderPlayer.final_score *= 0.96;
+        appliedCoeffs.push('C_pace');
+    }
+
+    // 8. C_timing
+    tempPlayers.forEach(pp => {
+        if (pp.style === '両') {
+            const line = lines.find(l => l.includes(pp.id));
+            if (line && line.indexOf(pp.id) >= 1) {
+                pp.final_score *= 0.97;
+                appliedCoeffs.push('C_timing');
             }
-        });
-
-        // 7. C_pace
-        const leaderPlayer = tempPlayers.find(pp => pp.style === '逃' || pp.style === '自' || pp.style === '両');
-        if (leaderPlayer && leaderPlayer.score >= 105.0 && lines.length - 1 >= 2) {
-            leaderPlayer.final_score *= 0.96;
-            appliedCoeffs.push('C_pace');
         }
+    });
 
-        // 8. C_timing
-        tempPlayers.forEach(pp => {
-            if (pp.style === '両') {
-                const line = lines.find(l => l.includes(pp.id));
-                if (line && line.indexOf(pp.id) >= 1) {
-                    pp.final_score *= 0.97;
-                    appliedCoeffs.push('C_timing');
-                }
-            }
-        });
-
-        // 9. C_guard
-        lines.forEach(line => {
-            const p2 = tempPlayers.find(pp => pp.id === line[1]);
-            if (p2) {
-                const lowScoreThreshold = scoreMin + scoreRange * 0.4;
-                let baseRisk = 1.0;
-                if (p2.score < lowScoreThreshold) baseRisk = 0.95;
-                const attackers = tempPlayers.filter(pp => pp.id !== p2.id && (pp.style === '逃' || pp.style === '自' || pp.style === '両')).length;
-                if (attackers >= 2) baseRisk *= 0.95;
-                p2.final_score *= baseRisk;
-                appliedCoeffs.push('C_guard');
-            }
-        });
+    // 9. C_guard
+    lines.forEach(line => {
+        const p2 = tempPlayers.find(pp => pp.id === line[1]);
+        if (p2) {
+            const lowScoreThreshold = scoreMin + scoreRange * 0.4;
+            let baseRisk = 1.0;
+            if (p2.score < lowScoreThreshold) baseRisk = 0.95;
+            const attackers = tempPlayers.filter(pp => pp.id !== p2.id && (pp.style === '逃' || pp.style === '自' || pp.style === '両')).length;
+            if (attackers >= 2) baseRisk *= 0.95;
+            p2.final_score *= baseRisk;
+            appliedCoeffs.push('C_guard');
+        }
     });
 
     // 10. C_suicide
