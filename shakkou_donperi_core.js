@@ -582,49 +582,6 @@ function cosmosObserver(allResults, basePlayers) {
 // 🔗 既存コードとの統合用ラッパー関数
 // ----------------------------------------------------------------------------
 
-async function runScenarioSimulationMultiverse(basePlayers, allSeriInfos, settings, BANK_DATA, applyKoutenrei, lineInput, windSpeed, windDirection) {
-    // コンテキスト構築
-    const context = {
-        grade: settings.GRADE || Object.keys(COEFFICIENT_SETTINGS).find(key => 
-            COEFFICIENT_SETTINGS[key] === settings) || 'a-kyu',
-        seriInfos: allSeriInfos,
-        lineInput: lineInput,
-        windSpeed: windSpeed,
-        windDirection: windDirection,
-        isGirls: settings.IS_GIRLS || false,
-        BANK_DATA: BANK_DATA
-    };
-
-    console.log('[赤口呑縁] 開始:', context.grade);
-    
-    // 赤口呑縁実行
-    const cosmosResult = await invokeShakkouDonperi(basePlayers, context);
-    
-    console.log('[赤口呑縁] 完了');
-    
-    // 既存形式に変換（互換性のため）
-    const allScenarioResults = [{
-        scenario: 'マルチバース統合',
-        results: cosmosResult.statistics.map(s => ({
-            id: s.id,
-            final_score: s.winProbability * 1000,
-            grade: calculateGradeFromProbability(s.winProbability),
-            strength_mark: generateStrengthMark(s.winProbability, s.top3Probability)
-        }))
-    }];
-    
-    const integratedScores = {};
-    cosmosResult.statistics.forEach(s => {
-        integratedScores[s.id] = s.winProbability * 1000;
-    });
-    
-    return {
-        allScenarioResults: allScenarioResults,
-        integratedScores: integratedScores,
-        cosmosResult: cosmosResult
-    };
-}
-
 function calculateGradeFromProbability(winProb) {
     if (winProb >= 0.30) return 10;
     if (winProb >= 0.25) return 9;
