@@ -98,9 +98,11 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
     const map = BANK_DATA.wind_direction_map || {};
     const dirType = map[selectedDir] || "横風成分";
 
-    let vector = -0.2;
-    if (dirType.includes("追い"))   { vector =  1.0; }
+    let vector = 0.0;
+    if (dirType.includes("追い"))        { vector =  1.0; }
     else if (dirType.includes("向かい")) { vector = -1.0; }
+    else if (dirType === "H→B横風")     { vector =  0.2; }
+    else if (dirType === "B→H横風")     { vector = -0.2; }
 
     const finalAdj = 1.0 + (vector * kp * (BANK_DATA.alpha || 1.0) * positionShield);
 
