@@ -582,6 +582,19 @@ function cosmosObserver(allResults, basePlayers) {
 // 🔗 既存コードとの統合用ラッパー関数
 // ----------------------------------------------------------------------------
 
+async function runScenarioSimulationMultiverse(basePlayers, allSeriInfos, settings, BANK_DATA, applyKoutenrei, lineInput, windSpeed, windDirection) {
+    // コンテキスト構築
+    const context = {
+        grade: settings.GRADE || Object.keys(COEFFICIENT_SETTINGS).find(key => 
+            COEFFICIENT_SETTINGS[key] === settings) || 'a-kyu',
+        seriInfos: allSeriInfos,
+        lineInput: lineInput,
+        windSpeed: windSpeed,
+        windDirection: windDirection,
+        isGirls: settings.IS_GIRLS || false,
+        BANK_DATA: BANK_DATA
+    };
+
     console.log('[赤口呑縁] 開始:', context.grade);
     
     // 赤口呑縁実行
