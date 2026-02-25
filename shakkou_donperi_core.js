@@ -432,7 +432,7 @@ async function invokeShakkouDonperi(basePlayers, context) {
         }
 
         // 500刻みで進捗ログ
-        if (typeof logMessage === 'function' && (end === 500 || end === 1000)) {
+        if (typeof logMessage === 'function' && end % 300 === 0) {
             logMessage(`[赤口] 世界蛇回路:嚥下中... ${end} / ${TOTAL_ITERATIONS}`);
         }
 
