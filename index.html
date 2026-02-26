@@ -19,7 +19,7 @@
 
     <script>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
+        document.addEventListener('DOMContentLoaded', () => {
           navigator.serviceWorker.register('./sw.js');
         });
       }
