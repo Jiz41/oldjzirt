@@ -1,5 +1,4 @@
-
-(function() {
+(function(app) {
 
 // 真自在律 実質Ver9.2 - 捌風旋炉 枢（はっぷうせんろ くるる）物理層実装
 // 【V7.3】消耗ペナルティ適用拡大 ＆ 複数競り表示修正
@@ -17,7 +16,7 @@
 //  - イン突き（ワープ）実装：番手ブロック時の内線選手ブースト×1.35
 //  - 計算順序: 物理層 → 展開層 → 事象層（kururu風圧・壱耀占術）
 // 【V9.1】赤口呑縁（シャッコウ・ドンペリ）導入 - 1465世界線並列シミュレーション実装
-// 【V9.2】C_L（ライン結束力係数）完全実装 ＆ 赤口呑縁独立起動統合
+// 【V9.2】赤口呑縁独立起動統合
 //          runScenarioSimulation を本来のロジックに完全復元
 //          赤口呑縁関係の諸々不具合修正（invokeShakkouDonperi直接呼び出し・展開別表示削除）
 // ------------------------------------------------------------------------------------
@@ -62,7 +61,7 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
     const v = speed * beta;
     const selectedDir = direction;
 
-    logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 風速[${speed}m] → 実効[${v.toFixed(2)}m](β:${beta})`);
+    app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 風速[${speed}m] → 実効[${v.toFixed(2)}m](β:${beta})`);
 
     const straightBonus = (BANK_DATA.straight || 50) / 50;
     let kp;
@@ -96,7 +95,7 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
         }
     }
 
-    logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 位置[${posLabel}] -> 風補正実行`);
+    app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 位置[${posLabel}] -> 風補正実行`);
 
     const map = BANK_DATA.wind_direction_map || {};
     const dirType = map[selectedDir] || "横風成分";
@@ -109,7 +108,7 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
 
     const finalAdj = 1.0 + (vector * kp * (BANK_DATA.alpha || 1.0) * positionShield);
 
-    logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 属性[${dirType}] 位置[${posLabel}] -> 風補正実行`);
+    app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 属性[${dirType}] 位置[${posLabel}] -> 風補正実行`);
 
     return { adj: finalAdj, v: v };
 }
@@ -127,10 +126,10 @@ function applyPhysicalConstraints(players, bankData, lineInput) {
         let physicalPenalty = 1.0;
 
         if (straight < 35) {
-            if (pos.position >= 4)      { physicalPenalty = 0.25; logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 物理的到達困難 (×0.25)`); }
-            else if (pos.position === 3){ physicalPenalty = 0.60; logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置3番手 → 到達困難 (×0.60)`); }
+            if (pos.position >= 4)      { physicalPenalty = 0.25; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 物理的到達困難 (×0.25)`); }
+            else if (pos.position === 3){ physicalPenalty = 0.60; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置3番手 → 到達困難 (×0.60)`); }
         } else if (straight < 50) {
-            if (pos.position >= 4)      { physicalPenalty = 0.50; logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 到達やや困難 (×0.50)`); }
+            if (pos.position >= 4)      { physicalPenalty = 0.50; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 到達やや困難 (×0.50)`); }
             else if (pos.position === 3){ physicalPenalty = 0.80; }
         }
 
@@ -177,7 +176,7 @@ function applyTacticalAdjustments(players, bankData, lineInput, seriInfos) {
         seriInfos.forEach(seri => {
             const winnerPos = positionMap[seri.winner];
             if (winnerPos && winnerPos.position === 2) {
-                logMessage(`[展開層] 番手選手${seri.winner}が競り勝利 → イン突き（ワープ）発動`);
+                app.logMessage(`[展開層] 番手選手${seri.winner}が競り勝利 → イン突き（ワープ）発動`);
                 Object.keys(positionMap).forEach(id => {
                     const pos = positionMap[id];
                     if (pos.position >= 3 && pos.position <= 4) {
@@ -193,7 +192,7 @@ function applyTacticalAdjustments(players, bankData, lineInput, seriInfos) {
 
         if (warpBoostTargets.includes(p.id)) {
             p.warpBoost = 1.35;
-            logMessage(`[展開層] 選手${p.id}: イン突き（ワープ）ブースト ×1.35`);
+            app.logMessage(`[展開層] 選手${p.id}: イン突き（ワープ）ブースト ×1.35`);
         } else {
             p.warpBoost = 1.0;
         }
@@ -227,7 +226,7 @@ const SUPERIOR_PATTERNS_FINAL_LIST = calculateSuperiorityList();
 // ロギング
 // ====================================================================================
 let _logScrollTimer = null;
-function logMessage(message) {
+app.logMessage = function(message) {
     const logArea = document.getElementById('debug-log');
     if (!logArea) return;
     const timestamp = new Date().toLocaleTimeString('ja-JP', { hour12: false });
@@ -277,12 +276,12 @@ function getPlayerData() {
 // ====================================================================================
 async function loadBANK_DATA() {
     try {
-        logMessage("[INIT] bankdata.jsonの読み込みを開始します...");
+        app.logMessage("[INIT] bankdata.jsonの読み込みを開始します...");
         const response = await fetch('https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest01/resolve/main/bankdata.json');
         if (!response.ok) throw new Error(`HTTP status ${response.status}`);
 
         BANK_DATA = await response.json();
-        logMessage(`[SUCCESS] bankdata.jsonを正常に読み込みました。 ${Object.keys(BANK_DATA).length}件のバンクデータをロード。`);
+        app.logMessage(`[SUCCESS] bankdata.jsonを正常に読み込みました。 ${Object.keys(BANK_DATA).length}件のバンクデータをロード。`);
 
         const bankSelect = document.getElementById('bank-name');
         if (bankSelect) {
@@ -293,11 +292,11 @@ async function loadBANK_DATA() {
                 option.textContent = bankName;
                 bankSelect.appendChild(option);
             });
-            logMessage("[UI] バンク名の選択肢を動的に構築しました。");
+            app.logMessage("[UI] バンク名の選択肢を動的に構築しました。");
             displayBankTendency();
         }
     } catch (error) {
-        logMessage(`[FATAL ERROR] データ読み込み処理中に重大なエラーが発生: ${error.message}`);
+        app.logMessage(`[FATAL ERROR] データ読み込み処理中に重大なエラーが発生: ${error.message}`);
         BANK_DATA = { 'ダミーバンク': { length: 400, keirin_bias: { '先行': 1.0, '捲り': 1.0, '差し': 1.0 }, wind_or_position: {} } };
         const bankSelect = document.getElementById('bank-name');
         if (bankSelect) bankSelect.innerHTML = '<option value="ダミーバンク">データ読み込み失敗</option>';
@@ -354,7 +353,7 @@ function displayBankTendency() {
     }
 
     displayArea.innerHTML = message;
-    logMessage(`[BANK] ${bankName} の展開傾向: ${message.replace(/<[^>]*>?/gm, '')}`);
+    app.logMessage(`[BANK] ${bankName} の展開傾向: ${message.replace(/<[^>]*>?/gm, '')}`);
 }
 
 (async function() { await loadBANK_DATA(); })();
@@ -398,7 +397,7 @@ function parseLineInput(lineInput, allPlayers) {
                 const follower  = parseInt(seriMatch[1]);
                 const contender = parseInt(seriMatch[2]);
 
-                logMessage(`[PARSE] 競り検出: 選手${follower} (イン) vs 選手${contender} (アウト)`);
+                app.logMessage(`[PARSE] 競り検出: 選手${follower} (イン) vs 選手${contender} (アウト)`);
 
                 const followerCoef  = allPlayers.find(p => p.id === follower)?.seri_coef  || 0;
                 const contenderCoef = allPlayers.find(p => p.id === contender)?.seri_coef || 0;
@@ -408,7 +407,7 @@ function parseLineInput(lineInput, allPlayers) {
                 else                               { winnerId = contender; loserId = follower;  }
 
                 allSeriInfos.push({ exists: true, follower, contender, winner: winnerId, loser: loserId });
-                logMessage(`[PARSE] 競り勝者予測: 選手${winnerId} (C_seriに基づき予測)`);
+                app.logMessage(`[PARSE] 競り勝者予測: 選手${winnerId} (C_seriに基づき予測)`);
 
                 currentLine.push(winnerId);
                 lines.push([loserId]);
@@ -449,16 +448,16 @@ function calculateLineCoeffs(players, settings) {
 
     // 1. 欠場除外
     const participatingPlayers = players.filter(p => !p.is_scratch);
-    logMessage(`[SCRATCH] 欠場選手を除外しました。出走選手数: ${participatingPlayers.length}`);
+    app.logMessage(`[SCRATCH] 欠場選手を除外しました。出走選手数: ${participatingPlayers.length}`);
 
     if (participatingPlayers.length === 0) {
-        logMessage("[ERROR] 出走選手がゼロのため、ライン解析をスキップします。");
+        app.logMessage("[ERROR] 出走選手がゼロのため、ライン解析をスキップします。");
         return { players: [], allSeriInfos: [], finalOrderedPlayerIds: [], displayLineSegments: [] };
     }
 
     // 2. ライン解析
     const lineInput = document.getElementById('line-input').value;
-    logMessage(`[PARSE] ライン入力解析: ${lineInput}`);
+    app.logMessage(`[PARSE] ライン入力解析: ${lineInput}`);
     const {
         lines: initialLines,
         allSeriInfos: parsedAllSeriInfos,
@@ -483,7 +482,7 @@ function calculateLineCoeffs(players, settings) {
         }
         if (!allRidersInLines.has(p.id)) lines.push([p.id]);
     });
-    logMessage(`[ORDER] 最終表示順序に欠落選手を補完しました。`);
+    app.logMessage(`[ORDER] 最終表示順序に欠落選手を補完しました。`);
 
     // 3. C_L（ライン結束力係数）計算 ★実装
     const coop = settings.COOP_WEIGHT || 1.0;
@@ -492,7 +491,7 @@ function calculateLineCoeffs(players, settings) {
     const seriLoserIds = new Set(parsedAllSeriInfos.map(s => s.loser));
 
     if (settings.IS_GIRLS) {
-        logMessage(`[C_L] ガールズ競輪モード: エースマーク係数適用 (C_MARK_VALUES)`);
+        app.logMessage(`[C_L] ガールズ競輪モード: エースマーク係数適用 (C_MARK_VALUES)`);
         lines.forEach(line => {
             if (line.length < 2) return;
             const leader = participatingPlayers.find(p => p.id === line[0]);
@@ -506,11 +505,11 @@ function calculateLineCoeffs(players, settings) {
 
                 // 番手は満額、3番手以降は半額ボーナス
                 p.c_l = (i === 1) ? markVal : 1.0 + (markVal - 1.0) * 0.5;
-                logMessage(`[C_L] 選手ID ${p.id}: ガールズC_L=${p.c_l.toFixed(3)}`);
+                app.logMessage(`[C_L] 選手ID ${p.id}: ガールズC_L=${p.c_l.toFixed(3)}`);
             }
         });
     } else {
-        logMessage(`[C_L] 一般競輪モード: COOP_WEIGHT=${coop}`);
+        app.logMessage(`[C_L] 一般競輪モード: COOP_WEIGHT=${coop}`);
         lines.forEach(line => {
             if (line.length < 2) return;
             for (let i = 1; i < line.length; i++) {
@@ -522,7 +521,7 @@ function calculateLineCoeffs(players, settings) {
                 } else {
                     p.c_l = 1.0 + coop * 0.03;       // 3番手以降
                 }
-                logMessage(`[C_L] 選手ID ${p.id}: 位置${i + 1}番手 C_L=${p.c_l.toFixed(3)}`);
+                app.logMessage(`[C_L] 選手ID ${p.id}: 位置${i + 1}番手 C_L=${p.c_l.toFixed(3)}`);
             }
         });
     }
@@ -535,26 +534,26 @@ function calculateLineCoeffs(players, settings) {
 // ====================================================================================
 function applySeriCorrection(scoredPlayers, allSeriInfos) {
     if (allSeriInfos.length === 0) {
-        logMessage("[SERI] 競り入力がないため、競り補正はスキップします。");
+        app.logMessage("[SERI] 競り入力がないため、競り補正はスキップします。");
         return scoredPlayers;
     }
-    logMessage(`[SERI] 競り補正処理（${allSeriInfos.length}件）を開始します。`);
+    app.logMessage(`[SERI] 競り補正処理（${allSeriInfos.length}件）を開始します。`);
 
     allSeriInfos.forEach(seriInfo => {
         const winner = scoredPlayers.find(p => p.id === seriInfo.winner);
         if (winner) {
             winner.final_score = winner.final_score * (1 + SERI_WIN_BONUS) * (1 - SERI_FATIGUE_PENALTY_IN);
-            logMessage(`[SERI] 競り勝者 選手${winner.id}: スコア微増/体力減点補正が適用されました。`);
+            app.logMessage(`[SERI] 競り勝者 選手${winner.id}: スコア微増/体力減点補正が適用されました。`);
         }
         const loser = scoredPlayers.find(p => p.id === seriInfo.loser);
         if (loser) {
             loser.final_score *= (1 - SERI_FATIGUE_PENALTY_OUT);
-            logMessage(`[SERI] 競り敗者 選手${loser.id}: スコア大幅減点補正が適用されました。`);
+            app.logMessage(`[SERI] 競り敗者 選手${loser.id}: スコア大幅減点補正が適用されました。`);
         }
     });
 
     scoredPlayers.forEach(p => {
-        logMessage(`[SERI] 選手ID ${p.id}: 競り処理後のスコアは ${p.final_score.toFixed(3)} になりました。`);
+        app.logMessage(`[SERI] 選手ID ${p.id}: 競り処理後のスコアは ${p.final_score.toFixed(3)} になりました。`);
     });
 
     return scoredPlayers;
@@ -774,7 +773,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
     Object.keys(lineEvaluations).forEach(lineIndex => {
         const ev = lineEvaluations[lineIndex];
         if (ev.lineLength >= 3 && ev.totalWeightScore === 3 && ev.hasSelfStarter) {
-            logMessage(`[C_suicide] 🔴 リスク極大ライン検出！ (ライン${ev.lineMembers.join('-')})`);
+            app.logMessage(`[C_suicide] 🔴 リスク極大ライン検出！ (ライン${ev.lineMembers.join('-')})`);
             isSuicideRiskDetected = true;
             ev.lineMembers.forEach(id => suicideRiskLineMembers.add(id));
         }
@@ -800,13 +799,13 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
 
     // シナリオ単位でまとめてログ出力
     const uniqueCoeffs = [...new Set(appliedCoeffs)];
-    logMessage(`[KOUTENREI] ${scenario}: ${uniqueCoeffs.length > 0 ? uniqueCoeffs.join(' / ') : 'なし'}`);
+    app.logMessage(`[KOUTENREI] ${scenario}: ${uniqueCoeffs.length > 0 ? uniqueCoeffs.join(' / ') : 'なし'}`);
 
     return tempPlayers;
 }
 
 // ====================================================================================
-// runScenarioSimulation  ★本来のロジック完全復元版（V10.0）
+// runScenarioSimulation
 // ====================================================================================
 function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, applyKoutenrei, lineInput, windSpeed, windDirection) {
     const scenarios = ['先行有利', '捲り有利', '差し有利'];
@@ -815,7 +814,7 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
     const completedScenarios = [];
     const scenarioPrefix = applyKoutenrei ? '[KOUTEN]' : '[SEITEN]';
 
-    logMessage(`${scenarioPrefix} バンク直線: ${BANK_DATA.straight || 50}m / カント: ${BANK_DATA.canto || 30}度`);
+    app.logMessage(`${scenarioPrefix} バンク直線: ${BANK_DATA.straight || 50}m / カント: ${BANK_DATA.canto || 30}度`);
 
     basePlayers.forEach(p => integratedScores[p.id] = 0);
 
@@ -864,7 +863,7 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
         completedScenarios.push(scenario);
     });
 
-    logMessage(`${scenarioPrefix} ${completedScenarios.join(' / ')} 完了`);
+    app.logMessage(`${scenarioPrefix} ${completedScenarios.join(' / ')} 完了`);
 
     return { allScenarioResults, integratedScores };
 }
@@ -905,14 +904,14 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
             const isWeightTop = (firstPlayer.wmark === '◎');
             if (isSashiMa && isWeightTop) {
                 targetPlayerId = firstPlayer.id;
-                logMessage(`壱耀晴乾ノ象：○${targetPlayerId}`);
+                app.logMessage(`壱耀晴乾ノ象：○${targetPlayerId}`);
             }
         }
     }
 
-    let finalHtml = window.generateTamakiTenunHTML(tIndex, false, null);
+    let finalHtml = app.generateTamakiTenunHTML(tIndex, false, null);
     if (targetPlayerId !== null) {
-        finalHtml += window.generateTamakiTenunHTML(tIndex, true, targetPlayerId);
+        finalHtml += app.generateTamakiTenunHTML(tIndex, true, targetPlayerId);
     }
 
     return {
@@ -924,12 +923,12 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
 }
 
 // ====================================================================================
-// calculatePrediction  ★赤口呑縁独立起動統合版
+// calculatePrediction
 // ====================================================================================
-App.calculatePrediction = async function() {
+app.calculatePrediction = async function() {
     const tenunOutputArea = document.getElementById('tenun-index-output');
-    if (tenunOutputArea && typeof window.generateTamakiObservingHTML === 'function') {
-        tenunOutputArea.innerHTML = window.generateTamakiObservingHTML();
+    if (tenunOutputArea) {
+        tenunOutputArea.innerHTML = ''
     }
     await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -950,7 +949,7 @@ App.calculatePrediction = async function() {
         const isGoldCap = document.getElementById(`goldcap-${id}`)?.checked || false;
         if (isGoldCap && score < 95.0) {
             score = 95.0;
-            logMessage(`[ROYAL] 選手${id}: 👑 戴冠（地力再定義)`);
+            app.logMessage(`[ROYAL] 選手${id}: 👑 戴冠（地力再定義)`);
         }
 
         players.push({
@@ -972,7 +971,7 @@ App.calculatePrediction = async function() {
     const modeSelector = document.getElementById('mode-selector');
     const koutenreiModeSelected = modeSelector ? modeSelector.value === 'koutenrei' : false;
 
-    logMessage(`[CALC START] ${raceType} / バンク: ${bankName} / モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`);
+    app.logMessage(`[CALC START] ${raceType} / バンク: ${bankName} / モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`);
 
     const { players: participatingPlayers, allSeriInfos, finalOrderedPlayerIds, displayLineSegments } = calculateLineCoeffs(players, settings);
 
@@ -1009,16 +1008,16 @@ App.calculatePrediction = async function() {
 
     try {
         const currentLineInputForCalc = document.getElementById('line-input').value;
-        logMessage(`[DEBUG] シミュレーション開始: ラインデータ "${currentLineInputForCalc}"`);
+        app.logMessage(`[DEBUG] シミュレーション開始: ラインデータ "${currentLineInputForCalc}"`);
 
         const windSpeed     = parseFloat(document.getElementById('wind-speed').value) || 0;
         const windDirection = document.getElementById('wind-direction').value;
 
         const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, false, currentLineInputForCalc, windSpeed, windDirection);
-        logMessage(`[CALC] 晴天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`);
+        app.logMessage(`[CALC] 晴天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`);
 
         const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, true, currentLineInputForCalc, windSpeed, windDirection);
-        logMessage(`[CALC] 荒天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`);
+        app.logMessage(`[CALC] 荒天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`);
 
         const detailedScenarioResults = koutenreiModeSelected
             ? koutenreiResults.allScenarioResults
@@ -1052,7 +1051,7 @@ App.calculatePrediction = async function() {
         if (resultsContainer) resultsContainer.classList.add('visible');
 
         // 🌌 赤口呑縁：晴天令・荒天令完了後に直接起動
-        if (typeof invokeShakkouDonperi === 'function') {
+        if (typeof app.invokeShakkouDonperi === 'function') {
             const context = {
                 grade: gradeKey,
                 seriInfos: allSeriInfos,
@@ -1062,19 +1061,19 @@ App.calculatePrediction = async function() {
                 isGirls: settings.IS_GIRLS || false,
                 BANK_DATA: selectedBank
             };
-            return invokeShakkouDonperi(basePlayers, context).then(cosmosResult => {
-                if (typeof completeShakkouCalculation === 'function') {
-                    completeShakkouCalculation(cosmosResult, gradeKey);
+            return app.invokeShakkouDonperi(basePlayers, context).then(cosmosResult => {
+                if (typeof app.completeShakkouCalculation === 'function') {
+                    app.completeShakkouCalculation(cosmosResult, gradeKey);
                 }
-                logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
+                app.logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
             });
         } else {
-            logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
+            app.logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
         }
 
     } catch (error) {
         console.error("計算実行中にエラー:", error);
-        logMessage(`[ERROR] 計算中断: ${error.message}`);
+        app.logMessage(`[ERROR] 計算中断: ${error.message}`);
     }
 }
 
@@ -1135,7 +1134,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
 
     if (lineDisplay) lineDisplay.innerHTML = displayHtml;
 
-　　// 競りサマリー
+    // 競りサマリー
     let seriSummaryHtml = '';
     if (allSeriInfos.length > 0) {
             seriSummaryHtml += `<div style="padding: 15px; margin-bottom: 15px; border: 4px dashed #f8b500; background: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255, 255, 255, 0.05) 2px, rgba(255, 255, 255, 0.05) 3px), repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.05) 2px, rgba(255, 255, 255, 0.05) 3px), #3a3a3a; border-radius: 6px; color: #ffffff; background-clip: padding-box;"><h4 style="color: #ffffff; margin-top: 0;">⚠️ 競り発生！</h4>`;        allSeriInfos.forEach((info, index) => {
@@ -1183,7 +1182,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             scenarioOutput.insertAdjacentHTML('afterbegin', seriSummaryHtml);
         }
     }
-　}
+}
 
 // ====================================================================================
 // 買い目生成ユーティリティ
@@ -1232,4 +1231,4 @@ document.querySelectorAll('select').forEach(select => {
         window.scrollBy(0, -1);
     });
 });
-})();
+})(window.App = window.App || {});

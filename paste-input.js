@@ -1,12 +1,4 @@
-(function(app) {
-/**
- * paste-input.js
- * 自在律（華耀天輪 真・自在律）用
- * keirin.jp 出走表テキスト → フォーム一括自動入力
- * Ver 1.0
- */
-
-(function () {
+(function() {
   'use strict';
 
   // ============================================================
@@ -748,6 +740,4 @@
     injectUI();
     initWindFetch();
   }
-
 })();
-})(App);

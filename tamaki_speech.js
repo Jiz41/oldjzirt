@@ -1,18 +1,7 @@
 (function(app) {
-/**
- * tamaki_speech.js
- * 七曜院パラドキサ環 - 天雲指数セリフシステム (Ver 1.4)
- * 修正内容: 
- * 1. 神託提示後の「解説」として全セリフの文脈を整合
- * 2. 射幸心を煽る言葉を排除し、観測者としての視点に統一
- * 3. index_100を無機質な「計器異常ログ（タグ付き）」に刷新
- * 4. ichiyoの冒頭に「…あら？」を付与し、発見のニュアンスを追加
- */
+  'use strict';
 
-// ========================================
-// セリフデータベース (5種類 x 10パターン)
-// ========================================
-const TAMAKI_SPEECHES = {
+  const TAMAKI_SPEECHES = {
     index_0: [
         "提示された数字、とっても穏やかな気配ですぅ。晴天令の示す形を、そのまま信じて良さそうですよぉ。",
         "出された結果を見ると、空はとっても澄んでいますぅ。波乱の種は見当たりませんし、このまま静かに見守っていられそうですぅ。",
@@ -75,72 +64,68 @@ const TAMAKI_SPEECHES = {
     ]
 };
 
-const TAMAKI_EXPRESSIONS = {
-    index_0: 'smile',
-    index_33: 'normal',
-    index_67: 'worried',
-    index_100: 'shocked',
-    ichiyo: 'excited'
-};
+  const TAMAKI_EXPRESSIONS = {
+      index_0: 'smile',
+      index_33: 'normal',
+      index_67: 'worried',
+      index_100: 'shocked',
+      ichiyo: 'excited'
+  };
 
-function getTamakiSpeech(tenunIndex, isIchiyo = false, playerId = null) {
-    let speechArray;
-    if (isIchiyo) {
-        speechArray = TAMAKI_SPEECHES.ichiyo;
-        const randomSpeech = speechArray[Math.floor(Math.random() * speechArray.length)];
-        return randomSpeech.replace(/\$\{id\}/g, playerId);
-    }
-    if (tenunIndex === 0) speechArray = TAMAKI_SPEECHES.index_0;
-    else if (tenunIndex === 33) speechArray = TAMAKI_SPEECHES.index_33;
-    else if (tenunIndex === 67) speechArray = TAMAKI_SPEECHES.index_67;
-    else if (tenunIndex === 100) speechArray = TAMAKI_SPEECHES.index_100;
-    else {
-        if (tenunIndex <= 16) speechArray = TAMAKI_SPEECHES.index_0;
-        else if (tenunIndex <= 50) speechArray = TAMAKI_SPEECHES.index_33;
-        else if (tenunIndex <= 83) speechArray = TAMAKI_SPEECHES.index_67;
-        else speechArray = TAMAKI_SPEECHES.index_100;
-    }
-    return speechArray[Math.floor(Math.random() * speechArray.length)];
-}
+  function getTamakiSpeech(tenunIndex, isIchiyo = false, playerId = null) {
+      let speechArray;
+      if (isIchiyo) {
+          speechArray = TAMAKI_SPEECHES.ichiyo;
+          const randomSpeech = speechArray[Math.floor(Math.random() * speechArray.length)];
+          return randomSpeech.replace(/\$\{id\}/g, playerId);
+      }
+      if (tenunIndex === 0) speechArray = TAMAKI_SPEECHES.index_0;
+      else if (tenunIndex === 33) speechArray = TAMAKI_SPEECHES.index_33;
+      else if (tenunIndex === 67) speechArray = TAMAKI_SPEECHES.index_67;
+      else if (tenunIndex === 100) speechArray = TAMAKI_SPEECHES.index_100;
+      else {
+          if (tenunIndex <= 16) speechArray = TAMAKI_SPEECHES.index_0;
+          else if (tenunIndex <= 50) speechArray = TAMAKI_SPEECHES.index_33;
+          else if (tenunIndex <= 83) speechArray = TAMAKI_SPEECHES.index_67;
+          else speechArray = TAMAKI_SPEECHES.index_100;
+      }
+      return speechArray[Math.floor(Math.random() * speechArray.length)];
+  }
 
-function getTamakiExpression(tenunIndex, isIchiyo = false) {
-    if (isIchiyo) return TAMAKI_EXPRESSIONS.ichiyo;
-    if (tenunIndex === 0) return TAMAKI_EXPRESSIONS.index_0;
-    else if (tenunIndex === 33) return TAMAKI_EXPRESSIONS.index_33;
-    else if (tenunIndex === 67) return TAMAKI_EXPRESSIONS.index_67;
-    else if (tenunIndex === 100) return TAMAKI_EXPRESSIONS.index_100;
-    if (tenunIndex <= 16) return TAMAKI_EXPRESSIONS.index_0;
-    else if (tenunIndex <= 50) return TAMAKI_EXPRESSIONS.index_33;
-    else if (tenunIndex <= 83) return TAMAKI_EXPRESSIONS.index_67;
-    else return TAMAKI_EXPRESSIONS.index_100;
-}
+  function getTamakiExpression(tenunIndex, isIchiyo = false) {
+      if (isIchiyo) return TAMAKI_EXPRESSIONS.ichiyo;
+      if (tenunIndex === 0) return TAMAKI_EXPRESSIONS.index_0;
+      else if (tenunIndex === 33) return TAMAKI_EXPRESSIONS.index_33;
+      else if (tenunIndex === 67) return TAMAKI_EXPRESSIONS.index_67;
+      else if (tenunIndex === 100) return TAMAKI_EXPRESSIONS.index_100;
+      if (tenunIndex <= 16) return TAMAKI_EXPRESSIONS.index_0;
+      else if (tenunIndex <= 50) return TAMAKI_EXPRESSIONS.index_33;
+      else if (tenunIndex <= 83) return TAMAKI_EXPRESSIONS.index_67;
+      else return TAMAKI_EXPRESSIONS.index_100;
+  }
 
-/**
- * HTMLを生成して返す
- */
-function generateTamakiTenunHTML(tenunIndex, isIchiyo = false, playerId = null) {
-    if (typeof logMessage === 'function') {
-        logMessage(`[TENUN] 天雲指数: ${tenunIndex} ${isIchiyo ? '(壱耀晴乾ノ象発動)' : ''}`);
-    }
-    const speech = getTamakiSpeech(tenunIndex, isIchiyo, playerId);
-    const expression = getTamakiExpression(tenunIndex, isIchiyo);
+  function generateTamakiTenunHTML(tenunIndex, isIchiyo = false, playerId = null) {
+      if (typeof app.logMessage === 'function') {
+          app.logMessage(`[TENUN] 天雲指数: ${tenunIndex} ${isIchiyo ? '(壱耀晴乾ノ象発動)' : ''}`);
+      }
+      const speech = getTamakiSpeech(tenunIndex, isIchiyo, playerId);
+      const expression = getTamakiExpression(tenunIndex, isIchiyo);
 
-    let cardClass = isIchiyo ? 'tenun-ichiyo' : (tenunIndex === 0 ? 'tenun-stable' : (tenunIndex <= 50 ? 'tenun-mild' : (tenunIndex <= 83 ? 'tenun-alert' : 'tenun-severe')));
+      let cardClass = isIchiyo ? 'tenun-ichiyo' : (tenunIndex === 0 ? 'tenun-stable' : (tenunIndex <= 50 ? 'tenun-mild' : (tenunIndex <= 83 ? 'tenun-alert' : 'tenun-severe')));
 
-    const expressionImages = {
-        'smile': 'tamaki_smile.png',
-        'normal': 'tamaki_normal.png',
-        'worried': 'tamaki_worried.png',
-        'shocked': 'tamaki_shocked.png',
-        'excited': 'tamaki_smile.png'
-    };
-    const expressionImagePath = expressionImages[expression] || expressionImages['normal'];
+      const expressionImages = {
+          'smile': 'tamaki_smile.png',
+          'normal': 'tamaki_normal.png',
+          'worried': 'tamaki_worried.png',
+          'shocked': 'tamaki_shocked.png',
+          'excited': 'tamaki_smile.png'
+      };
+      const expressionImagePath = expressionImages[expression] || expressionImages['normal'];
 
-    // 💡 追加：壱耀メッセージの場合はタイトルとスタイルを変更
-    const titleText = isIchiyo ? '⚡ 壱耀晴乾ノ象 ⚡' : '天雲指数';
-    const titleStyle = isIchiyo ? 'margin-top: 15px;' : 'margin-top: 25px;';
+      const titleText = isIchiyo ? '⚡ 壱耀晴乾ノ象 ⚡' : '天雲指数';
+      const titleStyle = isIchiyo ? 'margin-top: 15px;' : 'margin-top: 25px;';
 
-    return `
+      return `
         <span class="tenun-title" style="font-weight: bold; font-size: 1.1em; color: #8b6d00; ${titleStyle} margin-bottom: 10px; display: block;">${titleText}</span>
         <div class="tenun-index-container ${cardClass}">
             <div class="tamaki-display">
@@ -154,9 +139,9 @@ function generateTamakiTenunHTML(tenunIndex, isIchiyo = false, playerId = null) 
                 </div>
             </div>
         </div>`;
-}
+  }
 
-const TAMAKI_CSS = `
+  const TAMAKI_CSS = `
 <style>
 /* タイトルのスタイル修正 */
 .tenun-title {
@@ -204,6 +189,6 @@ const TAMAKI_CSS = `
 }
 </style>`;
 
-window.generateTamakiTenunHTML = generateTamakiTenunHTML;
-window.TAMAKI_CSS = TAMAKI_CSS;
-})(App);
+  app.generateTamakiTenunHTML = generateTamakiTenunHTML;
+  app.TAMAKI_CSS = TAMAKI_CSS;
+})(window.App = window.App || {});

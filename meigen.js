@@ -1,4 +1,4 @@
-(function(app) {
+(function() {
 /**
  * 華耀天輪 真・自在律 用：ランダム格言表示機能
  * 格言リスト (29個) を使用。
@@ -69,4 +69,4 @@ function displayRandomMaxim() {
 
 // ページ読み込み完了時に格言を表示する
 document.addEventListener('DOMContentLoaded', displayRandomMaxim);
-})(App);
+})();
