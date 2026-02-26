@@ -1037,7 +1037,7 @@ app.calculatePrediction = async function() {
         displayResults(
             detailedScenarioResults,
             seitenreiResults.integratedScores,
-            koutenreiIntegratedScores,
+            koutenreiResults.integratedScores,
             bankName,
             allSeriInfos,
             finalOrderedPlayerIds,
