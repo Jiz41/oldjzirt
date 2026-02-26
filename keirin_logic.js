@@ -1608,7 +1608,7 @@ function initInputGuardWrapper() {
                 return;
             }
             InputGuard.lockAllInputs();
-            _original.call(window.App).finally(() => InputGuard.unlockAllInputs());
+            return _original.call(window.App).finally(() => InputGuard.unlockAllInputs());
         };
 
         InputGuard.log('ラッパー設置完了 — グローバルな calculatePrediction から App.calculatePrediction を呼び出します。');
