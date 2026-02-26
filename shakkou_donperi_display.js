@@ -17,15 +17,7 @@ function showShakkouProgress(grade) {
     const scenarioOutput = document.getElementById('scenario-output');
     
     if (scenarioOutput) {
-        // 1. 既存の内容（Logicの結果）を消去しない
-        // scenarioOutput.innerHTML = ''; 👈 執事の命により封印
-
-        // 2. 進捗バー用のHTMLを生成
-        const progressHTML = generateCalculationStartMessage(grade);
-        
-        // 3. 🔍 重要：innerHTMLではなく「insertAdjacentHTML」で末尾に追記
-        // これにより、Logicの結果の下に赤口のバーが現れます
-        scenarioOutput.insertAdjacentHTML('beforeend', progressHTML);
+        // 進捗表示はスキップ
     }
 }
 
