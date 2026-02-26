@@ -1,3 +1,4 @@
+(function(app) {
 // ============================================================================
 // 五更斎アメンティア清音：メッセージ生成システム
 // ============================================================================
@@ -553,3 +554,8 @@ if (typeof document !== 'undefined') {
         injectKiyoneStyles();
     }
 }
+
+app.generateKiyoneMessage = generateKiyoneMessage;
+app.generateCalculationStartMessage = generateCalculationStartMessage;
+
+})(window.App = window.App || {});

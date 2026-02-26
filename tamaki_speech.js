@@ -1,3 +1,4 @@
+(function(app) {
 /**
  * tamaki_speech.js
  * 七曜院パラドキサ環 - 天雲指数セリフシステム (Ver 1.4)
@@ -75,7 +76,11 @@ const TAMAKI_SPEECHES = {
 };
 
 const TAMAKI_EXPRESSIONS = {
-    index_0: 'smile', index_33: 'normal', index_67: 'worried', index_100: 'shocked', ichiyo: 'excited'
+    index_0: 'smile',
+    index_33: 'normal',
+    index_67: 'worried',
+    index_100: 'shocked',
+    ichiyo: 'excited'
 };
 
 function getTamakiSpeech(tenunIndex, isIchiyo = false, playerId = null) {
@@ -119,15 +124,15 @@ function generateTamakiTenunHTML(tenunIndex, isIchiyo = false, playerId = null) 
     }
     const speech = getTamakiSpeech(tenunIndex, isIchiyo, playerId);
     const expression = getTamakiExpression(tenunIndex, isIchiyo);
-    
+
     let cardClass = isIchiyo ? 'tenun-ichiyo' : (tenunIndex === 0 ? 'tenun-stable' : (tenunIndex <= 50 ? 'tenun-mild' : (tenunIndex <= 83 ? 'tenun-alert' : 'tenun-severe')));
-    
-    const expressionImages = { 
-        'smile': 'tamaki_smile.png', 
-        'normal': 'tamaki_normal.png', 
-        'worried': 'tamaki_worried.png', 
-        'shocked': 'tamaki_shocked.png', 
-        'excited': 'tamaki_smile.png' 
+
+    const expressionImages = {
+        'smile': 'tamaki_smile.png',
+        'normal': 'tamaki_normal.png',
+        'worried': 'tamaki_worried.png',
+        'shocked': 'tamaki_shocked.png',
+        'excited': 'tamaki_smile.png'
     };
     const expressionImagePath = expressionImages[expression] || expressionImages['normal'];
 
@@ -201,3 +206,4 @@ const TAMAKI_CSS = `
 
 window.generateTamakiTenunHTML = generateTamakiTenunHTML;
 window.TAMAKI_CSS = TAMAKI_CSS;
+})(App);

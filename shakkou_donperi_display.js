@@ -1,3 +1,4 @@
+(function(app) {
 // ============================================================================
 // 儀術『赤口呑縁（しゃっこうどんぺり）』表示制御システム
 // ============================================================================
@@ -243,7 +244,6 @@ function injectShakkouStyles() {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
     flex-wrap: wrap;
     gap: 10px;
 }
@@ -430,3 +430,4 @@ function completeShakkouCalculation(cosmosResult, grade) {
 if (typeof document !== 'undefined') {
     console.log('[赤口呑縁] 表示システム初期化完了');
 }
+})(App);
