@@ -1,8 +1,8 @@
 ---
-title: 自在律テスト環境
-emoji: 💻
-colorFrom: green
-colorTo: yellow
+title: '-華耀天輪 真自在律-'
+emoji: 👁
+colorFrom: indigo
+colorTo: blue
 sdk: static
 pinned: true
 thumbnail: >-
