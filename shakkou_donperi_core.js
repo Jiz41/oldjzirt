@@ -605,5 +605,7 @@ function generateStrengthMark(winProb, top3Prob) {
     return '・';
 }
 
+app.invokeShakkouDonperi = invokeShakkouDonperi;
+
 console.log('[赤口呑縁] コアシステム初期化完了');
 })(App);
