@@ -1600,32 +1600,30 @@ function initInputGuardWrapper() {
         InputGuard.log('INFO: App.calculatePredictionを検出しました。ラッパーを設置します。');
 
         // グローバルスコープに新しいcalculatePredictionラッパーを公開
-        window.calculatePrediction = function() {
-            // ── バリデーション実行 ──
-            const result = InputGuard.collectAndValidate();
-
-            if (!result.valid) {
-                const msg = '⚠️ 入力エラー:\n' + result.errors.join('\n');
-                alert(msg);
-                InputGuard.log('ERROR: バリデーション失敗 — 計算を中断しました。' + result.errors.join(' / '));
-                return; // 計算をロック
-            }
+       window.calculatePrediction = function() {
+    const result = InputGuard.collectAndValidate();
+    if (!result.valid) {
+        const msg = '⚠️ 入力エラー:\n' + result.errors.join('\n');
+        alert(msg);
+        InputGuard.log('ERROR: バリデーション失敗 — 計算を中断しました。' + result.errors.join(' / '));
+        return;
+    }
+    InputGuard.lockAllInputs();
+    _original.call(window.App).finally(() => InputGuard.unlockAllInputs());
+};
 
             // ── 計算中ロック ──
             InputGuard.lockAllInputs();
 
             // ── 元の計算関数を非同期で実行し、完了後にアンロック ──
             try {
-                // 元の App.calculatePrediction を呼び出し、検証済みデータを渡す
-                const ret = _original.apply(window.App);
-                
-                if (ret && typeof ret.then === 'function') {
-                    ret.then(() => InputGuard.unlockAllInputs())
-                   .catch(() => InputGuard.unlockAllInputs());
-                } else {
-                    // 同期処理やPromiseを返さない非同期処理の場合
-                    setTimeout(() => InputGuard.unlockAllInputs(), 200); // 少し余裕を持たせる
-                }
+    _original.call(window.App).finally(() => InputGuard.unlockAllInputs());
+} catch (e) {
+    InputGuard.log('ERROR: 計算中に例外が発生: ' + e.message + '\n' + e.stack);
+    InputGuard.unlockAllInputs();
+    alert('計算中に予期せぬエラーが発生しました。コンソールを確認してください。');
+    throw e;
+}
             } catch (e) {
                 InputGuard.log('ERROR: 計算中に例外が発生: ' + e.message + '\n' + e.stack);
                 InputGuard.unlockAllInputs();
