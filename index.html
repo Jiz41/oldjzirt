@@ -414,7 +414,7 @@
             </div>
             <div class="input-item">
                 <label for="bank-name">バンク名:</label>
-                <select id="bank-name" onchange="displayBankTendency()"></select>
+                <select id="bank-name" onchange="App.displayBankTendency()"></select>
             </div>
 
 <div class="input-item" id="kururu-ui-container" style="margin-bottom: 15px;">
@@ -492,7 +492,7 @@
                 <input type="checkbox" id="local-switch">
                 <label for="local-switch">🎌 **地元スイッチ ON**</label>
             </div>
-            <button onclick="calculatePrediction()">🚀 予想を計算 (実行)</button>
+            <button onclick="App.calculatePrediction()">🚀 予想を計算 (実行)</button>
         </div>
 
         <div id="results-container">
