@@ -558,4 +558,4 @@ if (typeof document !== 'undefined') {
 app.generateKiyoneMessage = generateKiyoneMessage;
 app.generateCalculationStartMessage = generateCalculationStartMessage;
 
-})(window.App = window.App || {});
+})(App);

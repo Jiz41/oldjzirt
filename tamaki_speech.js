@@ -191,4 +191,4 @@
 
   app.generateTamakiTenunHTML = generateTamakiTenunHTML;
   app.TAMAKI_CSS = TAMAKI_CSS;
-})(window.App = window.App || {});
+})(App);
