@@ -604,7 +604,8 @@ function generateStrengthMark(winProb, top3Prob) {
     if (winProb >= 0.05) return '×';
     return '・';
 }
-
+  
+app.logMessage('[DEBUG] invokeShakkouDonperi 実行開始');
 app.invokeShakkouDonperi = invokeShakkouDonperi;
 
 console.log('[赤口呑縁] コアシステム初期化完了');
