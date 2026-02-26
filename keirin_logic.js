@@ -278,7 +278,7 @@ function getPlayerData() {
 async function loadBANK_DATA() {
     try {
         logMessage("[INIT] bankdata.jsonの読み込みを開始します...");
-        const response = await fetch('https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest/resolve/main/bankdata.json');
+        const response = await fetch('https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest01/resolve/main/bankdata.json');
         if (!response.ok) throw new Error(`HTTP status ${response.status}`);
 
         BANK_DATA = await response.json();
