@@ -414,8 +414,8 @@ app.startShakkouCalculation = function(grade) {
     showShakkouProgress(grade);
 }
 
-app.completeShakkouCalculation = function(cosmosResult, grade) {
-    app.logMessage('[DEBUG] completeShakkouCalculation 呼び出し確認');
+function displayShakkouResults(cosmosResult, grade) {
+    app.logMessage('[DEBUG] displayShakkouResults 呼び出し確認')
     displayShakkouResults(cosmosResult, grade);
 }
 
