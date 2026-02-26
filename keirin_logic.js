@@ -1617,10 +1617,11 @@ function initInputGuardWrapper() {
             // ── 元の計算関数を非同期で実行し、完了後にアンロック ──
             try {
                 // 元の App.calculatePrediction を呼び出し、検証済みデータを渡す
-                const ret = _original.apply(window.App, [result.data]);
+                const ret = _original.apply(window.App);
                 
                 if (ret && typeof ret.then === 'function') {
-                    ret.finally(() => InputGuard.unlockAllInputs());
+                    ret.then(() => InputGuard.unlockAllInputs())
+                   .catch(() => InputGuard.unlockAllInputs());
                 } else {
                     // 同期処理やPromiseを返さない非同期処理の場合
                     setTimeout(() => InputGuard.unlockAllInputs(), 200); // 少し余裕を持たせる
