@@ -415,6 +415,7 @@ app.startShakkouCalculation = function(grade) {
 }
 
 app.completeShakkouCalculation = function(cosmosResult, grade) {
+    app.logMessage('[DEBUG] completeShakkouCalculation 呼び出し確認');
     displayShakkouResults(cosmosResult, grade);
 }
 
