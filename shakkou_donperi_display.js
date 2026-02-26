@@ -415,7 +415,11 @@ app.startShakkouCalculation = function(grade) {
 }
 
 app.completeShakkouCalculation = function(cosmosResult, grade) {
-    displayShakkouResults(cosmosResult, grade);
+    try {
+        displayShakkouResults(cosmosResult, grade);
+    } catch(e) {
+        app.logMessage('[ERROR] displayShakkouResults: ' + e.message);
+    }
 }
 
 // 🚀 初期化
