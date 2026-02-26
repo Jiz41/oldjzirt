@@ -1037,7 +1037,7 @@ app.calculatePrediction = async function() {
         displayResults(
             detailedScenarioResults,
             seitenreiResults.integratedScores,
-            koutenreiResults.integratedScores,
+            koutenreiIntegratedScores,
             bankName,
             allSeriInfos,
             finalOrderedPlayerIds,
@@ -1239,3 +1239,4 @@ document.querySelectorAll('select').forEach(select => {
     });
 });
 })(App);
+window.dispatchEvent(new Event('appReady'));

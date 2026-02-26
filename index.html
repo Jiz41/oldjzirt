@@ -979,8 +979,7 @@ document.addEventListener('DOMContentLoaded', () => {
 //    calculatePredictionをグローバルに公開し、ボタンから呼び出せるようにする。
 //    内部では、App.calculatePrediction（本体ロジック）をバリデーション付きで呼び出す。
 // ============================================================
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
+window.addEventListener('appReady', () => {
     if (window.App && typeof window.App.calculatePrediction === 'function') {
         const _original = window.App.calculatePrediction;
         InputGuard.log('INFO: App.calculatePredictionを検出しました。ラッパーを設置します。');
@@ -1030,7 +1029,6 @@ document.addEventListener('DOMContentLoaded', () => {
             InputGuard.log('ERROR: App.calculatePrediction is not defined. Cannot run prediction.');
         };
     }
-    });
 });
 </script>
 
