@@ -1,5 +1,7 @@
 (function(app) {
-  document.body.style.border = '10px solid red';
+  if (app && typeof app.logMessage === 'function') {
+    app.logMessage('[DEBUG] shakkou_donperi_core.js 開始');
+  }
 // ============================================================================
 // 儀術『赤口呑縁（しゃっこうどんぺり）』コア実装
 // ============================================================================
@@ -600,8 +602,10 @@ function generateStrengthMark(winProb, top3Prob) {
     return '・';
 }
   
-app.logMessage('[DEBUG] invokeShakkouDonperi 実行開始');
-app.invokeShakkouDonperi = invokeShakkouDonperi;
-
+if (app && typeof app.logMessage === 'function') {
+    app.logMessage('[DEBUG] invokeShakkouDonperi 実行開始');
+  }
+  app.invokeShakkouDonperi = invokeShakkouDonperi;
+  
 console.log('[赤口呑縁] コアシステム初期化完了');
 })(App);
