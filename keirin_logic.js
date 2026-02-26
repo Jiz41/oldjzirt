@@ -1599,40 +1599,18 @@ function initInputGuardWrapper() {
         const _original = window.App.calculatePrediction;
         InputGuard.log('INFO: App.calculatePredictionを検出しました。ラッパーを設置します。');
 
-        // グローバルスコープに新しいcalculatePredictionラッパーを公開
-       window.calculatePrediction = function() {
-    const result = InputGuard.collectAndValidate();
-    if (!result.valid) {
-        const msg = '⚠️ 入力エラー:\n' + result.errors.join('\n');
-        alert(msg);
-        InputGuard.log('ERROR: バリデーション失敗 — 計算を中断しました。' + result.errors.join(' / '));
-        return;
-    }
-    InputGuard.lockAllInputs();
-    _original.call(window.App).finally(() => InputGuard.unlockAllInputs());
-};
-
-            // ── 計算中ロック ──
-            InputGuard.lockAllInputs();
-
-            // ── 元の計算関数を非同期で実行し、完了後にアンロック ──
-            try {
-    _original.call(window.App).finally(() => InputGuard.unlockAllInputs());
-} catch (e) {
-    InputGuard.log('ERROR: 計算中に例外が発生: ' + e.message + '\n' + e.stack);
-    InputGuard.unlockAllInputs();
-    alert('計算中に予期せぬエラーが発生しました。コンソールを確認してください。');
-    throw e;
-}
-            } catch (e) {
-                InputGuard.log('ERROR: 計算中に例外が発生: ' + e.message + '\n' + e.stack);
-                InputGuard.unlockAllInputs();
-                // ユーザーにエラーを通知
-                alert('計算中に予期せぬエラーが発生しました。コンソールを確認してください。');
-                throw e;
+        window.calculatePrediction = function() {
+            const result = InputGuard.collectAndValidate();
+            if (!result.valid) {
+                const msg = '⚠️ 入力エラー:\n' + result.errors.join('\n');
+                alert(msg);
+                InputGuard.log('ERROR: バリデーション失敗 — 計算を中断しました。' + result.errors.join(' / '));
+                return;
             }
+            InputGuard.lockAllInputs();
+            _original.call(window.App).finally(() => InputGuard.unlockAllInputs());
         };
-        
+
         InputGuard.log('ラッパー設置完了 — グローバルな calculatePrediction から App.calculatePrediction を呼び出します。');
 
     } else {
