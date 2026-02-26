@@ -1640,6 +1640,6 @@ function initInputGuardWrapper() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', initInputGuardWrapper);
+initInputGuardWrapper();
 
 })(App);
