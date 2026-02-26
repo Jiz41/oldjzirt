@@ -980,7 +980,7 @@ document.addEventListener('DOMContentLoaded', () => {
 //    内部では、App.calculatePrediction（本体ロジック）をバリデーション付きで呼び出す。
 // ============================================================
 window.addEventListener('load', () => {
-    // Appオブジェクトと、その中のcalculatePredictionが存在するか確認
+    setTimeout(() => {
     if (window.App && typeof window.App.calculatePrediction === 'function') {
         const _original = window.App.calculatePrediction;
         InputGuard.log('INFO: App.calculatePredictionを検出しました。ラッパーを設置します。');
@@ -1030,6 +1030,7 @@ window.addEventListener('load', () => {
             InputGuard.log('ERROR: App.calculatePrediction is not defined. Cannot run prediction.');
         };
     }
+    });
 });
 </script>
 
