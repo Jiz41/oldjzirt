@@ -47,7 +47,7 @@ function updateShakkouProgress(current, total) {
  * @param {string} grade - 階級
  */
 function displayShakkouResults(cosmosResult, grade) {
-    const kiyoneMessage = generateKiyoneMessage(cosmosResult, grade);
+    const kiyoneMessage = app.generateKiyoneMessage(cosmosResult, grade);
     const scenarioOutput = document.getElementById('scenario-output');
     
     if (scenarioOutput) {
