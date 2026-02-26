@@ -1238,4 +1238,408 @@ document.querySelectorAll('select').forEach(select => {
         window.scrollBy(0, -1);
     });
 });
+
+// ============================================================
+// 🔐 InputGuard : 入力値の正規化・バリデーション・型変換を担う
+//                 全ての入力値はこのモジュールを経由してロジックへ渡す
+// ============================================================
+const InputGuard = (() => {
+
+    // ──────────────────────────────────────────────────────
+    // § 1. 内部ユーティリティ
+    // ──────────────────────────────────────────────────────
+
+    /** 全角数字 → 半角数字へ変換 */
+    function toHalfWidth(str) {
+        return String(str).replace(/[０-９]/g, ch =>
+            String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)
+        );
+    }
+
+    /** デバッグログへの書き込み（debug-log 要素があれば追記） */
+    function log(msg) {
+        const el = document.getElementById('debug-log');
+        if (el) el.innerHTML += `[InputGuard] ${msg}<br>`;
+        console.log('[InputGuard]', msg);
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 2. レース・環境設定系 バリデーション
+    //       対象: id="race-info" 配下の各要素
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * race-type: 未選択ガード
+     * @returns {string|null} 選択値、または null（ロック対象）
+     */
+    function getRaceType() {
+        const el = document.getElementById('race-type');
+        if (!el || !el.value) {
+            log('ERROR: 級班(race-type)が未選択です。計算をロックします。');
+            return null;
+        }
+        return el.value;
+    }
+
+    /**
+     * bank-name: bankdata.json 取得失敗時のフォールバック（400m）
+     * @returns {string} バンク名
+     */
+    function getBankName() {
+        const el = document.getElementById('bank-name');
+        const val = el ? el.value : '';
+        if (!val || val.trim() === '') {
+            log('WARN: バンク名が空値です。デフォルト値(400)を使用します。');
+            return '400';
+        }
+        return val;
+    }
+
+    /**
+     * wind-direction / wind-speed: 論理矛盾の解消
+     * 「none」選択時は wind-speed を強制的に 0 にして disabled 化する。
+     * @returns {{ direction: string, speed: number }}
+     */
+    function getWindInfo() {
+        const dirEl   = document.getElementById('wind-direction');
+        const speedEl = document.getElementById('wind-speed');
+        const dir     = dirEl   ? dirEl.value   : 'none';
+        let   speed   = speedEl ? Number(speedEl.value) : 0;
+
+        if (dir === 'none' || dir === '無風') {
+            if (speedEl) {
+                speedEl.value    = 0;
+                speedEl.disabled = true;
+            }
+            speed = 0;
+            log(`INFO: 風向=無風 → 風速を強制的に 0 にセット。`);
+        } else {
+            if (speedEl) speedEl.disabled = false;
+            // サイレント・コレクト: 0.0〜20.0 の範囲外を補正
+            if (isNaN(speed) || speed < 0)  { log(`WARN: 風速(${speed})が範囲外 → 0 に補正`); speed = 0; }
+            if (speed > 20)                  { log(`WARN: 風速(${speed})が範囲外 → 20 に補正`); speed = 20; }
+            speed = Math.round(speed * 10) / 10; // 小数1桁に丸め
+        }
+        return { direction: dir, speed };
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 3. 選手データ入力系 バリデーション
+    //       対象: class="player-card" / "player-row" 全7スロット
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * .score (得点): 全角→半角変換、NaN/空は0、範囲 0〜130 にサイレント補正
+     * @param {Element} card - 選手カード要素
+     * @param {number}  idx  - 選手番号（ログ用）
+     * @returns {number}
+     */
+    function getScore(card, idx) {
+        const el  = card.querySelector('.score');
+        if (!el) return 0;
+        let raw   = toHalfWidth(el.value);
+        let val   = parseFloat(raw);
+        if (isNaN(val) || el.value.trim() === '') {
+            log(`WARN: 選手${idx}の得点が非数値 → 0 に補正`);
+            val = 0;
+        }
+        if (val < 0)   { log(`WARN: 選手${idx}の得点(${val})が範囲外 → 0 に補正`);   val = 0; }
+        if (val > 130) { log(`WARN: 選手${idx}の得点(${val})が範囲外 → 130 に補正`); val = 130; }
+        return val;
+    }
+
+    /**
+     * .recent (3走): 数字以外を即座に 9 へ置換し、必ず3桁の文字列に整形
+     * @param {Element} card
+     * @param {number}  idx
+     * @returns {string} 例: "192"
+     */
+    function getRecent(card, idx) {
+        const el  = card.querySelector('.recent');
+        if (!el) return '999';
+        // 全角数字を半角変換してから非数字を 9 に置換
+        let raw   = toHalfWidth(el.value);
+        let clean = raw.replace(/[^0-9]/g, '9');  // 欠・休・英字なども全て 9
+        // 3桁に整形（不足は 9 で補填、超過は先頭3桁のみ）
+        while (clean.length < 3) clean += '9';
+        clean = clean.slice(0, 3);
+        if (clean !== raw.slice(0, 3)) {
+            log(`INFO: 選手${idx}の3走成績を正規化: "${el.value}" → "${clean}"`);
+        }
+        el.value = clean; // UIにも反映
+        return clean;
+    }
+
+    /**
+     * .style (脚質): 未選択時のガード
+     * @param {Element} card
+     * @param {number}  idx
+     * @returns {string} "自" | "追" | "両"
+     */
+    function getStyle(card, idx) {
+        const el  = card.querySelector('.style');
+        const val = el ? el.value : '';
+        if (!val || !['逃', '自', '追', '両'].includes(val)) {
+        log(`WARN: 選手${idx}の脚質が未選択 → "逃" をデフォルト適用`);
+        return '逃';
+        }
+        return val;
+    }
+
+    /**
+     * .wmark (W印): 未選択時は "無" を返して未定義エラーを回避
+     * @param {Element} card
+     * @param {number}  idx
+     * @returns {string}
+     */
+    function getWmark(card, idx) {
+        const el  = card.querySelector('.wmark');
+        const val = el ? el.value : '無';
+        return (val && val.trim() !== '') ? val : '無';
+    }
+
+    /**
+     * ラジオボタン排他制御の整合性確認
+     * S1位・B1位がそれぞれ正しく1名選出されているかを検証する。
+     * @returns {{ s1Id: number, b1Id: number, valid: boolean }}
+     */
+    function validateRadioButtons() {
+        const s1Checked = document.querySelectorAll('input[name="s-leader"]:checked');
+        const b1Checked = document.querySelectorAll('input[name="b-leader"]:checked');
+
+        const s1Id = s1Checked.length === 1 ? Number(s1Checked[0].dataset.id) : -1;
+        const b1Id = b1Checked.length === 1 ? Number(b1Checked[0].dataset.id) : -1;
+
+        let valid = true;
+        if (s1Checked.length !== 1) {
+            log(`WARN: S1位ラジオボタンが ${s1Checked.length} 名選択されています（正: 1名）。`);
+            valid = false;
+        }
+        if (b1Checked.length !== 1) {
+            log(`WARN: B1位ラジオボタンが ${b1Checked.length} 名選択されています（正: 1名）。`);
+            valid = false;
+        }
+        return { s1Id, b1Id, valid };
+    }
+
+    /**
+     * 全7選手のデータを一括バリデーションして配列で返す
+     * @returns {Array<Object>}
+     */
+    function getAllPlayersData() {
+        const cards  = document.querySelectorAll('.player-row');
+        const result = [];
+        cards.forEach((card, i) => {
+            const idx      = i + 1;
+            const isScratch = card.querySelector('.is-scratch')?.checked ?? false;
+            result.push({
+                id       : idx,
+                isScratch,
+                score    : getScore(card, idx),
+                recent   : getRecent(card, idx),
+                style    : getStyle(card, idx),
+                wmark    : getWmark(card, idx),
+                isLocal  : card.querySelector('.is-local')?.checked   ?? false,
+                isGoldCap: card.querySelector('.is-gold-cap')?.checked ?? false,
+            });
+        });
+        return result;
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 4. 展開・スイッチ系 バリデーション
+    //       対象: id="line-input-container" 配下
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * line-input: 許可文字以外を一括削除して純粋な並び文字列に浄化
+     * 許可: 1234567 , ( ) [ ] -
+     * @returns {string}
+     */
+    function getLineInput() {
+        const el  = document.getElementById('line-input');
+        if (!el) return '';
+        // 全角数字を半角変換してから不正文字を除去
+        let raw   = toHalfWidth(el.value);
+        let clean = raw.replace(/[^1-9,\(\)\[\]\-]/g, '');
+        if (clean !== raw) {
+            log(`INFO: 並び入力を浄化: "${el.value}" → "${clean}"`);
+            el.value = clean; // UIにも反映
+        }
+        return clean;
+    }
+
+    /**
+     * local-switch: Boolean型として確実に抽出
+     * @returns {boolean}
+     */
+    function getLocalSwitch() {
+        const el = document.getElementById('local-switch');
+        return el ? Boolean(el.checked) : false;
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 5. システム基盤: ReadOnly ロック / アンロック
+    // ──────────────────────────────────────────────────────
+
+    /** 全入力要素を一時的に無効化（計算中のデータ改ざん防止） */
+    function lockAllInputs() {
+        document.querySelectorAll(
+            'input, select, textarea, button'
+        ).forEach(el => {
+            el.dataset.prevDisabled = el.disabled; // 元の状態を保存
+            el.disabled = true;
+        });
+        log('INFO: 計算開始 — 全入力をロックしました。');
+    }
+
+    /** ロックを解除して元の状態へ復元 */
+    function unlockAllInputs() {
+        document.querySelectorAll(
+            'input, select, textarea, button'
+        ).forEach(el => {
+            // 元から disabled だった要素はそのまま維持
+            el.disabled = el.dataset.prevDisabled === 'true';
+        });
+        log('INFO: 計算完了 — 全入力のロックを解除しました。');
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 6. メイン収集関数
+    //       calculatePrediction() から呼び出す統合エントリーポイント
+    //       全値を Number() でサイレント・キャストして返す
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * 全入力値を検証・正規化して構造化オブジェクトとして返す。
+     * バリデーションエラーがあれば { valid: false, errors: [...] } を返す。
+     * @returns {{ valid: boolean, data?: Object, errors?: string[] }}
+     */
+    function collectAndValidate() {
+        const errors = [];
+
+        // 1) 級班チェック
+        const raceType = getRaceType();
+        if (raceType === null) errors.push('級班(race-type)が未選択です。');
+
+        // 2) 風向・風速
+        const wind = getWindInfo();
+
+        // 3) 選手データ
+        const players = getAllPlayersData();
+
+        // 4) ラジオボタン整合性
+        const radio = validateRadioButtons();
+        if (!radio.valid) errors.push('S1位またはB1位のラジオボタンが正しく設定されていません。');
+
+        // 5) 展開入力
+        const lineInput   = getLineInput();
+        const localSwitch = getLocalSwitch();
+
+        if (errors.length > 0) {
+            return { valid: false, errors };
+        }
+
+        return {
+            valid: true,
+            data: {
+                raceType,
+                bankName   : getBankName(),
+                wind,
+                players,
+                radio,
+                lineInput,
+                localSwitch,
+            }
+        };
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 7. 風向セレクト変更時のリアルタイム連動
+    //       ページロード後に wind-direction に監視を設定する
+    // ──────────────────────────────────────────────────────
+    function initWindDirectionWatcher() {
+        const dirEl = document.getElementById('wind-direction');
+        if (!dirEl) return;
+        dirEl.addEventListener('change', () => {
+            getWindInfo(); // バリデーション & disabled 制御を即時実行
+        });
+        // 初期状態の反映
+        getWindInfo();
+    }
+
+    // Public API
+    return {
+        collectAndValidate,
+        lockAllInputs,
+        unlockAllInputs,
+        getWindInfo,
+        getLineInput,
+        getLocalSwitch,
+        getAllPlayersData,
+        initWindDirectionWatcher,
+        log,
+    };
+})();
+
+// DOMContentLoaded 後に風向ウォッチャーを初期化
+document.addEventListener('DOMContentLoaded', () => {
+    InputGuard.initWindDirectionWatcher();
+    InputGuard.log('初期化完了 — 入力層堅牢化モジュール(InputGuard)が起動しました。');
+});
+
+// ============================================================
+// 🔗 calculatePrediction() のラッパー
+//    calculatePredictionをグローバルに公開し、ボタンから呼び出せるようにする。
+//    内部では、App.calculatePrediction（本体ロジック）をバリデーション付きで呼び出す。
+// ============================================================
+function initInputGuardWrapper() {
+    if (window.App && typeof window.App.calculatePrediction === 'function') {
+        const _original = window.App.calculatePrediction;
+        InputGuard.log('INFO: App.calculatePredictionを検出しました。ラッパーを設置します。');
+
+        // グローバルスコープに新しいcalculatePredictionラッパーを公開
+        window.calculatePrediction = function() {
+            // ── バリデーション実行 ──
+            const result = InputGuard.collectAndValidate();
+
+            if (!result.valid) {
+                const msg = '⚠️ 入力エラー:\n' + result.errors.join('\n');
+                alert(msg);
+                InputGuard.log('ERROR: バリデーション失敗 — 計算を中断しました。' + result.errors.join(' / '));
+                return; // 計算をロック
+            }
+
+            // ── 計算中ロック ──
+            InputGuard.lockAllInputs();
+
+            // ── 元の計算関数を非同期で実行し、完了後にアンロック ──
+            try {
+                // 元の App.calculatePrediction を呼び出し、検証済みデータを渡す
+                const ret = _original.apply(window.App, [result.data]);
+                
+                if (ret && typeof ret.then === 'function') {
+                    ret.finally(() => InputGuard.unlockAllInputs());
+                } else {
+                    // 同期処理やPromiseを返さない非同期処理の場合
+                    setTimeout(() => InputGuard.unlockAllInputs(), 200); // 少し余裕を持たせる
+                }
+            } catch (e) {
+                InputGuard.log('ERROR: 計算中に例外が発生: ' + e.message + '\n' + e.stack);
+                InputGuard.unlockAllInputs();
+                // ユーザーにエラーを通知
+                alert('計算中に予期せぬエラーが発生しました。コンソールを確認してください。');
+                throw e;
+            }
+        };
+        
+        InputGuard.log('ラッパー設置完了 — グローバルな calculatePrediction から App.calculatePrediction を呼び出します。');
+
+    } else {
+        setTimeout(initInputGuardWrapper, 50);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initInputGuardWrapper);
+
 })(App);
