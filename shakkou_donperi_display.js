@@ -418,11 +418,11 @@ function injectShakkouStyles() {
 // 🔗 既存コードとの統合用関数
 // ----------------------------------------------------------------------------
 
-function startShakkouCalculation(grade) {
+app.startShakkouCalculation = function(grade) {
     showShakkouProgress(grade);
 }
 
-function completeShakkouCalculation(cosmosResult, grade) {
+app.completeShakkouCalculation = function(cosmosResult, grade) {
     displayShakkouResults(cosmosResult, grade);
 }
 
