@@ -396,8 +396,7 @@ async function invokeShakkouDonperi(basePlayers, context) {
     const TOTAL_ITERATIONS = 1465;
     const BATCH_SIZE = 50;
 
-    if (typeof logMessage === 'function') {
-        logMessage(`[赤口] 世界蛇回路:嚥下開始 (${TOTAL_ITERATIONS}世界線)`);
+    app.logMessage(`[赤口] 世界蛇回路:嚥下開始 (${TOTAL_ITERATIONS}世界線)`);
     }
 
     const allResults = [];
@@ -433,8 +432,7 @@ async function invokeShakkouDonperi(basePlayers, context) {
         }
 
         // 500刻みで進捗ログ
-        if (typeof logMessage === 'function' && end % 300 === 0) {
-            logMessage(`[赤口] 世界蛇回路:嚥下中... ${end} / ${TOTAL_ITERATIONS}`);
+        app.logMessage(`[赤口] 世界蛇回路:嚥下中... ${end} / ${TOTAL_ITERATIONS}`);
         }
 
         await new Promise(resolve => setTimeout(resolve, 0));
@@ -442,8 +440,7 @@ async function invokeShakkouDonperi(basePlayers, context) {
 
     const cosmosResult = cosmosObserver(allResults, basePlayers);
 
-    if (typeof logMessage === 'function') {
-        logMessage(`[赤口] 世界蛇回路:嚥下完了`);
+    app.logMessage(`[赤口] 世界蛇回路:嚥下完了`);
     }
 
     return cosmosResult;
