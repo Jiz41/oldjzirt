@@ -277,7 +277,7 @@ function getPlayerData() {
 async function loadBANK_DATA() {
     try {
         app.logMessage("[INIT] bankdata.jsonの読み込みを開始します...");
-        const response = await fetch('https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest01/resolve/main/bankdata.json');
+        const response = await fetch('./bankdata.json');
         if (!response.ok) throw new Error(`HTTP status ${response.status}`);
 
         BANK_DATA = await response.json();
@@ -1052,6 +1052,9 @@ app.calculatePrediction = async function() {
 
         // 🌌 赤口呑縁：晴天令・荒天令完了後に直接起動
         if (typeof app.invokeShakkouDonperi === 'function') {
+            if (typeof app.startShakkouCalculation === 'function') {
+                app.startShakkouCalculation(gradeKey);
+            }
             const context = {
                 grade: gradeKey,
                 seriInfos: allSeriInfos,
@@ -1137,7 +1140,8 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // 競りサマリー
     let seriSummaryHtml = '';
     if (allSeriInfos.length > 0) {
-            seriSummaryHtml += `<div style="padding: 15px; margin-bottom: 15px; border: 4px dashed #f8b500; background: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255, 255, 255, 0.05) 2px, rgba(255, 255, 255, 0.05) 3px), repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.05) 2px, rgba(255, 255, 255, 0.05) 3px), #3a3a3a; border-radius: 6px; color: #ffffff; background-clip: padding-box;"><h4 style="color: #ffffff; margin-top: 0;">⚠️ 競り発生！</h4>`;        allSeriInfos.forEach((info, index) => {
+            seriSummaryHtml += `<div id="seri-summary" style="padding: 15px; margin-bottom: 15px; border: 4px dashed #f8b500; background: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255, 255, 255, 0.05) 2px, rgba(255, 255, 255, 0.05) 3px), repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.05) 2px, rgba(255, 255, 255, 0.05) 3px), #3a3a3a; border-radius: 6px; color: #ffffff; background-clip: padding-box;"><h4 style="color: #ffffff; margin-top: 0;">⚠️ 競り発生！</h4>`;
+        allSeriInfos.forEach((info, index) => {
             const prefix = (index === 0) ? '最初の競りは、' : '<strong>さらに、</strong>';
             seriSummaryHtml += `<p>${prefix}選手<strong>${info.follower}</strong> vs 選手<strong>${info.contender}</strong>。予測勝者は **選手${info.winner}** です。</p>`;
         });
@@ -1177,7 +1181,10 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
 
     const scenarioOutput = document.getElementById('scenario-output');
     if (scenarioOutput) {
-        scenarioOutput.innerHTML = ''; // 毎回クリア
+        const oldSummary = document.getElementById('seri-summary');
+        if (oldSummary) {
+            oldSummary.remove();
+        }
         if (seriSummaryHtml) {
             scenarioOutput.insertAdjacentHTML('afterbegin', seriSummaryHtml);
         }
