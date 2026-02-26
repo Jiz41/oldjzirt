@@ -1239,4 +1239,3 @@ document.querySelectorAll('select').forEach(select => {
     });
 });
 })(App);
-window.dispatchEvent(new Event('appReady'));
