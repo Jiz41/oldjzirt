@@ -976,55 +976,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ============================================================
 // 🔗 calculatePrediction() のラッパー
-//    既存の keirin_logic が同名関数を定義している場合に備え、
-//    元の関数を _originalCalculatePrediction として保存し、
-//    バリデーションを挟んでから呼び出すパターンを採用する。
-//    ※ keirin_logic 側で window.calculatePrediction を上書きするため、
-//      defer スクリプト読み込み完了後に遅延実行でフック。
+//    calculatePredictionをグローバルに公開し、ボタンから呼び出せるようにする。
+//    内部では、App.calculatePrediction（本体ロジック）をバリデーション付きで呼び出す。
 // ============================================================
 window.addEventListener('load', () => {
-    const _original = window.calculatePrediction;
+    // Appオブジェクトと、その中のcalculatePredictionが存在するか確認
+    if (window.App && typeof window.App.calculatePrediction === 'function') {
+        const _original = window.App.calculatePrediction;
+        InputGuard.log('INFO: App.calculatePredictionを検出しました。ラッパーを設置します。');
 
-    if (typeof _original !== 'function') {
-        InputGuard.log('WARN: calculatePrediction が未定義です。ラッパーのみ設置します。');
-    }
+        // グローバルスコープに新しいcalculatePredictionラッパーを公開
+        window.calculatePrediction = function() {
+            // ── バリデーション実行 ──
+            const result = InputGuard.collectAndValidate();
 
-    window.calculatePrediction = function() {
-        // ── バリデーション実行 ──
-        const result = InputGuard.collectAndValidate();
+            if (!result.valid) {
+                const msg = '⚠️ 入力エラー:\n' + result.errors.join('\n');
+                alert(msg);
+                InputGuard.log('ERROR: バリデーション失敗 — 計算を中断しました。' + result.errors.join(' / '));
+                return; // 計算をロック
+            }
 
-        if (!result.valid) {
-            const msg = '⚠️ 入力エラー:\n' + result.errors.join('\n');
-            alert(msg);
-            InputGuard.log('ERROR: バリデーション失敗 — 計算を中断しました。' + result.errors.join(' / '));
-            return; // 計算をロック
-        }
+            // ── 計算中ロック ──
+            InputGuard.lockAllInputs();
 
-        // ── 計算中ロック ──
-        InputGuard.lockAllInputs();
-
-        // ── 元の計算関数を非同期で実行し、完了後にアンロック ──
-        if (typeof _original === 'function') {
+            // ── 元の計算関数を非同期で実行し、完了後にアンロック ──
             try {
-                const ret = _original.apply(this, arguments);
-                // Promise を返す場合と同期の場合の両方に対応
+                // 元の App.calculatePrediction を呼び出し、検証済みデータを渡す
+                const ret = _original.apply(window.App, [result.data]);
+                
                 if (ret && typeof ret.then === 'function') {
                     ret.finally(() => InputGuard.unlockAllInputs());
                 } else {
-                    // 同期処理の場合は少し遅らせてからアンロック（シミュレーション完了を待つ）
-                    setTimeout(() => InputGuard.unlockAllInputs(), 100);
+                    // 同期処理やPromiseを返さない非同期処理の場合
+                    setTimeout(() => InputGuard.unlockAllInputs(), 200); // 少し余裕を持たせる
                 }
             } catch (e) {
-                InputGuard.log('ERROR: 計算中に例外が発生: ' + e.message);
+                InputGuard.log('ERROR: 計算中に例外が発生: ' + e.message + '\n' + e.stack);
                 InputGuard.unlockAllInputs();
+                // ユーザーにエラーを通知
+                alert('計算中に予期せぬエラーが発生しました。コンソールを確認してください。');
                 throw e;
             }
-        } else {
-            setTimeout(() => InputGuard.unlockAllInputs(), 100);
-        }
-    };
+        };
+        
+        InputGuard.log('ラッパー設置完了 — グローバルな calculatePrediction から App.calculatePrediction を呼び出します。');
 
-    InputGuard.log('ラッパー設置完了 — calculatePrediction にバリデーションフックを挿入しました。');
+    } else {
+        InputGuard.log('WARN: App.calculatePrediction が未定義です。計算機能は利用できません。');
+        // グローバルにダミー関数を置いて、ボタンがエラーを起こさないようにする
+        window.calculatePrediction = function() {
+            alert('エラー: 計算機能が正しく読み込まれていません。スクリプトの読み込み順序を確認してください。');
+            InputGuard.log('ERROR: App.calculatePrediction is not defined. Cannot run prediction.');
+        };
+    }
 });
 </script>
 
@@ -1032,17 +1037,19 @@ window.addEventListener('load', () => {
      スクリプトの読み込み順序（重要！この順序を厳守）
      ============================================================================ -->
 
-<!-- 1. メインロジック（keirin_logic）を最初に読み込む -->
-<script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest/resolve/main/keirin_logic.js" defer></script>
+<!-- 1. コアロジック (Appオブジェクトと計算本体を定義) -->
+<script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest/resolve/main/shakkou_donperi_core.js" defer></script>
 
-<!-- 2. 補助システム（meigen, tamaki） -->
+<!-- 2. 依存スクリプト (コアに依存するUIや音声など) -->
+<script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest/resolve/main/shakkou_donperi_display.js" defer></script>
+<script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest/resolve/main/kiyone_voice.js" defer></script>
+
+<!-- 3. 補助システム (名言、キャラクターなど) -->
 <script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest/resolve/main/meigen.js" defer></script>
 <script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest/resolve/main/tamaki_speech.js" defer></script>
 
-<!-- 3. 赤口呑縁システム（この順序で読み込む） -->
-<script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest/resolve/main/kiyone_voice.js" defer></script>
-<script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest/resolve/main/shakkou_donperi_display.js" defer></script>
-<script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest/resolve/main/shakkou_donperi_core.js" defer></script>
+<!-- 4. その他のスクリプト -->
+<script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest/resolve/main/keirin_logic.js" defer></script>
 <script src="https://huggingface.co/spaces/Jiz41/Jiz41r1t5utest/resolve/main/paste-input.js" defer></script>
 
 </body>
