@@ -1051,6 +1051,7 @@ app.calculatePrediction = async function() {
         if (resultsContainer) resultsContainer.classList.add('visible');
 
         // 🌌 赤口呑縁：晴天令・荒天令完了後に直接起動
+        app.logMessage('[DEBUG] invokeShakkouDonperi type: ' + typeof app.invokeShakkouDonperi);
         if (typeof app.invokeShakkouDonperi === 'function') {
             if (typeof app.startShakkouCalculation === 'function') {
                 app.startShakkouCalculation(gradeKey);
