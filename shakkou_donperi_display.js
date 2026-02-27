@@ -51,6 +51,9 @@ function displayShakkouResults(cosmosResult, grade) {
     const scenarioOutput = document.getElementById('scenario-output');
     
     if (scenarioOutput) {
+        const existing = scenarioOutput.querySelector('.shakkou-results-container');
+        if (existing) existing.remove();
+        
         const resultHTML = `
 <div class="shakkou-results-container">
     <div class="shakkou-header">
