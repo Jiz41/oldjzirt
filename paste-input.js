@@ -1,5 +1,4 @@
 (function() {
-  'use strict';
 
   // ============================================================
   // 1. 定数・変換マップ
@@ -352,7 +351,7 @@
   /**
    * テキスト全体を解析してデータオブジェクトを返す
    * @param {string} text
-   * @returns {{ venue: string|null, raceType: string|null, players: Object[] }}
+   * @returns {{ venue: string|null, raceType: string|null, players: Object[], error?: string }}
    */
   function parseText(text) {
     const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
@@ -360,7 +359,7 @@
     const result = {
       venue: null,
       raceType: null,
-      players: [],  // { carNo, name, pref, style_raw, score, kimatete }
+      players: [],  // { carNo, name, pref, style_raw, score, kimatete, scoreUndetected }
     };
 
     // --- 開催場 ---
@@ -383,27 +382,16 @@
     }
 
     // --- 選手データ ---
-    // 戦略: 「府県/級班/脚質」行を基準点として前後から値を拾う
-    // 「調子」が「調」「子」に分裂するなど行数が可変でも影響を受けない
-    //
-    // タブ区切りで1行になる場合もあるため、タブを改行に展開して処理する
-
     const normalizedLines = lines.flatMap(l => l.split('\t').map(s => s.trim())).filter(s => s.length > 0);
-
-    // 府県/級班/脚質パターン: 例「栃　木/A3A3/追」
     const prefStylePattern = /^(.{2,6})\/((?:[ASGLa-z][0-9]?){2,})\/(逃|捲|差|マ|両|追)$/;
-    // 競走得点パターン: 数値（小数あり）
     const scorePattern = /^(\d+\.\d+)$/;
-    // 車番パターン: 1〜7の単一数字
     const carNoPattern = /^([1-7])$/;
-    // 決まり手数値パターン（整数）
     const intPattern = /^\d+$/;
 
     for (let i = 0; i < normalizedLines.length; i++) {
       const prefMatch = prefStylePattern.exec(normalizedLines[i]);
       if (!prefMatch) continue;
 
-      // 府県行(i)を基準に前を遡って車番・選手名を取得
       let carNo = null;
       let nameLine = '';
 
@@ -420,7 +408,6 @@
       const pref     = prefMatch[1].replace(/[\s　]/g, '');
       const styleRaw = prefMatch[3];
 
-      // 府県行(i)の次から競走得点を探す（最大3行先まで）
       let score = null;
       let scoreIdx = -1;
       for (let j = i + 1; j <= i + 3 && j < normalizedLines.length; j++) {
@@ -431,7 +418,6 @@
         }
       }
 
-      // 決まり手: 競走得点の次から逃/捲/差/マの4列（Bは無視）
       let kimatete = { 逃: 0, 捲: 0, 差: 0, マ: 0 };
       if (scoreIdx !== -1) {
         const cols = ['逃', '捲', '差', 'マ'];
@@ -443,7 +429,20 @@
         });
       }
 
-      result.players.push({ carNo, name: nameLine, pref, styleRaw, score, kimatete });
+      result.players.push({
+        carNo,
+        name: nameLine,
+        pref,
+        styleRaw,
+        score,
+        kimatete,
+        scoreUndetected: score === null,
+      });
+    }
+
+    // 全項目が未検出の場合はエラーフラグを立てる
+    if (result.venue === null && result.raceType === null && result.players.length === 0) {
+      result.error = 'UNRECOGNIZED_FORMAT';
     }
 
     return result;
@@ -459,27 +458,27 @@
    * @returns { value: '自'|'両'|'追'|null, warn: boolean }
    */
   function resolveStyle(kimatete) {
-  const nige  = kimatete['逃'] || 0;
-  const maku  = kimatete['捲'] || 0;
-  const sashi = kimatete['差'] || 0;
-  const ma    = kimatete['マ'] || 0;
+    const nige  = kimatete['逃'] || 0;
+    const maku  = kimatete['捲'] || 0;
+    const sashi = kimatete['差'] || 0;
+    const ma    = kimatete['マ'] || 0;
 
-  const groups = [
-    { value: '逃', score: nige },
-    { value: '自', score: maku },
-    { value: '追', score: Math.max(sashi, ma) },
-  ];
+    const groups = [
+      { value: '逃', score: nige },
+      { value: '自', score: maku },
+      { value: '追', score: Math.max(sashi, ma) },
+    ];
 
-  groups.sort((a, b) => b.score - a.score);
+    groups.sort((a, b) => b.score - a.score);
 
-  if (groups[0].score === 0) {
-    return { value: null, warn: true };
+    if (groups[0].score === 0) {
+      return { value: null, warn: true };
+    }
+    if (groups[0].score === groups[1].score) {
+      return { value: null, warn: true };
+    }
+    return { value: groups[0].value, warn: false };
   }
-  if (groups[0].score === groups[1].score) {
-    return { value: null, warn: true };
-  }
-  return { value: groups[0].value, warn: false };
-}
 
   // ============================================================
   // 5. フォームへの反映
@@ -496,6 +495,18 @@
     }
 
     const data = parseText(text);
+
+    // フォーマット完全不認識
+    if (data.error === 'UNRECOGNIZED_FORMAT') {
+      log.textContent = '❌ テキスト形式を認識できませんでした。\nkeirin.jp スマホ版の出走表ページを最上部〜最下部まで全選択してコピーしてください。';
+      return;
+    }
+
+    // 選手データが1件も取れていない
+    if (data.players.length === 0) {
+      log.textContent = '⚠️ 選手データを検出できませんでした。\nkeirin.jp のフォーマットが変更された可能性があります。\n手動で入力してください。';
+      return;
+    }
 
     // --- バンク名 ---
     if (data.venue) {
@@ -569,8 +580,6 @@
         if (styleValue !== null) {
           styleEl.value = styleValue;
         } else {
-          // 同数 or 判定不能 → 空欄にはできないので最初のoption以外を選択しない
-          // プルダウンの選択を変えずに警告のみ
           warnCarNos.push(player.carNo);
         }
       }
@@ -582,6 +591,12 @@
         localEl.checked = playerPref.includes(venuePref) || venuePref.includes(playerPref);
       }
     });
+
+    // 競走得点未検出の選手を警告
+    const noScorePlayers = data.players.filter(p => p.scoreUndetected).map(p => p.carNo);
+    if (noScorePlayers.length > 0) {
+      msgs.push(`⚠️ 車番 ${noScorePlayers.join(', ')}: 競走得点を検出できませんでした（手動入力してください）`);
+    }
 
     if (warnCarNos.length > 0) {
       msgs.push(`⚠️ 車番 ${warnCarNos.join(', ')}: 脚質が同数のため手動設定してください`);
@@ -696,6 +711,16 @@
       const res     = await fetch(url);
       const json    = await res.json();
       const current = json.current;
+
+      // レスポンス異常チェック
+      if (!res.ok) {
+        console.warn(`[wind] APIレスポンス異常: HTTP ${res.status}`);
+        return;
+      }
+      if (!current || current.wind_speed_10m === undefined || current.wind_direction_10m === undefined) {
+        console.warn(`[wind] ${bankKey}: APIレスポンスに風速データが含まれていません`, json);
+        return;
+      }
 
       const speedMs   = kmhToMs(current.wind_speed_10m);
       const direction = degToDirection(current.wind_direction_10m);
