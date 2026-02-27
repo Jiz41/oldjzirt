@@ -26,6 +26,10 @@ function parseLines(lineInput) {
 // 🌌 世界線定義テーブル
 // ----------------------------------------------------------------------------
 
+// weight値：各世界線の出現頻度（各grade合計 = TOTAL_ITERATIONSの1465に統一）
+// S級：W0(879/1465≒60%) が支配的 ── 実力通りに決まりやすい
+// チャレンジ：W0=W1=366 ── 純正と崩壊が同率の混沌設計
+// weight = その世界線が選ばれる世界線数として直読できる
 const SHAKKOU_WORLD_TABLE = {
     's-kyu': [
         { id: 'W0', name: '物理純正世界', weight: 879, events: [] },
@@ -396,7 +400,12 @@ function parseLines(lineInput) {
 // ----------------------------------------------------------------------------
 
 async function invokeShakkouDonperi(basePlayers, context) {
+    // 1465：ドクター・ストレンジが観測した並行世界数へのオマージュ
+    // （Marvel『インフィニティ・ウォー』：1400万605の未来から勝利への道を探す）
+    // 競輪における「唯一の正解」を探す儀術として設定
     const TOTAL_ITERATIONS = 1465;
+    // 50件ずつ非同期分割処理：UI応答性を確保するためのバッチサイズ
+    // await setTimeout(0) と組み合わせてメインスレッドのブロックを防止
     const BATCH_SIZE = 50;
 
     app.logMessage(`[赤口] 世界蛇回路:嚥下開始 (${TOTAL_ITERATIONS}世界線)`);
@@ -417,6 +426,7 @@ async function invokeShakkouDonperi(basePlayers, context) {
             const occurredEvents = applyChaos(players, world.events, context);
 
             players.forEach(p => {
+                // ±5%のランダムゆらぎ：同一世界線内での個体差・レース展開の微細な揺れを表現
                 p.final_score *= (0.95 + Math.random() * 0.10);
             });
 
@@ -580,6 +590,11 @@ function cosmosObserver(allResults, basePlayers) {
 // 🔗 既存コードとの統合用ラッパー関数
 // ----------------------------------------------------------------------------
 
+/**
+ * 勝率をグレード1〜10に変換する
+ * 7車レースの均等分布なら理論勝率≒14.3%
+ * 30%以上で最高グレード10、2%未満で最低グレード1
+ */
 function calculateGradeFromProbability(winProb) {
     if (winProb >= 0.30) return 10;
     if (winProb >= 0.25) return 9;
@@ -593,6 +608,11 @@ function calculateGradeFromProbability(winProb) {
     return 1;
 }
 
+/**
+ * 勝率・3着内確率から競輪印（◎〇▲△×・）を返す
+ * 勝率28%以上かつ3着内70%以上で本命◎
+ * 勝率5%未満は消し（・）
+ */
 function generateStrengthMark(winProb, top3Prob) {
     if (winProb >= 0.28 && top3Prob >= 0.70) return '◎';
     if (winProb >= 0.20 && top3Prob >= 0.60) return '○';
