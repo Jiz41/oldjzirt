@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自在律 成績計算機</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Antique+Soft&family=DM+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: #2a2a3a;
+    --accent: #c8a96e;
+    --accent2: #7eb8c8;
+    --hit: #6ec87e;
+    --miss: #c86e6e;
+    --text: #e8e4d8;
+    --text-muted: #6a6880;
+    --text-dim: #3a3850;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(200,169,110,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(126,184,200,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  #app {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  header::after {
+    content: '';
+    display: block;
+    width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    margin: 24px auto 0;
+  }
+
+  .title-jp {
+    font-family: 'Zen Antique Soft', serif;
+    font-size: 28px;
+    color: var(--accent);
+    letter-spacing: 0.3em;
+    line-height: 1;
+  }
+
+  .title-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.2em;
+    margin-top: 8px;
+    text-transform: uppercase;
+  }
+
+  /* Upload Zone */
+  #upload-zone {
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #upload-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(200,169,110,0.02) 0%, transparent 50%);
+  }
+
+  #upload-zone:hover, #upload-zone.drag-over {
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+
+  #upload-zone .icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    opacity: 0.6;
+  }
+
+  #upload-zone .label {
+    color: var(--text-muted);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+  }
+
+  #upload-zone .label span {
+    color: var(--accent);
+  }
+
+  #file-input { display: none; }
+
+  /* File info */
+  #file-info {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #file-info.visible { display: flex; }
+
+  .file-name {
+    color: var(--accent);
+    flex: 1;
+  }
+
+  .file-rows {
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+
+  /* Results */
+  #results {
+    display: none;
+    margin-top: 32px;
+    animation: fadeIn 0.4s ease;
+  }
+
+  #results.visible { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-title {
+    font-family: 'Zen Antique Soft', serif;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+
+  .stat-card.accent2::before { background: var(--accent2); }
+  .stat-card.hit::before { background: var(--hit); }
+  .stat-card.miss::before { background: var(--miss); }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-value.pct::after {
+    content: '%';
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-left: 2px;
+  }
+
+  .stat-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* Table */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    background: var(--surface2);
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--text-dim);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tbody tr:hover td { background: var(--surface2); }
+
+  .val-good { color: var(--hit); }
+  .val-bad { color: var(--miss); }
+  .val-neutral { color: var(--accent); }
+  .val-muted { color: var(--text-muted); }
+
+  /* Reset btn */
+  #reset-btn {
+    display: none;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+
+  #reset-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  #reset-btn.visible { display: inline-block; }
+
+  /* Error */
+  .error-msg {
+    color: var(--miss);
+    font-size: 11px;
+    margin-top: 8px;
+    display: none;
+  }
+
+  .error-msg.visible { display: block; }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 32px 0;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="title-jp">自在律　成績計算機</div>
+    <div class="title-sub">Jizairitsu Performance Analyzer</div>
+  </header>
+
+  <div id="upload-zone" onclick="document.getElementById('file-input').click()">
+    <div class="icon">⊕</div>
+    <div class="label">CSVをドロップ、または<span>タップして選択</span></div>
+    <input type="file" id="file-input" accept=".csv">
+  </div>
+
+  <div id="file-info">
+    <span class="file-name" id="file-name-text">—</span>
+    <span class="file-rows" id="file-rows-text">—</span>
+  </div>
+
+  <div class="error-msg" id="error-msg"></div>
+
+  <button id="reset-btn" onclick="resetAll()">× リセット</button>
+
+  <div id="results">
+
+    <div class="section-title">── 総合成績</div>
+    <div class="stats-grid" id="overview-stats"></div>
+
+    <div class="divider"></div>
+
+    <div class="section-title">── 令別　精度</div>
+    <div class="stats-grid" id="rei-stats"></div>
+
+    <div class="divider"></div>
+
+    <div class="section-title">── 券種別　回収率</div>
+    <div class="table-wrap">
+      <table id="券種-table">
+        <thead>
+          <tr>
+            <th>令</th>
+            <th>券種</th>
+            <th>点数</th>
+            <th>投資額</th>
+            <th>払戻合計</th>
+            <th>回収率</th>
+            <th>的中数</th>
+          </tr>
+        </thead>
+        <tbody id="券種-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-title">── 開催場別　的中率</div>
+    <div class="table-wrap">
+      <table id="venue-table">
+        <thead>
+          <tr>
+            <th>開催場</th>
+            <th>レース数</th>
+            <th>的中数</th>
+            <th>的中率</th>
+            <th>晴天令T率</th>
+            <th>荒天令T率</th>
+          </tr>
+        </thead>
+        <tbody id="venue-tbody"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ── CSV Parser ──────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const rows = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    const vals = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+    if (vals.every(v => v === '')) continue;
+    const row = {};
+    headers.forEach((h, idx) => { row[h] = vals[idx] || ''; });
+    rows.push(row);
+  }
+  return rows;
+}
+
+// ── Column Detection ─────────────────────────────────────────
+// スプシの列名をキーに取得
+function getCol(row, candidates) {
+  for (const c of candidates) {
+    if (row[c] !== undefined) return row[c];
+  }
+  return '';
+}
+
+// ── Analysis ────────────────────────────────────────────────
+function analyze(rows) {
+  const total = rows.length;
+  
+  // 列名候補
+  const colI = ['総合判定', 'I'];
+  const colG = ['晴天令 T/F', '晴天令T/F', 'G'];
+  const colH = ['荒天令 T/F', '荒天令T/F', 'H'];
+  const colN = ['3連単オッズ', 'N'];
+  const colO = ['3連複オッズ', 'O'];
+  const colP = ['2車単オッズ', '2連単オッズ', 'P'];
+  const colB = ['開催場', 'B'];
+  const colC = ['天雲指数', 'C'];
+  const colQ = ['級別', 'Q'];
+
+  // ヘルパー
+  const isHit = row => getCol(row, colI).includes('的中') && !getCol(row, colI).includes('不的中');
+  const isT = (row, col) => getCol(row, col) === 'T';
+  const toOdds = val => { const n = parseFloat(val); return isNaN(n) ? 0 : n; };
+
+  // 総合
+  const hits = rows.filter(isHit).length;
+  const hitRate = total > 0 ? (hits / total * 100) : 0;
+
+  // 晴天令
+  const seiT = rows.filter(r => isT(r, colG)).length;
+  const seiRate = total > 0 ? (seiT / total * 100) : 0;
+
+  // 荒天令
+  const koT = rows.filter(r => isT(r, colH)).length;
+  const koRate = total > 0 ? (koT / total * 100) : 0;
+
+  // 投資総額
+  const totalInvest = total * 1000;
+
+  // 券種別回収率
+  // 晴天令3連単：G=T時 N列×100 ÷ (レース数×400)
+  const s3tan = calcKiken(rows, colG, colN, 400, total);
+  const s3fuku = calcKiken(rows, colG, colO, 100, total);
+  const k3fuku = calcKiken(rows, colH, colO, 200, total);
+  const k2tan = calcKiken(rows, colH, colP, 300, total);
+
+  // 全体回収率
+  const totalPayout = s3tan.payout + s3fuku.payout + k3fuku.payout + k2tan.payout;
+  const totalRecovery = totalInvest > 0 ? (totalPayout / totalInvest * 100) : 0;
+
+  // 開催場別
+  const venueMap = {};
+  rows.forEach(r => {
+    const v = getCol(r, colB) || '不明';
+    if (!venueMap[v]) venueMap[v] = { total: 0, hits: 0, seiT: 0, koT: 0 };
+    venueMap[v].total++;
+    if (isHit(r)) venueMap[v].hits++;
+    if (isT(r, colG)) venueMap[v].seiT++;
+    if (isT(r, colH)) venueMap[v].koT++;
+  });
+
+  return {
+    total, hits, hitRate,
+    seiT, seiRate,
+    koT, koRate,
+    totalInvest, totalPayout, totalRecovery,
+    kiken: { s3tan, s3fuku, k3fuku, k2tan },
+    venues: venueMap
+  };
+}
+
+function calcKiken(rows, tfCol, oddsCol, investPerRace, totalRows) {
+  let payout = 0;
+  let hitCount = 0;
+  rows.forEach(r => {
+    const tf = r[Object.keys(r).find(k => tfCol.includes(k))] || 
+               r[tfCol[0]] || '';
+    if (tf === 'T') {
+      const oddsKey = Object.keys(r).find(k => oddsCol.some(c => k.includes(c.replace(/列$/, ''))));
+      const oddsVal = oddsKey ? toFloat(r[oddsKey]) : 0;
+      if (oddsVal > 0) {
+        payout += oddsVal * 100;
+        hitCount++;
+      }
+    }
+  });
+  const invest = totalRows * investPerRace;
+  const recovery = invest > 0 ? (payout / invest * 100) : 0;
+  return { payout, hitCount, invest, recovery, investPerRace };
+}
+
+function toFloat(v) {
+  const n = parseFloat(v);
+  return isNaN(n) ? 0 : n;
+}
+
+// ── Render ───────────────────────────────────────────────────
+function render(result) {
+  const { total, hits, hitRate, seiT, seiRate, koT, koRate,
+          totalInvest, totalPayout, totalRecovery, kiken, venues } = result;
+
+  // Overview
+  document.getElementById('overview-stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">総レース数</div>
+      <div class="stat-value">${total.toLocaleString()}</div>
+      <div class="stat-sub">レース</div>
+    </div>
+    <div class="stat-card hit">
+      <div class="stat-label">的中数</div>
+      <div class="stat-value">${hits}</div>
+      <div class="stat-sub">/ ${total} レース</div>
+    </div>
+    <div class="stat-card hit">
+      <div class="stat-label">的中率</div>
+      <div class="stat-value pct">${hitRate.toFixed(1)}</div>
+      <div class="stat-sub">総合判定</div>
+    </div>
+    <div class="stat-card ${totalRecovery >= 100 ? 'hit' : 'miss'}">
+      <div class="stat-label">総合回収率</div>
+      <div class="stat-value pct">${totalRecovery.toFixed(1)}</div>
+      <div class="stat-sub">${totalPayout.toLocaleString()}円 / ${totalInvest.toLocaleString()}円</div>
+    </div>
+  `;
+
+  // 令別精度
+  document.getElementById('rei-stats').innerHTML = `
+    <div class="stat-card accent2">
+      <div class="stat-label">晴天令　的中数</div>
+      <div class="stat-value">${seiT}</div>
+      <div class="stat-sub">/ ${total} レース</div>
+    </div>
+    <div class="stat-card accent2">
+      <div class="stat-label">晴天令　精度</div>
+      <div class="stat-value pct">${seiRate.toFixed(1)}</div>
+      <div class="stat-sub">G列 T率</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">荒天令　的中数</div>
+      <div class="stat-value">${koT}</div>
+      <div class="stat-sub">/ ${total} レース</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">荒天令　精度</div>
+      <div class="stat-value pct">${koRate.toFixed(1)}</div>
+      <div class="stat-sub">H列 T率</div>
+    </div>
+  `;
+
+  // 券種別回収率
+  const kikenRows = [
+    { rei: '晴天令', type: '3連単', pts: 4, data: kiken.s3tan },
+    { rei: '晴天令', type: '3連複', pts: 1, data: kiken.s3fuku },
+    { rei: '荒天令', type: '3連複', pts: 2, data: kiken.k3fuku },
+    { rei: '荒天令', type: '2連単', pts: 3, data: kiken.k2tan },
+  ];
+
+  document.getElementById('券種-tbody').innerHTML = kikenRows.map(({ rei, type, pts, data }) => {
+    const cls = data.recovery >= 100 ? 'val-good' : data.recovery >= 70 ? 'val-neutral' : 'val-bad';
+    return `<tr>
+      <td>${rei}</td>
+      <td>${type}</td>
+      <td class="val-muted">${pts}点</td>
+      <td class="val-muted">${data.invest.toLocaleString()}円</td>
+      <td>${data.payout.toLocaleString()}円</td>
+      <td class="${cls}">${data.recovery.toFixed(1)}%</td>
+      <td class="val-muted">${data.hitCount}回</td>
+    </tr>`;
+  }).join('');
+
+  // 開催場別
+  const venueEntries = Object.entries(venues).sort((a, b) => b[1].total - a[1].total);
+  document.getElementById('venue-tbody').innerHTML = venueEntries.map(([venue, v]) => {
+    const hr = (v.hits / v.total * 100).toFixed(1);
+    const sr = (v.seiT / v.total * 100).toFixed(1);
+    const kr = (v.koT / v.total * 100).toFixed(1);
+    const cls = parseFloat(hr) >= 30 ? 'val-good' : parseFloat(hr) >= 15 ? 'val-neutral' : 'val-bad';
+    return `<tr>
+      <td>${venue}</td>
+      <td class="val-muted">${v.total}</td>
+      <td class="val-muted">${v.hits}</td>
+      <td class="${cls}">${hr}%</td>
+      <td>${sr}%</td>
+      <td>${kr}%</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('results').classList.add('visible');
+  document.getElementById('reset-btn').classList.add('visible');
+}
+
+// ── File Handling ────────────────────────────────────────────
+function handleFile(file) {
+  if (!file || !file.name.endsWith('.csv')) {
+    showError('CSVファイルを選択してください');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const rows = parseCSV(e.target.result);
+      if (rows.length === 0) { showError('データが見つかりませんでした'); return; }
+
+      document.getElementById('file-info').classList.add('visible');
+      document.getElementById('file-name-text').textContent = file.name;
+      document.getElementById('file-rows-text').textContent = `${rows.length.toLocaleString()} レース`;
+      document.getElementById('upload-zone').style.display = 'none';
+
+      const result = analyze(rows);
+      render(result);
+    } catch (err) {
+      showError('解析エラー: ' + err.message);
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+function resetAll() {
+  document.getElementById('upload-zone').style.display = '';
+  document.getElementById('file-info').classList.remove('visible');
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('reset-btn').classList.remove('visible');
+  document.getElementById('error-msg').classList.remove('visible');
+  document.getElementById('file-input').value = '';
+}
+
+// Events
+document.getElementById('file-input').addEventListener('change', e => {
+  handleFile(e.target.files[0]);
+});
+
+const zone = document.getElementById('upload-zone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault();
+  zone.classList.remove('drag-over');
+  handleFile(e.dataTransfer.files[0]);
+});
+</script>
+</body>
+</html>
