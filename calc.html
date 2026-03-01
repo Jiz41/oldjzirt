@@ -607,11 +607,11 @@ function handleFile(file) {
 
       // デバッグ（全列番号確認用）
       const headers = Object.keys(rows[0]);
-      const last = Object.values(rows[rows.length - 1]);
-      const allCols = headers.map((h, i) => `[${i}] ${h} → ${last[i]}`).join('\n');
+      const row1000 = Object.values(rows[Math.min(999, rows.length - 1)]);
+      const allCols = headers.map((h, i) => `[${i}] ${h} → ${row1000[i]}`).join('\n');
       const dbg = document.getElementById('debug-box');
       dbg.style.display = 'block';
-      dbg.textContent = `▼ 列名（タイトル行） → 最終行の値\n${allCols}`;
+      dbg.textContent = `▼ 列名 → 1000行目の値\n${allCols}`;
 
       const result = analyze(rows);
       render(result);
