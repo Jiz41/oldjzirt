@@ -605,13 +605,14 @@ function handleFile(file) {
       document.getElementById('file-rows-text').textContent = `${rows.length.toLocaleString()} レース`;
       document.getElementById('upload-zone').style.display = 'none';
 
-      // デバッグ（全列番号確認用）
+      // デバッグ（653行目・660行目確認用）
       const headers = Object.keys(rows[0]);
-      const row1000 = Object.values(rows[Math.min(999, rows.length - 1)]);
-      const allCols = headers.map((h, i) => `[${i}] ${h} → ${row1000[i]}`).join('\n');
+      const r653 = Object.values(rows[Math.min(652, rows.length - 1)]);
+      const r660 = Object.values(rows[Math.min(659, rows.length - 1)]);
+      const fmt = (r) => headers.map((h, i) => `[${i}] ${h} → ${r[i]}`).join('\n');
       const dbg = document.getElementById('debug-box');
       dbg.style.display = 'block';
-      dbg.textContent = `▼ 列名 → 1000行目の値\n${allCols}`;
+      dbg.textContent = `▼ 653行目\n${fmt(r653)}\n\n▼ 660行目\n${fmt(r660)}`;
 
       const result = analyze(rows);
       render(result);
