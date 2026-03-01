@@ -605,14 +605,12 @@ function handleFile(file) {
       document.getElementById('file-rows-text').textContent = `${rows.length.toLocaleString()} レース`;
       document.getElementById('upload-zone').style.display = 'none';
 
-      // デバッグ表示（列番号確認用）
+      // デバッグ（全列番号確認用）
       const arr0 = rows.map(r => Object.values(r));
-      const sample = arr0.slice(0, 3).map(a =>
-        `場:「${a[1]}」 晴T/F:「${a[6]}」 荒T/F:「${a[7]}」 判定:「${a[8]}」 3連単:「${a[13]}」`
-      ).join('\n');
+      const allCols = arr0[0].map((v, i) => `[${i}] ${v}`).join('\n');
       const dbg = document.getElementById('debug-box');
       dbg.style.display = 'block';
-      dbg.textContent = `▼ 列数: ${arr0[0].length}\n▼ サンプル（3行）\n${sample}`;
+      dbg.textContent = `▼ 1行目の全列\n${allCols}`;
 
       const result = analyze(rows);
       render(result);
