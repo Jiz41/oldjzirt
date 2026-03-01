@@ -333,6 +333,8 @@
 
   <div class="error-msg" id="error-msg"></div>
 
+  <div id="debug-box" style="display:none; margin-top:16px; background:#12121a; border:1px solid #2a2a3a; border-radius:4px; padding:16px; font-size:11px; color:#c8a96e; white-space:pre-wrap; word-break:break-all; line-height:1.8;"></div>
+
   <button id="reset-btn" onclick="resetAll()">× リセット</button>
 
   <div id="results">
@@ -620,6 +622,17 @@ function handleFile(file) {
       document.getElementById('file-name-text').textContent = file.name;
       document.getElementById('file-rows-text').textContent = `${rows.length.toLocaleString()} レース`;
       document.getElementById('upload-zone').style.display = 'none';
+
+      // デバッグ表示
+      const headers = Object.keys(rows[0]);
+      const sampleI = rows.slice(0, 5).map(r => {
+        const iVal = r['総合判定'] || r['I'] || '(なし)';
+        const gVal = r['晴天令 T/F'] || r['晴天令T/F'] || '(なし)';
+        return `I列:「${iVal}」 G列:「${gVal}」`;
+      }).join('\n');
+      const dbg = document.getElementById('debug-box');
+      dbg.style.display = 'block';
+      dbg.textContent = `▼ 列名一覧（${headers.length}列）\n${headers.join(' | ')}\n\n▼ 最初の5行サンプル\n${sampleI}`;
 
       const result = analyze(rows);
       render(result);
