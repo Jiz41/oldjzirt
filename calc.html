@@ -409,100 +409,82 @@ function parseCSV(text) {
   return rows;
 }
 
-// ── Column Detection ─────────────────────────────────────────
-// スプシの列名をキーに取得
-function getCol(row, candidates) {
-  for (const c of candidates) {
-    if (row[c] !== undefined) return row[c];
-  }
-  return '';
+// ── Column Index (列番号で直読み) ────────────────────────────
+const COL = {
+  venue:     1,
+  tenun:     2,
+  seiTF:     6,
+  koTF:      7,
+  hantei:    8,
+  kimari:    12,
+  odds3tan:  13,
+  odds3fuku: 14,
+  odds2tan:  15,
+  kyubetsu:  16,
+  nittei:    17,
+};
+
+function toFloat(v) {
+  const n = parseFloat(v);
+  return isNaN(n) ? 0 : n;
 }
 
 // ── Analysis ────────────────────────────────────────────────
 function analyze(rows) {
   const total = rows.length;
-  
-  // 列名候補
-  const colI = ['総合判定', 'I'];
-  const colG = ['晴天令 T/F', '晴天令T/F', 'G'];
-  const colH = ['荒天令 T/F', '荒天令T/F', 'H'];
-  const colN = ['3連単オッズ', 'N'];
-  const colO = ['3連複オッズ', 'O'];
-  const colP = ['2車単オッズ', '2連単オッズ', 'P'];
-  const colB = ['開催場', 'B'];
-  const colC = ['天雲指数', 'C'];
-  const colQ = ['級別', 'Q'];
+  const arr = rows.map(r => Object.values(r));
 
-  // ヘルパー
-  const isHit = row => getCol(row, colI).includes('的中') && !getCol(row, colI).includes('不的中');
-  const isT = (row, col) => getCol(row, col) === 'T';
-  const toOdds = val => { const n = parseFloat(val); return isNaN(n) ? 0 : n; };
+  const get = (row, col) => (row[col] || '').trim();
+  const isHit  = row => { const v = get(row, COL.hantei); return v.includes('的中') && !v.includes('不的中'); };
+  const isSeiT = row => get(row, COL.seiTF) === 'T';
+  const isKoT  = row => get(row, COL.koTF)  === 'T';
 
-  // 総合
-  const hits = rows.filter(isHit).length;
+  const hits    = arr.filter(isHit).length;
   const hitRate = total > 0 ? (hits / total * 100) : 0;
-
-  // 晴天令
-  const seiT = rows.filter(r => isT(r, colG)).length;
+  const seiT    = arr.filter(isSeiT).length;
   const seiRate = total > 0 ? (seiT / total * 100) : 0;
+  const koT     = arr.filter(isKoT).length;
+  const koRate  = total > 0 ? (koT  / total * 100) : 0;
 
-  // 荒天令
-  const koT = rows.filter(r => isT(r, colH)).length;
-  const koRate = total > 0 ? (koT / total * 100) : 0;
-
-  // 投資総額
   const totalInvest = total * 1000;
 
-  // 券種別回収率
-  // 晴天令3連単：G=T時 N列×100 ÷ (レース数×400)
-  const s3tan = calcKiken(rows, colG, colN, 400, total);
-  const s3fuku = calcKiken(rows, colG, colO, 100, total);
-  const k3fuku = calcKiken(rows, colH, colO, 200, total);
-  const k2tan = calcKiken(rows, colH, colP, 300, total);
+  const calcKiken = (tfFn, oddsCol, investPerRace) => {
+    let payout = 0, hitCount = 0;
+    arr.forEach(row => {
+      if (tfFn(row)) {
+        const o = toFloat(get(row, oddsCol));
+        if (o > 0) { payout += o * 100; hitCount++; }
+      }
+    });
+    const invest = total * investPerRace;
+    return { payout, hitCount, invest, recovery: invest > 0 ? payout / invest * 100 : 0 };
+  };
 
-  // 全体回収率
-  const totalPayout = s3tan.payout + s3fuku.payout + k3fuku.payout + k2tan.payout;
+  const s3tan  = calcKiken(isSeiT, COL.odds3tan,  400);
+  const s3fuku = calcKiken(isSeiT, COL.odds3fuku, 100);
+  const k3fuku = calcKiken(isKoT,  COL.odds3fuku, 200);
+  const k2tan  = calcKiken(isKoT,  COL.odds2tan,  300);
+
+  const totalPayout   = s3tan.payout + s3fuku.payout + k3fuku.payout + k2tan.payout;
   const totalRecovery = totalInvest > 0 ? (totalPayout / totalInvest * 100) : 0;
 
-  // 開催場別
   const venueMap = {};
-  rows.forEach(r => {
-    const v = getCol(r, colB) || '不明';
+  arr.forEach(row => {
+    const v = get(row, COL.venue) || '不明';
     if (!venueMap[v]) venueMap[v] = { total: 0, hits: 0, seiT: 0, koT: 0 };
     venueMap[v].total++;
-    if (isHit(r)) venueMap[v].hits++;
-    if (isT(r, colG)) venueMap[v].seiT++;
-    if (isT(r, colH)) venueMap[v].koT++;
+    if (isHit(row))  venueMap[v].hits++;
+    if (isSeiT(row)) venueMap[v].seiT++;
+    if (isKoT(row))  venueMap[v].koT++;
   });
 
   return {
     total, hits, hitRate,
-    seiT, seiRate,
-    koT, koRate,
+    seiT, seiRate, koT, koRate,
     totalInvest, totalPayout, totalRecovery,
     kiken: { s3tan, s3fuku, k3fuku, k2tan },
     venues: venueMap
   };
-}
-
-function calcKiken(rows, tfCol, oddsCol, investPerRace, totalRows) {
-  let payout = 0;
-  let hitCount = 0;
-  rows.forEach(r => {
-    const tf = r[Object.keys(r).find(k => tfCol.includes(k))] || 
-               r[tfCol[0]] || '';
-    if (tf === 'T') {
-      const oddsKey = Object.keys(r).find(k => oddsCol.some(c => k.includes(c.replace(/列$/, ''))));
-      const oddsVal = oddsKey ? toFloat(r[oddsKey]) : 0;
-      if (oddsVal > 0) {
-        payout += oddsVal * 100;
-        hitCount++;
-      }
-    }
-  });
-  const invest = totalRows * investPerRace;
-  const recovery = invest > 0 ? (payout / invest * 100) : 0;
-  return { payout, hitCount, invest, recovery, investPerRace };
 }
 
 function toFloat(v) {
@@ -623,16 +605,14 @@ function handleFile(file) {
       document.getElementById('file-rows-text').textContent = `${rows.length.toLocaleString()} レース`;
       document.getElementById('upload-zone').style.display = 'none';
 
-      // デバッグ表示
-      const headers = Object.keys(rows[0]);
-      const sampleI = rows.slice(0, 5).map(r => {
-        const iVal = r['総合判定'] || r['I'] || '(なし)';
-        const gVal = r['晴天令 T/F'] || r['晴天令T/F'] || '(なし)';
-        return `I列:「${iVal}」 G列:「${gVal}」`;
-      }).join('\n');
+      // デバッグ表示（列番号確認用）
+      const arr0 = rows.map(r => Object.values(r));
+      const sample = arr0.slice(0, 3).map(a =>
+        `場:「${a[1]}」 晴T/F:「${a[6]}」 荒T/F:「${a[7]}」 判定:「${a[8]}」 3連単:「${a[13]}」`
+      ).join('\n');
       const dbg = document.getElementById('debug-box');
       dbg.style.display = 'block';
-      dbg.textContent = `▼ 列名一覧（${headers.length}列）\n${headers.join(' | ')}\n\n▼ 最初の5行サンプル\n${sampleI}`;
+      dbg.textContent = `▼ 列数: ${arr0[0].length}\n▼ サンプル（3行）\n${sample}`;
 
       const result = analyze(rows);
       render(result);
