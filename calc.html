@@ -606,11 +606,12 @@ function handleFile(file) {
       document.getElementById('upload-zone').style.display = 'none';
 
       // デバッグ（全列番号確認用）
-      const arr0 = rows.map(r => Object.values(r));
-      const allCols = arr0[0].map((v, i) => `[${i}] ${v}`).join('\n');
+      const headers = Object.keys(rows[0]);
+      const last = Object.values(rows[rows.length - 1]);
+      const allCols = headers.map((h, i) => `[${i}] ${h} → ${last[i]}`).join('\n');
       const dbg = document.getElementById('debug-box');
       dbg.style.display = 'block';
-      dbg.textContent = `▼ 1行目の全列\n${allCols}`;
+      dbg.textContent = `▼ 列名（タイトル行） → 最終行の値\n${allCols}`;
 
       const result = analyze(rows);
       render(result);
