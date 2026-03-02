@@ -274,7 +274,7 @@
 let _allRows = [];
 
 // ── Google Sheets API（APIキー方式） ─────────────────────────
-const SHEETS_API_KEY = AIzaSyBSjIboD5mR-Zv0GA-xVd6tpjf04lWNepM; // ← 発行したAPIキーに差し替え
+const SHEETS_API_KEY = 'AIzaSyBSjIboD5mR-Zv0GA-xVd6tpjf04lWNepM'; // ← 発行したAPIキーに差し替え
 
 async function loadSheet() {
   const sid   = document.getElementById('sheets-id-input').value.trim();
@@ -282,19 +282,31 @@ async function loadSheet() {
   if (!sid) { setStatus('Spreadsheet IDを入力してください', 'err'); return; }
 
   document.getElementById('sheets-load-btn').disabled = true;
-  setStatus('読み込み中...', 'loading');
+  setStatus('① APIキー確認中...', 'loading');
 
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${encodeURIComponent(sname)}?key=${SHEETS_API_KEY}`;
 
   try {
-    const res = await fetch(url);
+    setStatus('② シートへ接続中...', 'loading');
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+
+    setStatus('③ データ解析中...', 'loading');
+
     if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error?.message || 'APIエラー');
+      const errJson = await res.json().catch(() => ({}));
+      const code = res.status;
+      const msg  = errJson.error?.message || res.statusText || '不明';
+      throw new Error(`HTTP ${code}: ${msg}`);
     }
+
     const json = await res.json();
     const values = json.values;
-    if (!values || values.length < 2) { setStatus('データが見つかりませんでした', 'err'); return; }
+    if (!values || values.length < 2) { setStatus('データが見つかりませんでした（シート名を確認してください）', 'err'); return; }
 
     const headers = values[0].map(h => String(h).trim());
     const rows = [];
@@ -322,7 +334,11 @@ async function loadSheet() {
     });
     renderAll(rows);
   } catch (err) {
-    setStatus('読み込みエラー: ' + err.message, 'err');
+    if (err.name === 'AbortError') {
+      setStatus('タイムアウト: ネットワーク接続を確認してください', 'err');
+    } else {
+      setStatus('エラー: ' + err.message, 'err');
+    }
   } finally {
     document.getElementById('sheets-load-btn').disabled = false;
   }
