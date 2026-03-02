@@ -53,8 +53,8 @@
   #period-count { font-size: 11px; color: var(--accent2); margin-left: auto; }
 
   /* ── Results ── */
-  #results { display: none; margin-top: 32px; animation: fadeIn 0.4s ease; }
-  #results.visible { display: block; }
+  #results { margin-top: 24px; animation: fadeIn 0.4s ease; }
+
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
   .section-title { font-family: 'Zen Antique Soft', serif; font-size: 14px; color: var(--accent); letter-spacing: 0.2em; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
@@ -83,8 +83,7 @@
   .val-muted { color: var(--text-muted); }
 
   /* ── 外れ解剖 ── */
-  #miss-analysis { display: none; margin-top: 32px; }
-  #miss-analysis.visible { display: block; }
+  #miss-analysis { margin-top: 0; }
 
   .miss-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
   .miss-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px; }
@@ -128,6 +127,65 @@
   .error-msg { color: var(--miss); font-size: 11px; margin-top: 8px; display: none; }
   .error-msg.visible { display: block; }
   .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 32px 0; }
+
+  /* ── 表/裏 タブ ── */
+  .face-tabs { display: none; margin-top: 24px; border-bottom: 1px solid var(--border); }
+  .face-tabs.visible { display: flex; }
+  .face-tab {
+    padding: 10px 24px; font-family: 'Zen Antique Soft', serif; font-size: 13px;
+    color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent;
+    letter-spacing: 0.2em; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .face-tab:hover { color: var(--text); }
+  .face-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .face-tab.ura.active { color: var(--miss); border-bottom-color: var(--miss); }
+  .face-panel { display: none; }
+  .face-panel.active { display: block; }
+
+  /* ── 期待値ダッシュボード ── */
+  .ev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .ev-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px; position: relative; overflow: hidden; }
+  .ev-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); opacity: 0.4; }
+  .ev-card.positive::before { background: var(--hit); opacity: 1; }
+  .ev-card.negative::before { background: var(--miss); opacity: 1; }
+  .ev-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+  .ev-value { font-size: 22px; font-weight: 500; line-height: 1; }
+  .ev-sub { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+  /* ── X投稿ジェネレーター ── */
+  .x-box { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 20px; margin-bottom: 24px; }
+  .x-post-text {
+    width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    padding: 12px; border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 12px;
+    line-height: 1.8; resize: vertical; min-height: 160px;
+  }
+  .x-post-text:focus { outline: none; border-color: var(--accent); }
+  .x-actions { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+  .x-char-count { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+  .x-char-count.over { color: var(--miss); }
+  .btn-x {
+    background: transparent; border: 1px solid var(--accent2); color: var(--accent2);
+    padding: 7px 16px; border-radius: 2px; cursor: pointer;
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; transition: all 0.2s;
+  }
+  .btn-x:hover { background: var(--accent2); color: var(--bg); }
+  .btn-copy {
+    background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+    padding: 7px 16px; border-radius: 2px; cursor: pointer;
+    font-family: 'DM Mono', monospace; font-size: 11px; transition: all 0.2s;
+  }
+  .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── 最高配当バナー ── */
+  .best-hit-banner {
+    background: var(--surface2); border: 1px solid var(--accent); border-radius: 4px;
+    padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px;
+  }
+  .best-hit-icon { font-size: 24px; }
+  .best-hit-main { flex: 1; }
+  .best-hit-title { font-size: 10px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px; }
+  .best-hit-value { font-size: 20px; color: var(--accent); font-weight: 500; }
+  .best-hit-detail { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -161,64 +219,103 @@
     <span id="period-count">— レース</span>
   </div>
 
-  <!-- 成績サマリ -->
-  <div id="results">
-    <div class="section-title">── 総合成績</div>
-    <div class="stats-grid" id="overview-stats"></div>
-    <div class="divider"></div>
-    <div class="section-title">── 令別　精度</div>
-    <div class="stats-grid" id="rei-stats"></div>
-    <div class="divider"></div>
-    <div class="section-title">── 券種別　回収率</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>令</th><th>券種</th><th>点数</th><th>投資額</th><th>払戻合計</th><th>回収率</th><th>的中数</th></tr></thead>
-        <tbody id="券種-tbody"></tbody>
-      </table>
+  <!-- タブ -->
+  <div class="face-tabs" id="face-tabs">
+    <button class="face-tab active" onclick="switchFace('omote')">表　── 勝利の記録</button>
+    <button class="face-tab ura" onclick="switchFace('ura')">裏　── 負けの解剖</button>
+  </div>
+
+  <!-- 表の顔：勝利と繁栄 -->
+  <div id="face-omote" class="face-panel active">
+
+    <!-- 期待値ダッシュボード -->
+    <div id="ev-dashboard" style="display:none; margin-top:24px;">
+      <div class="section-title">── 期待値　ダッシュボード</div>
+      <div class="ev-grid" id="ev-cards"></div>
+
+      <!-- 最高配当バナー -->
+      <div class="best-hit-banner" id="best-hit-banner" style="display:none;">
+        <div class="best-hit-icon">🏆</div>
+        <div class="best-hit-main">
+          <div class="best-hit-title">今期間　最高配当</div>
+          <div class="best-hit-value" id="best-hit-value">—</div>
+          <div class="best-hit-detail" id="best-hit-detail">—</div>
+        </div>
+      </div>
+
+      <!-- X投稿ジェネレーター -->
+      <div class="section-title">── X 投稿文　生成</div>
+      <div class="x-box">
+        <textarea class="x-post-text" id="x-post-text" readonly></textarea>
+        <div class="x-actions">
+          <button class="btn-x" onclick="openX()">𝕏 で投稿</button>
+          <button class="btn-copy" onclick="copyX()">コピー</button>
+          <span class="x-char-count" id="x-char-count">0 / 280</span>
+        </div>
+      </div>
+      <div class="divider"></div>
     </div>
-    <div class="divider"></div>
-    <div class="section-title">── 開催場別　的中率</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>開催場</th><th>レース数</th><th>的中数</th><th>的中率</th><th>晴天令T率</th><th>荒天令T率</th></tr></thead>
-        <tbody id="venue-tbody"></tbody>
-      </table>
+
+    <!-- 成績サマリ -->
+    <div id="results" style="margin-top:0;">
+      <div class="section-title">── 総合成績</div>
+      <div class="stats-grid" id="overview-stats"></div>
+      <div class="divider"></div>
+      <div class="section-title">── 令別　精度</div>
+      <div class="stats-grid" id="rei-stats"></div>
+      <div class="divider"></div>
+      <div class="section-title">── 券種別　回収率</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>令</th><th>券種</th><th>点数</th><th>投資額</th><th>払戻合計</th><th>回収率</th><th>的中数</th></tr></thead>
+          <tbody id="券種-tbody"></tbody>
+        </table>
+      </div>
+      <div class="divider"></div>
+      <div class="section-title">── 開催場別　的中率</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>開催場</th><th>レース数</th><th>的中数</th><th>的中率</th><th>晴天令T率</th><th>荒天令T率</th></tr></thead>
+          <tbody id="venue-tbody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- 外れ解剖 -->
-  <div id="miss-analysis">
-    <div class="section-title">── 外れ解剖　─　負けに不思議の負けなし</div>
-    <div class="miss-grid">
-      <div class="miss-card">
-        <div class="miss-card-title">令種　偏り</div>
-        <div id="miss-rei"></div>
-      </div>
-      <div class="miss-card">
-        <div class="miss-card-title">天雲指数帯　分布</div>
-        <div id="miss-tenun"></div>
-      </div>
-      <div class="miss-card">
-        <div class="miss-card-title">開催場　ランキング</div>
-        <div id="miss-venue"></div>
-      </div>
-      <div class="miss-card">
-        <div class="miss-card-title">決まり手　偏り</div>
-        <div id="miss-kimari"></div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Gemini推論 -->
-    <div id="inference-section">
-      <div class="section-title">── 係数仮説　推論</div>
-      <div class="inference-box">
-        <div class="inference-input-row">
-          <input type="password" id="gemini-key-input" placeholder="Gemini API Key を入力して推論を生成">
-          <button id="inference-btn" onclick="runInference()">推論を生成</button>
+  <!-- 裏の顔：外れ解剖 -->
+  <div id="face-ura" class="face-panel">
+    <div id="miss-analysis" style="margin-top:24px;">
+      <div class="section-title">── 外れ解剖　─　負けに不思議の負けなし</div>
+      <div class="miss-grid">
+        <div class="miss-card">
+          <div class="miss-card-title">令種　パターン</div>
+          <div id="miss-rei"></div>
         </div>
-        <div id="inference-result"></div>
+        <div class="miss-card">
+          <div class="miss-card-title">天雲指数帯　外れ率</div>
+          <div id="miss-tenun"></div>
+        </div>
+        <div class="miss-card">
+          <div class="miss-card-title">開催場　外れ率順</div>
+          <div id="miss-venue"></div>
+        </div>
+        <div class="miss-card">
+          <div class="miss-card-title">決まり手　外れ率順</div>
+          <div id="miss-kimari"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div id="inference-section">
+        <div class="section-title">── 係数仮説　推論</div>
+        <div class="inference-box">
+          <div class="inference-input-row">
+            <input type="password" id="gemini-key-input" placeholder="Gemini API Key を入力して推論を生成">
+            <button id="inference-btn" onclick="runInference()">推論を生成</button>
+          </div>
+          <div id="inference-result"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -336,17 +433,20 @@ function analyzeMiss(rows) {
   const total  = misses.length;
   if (total === 0) return null;
 
-  // 令種：外れ率（母数付き）
-  const allSeiT = rows.filter(isSeiT);
-  const allSeiF = rows.filter(r => !isSeiT(r));
-  const allKoT  = rows.filter(isKoT);
-  const allKoF  = rows.filter(r => !isKoT(r));
-  const rei = {
-    '晴天令T': { miss: allSeiT.filter(r=>!isHit(r)).length, total: allSeiT.length },
-    '晴天令F': { miss: allSeiF.filter(r=>!isHit(r)).length, total: allSeiF.length },
-    '荒天令T': { miss: allKoT.filter(r=>!isHit(r)).length,  total: allKoT.length  },
-    '荒天令F': { miss: allKoF.filter(r=>!isHit(r)).length,  total: allKoF.length  },
-  };
+  // 令種：TT/TF/FT/FF パターン集計
+  // TT = 晴天令的中 かつ 荒天令的中（3連複かぶり）
+  // TF = 晴天令的中 かつ 荒天令不的中
+  // FT = 晴天令不的中 かつ 荒天令的中
+  // FF = 両令不的中（完全外れ）
+  const reiPattern = { TT: 0, TF: 0, FT: 0, FF: 0 };
+  rows.forEach(r => {
+    const s = isSeiT(r), k = isKoT(r);
+    if (s && k)       reiPattern.TT++;
+    else if (s && !k) reiPattern.TF++;
+    else if (!s && k) reiPattern.FT++;
+    else              reiPattern.FF++;
+  });
+  const rei = reiPattern;
 
   // 天雲指数帯：数値化して判定（小数・スペース対応）、外れ率付き
   const TENUN_KEYS = [0, 33, 67, 100];
@@ -394,13 +494,155 @@ function analyzeMiss(rows) {
 function renderAll(rows) {
   const result = analyze(rows);
   renderStats(result);
+  renderEV(result, rows);
+  renderXPost(result, rows);
   const missData = analyzeMiss(rows);
   renderMissAnalysis(missData);
-  // 推論結果はリセット
   document.getElementById('inference-result').classList.remove('visible');
   document.getElementById('inference-result').textContent = '';
   window._lastMissData = missData;
   window._lastRows = rows;
+  // タブ表示
+  document.getElementById('face-tabs').classList.add('visible');
+}
+
+// ── タブ切替 ─────────────────────────────────────────────────
+function switchFace(face) {
+  ['omote','ura'].forEach(f => {
+    document.getElementById('face-' + f).classList.toggle('active', f === face);
+  });
+  document.querySelectorAll('.face-tab').forEach((btn, i) => {
+    btn.classList.toggle('active', (i === 0 && face === 'omote') || (i === 1 && face === 'ura'));
+  });
+}
+
+// ── 期待値ダッシュボード ──────────────────────────────────────
+function renderEV(result, rows) {
+  const { total, hits, hitRate, totalInvest, totalPayout, totalRecovery, kiken } = result;
+  const ev = totalPayout - totalInvest; // 純損益
+  const evPerRace = total > 0 ? ev / total : 0;
+  const isPlus = ev >= 0;
+
+  // 晴天令・荒天令 各期待値貢献
+  const seiPayout = kiken.s3tan.payout + kiken.s3fuku.payout;
+  const koPayout  = kiken.k3fuku.payout + kiken.k2tan.payout;
+  const seiInvest = total * 500;
+  const koInvest  = total * 500;
+  const seiEV = seiPayout - seiInvest;
+  const koEV  = koPayout  - koInvest;
+
+  // TT/TF/FT/FF分布
+  const pat = { TT:0, TF:0, FT:0, FF:0 };
+  rows.forEach(r => {
+    const s = isSeiT(r), k = isKoT(r);
+    if (s && k) pat.TT++; else if (s) pat.TF++; else if (k) pat.FT++; else pat.FF++;
+  });
+
+  document.getElementById('ev-dashboard').style.display = 'block';
+  document.getElementById('ev-cards').innerHTML = `
+    <div class="ev-card ${isPlus?'positive':'negative'}">
+      <div class="ev-label">純損益</div>
+      <div class="ev-value" style="color:${isPlus?'var(--hit)':'var(--miss)'}">${ev>=0?'+':''}${ev.toLocaleString()}円</div>
+      <div class="ev-sub">1レース平均 ${evPerRace>=0?'+':''}${evPerRace.toFixed(0)}円</div>
+    </div>
+    <div class="ev-card ${seiEV>=0?'positive':'negative'}">
+      <div class="ev-label">晴天令　損益貢献</div>
+      <div class="ev-value" style="color:${seiEV>=0?'var(--hit)':'var(--miss)'}">${seiEV>=0?'+':''}${seiEV.toLocaleString()}円</div>
+      <div class="ev-sub">回収率 ${(seiPayout/seiInvest*100).toFixed(1)}%</div>
+    </div>
+    <div class="ev-card ${koEV>=0?'positive':'negative'}">
+      <div class="ev-label">荒天令　損益貢献</div>
+      <div class="ev-value" style="color:${koEV>=0?'var(--hit)':'var(--miss)'}">${koEV>=0?'+':''}${koEV.toLocaleString()}円</div>
+      <div class="ev-sub">回収率 ${(koPayout/koInvest*100).toFixed(1)}%</div>
+    </div>
+    <div class="ev-card">
+      <div class="ev-label">令パターン分布</div>
+      <div class="ev-value" style="font-size:14px;line-height:1.6;">
+        <span style="color:var(--hit)">TT ${pat.TT}</span> /
+        <span style="color:var(--accent2)">TF ${pat.TF}</span> /
+        <span style="color:var(--accent)">FT ${pat.FT}</span> /
+        <span style="color:var(--miss)">FF ${pat.FF}</span>
+      </div>
+      <div class="ev-sub">FF率 ${(pat.FF/total*100).toFixed(1)}%</div>
+    </div>`;
+
+  // 最高配当
+  let bestRow = null, bestPayout = 0;
+  rows.forEach(r => {
+    const p1 = toFloat(get(r, COL.odds3tan)) * 100;
+    const p2 = toFloat(get(r, COL.odds3fuku)) * 100;
+    const p3 = toFloat(get(r, COL.odds2tan)) * 100;
+    const maxP = Math.max(p1, p2, p3);
+    if ((isSeiT(r) || isKoT(r)) && maxP > bestPayout) { bestPayout = maxP; bestRow = r; }
+  });
+  if (bestRow) {
+    document.getElementById('best-hit-banner').style.display = 'flex';
+    const odds = Math.max(
+      toFloat(get(bestRow, COL.odds3tan)),
+      toFloat(get(bestRow, COL.odds3fuku)),
+      toFloat(get(bestRow, COL.odds2tan))
+    );
+    document.getElementById('best-hit-value').textContent = `${odds.toFixed(1)} 倍　${Math.round(odds*100).toLocaleString()}円`;
+    document.getElementById('best-hit-detail').textContent =
+      `${get(bestRow, COL.date)}　${get(bestRow, COL.venue)}`;
+  }
+}
+
+// ── X投稿生成 ────────────────────────────────────────────────
+function renderXPost(result, rows) {
+  const { total, hits, hitRate, totalInvest, totalPayout, totalRecovery } = result;
+  const ev = totalPayout - totalInvest;
+
+  // 期間取得
+  const from = document.getElementById('f-date-from').value;
+  const to   = document.getElementById('f-date-to').value;
+  const period = (from || to) ? `${from||''}〜${to||''}` : '全期間';
+
+  // 最高配当
+  let bestOdds = 0, bestDate = '', bestVenue = '';
+  rows.forEach(r => {
+    if (!isSeiT(r) && !isKoT(r)) return;
+    const o = Math.max(toFloat(get(r,COL.odds3tan)), toFloat(get(r,COL.odds3fuku)), toFloat(get(r,COL.odds2tan)));
+    if (o > bestOdds) { bestOdds = o; bestDate = get(r,COL.date); bestVenue = get(r,COL.venue); }
+  });
+
+  const sign = ev >= 0 ? '▲' : '▼';
+  const post = [
+    `【自在律　${period}　成績】`,
+    ``,
+    `📊 ${total}レース`,
+    `的中率　${hitRate.toFixed(1)}%（${hits}/${total}）`,
+    `回収率　${totalRecovery.toFixed(1)}%`,
+    `損益　${sign}${Math.abs(ev).toLocaleString()}円`,
+    bestOdds > 0 ? `
+🏆 最高配当` : '',
+    bestOdds > 0 ? `${bestDate} ${bestVenue}` : '',
+    bestOdds > 0 ? `${bestOdds.toFixed(1)}倍 / ${Math.round(bestOdds*100).toLocaleString()}円` : '',
+    ``,
+    `#競輪 #自在律 #競輪予想`,
+  ].filter(l => l !== null).join('
+').trim();
+
+  const ta = document.getElementById('x-post-text');
+  const cc = document.getElementById('x-char-count');
+  ta.value = post;
+  const len = post.length;
+  cc.textContent = `${len} / 280`;
+  cc.classList.toggle('over', len > 280);
+}
+
+function openX() {
+  const text = document.getElementById('x-post-text').value;
+  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text), '_blank');
+}
+
+function copyX() {
+  const text = document.getElementById('x-post-text').value;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = '✓ コピー完了';
+    setTimeout(() => { btn.textContent = 'コピー'; }, 1500);
+  });
 }
 
 function renderStats(result) {
@@ -436,7 +678,6 @@ function renderStats(result) {
     return `<tr><td>${venue}</td><td class="val-muted">${v.total}</td><td class="val-muted">${v.hits}</td><td class="${cls}">${hr}%</td><td>${sr}%</td><td>${kr}%</td></tr>`;
   }).join('');
 
-  document.getElementById('results').classList.add('visible');
   document.getElementById('reset-btn').classList.add('visible');
 }
 
@@ -461,15 +702,25 @@ function missRateRow(label, missData) {
 }
 
 function renderMissAnalysis(data) {
-  if (!data || data.total === 0) {
-    document.getElementById('miss-analysis').classList.remove('visible');
-    return;
-  }
-  document.getElementById('miss-analysis').classList.add('visible');
+  if (!data || data.total === 0) return;
 
-  // 令種（外れ率）
+  // 令種：TT/TF/FT/FF パターン分布
+  const reiTotal = Object.values(data.rei).reduce((a,b)=>a+b, 0);
+  const reiOrder = ['TT','TF','FT','FF'];
+  const reiLabels = { TT:'TT（両令的中）', TF:'TF（晴天令のみ的中）', FT:'FT（荒天令のみ的中）', FF:'FF（完全外れ）' };
+  const reiMax = Math.max(...Object.values(data.rei));
   document.getElementById('miss-rei').innerHTML =
-    Object.entries(data.rei).map(([k,v]) => missRateRow(k, v)).join('');
+    reiOrder.map(k => {
+      const cnt = data.rei[k] || 0;
+      const pct = reiTotal > 0 ? (cnt / reiTotal * 100) : 0;
+      const isBad = k === 'FF';
+      return `<div class="miss-row">
+        <span class="miss-label" style="${isBad?'color:var(--miss)':''}">${reiLabels[k]}</span>
+        <span class="miss-count">${cnt}件</span>
+        <div class="miss-bar-wrap"><div class="miss-bar" style="width:${pct.toFixed(1)}%;${isBad?'':'background:var(--accent2)'}"></div></div>
+        <span class="miss-pct" style="${isBad?'color:var(--miss)':''}">${pct.toFixed(1)}%</span>
+      </div>`;
+    }).join('');
 
   // 天雲指数帯（外れ率・設計通り0→33→67→100で外れ率が上がるか確認用）
   const tenunOrder = [0, 33, 67, 100, '他'];
@@ -679,8 +930,13 @@ async function runInference() {
   const prompt = `【外れ解剖データ】
 総レース数: ${total} / 外れ数: ${d.total} (外れ率: ${missRate}%)
 
-■ 令種別 外れ率（母数付き）
-${fmtRei(d.rei)}
+■ 令種パターン分布（TT=両令的中/TF=晴天令のみ/FT=荒天令のみ/FF=完全外れ）
+${(['TT','TF','FT','FF'].map(k => {
+  const cnt = d.rei[k]||0;
+  const pct = (cnt/rows.length*100).toFixed(1);
+  return `  ${k}: ${cnt}件 (${pct}%)`;
+}).join('\n'))}
+※ FFが外れ解剖の本質。FFが集中する条件を以下のデータから読み取ること。
 
 ■ 天雲指数帯別 外れ率（指数0→100で外れ率が上がるのが設計上の正常動作）
 ${fmtTenun(d.tenunBands)}
@@ -751,13 +1007,17 @@ function resetAll() {
   document.getElementById('file-info').classList.remove('visible');
   document.getElementById('period-filter').classList.remove('visible');
   document.getElementById('results').classList.remove('visible');
-  document.getElementById('miss-analysis').classList.remove('visible');
   document.getElementById('reset-btn').classList.remove('visible');
   document.getElementById('error-msg').classList.remove('visible');
   document.getElementById('inference-result').classList.remove('visible');
+  document.getElementById('face-tabs').classList.remove('visible');
+  document.getElementById('ev-dashboard').style.display = 'none';
+  document.getElementById('best-hit-banner').style.display = 'none';
+  document.getElementById('x-post-text').value = '';
   document.getElementById('f-date-from').value = '';
   document.getElementById('f-date-to').value = '';
   document.getElementById('file-input').value = '';
+  switchFace('omote');
 }
 
 document.getElementById('file-input').addEventListener('change', e => handleFile(e.target.files[0]));
