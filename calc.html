@@ -622,14 +622,41 @@ function handleFile(file) {
       document.getElementById('file-rows-text').textContent = `${rows.length.toLocaleString()} レース`;
       document.getElementById('upload-zone').style.display = 'none';
 
-      // デバッグ（653行目・660行目確認用）
+      // デバッグ（スプシ行番号入力→対応行を表示）
       const headers = Object.keys(rows[0]);
-      const r653 = rows[Math.min(652, rows.length - 1)];
-      const r660 = rows[Math.min(659, rows.length - 1)];
-      const fmtRow = r => headers.map(h => `  ${h}: "${r[h] || ''}"`).join('\n');
+      const headerText = `▼ ヘッダー（${headers.length}列）\n${headers.map((h,i) => `[${i}] "${h}"`).join('\n')}`;
+      const fmtRow = (r, sheetRow) =>
+        `▼ スプシ ${sheetRow}行目（CSVデータ ${sheetRow - 1}件目）\n` +
+        headers.map(h => `  ${h}: "${r[h] !== undefined ? r[h] : ''}"`).join('\n');
+
+      window._dbgRows    = rows;
+      window._dbgHeaders = headers;
+      window.showDbgRow  = function() {
+        const sheetRow = parseInt(document.getElementById('dbg-input').value);
+        const csvIdx   = sheetRow - 2; // スプシ1行目=ヘッダー、データは2行目～
+        const r   = window._dbgRows[csvIdx];
+        const pre = document.getElementById('dbg-pre');
+        if (!r) {
+          pre.textContent = headerText + `\n\n⚠ ${sheetRow}行目はデータ範囲外（総データ数: ${window._dbgRows.length}件）`;
+          return;
+        }
+        pre.textContent = headerText + '\n\n' + fmtRow(r, sheetRow);
+      };
+
       const dbg = document.getElementById('debug-box');
       dbg.style.display = 'block';
-      dbg.textContent = `▼ ヘッダー（${headers.length}列）\n${headers.map((h,i) => `[${i}] "${h}"`).join('\n')}\n\n▼ 653行目\n${fmtRow(r653)}\n\n▼ 660行目\n${fmtRow(r660)}`;
+      dbg.innerHTML =
+        `<div style="margin-bottom:8px;color:#6a6880;">スプシ行番号を入力（ヘッダー=1行目として計算）：</div>` +
+        `<input id="dbg-input" type="number" min="2" max="${rows.length + 1}" value="653" ` +
+        `style="background:#0a0a0f;border:1px solid #2a2a3a;color:#c8a96e;padding:4px 8px;` +
+        `font-family:'DM Mono',monospace;font-size:11px;width:80px;border-radius:2px;">` +
+        `<button onclick="showDbgRow()" style="background:transparent;border:1px solid #2a2a3a;` +
+        `color:#6a6880;padding:4px 10px;font-family:'DM Mono',monospace;font-size:11px;` +
+        `cursor:pointer;border-radius:2px;margin-left:6px;">表示</button>` +
+        `<pre id="dbg-pre" style="margin-top:12px;white-space:pre-wrap;word-break:break-all;"></pre>`;
+
+      // 初期表示：653行目
+      window.showDbgRow();
 
       const result = analyze(rows);
       render(result);
