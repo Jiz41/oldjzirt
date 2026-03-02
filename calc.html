@@ -395,10 +395,10 @@
 function parseCSV(text) {
   const lines = text.trim().split('\n');
   if (lines.length < 2) return [];
-  
+
   const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
   const rows = [];
-  
+
   for (let i = 1; i < lines.length; i++) {
     const vals = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
     if (vals.every(v => v === '')) continue;
@@ -409,19 +409,16 @@ function parseCSV(text) {
   return rows;
 }
 
-// ── Column Index (列番号で直読み) ────────────────────────────
+// ── 列名定数（列番号依存を廃止） ────────────────────────────
 const COL = {
-  venue:     1,
-  tenun:     2,
-  seiTF:     6,
-  koTF:      7,
-  hantei:    8,
-  kimari:    12,
-  odds3tan:  13,
-  odds3fuku: 14,
-  odds2tan:  15,
-  kyubetsu:  16,
-  nittei:    17,
+  venue:     '開催場',
+  tenun:     '天運',
+  seiTF:     '晴天令 T/F',
+  koTF:      '荒天令 T/F',
+  hantei:    '総合判定',
+  odds3tan:  '3連単オッズ',
+  odds3fuku: '3連複オッズ',
+  odds2tan:  '2車単オッズ',
 };
 
 function toFloat(v) {
@@ -432,27 +429,29 @@ function toFloat(v) {
 // ── Analysis ────────────────────────────────────────────────
 function analyze(rows) {
   const total = rows.length;
-  const arr = rows.map(r => Object.values(r));
 
-  const get = (row, col) => (row[col] || '').trim();
-  const isHit  = row => { const v = get(row, COL.hantei); return v.includes('的中') && !v.includes('不的中'); };
-  const isSeiT = row => get(row, COL.seiTF) === 'T';
-  const isKoT  = row => get(row, COL.koTF)  === 'T';
+  // 列名で直引き（列番号ズレ無関係）
+  const get     = (row, key) => (row[key] || '').trim();
+  const isHit   = row => { const v = get(row, COL.hantei); return v.includes('的中') && !v.includes('不的中'); };
+  const isSeiT  = row => get(row, COL.seiTF) === 'T';
+  const isKoT   = row => get(row, COL.koTF)  === 'T';
 
-  const hits    = arr.filter(isHit).length;
+  const hits    = rows.filter(isHit).length;
   const hitRate = total > 0 ? (hits / total * 100) : 0;
-  const seiT    = arr.filter(isSeiT).length;
+  const seiT    = rows.filter(isSeiT).length;
   const seiRate = total > 0 ? (seiT / total * 100) : 0;
-  const koT     = arr.filter(isKoT).length;
+  const koT     = rows.filter(isKoT).length;
   const koRate  = total > 0 ? (koT  / total * 100) : 0;
 
   const totalInvest = total * 1000;
 
-  const calcKiken = (tfFn, oddsCol, investPerRace) => {
+  // 買い目定義：晴天令3連単400円・晴天令3連複100円・荒天令3連複200円・荒天令2車単300円
+  // 払戻：オッズ × 100円
+  const calcKiken = (tfFn, oddsKey, investPerRace) => {
     let payout = 0, hitCount = 0;
-    arr.forEach(row => {
+    rows.forEach(row => {
       if (tfFn(row)) {
-        const o = toFloat(get(row, oddsCol));
+        const o = toFloat(get(row, oddsKey));
         if (o > 0) { payout += o * 100; hitCount++; }
       }
     });
@@ -469,7 +468,7 @@ function analyze(rows) {
   const totalRecovery = totalInvest > 0 ? (totalPayout / totalInvest * 100) : 0;
 
   const venueMap = {};
-  arr.forEach(row => {
+  rows.forEach(row => {
     const v = get(row, COL.venue) || '不明';
     if (!venueMap[v]) venueMap[v] = { total: 0, hits: 0, seiT: 0, koT: 0 };
     venueMap[v].total++;
@@ -485,11 +484,6 @@ function analyze(rows) {
     kiken: { s3tan, s3fuku, k3fuku, k2tan },
     venues: venueMap
   };
-}
-
-function toFloat(v) {
-  const n = parseFloat(v);
-  return isNaN(n) ? 0 : n;
 }
 
 // ── Render ───────────────────────────────────────────────────
@@ -531,7 +525,7 @@ function render(result) {
     <div class="stat-card accent2">
       <div class="stat-label">晴天令　精度</div>
       <div class="stat-value pct">${seiRate.toFixed(1)}</div>
-      <div class="stat-sub">G列 T率</div>
+      <div class="stat-sub">晴天令 T/F</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">荒天令　的中数</div>
@@ -541,7 +535,7 @@ function render(result) {
     <div class="stat-card">
       <div class="stat-label">荒天令　精度</div>
       <div class="stat-value pct">${koRate.toFixed(1)}</div>
-      <div class="stat-sub">H列 T率</div>
+      <div class="stat-sub">荒天令 T/F</div>
     </div>
   `;
 
@@ -571,7 +565,7 @@ function render(result) {
   document.getElementById('venue-tbody').innerHTML = venueEntries.map(([venue, v]) => {
     const hr = (v.hits / v.total * 100).toFixed(1);
     const sr = (v.seiT / v.total * 100).toFixed(1);
-    const kr = (v.koT / v.total * 100).toFixed(1);
+    const kr = (v.koT  / v.total * 100).toFixed(1);
     const cls = parseFloat(hr) >= 30 ? 'val-good' : parseFloat(hr) >= 15 ? 'val-neutral' : 'val-bad';
     return `<tr>
       <td>${venue}</td>
@@ -605,14 +599,12 @@ function handleFile(file) {
       document.getElementById('file-rows-text').textContent = `${rows.length.toLocaleString()} レース`;
       document.getElementById('upload-zone').style.display = 'none';
 
-      // デバッグ（653行目・660行目確認用）
+      // デバッグ（ヘッダー確認用）
       const headers = Object.keys(rows[0]);
-      const r653 = Object.values(rows[Math.min(652, rows.length - 1)]);
-      const r660 = Object.values(rows[Math.min(659, rows.length - 1)]);
-      const fmt = (r) => headers.map((h, i) => `[${i}] ${h} → ${r[i]}`).join('\n');
+      const r1 = rows[0];
       const dbg = document.getElementById('debug-box');
       dbg.style.display = 'block';
-      dbg.textContent = `▼ 653行目\n${fmt(r653)}\n\n▼ 660行目\n${fmt(r660)}`;
+      dbg.textContent = `▼ 検出ヘッダー（${headers.length}列）\n${headers.map((h, i) => `[${i}] "${h}"`).join('\n')}\n\n▼ 1行目サンプル\n総合判定: "${r1['総合判定'] || '─'}"\n晴天令T/F: "${r1['晴天令 T/F'] || '─'}"\n荒天令T/F: "${r1['荒天令 T/F'] || '─'}"\n3連単オッズ: "${r1['3連単オッズ'] || '─'}"\n3連複オッズ: "${r1['3連複オッズ'] || '─'}"\n2車単オッズ: "${r1['2車単オッズ'] || '─'}"`;
 
       const result = analyze(rows);
       render(result);
@@ -635,6 +627,7 @@ function resetAll() {
   document.getElementById('results').classList.remove('visible');
   document.getElementById('reset-btn').classList.remove('visible');
   document.getElementById('error-msg').classList.remove('visible');
+  document.getElementById('debug-box').style.display = 'none';
   document.getElementById('file-input').value = '';
 }
 
