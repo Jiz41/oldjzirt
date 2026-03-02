@@ -36,7 +36,6 @@
   #upload-zone .icon { font-size: 32px; margin-bottom: 12px; opacity: 0.6; }
   #upload-zone .label { color: var(--text-muted); font-size: 12px; letter-spacing: 0.1em; }
   #upload-zone .label span { color: var(--accent); }
-  #file-input { display: none; }
 
   #file-info { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 20px; margin-top: 12px; align-items: center; gap: 12px; }
   #file-info.visible { display: flex; }
@@ -196,10 +195,10 @@
     <div class="title-sub">Jizairitsu Performance Analyzer</div>
   </header>
 
+  <input type="file" id="file-input" accept=".csv" style="display:none">
   <div id="upload-zone" onclick="document.getElementById('file-input').click()">
     <div class="icon">⊕</div>
     <div class="label">CSVをドロップ、または<span>タップして選択</span></div>
-    <input type="file" id="file-input" accept=".csv">
   </div>
 
   <div id="file-info">
@@ -974,12 +973,35 @@ ${fmtList(d.kimari)}
 
 // ── File Handling ────────────────────────────────────────────
 function handleFile(file) {
-  if (!file || !file.name.endsWith('.csv')) { showError('CSVファイルを選択してください'); return; }
+  if (!file || !file.name.toLowerCase().endsWith('.csv')) { showError('CSVファイルを選択してください'); return; }
   const reader = new FileReader();
   reader.onload = e => {
     try {
-      const rows = parseCSV(e.target.result);
-      if (rows.length === 0) { showError('データが見つかりませんでした'); return; }
+      let rows = parseCSV(e.target.result);
+      if (rows.length === 0) {
+        // Shift-JISで再試行
+        const reader2 = new FileReader();
+        reader2.onload = e2 => {
+          try {
+            const rows2 = parseCSV(e2.target.result);
+            if (rows2.length === 0) { showError('データが見つかりませんでした'); return; }
+            _allRows = rows2;
+            document.getElementById('file-info').classList.add('visible');
+            document.getElementById('file-name-text').textContent = file.name;
+            document.getElementById('file-rows-text').textContent = \`\${rows2.length.toLocaleString()} レース\`;
+            document.getElementById('upload-zone').style.display = 'none';
+            document.getElementById('period-filter').classList.add('visible');
+            document.getElementById('period-count').textContent = \`\${rows2.length.toLocaleString()} / \${rows2.length.toLocaleString()} レース\`;
+            ['f-date-from','f-date-to'].forEach(id => {
+              document.getElementById(id).addEventListener('change', onPeriodChange);
+              document.getElementById(id).addEventListener('input', onPeriodChange);
+            });
+            renderAll(rows2);
+          } catch(err2) { showError('解析エラー: ' + err2.message); }
+        };
+        reader2.readAsText(file, 'Shift-JIS');
+        return;
+      }
       _allRows = rows;
       document.getElementById('file-info').classList.add('visible');
       document.getElementById('file-name-text').textContent = file.name;
@@ -994,6 +1016,9 @@ function handleFile(file) {
       renderAll(rows);
     } catch (err) { showError('解析エラー: ' + err.message); }
   };
+  reader.onloadend = () => {};
+  reader.onerror = () => { showError('ファイル読み込みエラーが発生しました'); };
+  // UTF-8で試みてパース失敗したらShift-JISで再試行
   reader.readAsText(file, 'UTF-8');
 }
 
