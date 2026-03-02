@@ -282,8 +282,7 @@
   .val-muted   { color: var(--text-muted); }
 
   /* ── 外れ解剖 ── */
-  #miss-analysis { display: none; margin-top: 32px; }
-  #miss-analysis.visible { display: block; }
+
   .miss-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
   .miss-card {
     background: var(--glass);
@@ -389,6 +388,60 @@
   .error-msg { color: var(--miss); font-size: 11px; margin-top: 8px; display: none; font-family: 'Shippori Mincho', serif; }
   .error-msg.visible { display: block; }
 
+  /* ── クロス分析 ── */
+  .cross-selectors { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .cross-sel-group { display: flex; align-items: center; gap: 8px; }
+  .cross-sel-label { font-family: 'Shippori Mincho', serif; font-size: 11px; color: var(--gold); letter-spacing: 0.2em; }
+  .cross-sel-sep { font-family: 'Shippori Mincho', serif; font-size: 18px; color: var(--red); opacity: 0.7; }
+  .cross-select {
+    background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+    color: var(--text); padding: 6px 12px;
+    font-family: 'Shippori Mincho', serif; font-size: 12px;
+    letter-spacing: 0.1em; cursor: pointer;
+    backdrop-filter: blur(8px);
+  }
+  .cross-select:focus { outline: none; border-color: var(--gold); }
+  .cross-legend { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); font-family: 'Shippori Mincho', serif; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .legend-note { font-size: 10px; color: var(--text-dim); margin-left: auto; font-family: 'Shippori Mincho', serif; }
+  .cross-table { width: 100%; border-collapse: collapse; min-width: 400px; }
+  .cross-table th {
+    background: rgba(184,150,46,0.08); padding: 8px 12px;
+    font-family: 'Shippori Mincho', serif; font-size: 10px;
+    color: var(--gold); letter-spacing: 0.15em;
+    border-bottom: 1px solid var(--border2); border-right: 1px solid var(--border);
+    white-space: nowrap; text-align: center;
+  }
+  .cross-table th.row-header { text-align: left; min-width: 80px; }
+  .cross-table td {
+    padding: 7px 10px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border);
+    text-align: center; font-size: 11px; font-family: 'DM Mono', monospace;
+    position: relative; transition: background 0.3s;
+  }
+  .cross-table td.row-label {
+    font-family: 'Shippori Mincho', serif; font-size: 11px;
+    color: var(--text-muted); text-align: left; white-space: nowrap;
+    background: rgba(184,150,46,0.04);
+  }
+  .cross-table td.sparse { opacity: 0.3; }
+  .cross-val { font-size: 12px; font-weight: 500; }
+  .cross-count { font-size: 9px; color: var(--text-dim); display: block; margin-top: 2px; }
+
+  /* ── 場別ソート ── */
+  .sortable { cursor: pointer; user-select: none; }
+  .sortable:hover { color: var(--gold2); }
+  .sort-icon { margin-left: 4px; font-size: 8px; opacity: 0.6; }
+  .geo-reset-btn {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-muted); padding: 4px 12px; cursor: pointer;
+    font-family: 'Shippori Mincho', serif; font-size: 11px;
+    letter-spacing: 0.1em; transition: all 0.2s;
+  }
+  .geo-reset-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .venue-header-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .venue-header-row .section-title { margin-bottom: 0; border-bottom: none; padding-bottom: 0; flex: 1; }
+
   /* ── スマホ対応 ── */
   @media (max-width: 600px) {
     #app { padding: 24px 14px; }
@@ -474,7 +527,7 @@
   <header>
     <div class="title-stamp">◆ 号 外 ◆</div>
     <div class="title-jp">真・自在律</div>
-    <div class="title-sub">華耀天輪　成績計算機</div>
+    <div class="title-sub">成績一覧　＆　熱度分布図</div>
   </header>
 
   <div id="sheets-zone">
@@ -505,7 +558,7 @@
   <!-- TAB -->
   <div class="face-tabs" id="face-tabs">
     <button class="face-tab active" onclick="switchFace('omote')">&#34920; &#8212;&#8212; &#21213;&#21106;&#12398;&#35352;&#37682;</button>
-    <button class="face-tab ura" onclick="switchFace('ura')">&#35013; &#8212;&#8212; &#36020;&#12369;&#12398;&#35299;&#21560;</button>
+    <button class="face-tab ura" onclick="switchFace('ura')">裏 ── 条件別　強度</button>
   </div>
   <!-- omote -->
   <div id="face-omote" class="face-panel active">
@@ -547,10 +600,20 @@
       </table>
     </div>
     <div class="divider"></div>
-    <div class="section-title">── 開催場別　的中率</div>
+    <div class="venue-header-row">
+      <div class="section-title">── 開催場別　的中率</div>
+      <button class="geo-reset-btn" onclick="resetVenueGeo()">地理順</button>
+    </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>開催場</th><th>レース数</th><th>的中数</th><th>的中率</th><th>晴天令T率</th><th>荒天令T率</th></tr></thead>
+        <thead><tr>
+          <th class="sortable" onclick="sortVenue('venue')">開催場 <span class="sort-icon" id="si-venue">▲▼</span></th>
+          <th class="sortable" onclick="sortVenue('total')">レース数 <span class="sort-icon" id="si-total">▲▼</span></th>
+          <th class="sortable" onclick="sortVenue('hits')">的中数 <span class="sort-icon" id="si-hits">▲▼</span></th>
+          <th class="sortable" onclick="sortVenue('hitRate')">的中率 <span class="sort-icon" id="si-hitRate">▲▼</span></th>
+          <th class="sortable" onclick="sortVenue('seiRate')">晴天令T率 <span class="sort-icon" id="si-seiRate">▲▼</span></th>
+          <th class="sortable" onclick="sortVenue('koRate')">荒天令T率 <span class="sort-icon" id="si-koRate">▲▼</span></th>
+        </tr></thead>
         <tbody id="venue-tbody"></tbody>
       </table>
     </div>
@@ -559,30 +622,44 @@
   </div><!-- /face-omote -->
   <!-- ura -->
   <div id="face-ura" class="face-panel">
-  <!-- 外れ解剖 -->
-  <div id="miss-analysis">
-    <div class="section-title">── 外れ解剖　─　負けに不思議の負けなし</div>
-    <div class="miss-grid">
-      <div class="miss-card">
-        <div class="miss-card-title">令種　偏り</div>
-        <div id="miss-rei"></div>
+    <div id="cross-analysis" style="margin-top:24px;">
+      <div class="section-title">── 条件別　強度マップ</div>
+
+      <!-- 軸セレクタ -->
+      <div class="cross-selectors">
+        <div class="cross-sel-group">
+          <span class="cross-sel-label">行　軸</span>
+          <select id="cross-row-axis" class="cross-select" onchange="renderCross()">
+            <option value="venue">開催場</option>
+            <option value="tenun">天雲指数</option>
+            <option value="rei">令種</option>
+            <option value="kimari">決まり手</option>
+          </select>
+        </div>
+        <div class="cross-sel-sep">×</div>
+        <div class="cross-sel-group">
+          <span class="cross-sel-label">列　軸</span>
+          <select id="cross-col-axis" class="cross-select" onchange="renderCross()">
+            <option value="tenun">天雲指数</option>
+            <option value="venue">開催場</option>
+            <option value="rei">令種</option>
+            <option value="kimari">決まり手</option>
+          </select>
+        </div>
       </div>
-      <div class="miss-card">
-        <div class="miss-card-title">天雲指数帯　分布</div>
-        <div id="miss-tenun"></div>
+
+      <div class="cross-legend">
+        <span class="legend-item"><span class="legend-dot" style="background:var(--miss)"></span>低</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--gold)"></span>中</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--hit)"></span>高</span>
+        <span class="legend-note">※ 5件未満は薄表示</span>
       </div>
-      <div class="miss-card">
-        <div class="miss-card-title">開催場　ランキング</div>
-        <div id="miss-venue"></div>
-      </div>
-      <div class="miss-card">
-        <div class="miss-card-title">決まり手　偏り</div>
-        <div id="miss-kimari"></div>
+
+      <div class="table-wrap" id="cross-table-wrap">
+        <div id="cross-table-inner"></div>
       </div>
     </div>
-
-  </div>
-</div><!-- /face-ura -->
+  </div><!-- /face-ura -->
 
 </div>
 <script>
@@ -590,7 +667,7 @@
 let _allRows = [];
 
 // ── Google Sheets API（APIキー方式） ─────────────────────────
-const SHEETS_API_KEY = 'AIzaSyBSjIboD5mR-Zv0GA-xVd6tpjf04lWNepM'; // ← 発行したAPIキーに差し替え
+const SHEETS_API_KEY = 'YOUR_API_KEY'; // ← 発行したAPIキーに差し替え
 
 async function loadSheet() {
   const sid   = document.getElementById('sheets-id-input').value.trim();
@@ -736,53 +813,74 @@ function analyze(rows) {
   return { total, hits, hitRate: hits/total*100, seiT:seiTCnt, seiRate:seiTCnt/total*100, koT:koTCnt, koRate:koTCnt/total*100, totalInvest, totalPayout, totalRecovery, kiken:{s3tan,s3fuku,k3fuku,k2tan}, venues:venueMap };
 }
 
-// ── 外れ解剖集計 ─────────────────────────────────────────────
-function analyzeMiss(rows) {
-  const misses = rows.filter(r => !isHit(r));
-  const total  = misses.length;
-  if (total === 0) return null;
-
-  // 令種
-  const rei = { '晴天令T': 0, '荒天令T': 0, '晴天令F': 0, '荒天令F': 0 };
-  misses.forEach(r => {
-    if (isSeiT(r)) rei['晴天令T']++;
-    else rei['晴天令F']++;
-    if (isKoT(r))  rei['荒天令T']++;
-    else rei['荒天令F']++;
-  });
-
-  // 天雲指数帯
-  const tenunBands = { '0': 0, '33': 0, '67': 0, '100': 0, '他': 0 };
-  misses.forEach(r => {
-    const v = get(r, COL.tenun);
-    if (['0','33','67','100'].includes(v)) tenunBands[v]++;
-    else tenunBands['他']++;
-  });
-
-  // 開催場（上位8）
-  const venueMap = {};
-  misses.forEach(r => { const v = get(r, COL.venue) || '不明'; venueMap[v] = (venueMap[v] || 0) + 1; });
-  const venues = Object.entries(venueMap).sort((a,b)=>b[1]-a[1]).slice(0, 8);
-
-  // 決まり手（上位8）
-  const kimariMap = {};
-  misses.forEach(r => { const k = get(r, COL.kimari) || '不明'; kimariMap[k] = (kimariMap[k] || 0) + 1; });
-  const kimari = Object.entries(kimariMap).sort((a,b)=>b[1]-a[1]).slice(0, 8);
-
-  return { total, rei, tenunBands, venues, kimari };
-}
-
 // ── Render ───────────────────────────────────────────────────
 function renderAll(rows) {
   const result = analyze(rows);
   renderStats(result);
   renderEV(result, rows);
   renderXPost(result, rows);
-  const missData = analyzeMiss(rows);
-  renderMissAnalysis(missData);
-  window._lastMissData = missData;
   window._lastRows = rows;
   document.getElementById('face-tabs').classList.add('visible');
+  renderCross();
+}
+
+// ── 競輪場地理順（北→南） ─────────────────────────────────────
+const GEO_ORDER = ['函館','青森','いわき平','前橋','取手','松戸','川崎','西武園','京王閣','立川','小田原','伊東','静岡','名古屋','岐阜','大垣','豊橋','富山','松阪','四日市','向日町','和歌山','岸和田','玉野','広島','防府','高松','高知','松山','小倉'];
+
+// ── 場別ソート状態 ─────────────────────────────────────────────
+let _venueData = [];
+let _venueSortCol = null, _venueSortDir = 1;
+
+function renderVenueTable(entries) {
+  document.getElementById('venue-tbody').innerHTML = entries.map(v => {
+    const hr = (v.hits/v.total*100).toFixed(1);
+    const sr = (v.seiT/v.total*100).toFixed(1);
+    const kr = (v.koT/v.total*100).toFixed(1);
+    const cls = parseFloat(hr)>=30?'val-good':parseFloat(hr)>=15?'val-neutral':'val-bad';
+    return `<tr><td>${v.venue}</td><td class="val-muted">${v.total}</td><td class="val-muted">${v.hits}</td><td class="${cls}">${hr}%</td><td>${sr}%</td><td>${kr}%</td></tr>`;
+  }).join('');
+}
+
+function sortVenue(col) {
+  if (_venueSortCol === col) {
+    _venueSortDir *= -1;
+  } else {
+    _venueSortCol = col;
+    _venueSortDir = -1;
+  }
+  // アイコンリセット
+  ['venue','total','hits','hitRate','seiRate','koRate'].forEach(c => {
+    const el = document.getElementById('si-' + c);
+    if (el) el.textContent = '▲▼';
+  });
+  const el = document.getElementById('si-' + col);
+  if (el) el.textContent = _venueSortDir === 1 ? '▲' : '▼';
+
+  const sorted = [..._venueData].sort((a, b) => {
+    let av, bv;
+    if (col === 'venue')   { av = a.venue; bv = b.venue; return av.localeCompare(bv, 'ja') * _venueSortDir; }
+    if (col === 'total')   { av = a.total; bv = b.total; }
+    if (col === 'hits')    { av = a.hits;  bv = b.hits; }
+    if (col === 'hitRate') { av = a.hits/a.total; bv = b.hits/b.total; }
+    if (col === 'seiRate') { av = a.seiT/a.total; bv = b.seiT/b.total; }
+    if (col === 'koRate')  { av = a.koT/a.total;  bv = b.koT/b.total; }
+    return (av - bv) * _venueSortDir;
+  });
+  renderVenueTable(sorted);
+}
+
+function resetVenueGeo() {
+  _venueSortCol = null;
+  ['venue','total','hits','hitRate','seiRate','koRate'].forEach(c => {
+    const el = document.getElementById('si-' + c);
+    if (el) el.textContent = '▲▼';
+  });
+  const geoSorted = [..._venueData].sort((a, b) => {
+    const ai = GEO_ORDER.indexOf(a.venue), bi = GEO_ORDER.indexOf(b.venue);
+    const an = ai === -1 ? 999 : ai, bn = bi === -1 ? 999 : bi;
+    return an - bn;
+  });
+  renderVenueTable(geoSorted);
 }
 
 function renderStats(result) {
@@ -811,62 +909,136 @@ function renderStats(result) {
     return `<tr><td>${rei}</td><td>${type}</td><td class="val-muted">${pts}点</td><td class="val-muted">${data.invest.toLocaleString()}円</td><td>${data.payout.toLocaleString()}円</td><td class="${cls}">${data.recovery.toFixed(1)}%</td><td class="val-muted">${data.hitCount}回</td></tr>`;
   }).join('');
 
-  const venueEntries = Object.entries(venues).sort((a,b)=>b[1].total-a[1].total);
-  document.getElementById('venue-tbody').innerHTML = venueEntries.map(([venue,v]) => {
-    const hr=(v.hits/v.total*100).toFixed(1), sr=(v.seiT/v.total*100).toFixed(1), kr=(v.koT/v.total*100).toFixed(1);
-    const cls=parseFloat(hr)>=30?'val-good':parseFloat(hr)>=15?'val-neutral':'val-bad';
-    return `<tr><td>${venue}</td><td class="val-muted">${v.total}</td><td class="val-muted">${v.hits}</td><td class="${cls}">${hr}%</td><td>${sr}%</td><td>${kr}%</td></tr>`;
-  }).join('');
+  // 場別データを保存してレース数順で初期表示
+  _venueData = Object.entries(venues).map(([venue, v]) => ({ venue, ...v }));
+  const initSorted = [..._venueData].sort((a, b) => b.total - a.total);
+  renderVenueTable(initSorted);
 
   document.getElementById('results').classList.add('visible');
   document.getElementById('reset-btn').classList.add('visible');
 }
 
-function missBarRow(label, count, max) {
-  const pct = max > 0 ? (count / max * 100) : 0;
-  return `<div class="miss-row">
-    <span class="miss-label">${label}</span>
-    <span class="miss-count">${count}</span>
-    <div class="miss-bar-wrap"><div class="miss-bar" style="width:${pct.toFixed(1)}%"></div></div>
-    <span class="miss-pct">${pct.toFixed(1)}%</span>
-  </div>`;
+// ── クロス分析 ───────────────────────────────────────────────
+const AXIS_DEF = {
+  venue:  { label: '開催場',   get: r => get(r, COL.venue) || '不明' },
+  tenun:  { label: '天雲指数', get: r => {
+    const v = parseInt(get(r, COL.tenun));
+    if (isNaN(v)) return '不明';
+    if (v === 0)  return '指数 0';
+    if (v <= 33)  return '指数 33';
+    if (v <= 67)  return '指数 67';
+    return '指数 100';
+  }},
+  rei:    { label: '令種', get: r => {
+    const s = get(r, COL.seiTF), k = get(r, COL.koTF);
+    const st = s === 'TRUE' || s === 'T' || s === '1';
+    const kt = k === 'TRUE' || k === 'T' || k === '1';
+    if (st && kt) return '晴天T 荒天T';
+    if (st)       return '晴天T 荒天F';
+    if (kt)       return '晴天F 荒天T';
+    return '晴天F 荒天F';
+  }},
+  kimari: { label: '決まり手', get: r => get(r, COL.kimariActual) || get(r, COL.kimari) || '不明' },
+};
+
+function hitRate(n, d) { return d > 0 ? n / d * 100 : null; }
+
+function heatColor(pct) {
+  if (pct === null) return 'rgba(255,255,255,0.03)';
+  // 0%→朱, 50%→金, 100%→緑
+  if (pct < 50) {
+    const t = pct / 50;
+    const r = Math.round(192 + (184 - 192) * t);
+    const g = Math.round(57  + (150 - 57)  * t);
+    const b = Math.round(43  + (46  - 43)  * t);
+    return `rgba(${r},${g},${b},0.35)`;
+  } else {
+    const t = (pct - 50) / 50;
+    const r = Math.round(184 + (45  - 184) * t);
+    const g = Math.round(150 + (175 - 150) * t);
+    const b = Math.round(46  + (100 - 46)  * t);
+    return `rgba(${r},${g},${b},0.35)`;
+  }
 }
 
-function renderMissAnalysis(data) {
-  if (!data || data.total === 0) {
-    document.getElementById('miss-analysis').classList.remove('visible');
-    return;
-  }
-  document.getElementById('miss-analysis').classList.add('visible');
+function renderCross() {
+  const rows = window._lastRows;
+  if (!rows || rows.length === 0) return;
 
-  // 令種
-  const reiMax = Math.max(...Object.values(data.rei));
-  document.getElementById('miss-rei').innerHTML =
-    Object.entries(data.rei).map(([k,v]) => missBarRow(k, v, reiMax)).join('');
+  const rowKey = document.getElementById('cross-row-axis').value;
+  const colKey = document.getElementById('cross-col-axis').value;
+  if (rowKey === colKey) return;
 
-  // 天雲指数帯
-  const tenunMax = Math.max(...Object.values(data.tenunBands));
-  document.getElementById('miss-tenun').innerHTML =
-    Object.entries(data.tenunBands).map(([k,v]) => missBarRow(`指数 ${k}`, v, tenunMax)).join('');
+  const rowDef = AXIS_DEF[rowKey];
+  const colDef = AXIS_DEF[colKey];
 
-  // 開催場
-  const venueMax = data.venues[0] ? data.venues[0][1] : 1;
-  document.getElementById('miss-venue').innerHTML =
-    data.venues.map(([k,v]) => missBarRow(k, v, venueMax)).join('');
+  // 集計
+  const map = {}; // map[rowVal][colVal] = {total, hits}
+  const rowVals = new Set(), colVals = new Set();
 
-  // 決まり手
-  const kimariMax = data.kimari[0] ? data.kimari[0][1] : 1;
-  document.getElementById('miss-kimari').innerHTML =
-    data.kimari.map(([k,v]) => missBarRow(k, v, kimariMax)).join('');
+  rows.forEach(r => {
+    const rv = rowDef.get(r);
+    const cv = colDef.get(r);
+    rowVals.add(rv); colVals.add(cv);
+    if (!map[rv]) map[rv] = {};
+    if (!map[rv][cv]) map[rv][cv] = { total: 0, hits: 0 };
+    map[rv][cv].total++;
+    if (isHit(r)) map[rv][cv].hits++;
+  });
+
+  // 行列ソート（開催場は地理順、それ以外は五十音）
+  const sortVals = (vals, key) => {
+    const arr = [...vals];
+    if (key === 'venue') {
+      return arr.sort((a, b) => {
+        const ai = GEO_ORDER.indexOf(a), bi = GEO_ORDER.indexOf(b);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+    }
+    if (key === 'tenun') {
+      const order = ['指数 0','指数 33','指数 67','指数 100','不明'];
+      return arr.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    }
+    return arr.sort((a, b) => a.localeCompare(b, 'ja'));
+  };
+
+  const sortedRows = sortVals(rowVals, rowKey);
+  const sortedCols = sortVals(colVals, colKey);
+
+  // HTML生成
+  let html = '<table class="cross-table"><thead><tr>';
+  html += `<th class="row-header">${rowDef.label} \\ ${colDef.label}</th>`;
+  sortedCols.forEach(cv => { html += `<th>${cv}</th>`; });
+  html += '</tr></thead><tbody>';
+
+  sortedRows.forEach(rv => {
+    html += `<tr><td class="row-label">${rv}</td>`;
+    sortedCols.forEach(cv => {
+      const cell = map[rv] && map[rv][cv];
+      const sparse = !cell || cell.total < 5;
+      if (!cell) {
+        html += `<td class="sparse">—</td>`;
+      } else {
+        const pct = hitRate(cell.hits, cell.total);
+        const bg  = heatColor(pct);
+        const cls = sparse ? ' sparse' : '';
+        html += `<td class="${cls}" style="background:${bg}">` +
+          `<span class="cross-val">${pct !== null ? pct.toFixed(1) + '%' : '—'}</span>` +
+          `<span class="cross-count">${cell.hits}/${cell.total}</span></td>`;
+      }
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('cross-table-inner').innerHTML = html;
 }
 
 // ── File Handling ────────────────────────────────────────────
 
-
-
 function resetAll() {
   _allRows = [];
-  window._lastMissData = null;
+  _venueData = [];
   window._lastRows = null;
   document.getElementById('sheets-zone').style.display = '';
   document.getElementById('sheets-status').className = '';
@@ -874,7 +1046,6 @@ function resetAll() {
   document.getElementById('file-info').classList.remove('visible');
   document.getElementById('period-filter').classList.remove('visible');
   document.getElementById('results').classList.remove('visible');
-  document.getElementById('miss-analysis').classList.remove('visible');
   document.getElementById('reset-btn').classList.remove('visible');
   document.getElementById('error-msg').classList.remove('visible');
   document.getElementById('f-date-from').value = '';
@@ -883,6 +1054,7 @@ function resetAll() {
   document.getElementById('ev-section').style.display = 'none';
   document.getElementById('best-banner').classList.remove('visible');
   document.getElementById('x-post-text').value = '';
+  document.getElementById('cross-table-inner').innerHTML = '';
   switchFace('omote');
 }
 
