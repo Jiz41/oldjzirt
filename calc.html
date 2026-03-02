@@ -36,6 +36,7 @@
   #upload-zone .icon { font-size: 32px; margin-bottom: 12px; opacity: 0.6; }
   #upload-zone .label { color: var(--text-muted); font-size: 12px; letter-spacing: 0.1em; }
   #upload-zone .label span { color: var(--accent); }
+  #file-input { display: none; }
 
   #file-info { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 20px; margin-top: 12px; align-items: center; gap: 12px; }
   #file-info.visible { display: flex; }
@@ -52,8 +53,8 @@
   #period-count { font-size: 11px; color: var(--accent2); margin-left: auto; }
 
   /* ── Results ── */
-  #results { margin-top: 24px; animation: fadeIn 0.4s ease; }
-
+  #results { display: none; margin-top: 32px; animation: fadeIn 0.4s ease; }
+  #results.visible { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
   .section-title { font-family: 'Zen Antique Soft', serif; font-size: 14px; color: var(--accent); letter-spacing: 0.2em; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
@@ -82,7 +83,8 @@
   .val-muted { color: var(--text-muted); }
 
   /* ── 外れ解剖 ── */
-  #miss-analysis { margin-top: 0; }
+  #miss-analysis { display: none; margin-top: 32px; }
+  #miss-analysis.visible { display: block; }
 
   .miss-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
   .miss-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px; }
@@ -127,64 +129,43 @@
   .error-msg.visible { display: block; }
   .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 32px 0; }
 
-  /* ── 表/裏 タブ ── */
-  .face-tabs { display: none; margin-top: 24px; border-bottom: 1px solid var(--border); }
-  .face-tabs.visible { display: flex; }
-  .face-tab {
-    padding: 10px 24px; font-family: 'Zen Antique Soft', serif; font-size: 13px;
-    color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent;
-    letter-spacing: 0.2em; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none;
-  }
-  .face-tab:hover { color: var(--text); }
-  .face-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .face-tab.ura.active { color: var(--miss); border-bottom-color: var(--miss); }
-  .face-panel { display: none; }
-  .face-panel.active { display: block; }
-
-  /* ── 期待値ダッシュボード ── */
-  .ev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
-  .ev-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px; position: relative; overflow: hidden; }
-  .ev-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); opacity: 0.4; }
-  .ev-card.positive::before { background: var(--hit); opacity: 1; }
-  .ev-card.negative::before { background: var(--miss); opacity: 1; }
-  .ev-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
-  .ev-value { font-size: 22px; font-weight: 500; line-height: 1; }
-  .ev-sub { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
-
-  /* ── X投稿ジェネレーター ── */
-  .x-box { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 20px; margin-bottom: 24px; }
-  .x-post-text {
-    width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text);
-    padding: 12px; border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 12px;
-    line-height: 1.8; resize: vertical; min-height: 160px;
-  }
-  .x-post-text:focus { outline: none; border-color: var(--accent); }
-  .x-actions { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
-  .x-char-count { font-size: 11px; color: var(--text-muted); margin-left: auto; }
-  .x-char-count.over { color: var(--miss); }
-  .btn-x {
-    background: transparent; border: 1px solid var(--accent2); color: var(--accent2);
-    padding: 7px 16px; border-radius: 2px; cursor: pointer;
-    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; transition: all 0.2s;
-  }
-  .btn-x:hover { background: var(--accent2); color: var(--bg); }
-  .btn-copy {
-    background: transparent; border: 1px solid var(--border); color: var(--text-muted);
-    padding: 7px 16px; border-radius: 2px; cursor: pointer;
-    font-family: 'DM Mono', monospace; font-size: 11px; transition: all 0.2s;
-  }
-  .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* ── 最高配当バナー ── */
-  .best-hit-banner {
-    background: var(--surface2); border: 1px solid var(--accent); border-radius: 4px;
-    padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px;
-  }
-  .best-hit-icon { font-size: 24px; }
-  .best-hit-main { flex: 1; }
-  .best-hit-title { font-size: 10px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px; }
-  .best-hit-value { font-size: 20px; color: var(--accent); font-weight: 500; }
-  .best-hit-detail { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  /* TAB */
+  .face-tabs{display:none;margin-top:24px;border-bottom:1px solid var(--border);}
+  .face-tabs.visible{display:flex;}
+  .face-tab{padding:10px 24px;font-family:'Zen Antique Soft',serif;font-size:13px;color:var(--text-muted);cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;letter-spacing:.2em;transition:all .2s;}
+  .face-tab:hover{color:var(--text);}
+  .face-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .face-tab.ura.active{color:var(--miss);border-bottom-color:var(--miss);}
+  .face-panel{display:none;}
+  .face-panel.active{display:block;}
+  /* EV */
+  .ev-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px;}
+  .ev-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:16px;position:relative;overflow:hidden;}
+  .ev-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);opacity:.4;}
+  .ev-card.pos::before{background:var(--hit);opacity:1;}
+  .ev-card.neg::before{background:var(--miss);opacity:1;}
+  .ev-label{font-size:10px;color:var(--text-muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px;}
+  .ev-value{font-size:22px;font-weight:500;line-height:1;}
+  .ev-sub{font-size:11px;color:var(--text-muted);margin-top:6px;}
+  /* BEST */
+  .best-banner{background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:16px 20px;margin-bottom:24px;display:none;align-items:center;gap:16px;}
+  .best-banner.visible{display:flex;}
+  .best-icon{font-size:24px;}
+  .best-main{flex:1;}
+  .best-title{font-size:10px;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:4px;}
+  .best-val{font-size:20px;color:var(--accent);font-weight:500;}
+  .best-detail{font-size:11px;color:var(--text-muted);margin-top:4px;}
+  /* X POST */
+  .x-box{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:20px;margin-bottom:24px;}
+  .x-post-text{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:2px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.8;resize:vertical;min-height:160px;}
+  .x-post-text:focus{outline:none;border-color:var(--accent);}
+  .x-actions{display:flex;gap:8px;margin-top:10px;align-items:center;}
+  .x-char{font-size:11px;color:var(--text-muted);margin-left:auto;}
+  .x-char.over{color:var(--miss);}
+  .btn-x{background:transparent;border:1px solid var(--accent2);color:var(--accent2);padding:7px 16px;border-radius:2px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;transition:all .2s;}
+  .btn-x:hover{background:var(--accent2);color:var(--bg);}
+  .btn-cp{background:transparent;border:1px solid var(--border);color:var(--text-muted);padding:7px 16px;border-radius:2px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;transition:all .2s;}
+  .btn-cp:hover{border-color:var(--accent);color:var(--accent);}
 </style>
 </head>
 <body>
@@ -195,10 +176,10 @@
     <div class="title-sub">Jizairitsu Performance Analyzer</div>
   </header>
 
-  <input type="file" id="file-input" accept=".csv" style="display:none">
   <div id="upload-zone" onclick="document.getElementById('file-input').click()">
     <div class="icon">⊕</div>
     <div class="label">CSVをドロップ、または<span>タップして選択</span></div>
+    <input type="file" id="file-input" accept=".csv">
   </div>
 
   <div id="file-info">
@@ -218,106 +199,100 @@
     <span id="period-count">— レース</span>
   </div>
 
-  <!-- タブ -->
+  <!-- TAB -->
   <div class="face-tabs" id="face-tabs">
-    <button class="face-tab active" onclick="switchFace('omote')">表　── 勝利の記録</button>
-    <button class="face-tab ura" onclick="switchFace('ura')">裏　── 負けの解剖</button>
+    <button class="face-tab active" onclick="switchFace('omote')">&#34920; &#8212;&#8212; &#21213;&#21106;&#12398;&#35352;&#37682;</button>
+    <button class="face-tab ura" onclick="switchFace('ura')">&#35013; &#8212;&#8212; &#36020;&#12369;&#12398;&#35299;&#21560;</button>
   </div>
-
-  <!-- 表の顔：勝利と繁栄 -->
+  <!-- omote -->
   <div id="face-omote" class="face-panel active">
-
-    <!-- 期待値ダッシュボード -->
-    <div id="ev-dashboard" style="display:none; margin-top:24px;">
-      <div class="section-title">── 期待値　ダッシュボード</div>
+    <div id="ev-section" style="display:none;margin-top:24px;">
+      <div class="section-title">&#8212;&#8212; &#26399;&#24453;&#20516; &#12480;&#12483;&#12471;&#12517;&#12508;&#12540;&#12489;</div>
       <div class="ev-grid" id="ev-cards"></div>
-
-      <!-- 最高配当バナー -->
-      <div class="best-hit-banner" id="best-hit-banner" style="display:none;">
-        <div class="best-hit-icon">🏆</div>
-        <div class="best-hit-main">
-          <div class="best-hit-title">今期間　最高配当</div>
-          <div class="best-hit-value" id="best-hit-value">—</div>
-          <div class="best-hit-detail" id="best-hit-detail">—</div>
+      <div class="best-banner" id="best-banner">
+        <div class="best-icon">&#127942;</div>
+        <div class="best-main">
+          <div class="best-title">&#26368;&#39640;&#37197;&#24403;</div>
+          <div class="best-val" id="best-val">&#8212;</div>
+          <div class="best-detail" id="best-detail">&#8212;</div>
         </div>
       </div>
-
-      <!-- X投稿ジェネレーター -->
-      <div class="section-title">── X 投稿文　生成</div>
+      <div class="section-title">&#8212;&#8212; X &#25295;&#31295;&#25991; &#29983;&#25104;</div>
       <div class="x-box">
         <textarea class="x-post-text" id="x-post-text" readonly></textarea>
         <div class="x-actions">
-          <button class="btn-x" onclick="openX()">𝕏 で投稿</button>
-          <button class="btn-copy" onclick="copyX()">コピー</button>
-          <span class="x-char-count" id="x-char-count">0 / 280</span>
+          <button class="btn-x" onclick="openX()">&#120143; &#12391;&#25295;&#31295;</button>
+          <button class="btn-cp" onclick="copyX()">&#12467;&#12500;&#12540;</button>
+          <span class="x-char" id="x-char">0 / 280</span>
         </div>
       </div>
       <div class="divider"></div>
     </div>
-
-    <!-- 成績サマリ -->
-    <div id="results" style="margin-top:0;">
-      <div class="section-title">── 総合成績</div>
-      <div class="stats-grid" id="overview-stats"></div>
-      <div class="divider"></div>
-      <div class="section-title">── 令別　精度</div>
-      <div class="stats-grid" id="rei-stats"></div>
-      <div class="divider"></div>
-      <div class="section-title">── 券種別　回収率</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>令</th><th>券種</th><th>点数</th><th>投資額</th><th>払戻合計</th><th>回収率</th><th>的中数</th></tr></thead>
-          <tbody id="券種-tbody"></tbody>
-        </table>
-      </div>
-      <div class="divider"></div>
-      <div class="section-title">── 開催場別　的中率</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>開催場</th><th>レース数</th><th>的中数</th><th>的中率</th><th>晴天令T率</th><th>荒天令T率</th></tr></thead>
-          <tbody id="venue-tbody"></tbody>
-        </table>
-      </div>
+  <!-- 成績サマリ -->
+  <div id="results">
+    <div class="section-title">── 総合成績</div>
+    <div class="stats-grid" id="overview-stats"></div>
+    <div class="divider"></div>
+    <div class="section-title">── 令別　精度</div>
+    <div class="stats-grid" id="rei-stats"></div>
+    <div class="divider"></div>
+    <div class="section-title">── 券種別　回収率</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>令</th><th>券種</th><th>点数</th><th>投資額</th><th>払戻合計</th><th>回収率</th><th>的中数</th></tr></thead>
+        <tbody id="券種-tbody"></tbody>
+      </table>
+    </div>
+    <div class="divider"></div>
+    <div class="section-title">── 開催場別　的中率</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>開催場</th><th>レース数</th><th>的中数</th><th>的中率</th><th>晴天令T率</th><th>荒天令T率</th></tr></thead>
+        <tbody id="venue-tbody"></tbody>
+      </table>
     </div>
   </div>
 
-  <!-- 裏の顔：外れ解剖 -->
+  </div><!-- /face-omote -->
+  <!-- ura -->
   <div id="face-ura" class="face-panel">
-    <div id="miss-analysis" style="margin-top:24px;">
-      <div class="section-title">── 外れ解剖　─　負けに不思議の負けなし</div>
-      <div class="miss-grid">
-        <div class="miss-card">
-          <div class="miss-card-title">令種　パターン</div>
-          <div id="miss-rei"></div>
-        </div>
-        <div class="miss-card">
-          <div class="miss-card-title">天雲指数帯　外れ率</div>
-          <div id="miss-tenun"></div>
-        </div>
-        <div class="miss-card">
-          <div class="miss-card-title">開催場　外れ率順</div>
-          <div id="miss-venue"></div>
-        </div>
-        <div class="miss-card">
-          <div class="miss-card-title">決まり手　外れ率順</div>
-          <div id="miss-kimari"></div>
-        </div>
+  <!-- 外れ解剖 -->
+  <div id="miss-analysis">
+    <div class="section-title">── 外れ解剖　─　負けに不思議の負けなし</div>
+    <div class="miss-grid">
+      <div class="miss-card">
+        <div class="miss-card-title">令種　偏り</div>
+        <div id="miss-rei"></div>
       </div>
+      <div class="miss-card">
+        <div class="miss-card-title">天雲指数帯　分布</div>
+        <div id="miss-tenun"></div>
+      </div>
+      <div class="miss-card">
+        <div class="miss-card-title">開催場　ランキング</div>
+        <div id="miss-venue"></div>
+      </div>
+      <div class="miss-card">
+        <div class="miss-card-title">決まり手　偏り</div>
+        <div id="miss-kimari"></div>
+      </div>
+    </div>
 
-      <div class="divider"></div>
+    <div class="divider"></div>
 
-      <div id="inference-section">
-        <div class="section-title">── 係数仮説　推論</div>
-        <div class="inference-box">
-          <div class="inference-input-row">
-            <input type="password" id="gemini-key-input" placeholder="Gemini API Key を入力して推論を生成">
-            <button id="inference-btn" onclick="runInference()">推論を生成</button>
-          </div>
-          <div id="inference-result"></div>
+    <!-- Gemini推論 -->
+    <div id="inference-section">
+      <div class="section-title">── 係数仮説　推論</div>
+      <div class="inference-box">
+        <div class="inference-input-row">
+          <input type="password" id="gemini-key-input" placeholder="Gemini API Key を入力して推論を生成">
+          <button id="inference-btn" onclick="runInference()">推論を生成</button>
         </div>
+        <div id="inference-result"></div>
       </div>
     </div>
   </div>
+</div><!-- /face-ura -->
 
 </div>
 <script>
@@ -432,59 +407,32 @@ function analyzeMiss(rows) {
   const total  = misses.length;
   if (total === 0) return null;
 
-  // 令種：TT/TF/FT/FF パターン集計
-  // TT = 晴天令的中 かつ 荒天令的中（3連複かぶり）
-  // TF = 晴天令的中 かつ 荒天令不的中
-  // FT = 晴天令不的中 かつ 荒天令的中
-  // FF = 両令不的中（完全外れ）
-  const reiPattern = { TT: 0, TF: 0, FT: 0, FF: 0 };
-  rows.forEach(r => {
-    const s = isSeiT(r), k = isKoT(r);
-    if (s && k)       reiPattern.TT++;
-    else if (s && !k) reiPattern.TF++;
-    else if (!s && k) reiPattern.FT++;
-    else              reiPattern.FF++;
-  });
-  const rei = reiPattern;
-
-  // 天雲指数帯：数値化して判定（小数・スペース対応）、外れ率付き
-  const TENUN_KEYS = [0, 33, 67, 100];
-  const tenunBands = {};
-  TENUN_KEYS.forEach(k => { tenunBands[k] = { miss: 0, total: 0 }; });
-  tenunBands['他'] = { miss: 0, total: 0 };
-  rows.forEach(r => {
-    const raw = get(r, COL.tenun);
-    const n   = Math.round(parseFloat(raw));
-    const key = TENUN_KEYS.includes(n) ? n : '他';
-    tenunBands[key].total++;
-    if (!isHit(r)) tenunBands[key].miss++;
+  // 令種
+  const rei = { '晴天令T': 0, '荒天令T': 0, '晴天令F': 0, '荒天令F': 0 };
+  misses.forEach(r => {
+    if (isSeiT(r)) rei['晴天令T']++;
+    else rei['晴天令F']++;
+    if (isKoT(r))  rei['荒天令T']++;
+    else rei['荒天令F']++;
   });
 
-  // 開催場：外れ率順上位8（母数付き）
-  const venueAllMap = {};
-  rows.forEach(r => {
-    const v = get(r, COL.venue) || '不明';
-    if (!venueAllMap[v]) venueAllMap[v] = { miss: 0, total: 0 };
-    venueAllMap[v].total++;
-    if (!isHit(r)) venueAllMap[v].miss++;
+  // 天雲指数帯
+  const tenunBands = { '0': 0, '33': 0, '67': 0, '100': 0, '他': 0 };
+  misses.forEach(r => {
+    const v = get(r, COL.tenun);
+    if (['0','33','67','100'].includes(v)) tenunBands[v]++;
+    else tenunBands['他']++;
   });
-  const venues = Object.entries(venueAllMap)
-    .filter(([,v]) => v.total > 0)
-    .sort((a,b) => (b[1].miss/b[1].total) - (a[1].miss/a[1].total))
-    .slice(0, 8);
 
-  // 決まり手：外れ率順上位8（母数付き）
-  const kimariAllMap = {};
-  rows.forEach(r => {
-    const k = get(r, COL.kimari) || '不明';
-    if (!kimariAllMap[k]) kimariAllMap[k] = { miss: 0, total: 0 };
-    kimariAllMap[k].total++;
-    if (!isHit(r)) kimariAllMap[k].miss++;
-  });
-  const kimari = Object.entries(kimariAllMap)
-    .filter(([,v]) => v.total > 0)
-    .sort((a,b) => (b[1].miss/b[1].total) - (a[1].miss/a[1].total))
-    .slice(0, 8);
+  // 開催場（上位8）
+  const venueMap = {};
+  misses.forEach(r => { const v = get(r, COL.venue) || '不明'; venueMap[v] = (venueMap[v] || 0) + 1; });
+  const venues = Object.entries(venueMap).sort((a,b)=>b[1]-a[1]).slice(0, 8);
+
+  // 決まり手（上位8）
+  const kimariMap = {};
+  misses.forEach(r => { const k = get(r, COL.kimari) || '不明'; kimariMap[k] = (kimariMap[k] || 0) + 1; });
+  const kimari = Object.entries(kimariMap).sort((a,b)=>b[1]-a[1]).slice(0, 8);
 
   return { total, rei, tenunBands, venues, kimari };
 }
@@ -501,147 +449,7 @@ function renderAll(rows) {
   document.getElementById('inference-result').textContent = '';
   window._lastMissData = missData;
   window._lastRows = rows;
-  // タブ表示
   document.getElementById('face-tabs').classList.add('visible');
-}
-
-// ── タブ切替 ─────────────────────────────────────────────────
-function switchFace(face) {
-  ['omote','ura'].forEach(f => {
-    document.getElementById('face-' + f).classList.toggle('active', f === face);
-  });
-  document.querySelectorAll('.face-tab').forEach((btn, i) => {
-    btn.classList.toggle('active', (i === 0 && face === 'omote') || (i === 1 && face === 'ura'));
-  });
-}
-
-// ── 期待値ダッシュボード ──────────────────────────────────────
-function renderEV(result, rows) {
-  const { total, hits, hitRate, totalInvest, totalPayout, totalRecovery, kiken } = result;
-  const ev = totalPayout - totalInvest; // 純損益
-  const evPerRace = total > 0 ? ev / total : 0;
-  const isPlus = ev >= 0;
-
-  // 晴天令・荒天令 各期待値貢献
-  const seiPayout = kiken.s3tan.payout + kiken.s3fuku.payout;
-  const koPayout  = kiken.k3fuku.payout + kiken.k2tan.payout;
-  const seiInvest = total * 500;
-  const koInvest  = total * 500;
-  const seiEV = seiPayout - seiInvest;
-  const koEV  = koPayout  - koInvest;
-
-  // TT/TF/FT/FF分布
-  const pat = { TT:0, TF:0, FT:0, FF:0 };
-  rows.forEach(r => {
-    const s = isSeiT(r), k = isKoT(r);
-    if (s && k) pat.TT++; else if (s) pat.TF++; else if (k) pat.FT++; else pat.FF++;
-  });
-
-  document.getElementById('ev-dashboard').style.display = 'block';
-  document.getElementById('ev-cards').innerHTML = `
-    <div class="ev-card ${isPlus?'positive':'negative'}">
-      <div class="ev-label">純損益</div>
-      <div class="ev-value" style="color:${isPlus?'var(--hit)':'var(--miss)'}">${ev>=0?'+':''}${ev.toLocaleString()}円</div>
-      <div class="ev-sub">1レース平均 ${evPerRace>=0?'+':''}${evPerRace.toFixed(0)}円</div>
-    </div>
-    <div class="ev-card ${seiEV>=0?'positive':'negative'}">
-      <div class="ev-label">晴天令　損益貢献</div>
-      <div class="ev-value" style="color:${seiEV>=0?'var(--hit)':'var(--miss)'}">${seiEV>=0?'+':''}${seiEV.toLocaleString()}円</div>
-      <div class="ev-sub">回収率 ${(seiPayout/seiInvest*100).toFixed(1)}%</div>
-    </div>
-    <div class="ev-card ${koEV>=0?'positive':'negative'}">
-      <div class="ev-label">荒天令　損益貢献</div>
-      <div class="ev-value" style="color:${koEV>=0?'var(--hit)':'var(--miss)'}">${koEV>=0?'+':''}${koEV.toLocaleString()}円</div>
-      <div class="ev-sub">回収率 ${(koPayout/koInvest*100).toFixed(1)}%</div>
-    </div>
-    <div class="ev-card">
-      <div class="ev-label">令パターン分布</div>
-      <div class="ev-value" style="font-size:14px;line-height:1.6;">
-        <span style="color:var(--hit)">TT ${pat.TT}</span> /
-        <span style="color:var(--accent2)">TF ${pat.TF}</span> /
-        <span style="color:var(--accent)">FT ${pat.FT}</span> /
-        <span style="color:var(--miss)">FF ${pat.FF}</span>
-      </div>
-      <div class="ev-sub">FF率 ${(pat.FF/total*100).toFixed(1)}%</div>
-    </div>`;
-
-  // 最高配当
-  let bestRow = null, bestPayout = 0;
-  rows.forEach(r => {
-    const p1 = toFloat(get(r, COL.odds3tan)) * 100;
-    const p2 = toFloat(get(r, COL.odds3fuku)) * 100;
-    const p3 = toFloat(get(r, COL.odds2tan)) * 100;
-    const maxP = Math.max(p1, p2, p3);
-    if ((isSeiT(r) || isKoT(r)) && maxP > bestPayout) { bestPayout = maxP; bestRow = r; }
-  });
-  if (bestRow) {
-    document.getElementById('best-hit-banner').style.display = 'flex';
-    const odds = Math.max(
-      toFloat(get(bestRow, COL.odds3tan)),
-      toFloat(get(bestRow, COL.odds3fuku)),
-      toFloat(get(bestRow, COL.odds2tan))
-    );
-    document.getElementById('best-hit-value').textContent = `${odds.toFixed(1)} 倍　${Math.round(odds*100).toLocaleString()}円`;
-    document.getElementById('best-hit-detail').textContent =
-      `${get(bestRow, COL.date)}　${get(bestRow, COL.venue)}`;
-  }
-}
-
-// ── X投稿生成 ────────────────────────────────────────────────
-function renderXPost(result, rows) {
-  const { total, hits, hitRate, totalInvest, totalPayout, totalRecovery } = result;
-  const ev = totalPayout - totalInvest;
-
-  // 期間取得
-  const from = document.getElementById('f-date-from').value;
-  const to   = document.getElementById('f-date-to').value;
-  const period = (from || to) ? `${from||''}〜${to||''}` : '全期間';
-
-  // 最高配当
-  let bestOdds = 0, bestDate = '', bestVenue = '';
-  rows.forEach(r => {
-    if (!isSeiT(r) && !isKoT(r)) return;
-    const o = Math.max(toFloat(get(r,COL.odds3tan)), toFloat(get(r,COL.odds3fuku)), toFloat(get(r,COL.odds2tan)));
-    if (o > bestOdds) { bestOdds = o; bestDate = get(r,COL.date); bestVenue = get(r,COL.venue); }
-  });
-
-  const sign = ev >= 0 ? '▲' : '▼';
-  const post = [
-    `【自在律　${period}　成績】`,
-    ``,
-    `📊 ${total}レース`,
-    `的中率　${hitRate.toFixed(1)}%（${hits}/${total}）`,
-    `回収率　${totalRecovery.toFixed(1)}%`,
-    `損益　${sign}${Math.abs(ev).toLocaleString()}円`,
-    bestOdds > 0 ? `
-🏆 最高配当` : '',
-    bestOdds > 0 ? `${bestDate} ${bestVenue}` : '',
-    bestOdds > 0 ? `${bestOdds.toFixed(1)}倍 / ${Math.round(bestOdds*100).toLocaleString()}円` : '',
-    ``,
-    `#競輪 #自在律 #競輪予想`,
-  ].filter(l => l !== null).join('
-').trim();
-
-  const ta = document.getElementById('x-post-text');
-  const cc = document.getElementById('x-char-count');
-  ta.value = post;
-  const len = post.length;
-  cc.textContent = `${len} / 280`;
-  cc.classList.toggle('over', len > 280);
-}
-
-function openX() {
-  const text = document.getElementById('x-post-text').value;
-  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text), '_blank');
-}
-
-function copyX() {
-  const text = document.getElementById('x-post-text').value;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('.btn-copy');
-    btn.textContent = '✓ コピー完了';
-    setTimeout(() => { btn.textContent = 'コピー'; }, 1500);
-  });
 }
 
 function renderStats(result) {
@@ -677,6 +485,7 @@ function renderStats(result) {
     return `<tr><td>${venue}</td><td class="val-muted">${v.total}</td><td class="val-muted">${v.hits}</td><td class="${cls}">${hr}%</td><td>${sr}%</td><td>${kr}%</td></tr>`;
   }).join('');
 
+  document.getElementById('results').classList.add('visible');
   document.getElementById('reset-btn').classList.add('visible');
 }
 
@@ -690,49 +499,32 @@ function missBarRow(label, count, max) {
   </div>`;
 }
 
-function missRateRow(label, missData) {
-  const rate = missData.total > 0 ? (missData.miss / missData.total * 100) : 0;
-  return `<div class="miss-row">
-    <span class="miss-label">${label}</span>
-    <span class="miss-count">${missData.miss}/${missData.total}</span>
-    <div class="miss-bar-wrap"><div class="miss-bar" style="width:${rate.toFixed(1)}%"></div></div>
-    <span class="miss-pct">${rate.toFixed(1)}%</span>
-  </div>`;
-}
-
 function renderMissAnalysis(data) {
-  if (!data || data.total === 0) return;
+  if (!data || data.total === 0) {
+    document.getElementById('miss-analysis').classList.remove('visible');
+    return;
+  }
+  document.getElementById('miss-analysis').classList.add('visible');
 
-  // 令種：TT/TF/FT/FF パターン分布
-  const reiTotal = Object.values(data.rei).reduce((a,b)=>a+b, 0);
-  const reiOrder = ['TT','TF','FT','FF'];
-  const reiLabels = { TT:'TT（両令的中）', TF:'TF（晴天令のみ的中）', FT:'FT（荒天令のみ的中）', FF:'FF（完全外れ）' };
+  // 令種
   const reiMax = Math.max(...Object.values(data.rei));
   document.getElementById('miss-rei').innerHTML =
-    reiOrder.map(k => {
-      const cnt = data.rei[k] || 0;
-      const pct = reiTotal > 0 ? (cnt / reiTotal * 100) : 0;
-      const isBad = k === 'FF';
-      return `<div class="miss-row">
-        <span class="miss-label" style="${isBad?'color:var(--miss)':''}">${reiLabels[k]}</span>
-        <span class="miss-count">${cnt}件</span>
-        <div class="miss-bar-wrap"><div class="miss-bar" style="width:${pct.toFixed(1)}%;${isBad?'':'background:var(--accent2)'}"></div></div>
-        <span class="miss-pct" style="${isBad?'color:var(--miss)':''}">${pct.toFixed(1)}%</span>
-      </div>`;
-    }).join('');
+    Object.entries(data.rei).map(([k,v]) => missBarRow(k, v, reiMax)).join('');
 
-  // 天雲指数帯（外れ率・設計通り0→33→67→100で外れ率が上がるか確認用）
-  const tenunOrder = [0, 33, 67, 100, '他'];
+  // 天雲指数帯
+  const tenunMax = Math.max(...Object.values(data.tenunBands));
   document.getElementById('miss-tenun').innerHTML =
-    tenunOrder.map(k => data.tenunBands[k] ? missRateRow(`指数 ${k}`, data.tenunBands[k]) : '').join('');
+    Object.entries(data.tenunBands).map(([k,v]) => missBarRow(`指数 ${k}`, v, tenunMax)).join('');
 
-  // 開催場（外れ率順）
+  // 開催場
+  const venueMax = data.venues[0] ? data.venues[0][1] : 1;
   document.getElementById('miss-venue').innerHTML =
-    data.venues.map(([k,v]) => missRateRow(k, v)).join('');
+    data.venues.map(([k,v]) => missBarRow(k, v, venueMax)).join('');
 
-  // 決まり手（外れ率順）
+  // 決まり手
+  const kimariMax = data.kimari[0] ? data.kimari[0][1] : 1;
   document.getElementById('miss-kimari').innerHTML =
-    data.kimari.map(([k,v]) => missRateRow(k, v)).join('');
+    data.kimari.map(([k,v]) => missBarRow(k, v, kimariMax)).join('');
 }
 
 // ── Gemini 推論 ───────────────────────────────────────────────
@@ -908,43 +700,20 @@ async function runInference() {
   const total = rows.length;
   const missRate = total > 0 ? (d.total / total * 100).toFixed(1) : '?';
 
-  const fmtRei = obj => Object.entries(obj).map(([k,v]) => {
-    const r = v.total > 0 ? (v.miss/v.total*100).toFixed(1) : '0.0';
-    return `  ${k}: 外れ率${r}% (${v.miss}/${v.total}件)`;
-  }).join('\n');
-
-  const tenunOrder = [0, 33, 67, 100, '他'];
-  const fmtTenun = obj => tenunOrder.map(k => {
-    const v = obj[k];
-    if (!v) return '';
-    const r = v.total > 0 ? (v.miss/v.total*100).toFixed(1) : '0.0';
-    return `  指数${k}: 外れ率${r}% (${v.miss}/${v.total}件)`;
-  }).filter(Boolean).join('\n');
-
-  const fmtList = arr => arr.map(([k,v]) => {
-    const r = v.total > 0 ? (v.miss/v.total*100).toFixed(1) : '0.0';
-    return `  ${k}: 外れ率${r}% (${v.miss}/${v.total}件)`;
-  }).join('\n');
-
   const prompt = `【外れ解剖データ】
 総レース数: ${total} / 外れ数: ${d.total} (外れ率: ${missRate}%)
 
-■ 令種パターン分布（TT=両令的中/TF=晴天令のみ/FT=荒天令のみ/FF=完全外れ）
-${(['TT','TF','FT','FF'].map(k => {
-  const cnt = d.rei[k]||0;
-  const pct = (cnt/rows.length*100).toFixed(1);
-  return `  ${k}: ${cnt}件 (${pct}%)`;
-}).join('\n'))}
-※ FFが外れ解剖の本質。FFが集中する条件を以下のデータから読み取ること。
+■ 令種別 外れ数
+${Object.entries(d.rei).map(([k,v])=>`  ${k}: ${v}件`).join('\n')}
 
-■ 天雲指数帯別 外れ率（指数0→100で外れ率が上がるのが設計上の正常動作）
-${fmtTenun(d.tenunBands)}
+■ 天雲指数帯別 外れ数
+${Object.entries(d.tenunBands).map(([k,v])=>`  指数${k}: ${v}件`).join('\n')}
 
-■ 開催場別 外れ率（外れ率順上位）
-${fmtList(d.venues)}
+■ 開催場別 外れ数（上位）
+${d.venues.map(([k,v])=>`  ${k}: ${v}件`).join('\n')}
 
-■ 決まり手別 外れ率（外れ率順上位）
-${fmtList(d.kimari)}
+■ 決まり手別 外れ数（上位）
+${d.kimari.map(([k,v])=>`  ${k}: ${v}件`).join('\n')}
 
 このデータから、自在律のどの係数に問題がある可能性がありますか？`;
 
@@ -973,35 +742,12 @@ ${fmtList(d.kimari)}
 
 // ── File Handling ────────────────────────────────────────────
 function handleFile(file) {
-  if (!file || !file.name.toLowerCase().endsWith('.csv')) { showError('CSVファイルを選択してください'); return; }
+  if (!file || !file.name.endsWith('.csv')) { showError('CSVファイルを選択してください'); return; }
   const reader = new FileReader();
   reader.onload = e => {
     try {
-      let rows = parseCSV(e.target.result);
-      if (rows.length === 0) {
-        // Shift-JISで再試行
-        const reader2 = new FileReader();
-        reader2.onload = e2 => {
-          try {
-            const rows2 = parseCSV(e2.target.result);
-            if (rows2.length === 0) { showError('データが見つかりませんでした'); return; }
-            _allRows = rows2;
-            document.getElementById('file-info').classList.add('visible');
-            document.getElementById('file-name-text').textContent = file.name;
-            document.getElementById('file-rows-text').textContent = \`\${rows2.length.toLocaleString()} レース\`;
-            document.getElementById('upload-zone').style.display = 'none';
-            document.getElementById('period-filter').classList.add('visible');
-            document.getElementById('period-count').textContent = \`\${rows2.length.toLocaleString()} / \${rows2.length.toLocaleString()} レース\`;
-            ['f-date-from','f-date-to'].forEach(id => {
-              document.getElementById(id).addEventListener('change', onPeriodChange);
-              document.getElementById(id).addEventListener('input', onPeriodChange);
-            });
-            renderAll(rows2);
-          } catch(err2) { showError('解析エラー: ' + err2.message); }
-        };
-        reader2.readAsText(file, 'Shift-JIS');
-        return;
-      }
+      const rows = parseCSV(e.target.result);
+      if (rows.length === 0) { showError('データが見つかりませんでした'); return; }
       _allRows = rows;
       document.getElementById('file-info').classList.add('visible');
       document.getElementById('file-name-text').textContent = file.name;
@@ -1016,9 +762,6 @@ function handleFile(file) {
       renderAll(rows);
     } catch (err) { showError('解析エラー: ' + err.message); }
   };
-  reader.onloadend = () => {};
-  reader.onerror = () => { showError('ファイル読み込みエラーが発生しました'); };
-  // UTF-8で試みてパース失敗したらShift-JISで再試行
   reader.readAsText(file, 'UTF-8');
 }
 
@@ -1032,16 +775,17 @@ function resetAll() {
   document.getElementById('file-info').classList.remove('visible');
   document.getElementById('period-filter').classList.remove('visible');
   document.getElementById('results').classList.remove('visible');
+  document.getElementById('miss-analysis').classList.remove('visible');
   document.getElementById('reset-btn').classList.remove('visible');
   document.getElementById('error-msg').classList.remove('visible');
   document.getElementById('inference-result').classList.remove('visible');
-  document.getElementById('face-tabs').classList.remove('visible');
-  document.getElementById('ev-dashboard').style.display = 'none';
-  document.getElementById('best-hit-banner').style.display = 'none';
-  document.getElementById('x-post-text').value = '';
   document.getElementById('f-date-from').value = '';
   document.getElementById('f-date-to').value = '';
   document.getElementById('file-input').value = '';
+  document.getElementById('face-tabs').classList.remove('visible');
+  document.getElementById('ev-section').style.display = 'none';
+  document.getElementById('best-banner').classList.remove('visible');
+  document.getElementById('x-post-text').value = '';
   switchFace('omote');
 }
 
@@ -1050,6 +794,127 @@ const zone = document.getElementById('upload-zone');
 zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
 zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
 zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
+
+// ── TAB ────────────────────────────────────────────────────
+function switchFace(face) {
+  document.getElementById('face-omote').classList.toggle('active', face === 'omote');
+  document.getElementById('face-ura').classList.toggle('active', face === 'ura');
+  var tabs = document.querySelectorAll('.face-tab');
+  tabs[0].classList.toggle('active', face === 'omote');
+  tabs[1].classList.toggle('active', face === 'ura');
+}
+
+// ── EV DASHBOARD ───────────────────────────────────────────
+function renderEV(result, rows) {
+  var total = result.total, hits = result.hits, hitRate = result.hitRate;
+  var totalInvest = result.totalInvest, totalPayout = result.totalPayout;
+  var kiken = result.kiken;
+  var ev = totalPayout - totalInvest;
+  var evPerRace = total > 0 ? Math.round(ev / total) : 0;
+  var seiPayout = kiken.s3tan.payout + kiken.s3fuku.payout;
+  var koPayout  = kiken.k3fuku.payout + kiken.k2tan.payout;
+  var seiInvest = total * 500, koInvest = total * 500;
+  var seiEV = seiPayout - seiInvest, koEV = koPayout - koInvest;
+
+  // TT/TF/FT/FF
+  var pat = {TT:0, TF:0, FT:0, FF:0};
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var s = isSeiT(r), k = isKoT(r);
+    if (s && k) pat.TT++; else if (s) pat.TF++; else if (k) pat.FT++; else pat.FF++;
+  }
+
+  function evCard(cls, label, val, sub) {
+    return '<div class="ev-card ' + cls + '">' +
+      '<div class="ev-label">' + label + '</div>' +
+      '<div class="ev-value" style="color:' + (cls==='pos'?'var(--hit)':cls==='neg'?'var(--miss)':'var(--text)') + '">' + val + '</div>' +
+      '<div class="ev-sub">' + sub + '</div></div>';
+  }
+
+  var sign = ev >= 0 ? '+' : '';
+  var sSign = seiEV >= 0 ? '+' : '';
+  var kSign = koEV >= 0 ? '+' : '';
+  var ffPct = total > 0 ? (pat.FF / total * 100).toFixed(1) : '0.0';
+  var sRec = seiInvest > 0 ? (seiPayout / seiInvest * 100).toFixed(1) : '0.0';
+  var kRec = koInvest  > 0 ? (koPayout  / koInvest  * 100).toFixed(1) : '0.0';
+
+  document.getElementById('ev-cards').innerHTML =
+    evCard(ev>=0?'pos':'neg', 'JUNNSONEKI', sign + ev.toLocaleString() + 'en', '1race heikin ' + (evPerRace>=0?'+':'') + evPerRace.toLocaleString() + 'en') +
+    evCard(seiEV>=0?'pos':'neg', 'SEITEN-REI KOKEN', sSign + seiEV.toLocaleString() + 'en', 'kaishuritsu ' + sRec + '%') +
+    evCard(koEV>=0?'pos':'neg', 'KOTEN-REI KOKEN', kSign + koEV.toLocaleString() + 'en', 'kaishuritsu ' + kRec + '%') +
+    evCard('', 'REI PATTERN', 'TT:' + pat.TT + ' TF:' + pat.TF + ' FT:' + pat.FT + ' FF:' + pat.FF, 'FF-ritsu ' + ffPct + '%');
+
+  // BEST HIT
+  var bestRow = null, bestOdds = 0;
+  for (var j = 0; j < rows.length; j++) {
+    var rr = rows[j];
+    if (!isSeiT(rr) && !isKoT(rr)) continue;
+    var o = Math.max(toFloat(get(rr, COL.odds3tan)), toFloat(get(rr, COL.odds3fuku)), toFloat(get(rr, COL.odds2tan)));
+    if (o > bestOdds) { bestOdds = o; bestRow = rr; }
+  }
+  if (bestRow) {
+    document.getElementById('best-banner').classList.add('visible');
+    var payout = Math.round(bestOdds * 100);
+    document.getElementById('best-val').textContent = bestOdds.toFixed(1) + ' bai / ' + payout.toLocaleString() + ' en';
+    document.getElementById('best-detail').textContent = get(bestRow, COL.date) + ' ' + get(bestRow, COL.venue);
+  }
+
+  document.getElementById('ev-section').style.display = 'block';
+}
+
+// ── X POST ──────────────────────────────────────────────────
+function renderXPost(result, rows) {
+  var total = result.total, hits = result.hits;
+  var hitRate = result.hitRate, totalRecovery = result.totalRecovery;
+  var ev = result.totalPayout - result.totalInvest;
+  var from = document.getElementById('f-date-from').value;
+  var to   = document.getElementById('f-date-to').value;
+  var period = (from || to) ? (from || '') + '~' + (to || '') : 'zentai';
+  var sign = ev >= 0 ? '+' : '-';
+  var bestOdds = 0, bestDate = '', bestVenue = '';
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    if (!isSeiT(r) && !isKoT(r)) continue;
+    var o = Math.max(toFloat(get(r, COL.odds3tan)), toFloat(get(r, COL.odds3fuku)), toFloat(get(r, COL.odds2tan)));
+    if (o > bestOdds) { bestOdds = o; bestDate = get(r, COL.date); bestVenue = get(r, COL.venue); }
+  }
+  var lines = [
+    '[Jizairitsu ' + period + ' seiseki]',
+    '',
+    total + ' races',
+    'tekichu-ritsu ' + hitRate.toFixed(1) + '% (' + hits + '/' + total + ')',
+    'kaishu-ritsu ' + totalRecovery.toFixed(1) + '%',
+    'soneki ' + sign + Math.abs(ev).toLocaleString() + 'en'
+  ];
+  if (bestOdds > 0) {
+    lines.push('');
+    lines.push('[saikou haito]');
+    lines.push(bestDate + ' ' + bestVenue);
+    lines.push(bestOdds.toFixed(1) + ' bai / ' + Math.round(bestOdds*100).toLocaleString() + ' en');
+  }
+  lines.push('');
+  lines.push('#keirin #Jizairitsu');
+  var post = lines.join('\n');
+  var ta = document.getElementById('x-post-text');
+  var cc = document.getElementById('x-char');
+  ta.value = post;
+  cc.textContent = post.length + ' / 280';
+  cc.classList.toggle('over', post.length > 280);
+}
+
+function openX() {
+  var t = document.getElementById('x-post-text').value;
+  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(t), '_blank');
+}
+function copyX() {
+  var t = document.getElementById('x-post-text').value;
+  navigator.clipboard.writeText(t).then(function() {
+    var b = document.querySelector('.btn-cp');
+    b.textContent = 'COPIED';
+    setTimeout(function(){ b.textContent = 'COPY'; }, 1500);
+  });
+}
+
 </script>
 </body>
 </html>
