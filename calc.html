@@ -394,8 +394,11 @@ function getFilteredRows() {
   const kimariChecked = getChecked('f-kimari');
 
   return _allRows.filter(row => {
-    if (dateFrom && get(row, COL.date) < dateFrom) return false;
-    if (dateTo   && get(row, COL.date) > dateTo)   return false;
+    const rowDate = get(row, COL.date).replace(/\//g, '-');
+    if (dateFrom && rowDate < dateFrom) return false;
+    if (dateTo   && rowDate > dateTo)   return false;
+
+
     if (venue    && get(row, COL.venue) !== venue)  return false;
 
     const tenun = toFloat(get(row, COL.tenun));
