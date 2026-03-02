@@ -404,6 +404,71 @@
 </style>
 </head>
 <body>
+<canvas id="particle-canvas" style="position:fixed;inset:0;pointer-events:none;z-index:0;"></canvas>
+<script>
+(function(){
+  const canvas = document.getElementById('particle-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const COLORS = [
+    'rgba(184,150,46,',   // 金
+    'rgba(212,168,67,',   // 明金
+    'rgba(192,57,43,',    // 朱
+    'rgba(242,232,213,',  // 紙白
+  ];
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function Particle() {
+    this.reset = function() {
+      this.x    = rand(0, W);
+      this.y    = rand(0, H);
+      this.vx   = rand(-0.3, 0.3);
+      this.vy   = rand(-0.6, -0.1);
+      this.size = rand(0.8, 2.5);
+      this.life = rand(0.4, 1.0);
+      this.decay= rand(0.0015, 0.004);
+      this.color= COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.twinkle = rand(0, Math.PI * 2);
+    };
+    this.reset();
+    this.y = rand(0, H); // 初期位置をバラけさせる
+  }
+
+  for (let i = 0; i < 120; i++) particles.push(new Particle());
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.twinkle += 0.04;
+      const alpha = p.life * (0.7 + 0.3 * Math.sin(p.twinkle));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + alpha + ')';
+      ctx.shadowBlur  = p.size * 4;
+      ctx.shadowColor = p.color + '0.8)';
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= p.decay;
+
+      if (p.life <= 0 || p.y < -10) p.reset();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
 <div id="app">
 
   <header>
@@ -459,7 +524,7 @@
       <div class="x-box">
         <textarea class="x-post-text" id="x-post-text" readonly></textarea>
         <div class="x-actions">
-          <button class="btn-x" onclick="openX()">&#120143; &#12391;&#25295;&#31295;</button>
+          <button class="btn-x" onclick="openX()">X へ投稿</button>
           <button class="btn-cp" onclick="copyX()">&#12467;&#12500;&#12540;</button>
           <span class="x-char" id="x-char">0 / 280</span>
         </div>
