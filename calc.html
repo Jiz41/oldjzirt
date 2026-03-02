@@ -391,19 +391,42 @@
 </div>
 
 <script>
-// ── CSV Parser ──────────────────────────────────────────────
+// ── CSV Parser（引用符・カンマ内包対応） ────────────────────
+function parseCSVLine(line) {
+  const fields = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQ) {
+      if (c === '"') {
+        if (line[i + 1] === '"') { cur += '"'; i++; } // エスケープ ""
+        else { inQ = false; }
+      } else {
+        cur += c;
+      }
+    } else {
+      if (c === '"') { inQ = true; }
+      else if (c === ',') { fields.push(cur.trim()); cur = ''; }
+      else { cur += c; }
+    }
+  }
+  fields.push(cur.trim());
+  return fields;
+}
+
 function parseCSV(text) {
-  const lines = text.trim().split('\n');
+  // CRLF/LF両対応、末尾空行除去
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
   if (lines.length < 2) return [];
 
-  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const headers = parseCSVLine(lines[0]);
   const rows = [];
 
   for (let i = 1; i < lines.length; i++) {
-    const vals = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+    const vals = parseCSVLine(lines[i]);
     if (vals.every(v => v === '')) continue;
     const row = {};
-    headers.forEach((h, idx) => { row[h] = vals[idx] || ''; });
+    headers.forEach((h, idx) => { row[h] = vals[idx] !== undefined ? vals[idx] : ''; });
     rows.push(row);
   }
   return rows;
@@ -599,12 +622,14 @@ function handleFile(file) {
       document.getElementById('file-rows-text').textContent = `${rows.length.toLocaleString()} レース`;
       document.getElementById('upload-zone').style.display = 'none';
 
-      // デバッグ（ヘッダー確認用）
+      // デバッグ（653行目・660行目確認用）
       const headers = Object.keys(rows[0]);
-      const r1 = rows[0];
+      const r653 = rows[Math.min(652, rows.length - 1)];
+      const r660 = rows[Math.min(659, rows.length - 1)];
+      const fmtRow = r => headers.map(h => `  ${h}: "${r[h] || ''}"`).join('\n');
       const dbg = document.getElementById('debug-box');
       dbg.style.display = 'block';
-      dbg.textContent = `▼ 検出ヘッダー（${headers.length}列）\n${headers.map((h, i) => `[${i}] "${h}"`).join('\n')}\n\n▼ 1行目サンプル\n総合判定: "${r1['総合判定'] || '─'}"\n晴天令T/F: "${r1['晴天令 T/F'] || '─'}"\n荒天令T/F: "${r1['荒天令 T/F'] || '─'}"\n3連単オッズ: "${r1['3連単オッズ'] || '─'}"\n3連複オッズ: "${r1['3連複オッズ'] || '─'}"\n2車単オッズ: "${r1['2車単オッズ'] || '─'}"`;
+      dbg.textContent = `▼ ヘッダー（${headers.length}列）\n${headers.map((h,i) => `[${i}] "${h}"`).join('\n')}\n\n▼ 653行目\n${fmtRow(r653)}\n\n▼ 660行目\n${fmtRow(r660)}`;
 
       const result = analyze(rows);
       render(result);
