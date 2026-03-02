@@ -336,32 +336,56 @@ function analyzeMiss(rows) {
   const total  = misses.length;
   if (total === 0) return null;
 
-  // 令種
-  const rei = { '晴天令T': 0, '荒天令T': 0, '晴天令F': 0, '荒天令F': 0 };
-  misses.forEach(r => {
-    if (isSeiT(r)) rei['晴天令T']++;
-    else rei['晴天令F']++;
-    if (isKoT(r))  rei['荒天令T']++;
-    else rei['荒天令F']++;
+  // 令種：外れ率（母数付き）
+  const allSeiT = rows.filter(isSeiT);
+  const allSeiF = rows.filter(r => !isSeiT(r));
+  const allKoT  = rows.filter(isKoT);
+  const allKoF  = rows.filter(r => !isKoT(r));
+  const rei = {
+    '晴天令T': { miss: allSeiT.filter(r=>!isHit(r)).length, total: allSeiT.length },
+    '晴天令F': { miss: allSeiF.filter(r=>!isHit(r)).length, total: allSeiF.length },
+    '荒天令T': { miss: allKoT.filter(r=>!isHit(r)).length,  total: allKoT.length  },
+    '荒天令F': { miss: allKoF.filter(r=>!isHit(r)).length,  total: allKoF.length  },
+  };
+
+  // 天雲指数帯：数値化して判定（小数・スペース対応）、外れ率付き
+  const TENUN_KEYS = [0, 33, 67, 100];
+  const tenunBands = {};
+  TENUN_KEYS.forEach(k => { tenunBands[k] = { miss: 0, total: 0 }; });
+  tenunBands['他'] = { miss: 0, total: 0 };
+  rows.forEach(r => {
+    const raw = get(r, COL.tenun);
+    const n   = Math.round(parseFloat(raw));
+    const key = TENUN_KEYS.includes(n) ? n : '他';
+    tenunBands[key].total++;
+    if (!isHit(r)) tenunBands[key].miss++;
   });
 
-  // 天雲指数帯
-  const tenunBands = { '0': 0, '33': 0, '67': 0, '100': 0, '他': 0 };
-  misses.forEach(r => {
-    const v = get(r, COL.tenun);
-    if (['0','33','67','100'].includes(v)) tenunBands[v]++;
-    else tenunBands['他']++;
+  // 開催場：外れ率順上位8（母数付き）
+  const venueAllMap = {};
+  rows.forEach(r => {
+    const v = get(r, COL.venue) || '不明';
+    if (!venueAllMap[v]) venueAllMap[v] = { miss: 0, total: 0 };
+    venueAllMap[v].total++;
+    if (!isHit(r)) venueAllMap[v].miss++;
   });
+  const venues = Object.entries(venueAllMap)
+    .filter(([,v]) => v.total > 0)
+    .sort((a,b) => (b[1].miss/b[1].total) - (a[1].miss/a[1].total))
+    .slice(0, 8);
 
-  // 開催場（上位8）
-  const venueMap = {};
-  misses.forEach(r => { const v = get(r, COL.venue) || '不明'; venueMap[v] = (venueMap[v] || 0) + 1; });
-  const venues = Object.entries(venueMap).sort((a,b)=>b[1]-a[1]).slice(0, 8);
-
-  // 決まり手（上位8）
-  const kimariMap = {};
-  misses.forEach(r => { const k = get(r, COL.kimari) || '不明'; kimariMap[k] = (kimariMap[k] || 0) + 1; });
-  const kimari = Object.entries(kimariMap).sort((a,b)=>b[1]-a[1]).slice(0, 8);
+  // 決まり手：外れ率順上位8（母数付き）
+  const kimariAllMap = {};
+  rows.forEach(r => {
+    const k = get(r, COL.kimari) || '不明';
+    if (!kimariAllMap[k]) kimariAllMap[k] = { miss: 0, total: 0 };
+    kimariAllMap[k].total++;
+    if (!isHit(r)) kimariAllMap[k].miss++;
+  });
+  const kimari = Object.entries(kimariAllMap)
+    .filter(([,v]) => v.total > 0)
+    .sort((a,b) => (b[1].miss/b[1].total) - (a[1].miss/a[1].total))
+    .slice(0, 8);
 
   return { total, rei, tenunBands, venues, kimari };
 }
@@ -426,6 +450,16 @@ function missBarRow(label, count, max) {
   </div>`;
 }
 
+function missRateRow(label, missData) {
+  const rate = missData.total > 0 ? (missData.miss / missData.total * 100) : 0;
+  return `<div class="miss-row">
+    <span class="miss-label">${label}</span>
+    <span class="miss-count">${missData.miss}/${missData.total}</span>
+    <div class="miss-bar-wrap"><div class="miss-bar" style="width:${rate.toFixed(1)}%"></div></div>
+    <span class="miss-pct">${rate.toFixed(1)}%</span>
+  </div>`;
+}
+
 function renderMissAnalysis(data) {
   if (!data || data.total === 0) {
     document.getElementById('miss-analysis').classList.remove('visible');
@@ -433,25 +467,22 @@ function renderMissAnalysis(data) {
   }
   document.getElementById('miss-analysis').classList.add('visible');
 
-  // 令種
-  const reiMax = Math.max(...Object.values(data.rei));
+  // 令種（外れ率）
   document.getElementById('miss-rei').innerHTML =
-    Object.entries(data.rei).map(([k,v]) => missBarRow(k, v, reiMax)).join('');
+    Object.entries(data.rei).map(([k,v]) => missRateRow(k, v)).join('');
 
-  // 天雲指数帯
-  const tenunMax = Math.max(...Object.values(data.tenunBands));
+  // 天雲指数帯（外れ率・設計通り0→33→67→100で外れ率が上がるか確認用）
+  const tenunOrder = [0, 33, 67, 100, '他'];
   document.getElementById('miss-tenun').innerHTML =
-    Object.entries(data.tenunBands).map(([k,v]) => missBarRow(`指数 ${k}`, v, tenunMax)).join('');
+    tenunOrder.map(k => data.tenunBands[k] ? missRateRow(`指数 ${k}`, data.tenunBands[k]) : '').join('');
 
-  // 開催場
-  const venueMax = data.venues[0] ? data.venues[0][1] : 1;
+  // 開催場（外れ率順）
   document.getElementById('miss-venue').innerHTML =
-    data.venues.map(([k,v]) => missBarRow(k, v, venueMax)).join('');
+    data.venues.map(([k,v]) => missRateRow(k, v)).join('');
 
-  // 決まり手
-  const kimariMax = data.kimari[0] ? data.kimari[0][1] : 1;
+  // 決まり手（外れ率順）
   document.getElementById('miss-kimari').innerHTML =
-    data.kimari.map(([k,v]) => missBarRow(k, v, kimariMax)).join('');
+    data.kimari.map(([k,v]) => missRateRow(k, v)).join('');
 }
 
 // ── Gemini 推論 ───────────────────────────────────────────────
@@ -627,20 +658,38 @@ async function runInference() {
   const total = rows.length;
   const missRate = total > 0 ? (d.total / total * 100).toFixed(1) : '?';
 
+  const fmtRei = obj => Object.entries(obj).map(([k,v]) => {
+    const r = v.total > 0 ? (v.miss/v.total*100).toFixed(1) : '0.0';
+    return `  ${k}: 外れ率${r}% (${v.miss}/${v.total}件)`;
+  }).join('\n');
+
+  const tenunOrder = [0, 33, 67, 100, '他'];
+  const fmtTenun = obj => tenunOrder.map(k => {
+    const v = obj[k];
+    if (!v) return '';
+    const r = v.total > 0 ? (v.miss/v.total*100).toFixed(1) : '0.0';
+    return `  指数${k}: 外れ率${r}% (${v.miss}/${v.total}件)`;
+  }).filter(Boolean).join('\n');
+
+  const fmtList = arr => arr.map(([k,v]) => {
+    const r = v.total > 0 ? (v.miss/v.total*100).toFixed(1) : '0.0';
+    return `  ${k}: 外れ率${r}% (${v.miss}/${v.total}件)`;
+  }).join('\n');
+
   const prompt = `【外れ解剖データ】
 総レース数: ${total} / 外れ数: ${d.total} (外れ率: ${missRate}%)
 
-■ 令種別 外れ数
-${Object.entries(d.rei).map(([k,v])=>`  ${k}: ${v}件`).join('\n')}
+■ 令種別 外れ率（母数付き）
+${fmtRei(d.rei)}
 
-■ 天雲指数帯別 外れ数
-${Object.entries(d.tenunBands).map(([k,v])=>`  指数${k}: ${v}件`).join('\n')}
+■ 天雲指数帯別 外れ率（指数0→100で外れ率が上がるのが設計上の正常動作）
+${fmtTenun(d.tenunBands)}
 
-■ 開催場別 外れ数（上位）
-${d.venues.map(([k,v])=>`  ${k}: ${v}件`).join('\n')}
+■ 開催場別 外れ率（外れ率順上位）
+${fmtList(d.venues)}
 
-■ 決まり手別 外れ数（上位）
-${d.kimari.map(([k,v])=>`  ${k}: ${v}件`).join('\n')}
+■ 決まり手別 外れ率（外れ率順上位）
+${fmtList(d.kimari)}
 
 このデータから、自在律のどの係数に問題がある可能性がありますか？`;
 
