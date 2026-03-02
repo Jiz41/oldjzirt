@@ -35,281 +35,163 @@
     content: '';
     position: fixed;
     inset: 0;
-    background: 
+    background:
       radial-gradient(ellipse 60% 40% at 20% 20%, rgba(200,169,110,0.04) 0%, transparent 60%),
       radial-gradient(ellipse 50% 50% at 80% 80%, rgba(126,184,200,0.04) 0%, transparent 60%);
     pointer-events: none;
   }
 
-  #app {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 40px 24px;
-  }
+  #app { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
 
-  /* Header */
-  header {
-    text-align: center;
-    margin-bottom: 48px;
-    position: relative;
-  }
-
+  header { text-align: center; margin-bottom: 48px; position: relative; }
   header::after {
-    content: '';
-    display: block;
-    width: 120px;
-    height: 1px;
+    content: ''; display: block; width: 120px; height: 1px;
     background: linear-gradient(90deg, transparent, var(--accent), transparent);
     margin: 24px auto 0;
   }
+  .title-jp { font-family: 'Zen Antique Soft', serif; font-size: 28px; color: var(--accent); letter-spacing: 0.3em; line-height: 1; }
+  .title-sub { font-size: 11px; color: var(--text-muted); letter-spacing: 0.2em; margin-top: 8px; text-transform: uppercase; }
 
-  .title-jp {
-    font-family: 'Zen Antique Soft', serif;
-    font-size: 28px;
-    color: var(--accent);
-    letter-spacing: 0.3em;
-    line-height: 1;
-  }
-
-  .title-sub {
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: 0.2em;
-    margin-top: 8px;
-    text-transform: uppercase;
-  }
-
-  /* Upload Zone */
   #upload-zone {
-    border: 1px dashed var(--border);
-    border-radius: 4px;
-    padding: 48px 24px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: var(--surface);
-    position: relative;
-    overflow: hidden;
+    border: 1px dashed var(--border); border-radius: 4px; padding: 48px 24px;
+    text-align: center; cursor: pointer; transition: all 0.2s;
+    background: var(--surface); position: relative; overflow: hidden;
   }
-
   #upload-zone::before {
-    content: '';
-    position: absolute;
-    inset: 0;
+    content: ''; position: absolute; inset: 0;
     background: linear-gradient(135deg, rgba(200,169,110,0.02) 0%, transparent 50%);
   }
-
-  #upload-zone:hover, #upload-zone.drag-over {
-    border-color: var(--accent);
-    background: var(--surface2);
-  }
-
-  #upload-zone .icon {
-    font-size: 32px;
-    margin-bottom: 12px;
-    opacity: 0.6;
-  }
-
-  #upload-zone .label {
-    color: var(--text-muted);
-    font-size: 12px;
-    letter-spacing: 0.1em;
-  }
-
-  #upload-zone .label span {
-    color: var(--accent);
-  }
-
+  #upload-zone:hover, #upload-zone.drag-over { border-color: var(--accent); background: var(--surface2); }
+  #upload-zone .icon { font-size: 32px; margin-bottom: 12px; opacity: 0.6; }
+  #upload-zone .label { color: var(--text-muted); font-size: 12px; letter-spacing: 0.1em; }
+  #upload-zone .label span { color: var(--accent); }
   #file-input { display: none; }
 
-  /* File info */
   #file-info {
+    display: none; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; padding: 16px 20px; margin-top: 12px;
+    align-items: center; gap: 12px;
+  }
+  #file-info.visible { display: flex; }
+  .file-name { color: var(--accent); flex: 1; }
+  .file-rows { color: var(--text-muted); font-size: 11px; }
+
+  /* ── Filter Panel ── */
+  #filter-panel {
     display: none;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 4px;
-    padding: 16px 20px;
-    margin-top: 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    padding: 20px;
+    margin-top: 16px;
   }
+  #filter-panel.visible { display: block; }
 
-  #file-info.visible { display: flex; }
-
-  .file-name {
-    color: var(--accent);
-    flex: 1;
+  .filter-title {
+    font-family: 'Zen Antique Soft', serif;
+    font-size: 13px; color: var(--accent); letter-spacing: 0.2em;
+    margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
   }
+  .filter-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent2); letter-spacing: 0; }
 
-  .file-rows {
-    color: var(--text-muted);
-    font-size: 11px;
+  .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
   }
+  .filter-group { display: flex; flex-direction: column; gap: 6px; }
+  .filter-group-wide { grid-column: 1 / -1; }
+  .filter-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; }
 
-  /* Results */
-  #results {
-    display: none;
-    margin-top: 32px;
-    animation: fadeIn 0.4s ease;
+  .filter-group input[type="date"],
+  .filter-group input[type="number"],
+  .filter-group select {
+    background: var(--bg); border: 1px solid var(--border);
+    color: var(--text); padding: 6px 10px; border-radius: 2px;
+    font-family: 'DM Mono', monospace; font-size: 12px; width: 100%;
   }
+  .filter-group input:focus, .filter-group select:focus { outline: none; border-color: var(--accent); }
 
+  .filter-range { display: flex; gap: 6px; align-items: center; }
+  .filter-range input { flex: 1; }
+  .filter-range span { color: var(--text-muted); font-size: 11px; }
+
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: 6px; }
+  .checkbox-item {
+    display: flex; align-items: center; gap: 4px;
+    background: var(--bg); border: 1px solid var(--border);
+    padding: 4px 8px; border-radius: 2px; cursor: pointer;
+    transition: all 0.15s; font-size: 11px; user-select: none;
+  }
+  .checkbox-item:hover { border-color: var(--accent); }
+  .checkbox-item input[type="checkbox"] { display: none; }
+  .checkbox-item.checked { border-color: var(--accent); color: var(--accent); background: var(--surface2); }
+
+  .filter-actions { display: flex; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .btn-reset-filter {
+    background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+    padding: 6px 16px; border-radius: 2px; cursor: pointer;
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; transition: all 0.2s;
+  }
+  .btn-reset-filter:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Results ── */
+  #results { display: none; margin-top: 32px; animation: fadeIn 0.4s ease; }
   #results.visible { display: block; }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
   .section-title {
-    font-family: 'Zen Antique Soft', serif;
-    font-size: 14px;
-    color: var(--accent);
-    letter-spacing: 0.2em;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
+    font-family: 'Zen Antique Soft', serif; font-size: 14px; color: var(--accent);
+    letter-spacing: 0.2em; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
   }
-
-  /* Stats Grid */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    margin-bottom: 32px;
-  }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 32px; }
 
   .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; padding: 16px; position: relative; overflow: hidden;
   }
-
   .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--accent);
-    opacity: 0.4;
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 2px; background: var(--accent); opacity: 0.4;
   }
-
   .stat-card.accent2::before { background: var(--accent2); }
   .stat-card.hit::before { background: var(--hit); }
   .stat-card.miss::before { background: var(--miss); }
 
-  .stat-label {
-    font-size: 10px;
-    color: var(--text-muted);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
+  .stat-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+  .stat-value { font-size: 28px; font-weight: 500; color: var(--text); line-height: 1; }
+  .stat-value.pct::after { content: '%'; font-size: 14px; color: var(--text-muted); margin-left: 2px; }
+  .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
 
-  .stat-value {
-    font-size: 28px;
-    font-weight: 500;
-    color: var(--text);
-    line-height: 1;
-  }
-
-  .stat-value.pct::after {
-    content: '%';
-    font-size: 14px;
-    color: var(--text-muted);
-    margin-left: 2px;
-  }
-
-  .stat-sub {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 6px;
-  }
-
-  /* Table */
-  .table-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 32px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 32px; }
+  table { width: 100%; border-collapse: collapse; }
   thead th {
-    background: var(--surface2);
-    padding: 10px 16px;
-    text-align: left;
-    font-size: 10px;
-    color: var(--text-muted);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
+    background: var(--surface2); padding: 10px 16px; text-align: left;
+    font-size: 10px; color: var(--text-muted); letter-spacing: 0.15em;
+    text-transform: uppercase; border-bottom: 1px solid var(--border); white-space: nowrap;
   }
-
-  tbody td {
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--text-dim);
-    font-size: 12px;
-    white-space: nowrap;
-  }
-
+  tbody td { padding: 10px 16px; border-bottom: 1px solid var(--text-dim); font-size: 12px; white-space: nowrap; }
   tbody tr:last-child td { border-bottom: none; }
-
   tbody tr:hover td { background: var(--surface2); }
 
   .val-good { color: var(--hit); }
-  .val-bad { color: var(--miss); }
+  .val-bad  { color: var(--miss); }
   .val-neutral { color: var(--accent); }
   .val-muted { color: var(--text-muted); }
 
-  /* Reset btn */
   #reset-btn {
-    display: none;
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    padding: 8px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    margin-top: 8px;
-    transition: all 0.2s;
+    display: none; background: transparent; border: 1px solid var(--border);
+    color: var(--text-muted); padding: 8px 20px; border-radius: 4px; cursor: pointer;
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em;
+    margin-top: 8px; transition: all 0.2s;
   }
-
-  #reset-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
+  #reset-btn:hover { border-color: var(--accent); color: var(--accent); }
   #reset-btn.visible { display: inline-block; }
 
-  /* Error */
-  .error-msg {
-    color: var(--miss);
-    font-size: 11px;
-    margin-top: 8px;
-    display: none;
-  }
-
+  .error-msg { color: var(--miss); font-size: 11px; margin-top: 8px; display: none; }
   .error-msg.visible { display: block; }
-
-  /* Divider */
-  .divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border), transparent);
-    margin: 32px 0;
-  }
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 32px 0; }
 </style>
 </head>
 <body>
@@ -332,65 +214,114 @@
   </div>
 
   <div class="error-msg" id="error-msg"></div>
-
-  <div id="debug-box" style="display:none; margin-top:16px; background:#12121a; border:1px solid #2a2a3a; border-radius:4px; padding:16px; font-size:11px; color:#c8a96e; white-space:pre-wrap; word-break:break-all; line-height:1.8;"></div>
-
   <button id="reset-btn" onclick="resetAll()">× リセット</button>
 
-  <div id="results">
+  <!-- フィルタパネル -->
+  <div id="filter-panel">
+    <div class="filter-title">
+      <span>── フィルタ</span>
+      <span class="filter-count" id="filter-count">— / — レース</span>
+    </div>
+    <div class="filter-grid">
 
+      <div class="filter-group">
+        <div class="filter-label">期間 開始</div>
+        <input type="date" id="f-date-from">
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">期間 終了</div>
+        <input type="date" id="f-date-to">
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-label">開催場</div>
+        <select id="f-venue"><option value="">すべて</option></select>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-label">天雲指数</div>
+        <div class="filter-range">
+          <input type="number" id="f-tenun-min" placeholder="最小" step="1">
+          <span>〜</span>
+          <input type="number" id="f-tenun-max" placeholder="最大" step="1">
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-label">級別</div>
+        <div class="checkbox-group" id="f-kyubetsu"></div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-label">令種</div>
+        <div class="checkbox-group" id="f-rei">
+          <label class="checkbox-item checked"><input type="checkbox" value="seiT" checked>晴天令T</label>
+          <label class="checkbox-item checked"><input type="checkbox" value="koT"  checked>荒天令T</label>
+          <label class="checkbox-item checked"><input type="checkbox" value="seiF" checked>晴天令F</label>
+          <label class="checkbox-item checked"><input type="checkbox" value="koF"  checked>荒天令F</label>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-label">的中</div>
+        <select id="f-hit">
+          <option value="">すべて</option>
+          <option value="hit">的中のみ</option>
+          <option value="miss">不的中のみ</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-label">日程</div>
+        <div class="checkbox-group" id="f-nittei"></div>
+      </div>
+
+      <div class="filter-group filter-group-wide">
+        <div class="filter-label">決まり手</div>
+        <div class="checkbox-group" id="f-kimari"></div>
+      </div>
+
+    </div>
+    <div class="filter-actions">
+      <button class="btn-reset-filter" onclick="resetFilters()">フィルタをリセット</button>
+    </div>
+  </div>
+
+  <div id="results">
     <div class="section-title">── 総合成績</div>
     <div class="stats-grid" id="overview-stats"></div>
-
     <div class="divider"></div>
-
     <div class="section-title">── 令別　精度</div>
     <div class="stats-grid" id="rei-stats"></div>
-
     <div class="divider"></div>
-
     <div class="section-title">── 券種別　回収率</div>
     <div class="table-wrap">
-      <table id="券種-table">
-        <thead>
-          <tr>
-            <th>令</th>
-            <th>券種</th>
-            <th>点数</th>
-            <th>投資額</th>
-            <th>払戻合計</th>
-            <th>回収率</th>
-            <th>的中数</th>
-          </tr>
-        </thead>
+      <table>
+        <thead><tr>
+          <th>令</th><th>券種</th><th>点数</th><th>投資額</th>
+          <th>払戻合計</th><th>回収率</th><th>的中数</th>
+        </tr></thead>
         <tbody id="券種-tbody"></tbody>
       </table>
     </div>
-
     <div class="divider"></div>
-
     <div class="section-title">── 開催場別　的中率</div>
     <div class="table-wrap">
-      <table id="venue-table">
-        <thead>
-          <tr>
-            <th>開催場</th>
-            <th>レース数</th>
-            <th>的中数</th>
-            <th>的中率</th>
-            <th>晴天令T率</th>
-            <th>荒天令T率</th>
-          </tr>
-        </thead>
+      <table>
+        <thead><tr>
+          <th>開催場</th><th>レース数</th><th>的中数</th>
+          <th>的中率</th><th>晴天令T率</th><th>荒天令T率</th>
+        </tr></thead>
         <tbody id="venue-tbody"></tbody>
       </table>
     </div>
-
   </div>
 
 </div>
-
 <script>
+// ── State ────────────────────────────────────────────────────
+let _allRows = [];
+
 // ── CSV Parser（引用符・カンマ内包対応） ────────────────────
 function parseCSVLine(line) {
   const fields = [];
@@ -399,11 +330,9 @@ function parseCSVLine(line) {
     const c = line[i];
     if (inQ) {
       if (c === '"') {
-        if (line[i + 1] === '"') { cur += '"'; i++; } // エスケープ ""
+        if (line[i + 1] === '"') { cur += '"'; i++; }
         else { inQ = false; }
-      } else {
-        cur += c;
-      }
+      } else { cur += c; }
     } else {
       if (c === '"') { inQ = true; }
       else if (c === ',') { fields.push(cur.trim()); cur = ''; }
@@ -415,13 +344,10 @@ function parseCSVLine(line) {
 }
 
 function parseCSV(text) {
-  // CRLF/LF両対応、末尾空行除去
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
   if (lines.length < 2) return [];
-
   const headers = parseCSVLine(lines[0]);
   const rows = [];
-
   for (let i = 1; i < lines.length; i++) {
     const vals = parseCSVLine(lines[i]);
     if (vals.every(v => v === '')) continue;
@@ -432,44 +358,161 @@ function parseCSV(text) {
   return rows;
 }
 
-// ── 列名定数（列番号依存を廃止） ────────────────────────────
+// ── 列名定数 ─────────────────────────────────────────────────
 const COL = {
+  date:      'レース日',
   venue:     '開催場',
-  tenun:     '天運',
+  tenun:     '天雲指数',
   seiTF:     '晴天令 T/F',
   koTF:      '荒天令 T/F',
   hantei:    '総合判定',
+  kimari:    '決まり手',
   odds3tan:  '3連単オッズ',
   odds3fuku: '3連複オッズ',
   odds2tan:  '2車単オッズ',
+  kyubetsu:  '級別',
+  nittei:    '日程',
 };
 
-function toFloat(v) {
-  const n = parseFloat(v);
-  return isNaN(n) ? 0 : n;
+function toFloat(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+const get    = (row, key) => (row[key] || '').trim();
+const isHit  = row => { const v = get(row, COL.hantei); return v.includes('的中') && !v.includes('不的中'); };
+const isSeiT = row => get(row, COL.seiTF) === 'T';
+const isKoT  = row => get(row, COL.koTF)  === 'T';
+
+// ── Filter ───────────────────────────────────────────────────
+function getFilteredRows() {
+  const dateFrom   = document.getElementById('f-date-from').value;
+  const dateTo     = document.getElementById('f-date-to').value;
+  const venue      = document.getElementById('f-venue').value;
+  const tenunMin   = document.getElementById('f-tenun-min').value;
+  const tenunMax   = document.getElementById('f-tenun-max').value;
+  const hitFilter  = document.getElementById('f-hit').value;
+  const reiChecked    = getChecked('f-rei');
+  const kyuChecked    = getChecked('f-kyubetsu');
+  const nitteiChecked = getChecked('f-nittei');
+  const kimariChecked = getChecked('f-kimari');
+
+  return _allRows.filter(row => {
+    if (dateFrom && get(row, COL.date) < dateFrom) return false;
+    if (dateTo   && get(row, COL.date) > dateTo)   return false;
+    if (venue    && get(row, COL.venue) !== venue)  return false;
+
+    const tenun = toFloat(get(row, COL.tenun));
+    if (tenunMin !== '' && tenun < parseFloat(tenunMin)) return false;
+    if (tenunMax !== '' && tenun > parseFloat(tenunMax)) return false;
+
+    if (kyuChecked.size > 0 && !kyuChecked.has(get(row, COL.kyubetsu))) return false;
+
+    if (reiChecked.size > 0 && reiChecked.size < 4) {
+      const sT = isSeiT(row), kT = isKoT(row);
+      const match =
+        (reiChecked.has('seiT') && sT)  ||
+        (reiChecked.has('koT')  && kT)  ||
+        (reiChecked.has('seiF') && !sT) ||
+        (reiChecked.has('koF')  && !kT);
+      if (!match) return false;
+    }
+
+    if (hitFilter === 'hit'  && !isHit(row)) return false;
+    if (hitFilter === 'miss' &&  isHit(row)) return false;
+    if (nitteiChecked.size > 0 && !nitteiChecked.has(get(row, COL.nittei))) return false;
+    if (kimariChecked.size > 0 && !kimariChecked.has(get(row, COL.kimari))) return false;
+
+    return true;
+  });
+}
+
+function getChecked(groupId) {
+  const group = document.getElementById(groupId);
+  if (!group) return new Set();
+  const s = new Set();
+  group.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => s.add(cb.value));
+  return s;
+}
+
+// ── Filter UI ────────────────────────────────────────────────
+function buildFilterUI(rows) {
+  const uniq = (key) => [...new Set(rows.map(r => get(r, key)).filter(Boolean))].sort();
+
+  const venueEl = document.getElementById('f-venue');
+  venueEl.innerHTML = '<option value="">すべて</option>' +
+    uniq(COL.venue).map(v => `<option value="${v}">${v}</option>`).join('');
+  venueEl.addEventListener('change', onFilterChange);
+
+  buildCheckboxGroup('f-kyubetsu', uniq(COL.kyubetsu));
+  buildCheckboxGroup('f-nittei',   uniq(COL.nittei));
+  buildCheckboxGroup('f-kimari',   uniq(COL.kimari));
+  bindCheckboxGroup('f-rei');
+
+  ['f-date-from','f-date-to','f-tenun-min','f-tenun-max','f-hit'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('change', onFilterChange);
+    el.addEventListener('input',  onFilterChange);
+  });
+}
+
+function buildCheckboxGroup(groupId, values) {
+  const group = document.getElementById(groupId);
+  group.innerHTML = values.map(v =>
+    `<label class="checkbox-item checked"><input type="checkbox" value="${v}" checked>${v}</label>`
+  ).join('');
+  bindCheckboxGroup(groupId);
+}
+
+function bindCheckboxGroup(groupId) {
+  const group = document.getElementById(groupId);
+  group.querySelectorAll('.checkbox-item').forEach(item => {
+    const cb = item.querySelector('input[type="checkbox"]');
+    item.classList.toggle('checked', cb.checked);
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      cb.checked = !cb.checked;
+      item.classList.toggle('checked', cb.checked);
+      onFilterChange();
+    });
+  });
+}
+
+function onFilterChange() {
+  const filtered = getFilteredRows();
+  document.getElementById('filter-count').textContent =
+    `${filtered.length.toLocaleString()} / ${_allRows.length.toLocaleString()} レース`;
+  render(analyze(filtered));
+}
+
+function resetFilters() {
+  document.getElementById('f-date-from').value = '';
+  document.getElementById('f-date-to').value   = '';
+  document.getElementById('f-venue').value      = '';
+  document.getElementById('f-tenun-min').value  = '';
+  document.getElementById('f-tenun-max').value  = '';
+  document.getElementById('f-hit').value        = '';
+  ['f-rei','f-kyubetsu','f-nittei','f-kimari'].forEach(groupId => {
+    document.getElementById(groupId).querySelectorAll('.checkbox-item').forEach(item => {
+      item.querySelector('input[type="checkbox"]').checked = true;
+      item.classList.add('checked');
+    });
+  });
+  onFilterChange();
 }
 
 // ── Analysis ────────────────────────────────────────────────
 function analyze(rows) {
   const total = rows.length;
-
-  // 列名で直引き（列番号ズレ無関係）
-  const get     = (row, key) => (row[key] || '').trim();
-  const isHit   = row => { const v = get(row, COL.hantei); return v.includes('的中') && !v.includes('不的中'); };
-  const isSeiT  = row => get(row, COL.seiTF) === 'T';
-  const isKoT   = row => get(row, COL.koTF)  === 'T';
+  const empty = { payout: 0, hitCount: 0, invest: 0, recovery: 0 };
+  if (total === 0) return {
+    total: 0, hits: 0, hitRate: 0, seiT: 0, seiRate: 0, koT: 0, koRate: 0,
+    totalInvest: 0, totalPayout: 0, totalRecovery: 0,
+    kiken: { s3tan: empty, s3fuku: empty, k3fuku: empty, k2tan: empty },
+    venues: {}
+  };
 
   const hits    = rows.filter(isHit).length;
-  const hitRate = total > 0 ? (hits / total * 100) : 0;
-  const seiT    = rows.filter(isSeiT).length;
-  const seiRate = total > 0 ? (seiT / total * 100) : 0;
-  const koT     = rows.filter(isKoT).length;
-  const koRate  = total > 0 ? (koT  / total * 100) : 0;
-
+  const seiTCnt = rows.filter(isSeiT).length;
+  const koTCnt  = rows.filter(isKoT).length;
   const totalInvest = total * 1000;
 
-  // 買い目定義：晴天令3連単400円・晴天令3連複100円・荒天令3連複200円・荒天令2車単300円
-  // 払戻：オッズ × 100円
   const calcKiken = (tfFn, oddsKey, investPerRace) => {
     let payout = 0, hitCount = 0;
     rows.forEach(row => {
@@ -486,9 +529,8 @@ function analyze(rows) {
   const s3fuku = calcKiken(isSeiT, COL.odds3fuku, 100);
   const k3fuku = calcKiken(isKoT,  COL.odds3fuku, 200);
   const k2tan  = calcKiken(isKoT,  COL.odds2tan,  300);
-
   const totalPayout   = s3tan.payout + s3fuku.payout + k3fuku.payout + k2tan.payout;
-  const totalRecovery = totalInvest > 0 ? (totalPayout / totalInvest * 100) : 0;
+  const totalRecovery = totalInvest > 0 ? totalPayout / totalInvest * 100 : 0;
 
   const venueMap = {};
   rows.forEach(row => {
@@ -501,8 +543,9 @@ function analyze(rows) {
   });
 
   return {
-    total, hits, hitRate,
-    seiT, seiRate, koT, koRate,
+    total, hits, hitRate: hits / total * 100,
+    seiT: seiTCnt, seiRate: seiTCnt / total * 100,
+    koT: koTCnt,   koRate:  koTCnt  / total * 100,
     totalInvest, totalPayout, totalRecovery,
     kiken: { s3tan, s3fuku, k3fuku, k2tan },
     venues: venueMap
@@ -514,10 +557,9 @@ function render(result) {
   const { total, hits, hitRate, seiT, seiRate, koT, koRate,
           totalInvest, totalPayout, totalRecovery, kiken, venues } = result;
 
-  // Overview
   document.getElementById('overview-stats').innerHTML = `
     <div class="stat-card">
-      <div class="stat-label">総レース数</div>
+      <div class="stat-label">対象レース数</div>
       <div class="stat-value">${total.toLocaleString()}</div>
       <div class="stat-sub">レース</div>
     </div>
@@ -535,10 +577,8 @@ function render(result) {
       <div class="stat-label">総合回収率</div>
       <div class="stat-value pct">${totalRecovery.toFixed(1)}</div>
       <div class="stat-sub">${totalPayout.toLocaleString()}円 / ${totalInvest.toLocaleString()}円</div>
-    </div>
-  `;
+    </div>`;
 
-  // 令別精度
   document.getElementById('rei-stats').innerHTML = `
     <div class="stat-card accent2">
       <div class="stat-label">晴天令　的中数</div>
@@ -559,22 +599,18 @@ function render(result) {
       <div class="stat-label">荒天令　精度</div>
       <div class="stat-value pct">${koRate.toFixed(1)}</div>
       <div class="stat-sub">荒天令 T/F</div>
-    </div>
-  `;
+    </div>`;
 
-  // 券種別回収率
   const kikenRows = [
     { rei: '晴天令', type: '3連単', pts: 4, data: kiken.s3tan },
     { rei: '晴天令', type: '3連複', pts: 1, data: kiken.s3fuku },
     { rei: '荒天令', type: '3連複', pts: 2, data: kiken.k3fuku },
     { rei: '荒天令', type: '2連単', pts: 3, data: kiken.k2tan },
   ];
-
   document.getElementById('券種-tbody').innerHTML = kikenRows.map(({ rei, type, pts, data }) => {
     const cls = data.recovery >= 100 ? 'val-good' : data.recovery >= 70 ? 'val-neutral' : 'val-bad';
     return `<tr>
-      <td>${rei}</td>
-      <td>${type}</td>
+      <td>${rei}</td><td>${type}</td>
       <td class="val-muted">${pts}点</td>
       <td class="val-muted">${data.invest.toLocaleString()}円</td>
       <td>${data.payout.toLocaleString()}円</td>
@@ -583,20 +619,18 @@ function render(result) {
     </tr>`;
   }).join('');
 
-  // 開催場別
   const venueEntries = Object.entries(venues).sort((a, b) => b[1].total - a[1].total);
   document.getElementById('venue-tbody').innerHTML = venueEntries.map(([venue, v]) => {
-    const hr = (v.hits / v.total * 100).toFixed(1);
-    const sr = (v.seiT / v.total * 100).toFixed(1);
-    const kr = (v.koT  / v.total * 100).toFixed(1);
+    const hr  = (v.hits / v.total * 100).toFixed(1);
+    const sr  = (v.seiT / v.total * 100).toFixed(1);
+    const kr  = (v.koT  / v.total * 100).toFixed(1);
     const cls = parseFloat(hr) >= 30 ? 'val-good' : parseFloat(hr) >= 15 ? 'val-neutral' : 'val-bad';
     return `<tr>
       <td>${venue}</td>
       <td class="val-muted">${v.total}</td>
       <td class="val-muted">${v.hits}</td>
       <td class="${cls}">${hr}%</td>
-      <td>${sr}%</td>
-      <td>${kr}%</td>
+      <td>${sr}%</td><td>${kr}%</td>
     </tr>`;
   }).join('');
 
@@ -606,96 +640,48 @@ function render(result) {
 
 // ── File Handling ────────────────────────────────────────────
 function handleFile(file) {
-  if (!file || !file.name.endsWith('.csv')) {
-    showError('CSVファイルを選択してください');
-    return;
-  }
-
+  if (!file || !file.name.endsWith('.csv')) { showError('CSVファイルを選択してください'); return; }
   const reader = new FileReader();
   reader.onload = e => {
     try {
       const rows = parseCSV(e.target.result);
       if (rows.length === 0) { showError('データが見つかりませんでした'); return; }
-
+      _allRows = rows;
       document.getElementById('file-info').classList.add('visible');
       document.getElementById('file-name-text').textContent = file.name;
       document.getElementById('file-rows-text').textContent = `${rows.length.toLocaleString()} レース`;
       document.getElementById('upload-zone').style.display = 'none';
-
-      // デバッグ（スプシ行番号入力→対応行を表示）
-      const headers = Object.keys(rows[0]);
-      const headerText = `▼ ヘッダー（${headers.length}列）\n${headers.map((h,i) => `[${i}] "${h}"`).join('\n')}`;
-      const fmtRow = (r, sheetRow) =>
-        `▼ スプシ ${sheetRow}行目（CSVデータ ${sheetRow - 1}件目）\n` +
-        headers.map(h => `  ${h}: "${r[h] !== undefined ? r[h] : ''}"`).join('\n');
-
-      window._dbgRows    = rows;
-      window._dbgHeaders = headers;
-      window.showDbgRow  = function() {
-        const sheetRow = parseInt(document.getElementById('dbg-input').value);
-        const csvIdx   = sheetRow - 2; // スプシ1行目=ヘッダー、データは2行目～
-        const r   = window._dbgRows[csvIdx];
-        const pre = document.getElementById('dbg-pre');
-        if (!r) {
-          pre.textContent = headerText + `\n\n⚠ ${sheetRow}行目はデータ範囲外（総データ数: ${window._dbgRows.length}件）`;
-          return;
-        }
-        pre.textContent = headerText + '\n\n' + fmtRow(r, sheetRow);
-      };
-
-      const dbg = document.getElementById('debug-box');
-      dbg.style.display = 'block';
-      dbg.innerHTML =
-        `<div style="margin-bottom:8px;color:#6a6880;">スプシ行番号を入力（ヘッダー=1行目として計算）：</div>` +
-        `<input id="dbg-input" type="number" min="2" max="${rows.length + 1}" value="653" ` +
-        `style="background:#0a0a0f;border:1px solid #2a2a3a;color:#c8a96e;padding:4px 8px;` +
-        `font-family:'DM Mono',monospace;font-size:11px;width:80px;border-radius:2px;">` +
-        `<button onclick="showDbgRow()" style="background:transparent;border:1px solid #2a2a3a;` +
-        `color:#6a6880;padding:4px 10px;font-family:'DM Mono',monospace;font-size:11px;` +
-        `cursor:pointer;border-radius:2px;margin-left:6px;">表示</button>` +
-        `<pre id="dbg-pre" style="margin-top:12px;white-space:pre-wrap;word-break:break-all;"></pre>`;
-
-      // 初期表示：653行目
-      window.showDbgRow();
-
-      const result = analyze(rows);
-      render(result);
-    } catch (err) {
-      showError('解析エラー: ' + err.message);
-    }
+      buildFilterUI(rows);
+      document.getElementById('filter-panel').classList.add('visible');
+      document.getElementById('filter-count').textContent =
+        `${rows.length.toLocaleString()} / ${rows.length.toLocaleString()} レース`;
+      render(analyze(rows));
+    } catch (err) { showError('解析エラー: ' + err.message); }
   };
   reader.readAsText(file, 'UTF-8');
 }
 
 function showError(msg) {
   const el = document.getElementById('error-msg');
-  el.textContent = msg;
-  el.classList.add('visible');
+  el.textContent = msg; el.classList.add('visible');
 }
 
 function resetAll() {
+  _allRows = [];
   document.getElementById('upload-zone').style.display = '';
   document.getElementById('file-info').classList.remove('visible');
+  document.getElementById('filter-panel').classList.remove('visible');
   document.getElementById('results').classList.remove('visible');
   document.getElementById('reset-btn').classList.remove('visible');
   document.getElementById('error-msg').classList.remove('visible');
-  document.getElementById('debug-box').style.display = 'none';
   document.getElementById('file-input').value = '';
 }
 
-// Events
-document.getElementById('file-input').addEventListener('change', e => {
-  handleFile(e.target.files[0]);
-});
-
+document.getElementById('file-input').addEventListener('change', e => handleFile(e.target.files[0]));
 const zone = document.getElementById('upload-zone');
 zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
 zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-zone.addEventListener('drop', e => {
-  e.preventDefault();
-  zone.classList.remove('drag-over');
-  handleFile(e.dataTransfer.files[0]);
-});
+zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
 </script>
 </body>
 </html>
