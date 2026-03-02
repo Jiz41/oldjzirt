@@ -27,16 +27,24 @@
   .title-jp { font-family: 'Zen Antique Soft', serif; font-size: 28px; color: var(--accent); letter-spacing: 0.3em; line-height: 1; }
   .title-sub { font-size: 11px; color: var(--text-muted); letter-spacing: 0.2em; margin-top: 8px; text-transform: uppercase; }
 
-  #upload-zone {
+  /* ── Sheets 入力UI ── */
+  #sheets-zone {
     border: 1px dashed var(--border); border-radius: 4px; padding: 48px 24px;
-    text-align: center; cursor: pointer; transition: all 0.2s; background: var(--surface); position: relative; overflow: hidden;
+    text-align: center; background: var(--surface); position: relative;
   }
-  #upload-zone::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(200,169,110,0.02) 0%, transparent 50%); }
-  #upload-zone:hover, #upload-zone.drag-over { border-color: var(--accent); background: var(--surface2); }
-  #upload-zone .icon { font-size: 32px; margin-bottom: 12px; opacity: 0.6; }
-  #upload-zone .label { color: var(--text-muted); font-size: 12px; letter-spacing: 0.1em; }
-  #upload-zone .label span { color: var(--accent); }
-  #file-input { display: none; }
+  #sheets-zone::before { content: ''; position: absolute; inset: 0; border-radius: 4px; background: linear-gradient(135deg, rgba(200,169,110,0.02) 0%, transparent 50%); pointer-events: none; }
+  #sheets-load-btn {
+    background: transparent; border: 1px solid var(--accent); color: var(--accent);
+    padding: 12px 32px; border-radius: 2px; cursor: pointer;
+    font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.15em; transition: all 0.2s;
+  }
+  #sheets-load-btn:hover { background: var(--accent); color: var(--bg); }
+  #sheets-load-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  #sheets-status { font-size: 11px; margin-top: 16px; display: none; }
+  #sheets-status.visible { display: block; }
+  #sheets-status.loading { color: var(--text-muted); animation: pulse 1.5s infinite; }
+  #sheets-status.ok { color: var(--hit); }
+  #sheets-status.err { color: var(--miss); }
 
   #file-info { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 20px; margin-top: 12px; align-items: center; gap: 12px; }
   #file-info.visible { display: flex; }
@@ -97,29 +105,6 @@
   .miss-label { color: var(--text); min-width: 60px; }
   .miss-count { color: var(--text-muted); font-size: 11px; min-width: 30px; }
 
-  /* ── Gemini推論 ── */
-  #inference-section { margin-top: 32px; }
-  .inference-box { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 20px; }
-  .inference-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
-  #gemini-key-input {
-    flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text);
-    padding: 8px 12px; border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 12px;
-  }
-  #gemini-key-input::placeholder { color: var(--text-dim); }
-  #gemini-key-input:focus { outline: none; border-color: var(--accent); }
-  #inference-btn {
-    background: transparent; border: 1px solid var(--accent); color: var(--accent);
-    padding: 8px 20px; border-radius: 2px; cursor: pointer;
-    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; transition: all 0.2s; white-space: nowrap;
-  }
-  #inference-btn:hover { background: var(--accent); color: var(--bg); }
-  #inference-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  #inference-result {
-    display: none; background: var(--bg); border: 1px solid var(--border); border-radius: 2px;
-    padding: 16px; font-size: 12px; line-height: 1.8; color: var(--text); white-space: pre-wrap;
-  }
-  #inference-result.visible { display: block; }
-  .inference-loading { color: var(--text-muted); font-size: 11px; animation: pulse 1.5s infinite; }
   @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
 
   #reset-btn { display: none; background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 8px 20px; border-radius: 4px; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; margin-top: 8px; transition: all 0.2s; }
@@ -176,10 +161,12 @@
     <div class="title-sub">Jizairitsu Performance Analyzer</div>
   </header>
 
-  <div id="upload-zone" onclick="document.getElementById('file-input').click()">
-    <div class="icon">⊕</div>
-    <div class="label">CSVをドロップ、または<span>タップして選択</span></div>
-    <input type="file" id="file-input" accept=".csv">
+  <div id="sheets-zone">
+    <div class="sheets-title">── 成績データ読み込み</div>
+    <input type="hidden" id="sheets-id-input" value="1S9U_AR4dM8tKTUTKx3_wAJBLW5x4zB3h7annjv7z8iw">
+    <input type="hidden" id="sheets-name-input" value="データ入力">
+    <button id="sheets-load-btn" onclick="loadSheet()">⊕ データを読み込む</button>
+    <div id="sheets-status"></div>
   </div>
 
   <div id="file-info">
@@ -278,19 +265,6 @@
       </div>
     </div>
 
-    <div class="divider"></div>
-
-    <!-- Gemini推論 -->
-    <div id="inference-section">
-      <div class="section-title">── 係数仮説　推論</div>
-      <div class="inference-box">
-        <div class="inference-input-row">
-          <input type="password" id="gemini-key-input" placeholder="Gemini API Key を入力して推論を生成">
-          <button id="inference-btn" onclick="runInference()">推論を生成</button>
-        </div>
-        <div id="inference-result"></div>
-      </div>
-    </div>
   </div>
 </div><!-- /face-ura -->
 
@@ -299,36 +273,65 @@
 // ── State ────────────────────────────────────────────────────
 let _allRows = [];
 
-// ── CSV Parser ───────────────────────────────────────────────
-function parseCSVLine(line) {
-  const fields = []; let cur = '', inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (inQ) {
-      if (c === '"') { if (line[i+1] === '"') { cur += '"'; i++; } else { inQ = false; } }
-      else { cur += c; }
-    } else {
-      if (c === '"') { inQ = true; }
-      else if (c === ',') { fields.push(cur.trim()); cur = ''; }
-      else { cur += c; }
+// ── Google Sheets API（APIキー方式） ─────────────────────────
+const SHEETS_API_KEY = 'YOUR_API_KEY'; // ← 発行したAPIキーに差し替え
+
+async function loadSheet() {
+  const sid   = document.getElementById('sheets-id-input').value.trim();
+  const sname = document.getElementById('sheets-name-input').value.trim() || 'データ入力';
+  if (!sid) { setStatus('Spreadsheet IDを入力してください', 'err'); return; }
+
+  document.getElementById('sheets-load-btn').disabled = true;
+  setStatus('読み込み中...', 'loading');
+
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${encodeURIComponent(sname)}?key=${SHEETS_API_KEY}`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || 'APIエラー');
     }
+    const json = await res.json();
+    const values = json.values;
+    if (!values || values.length < 2) { setStatus('データが見つかりませんでした', 'err'); return; }
+
+    const headers = values[0].map(h => String(h).trim());
+    const rows = [];
+    for (let i = 1; i < values.length; i++) {
+      const r = values[i];
+      if (!r || r.every(v => !v)) continue;
+      const obj = {};
+      headers.forEach((h, idx) => { obj[h] = r[idx] !== undefined ? String(r[idx]).trim() : ''; });
+      rows.push(obj);
+    }
+    if (rows.length === 0) { setStatus('有効なデータ行がありませんでした', 'err'); return; }
+
+    _allRows = rows;
+    setStatus('✓ ' + rows.length.toLocaleString() + ' レース読み込み完了', 'ok');
+    document.getElementById('file-info').classList.add('visible');
+    document.getElementById('file-name-text').textContent = sname;
+    document.getElementById('file-rows-text').textContent = rows.length.toLocaleString() + ' レース';
+    document.getElementById('sheets-zone').style.display = 'none';
+    document.getElementById('period-filter').classList.add('visible');
+    document.getElementById('period-count').textContent =
+      rows.length.toLocaleString() + ' / ' + rows.length.toLocaleString() + ' レース';
+    ['f-date-from','f-date-to'].forEach(id => {
+      document.getElementById(id).addEventListener('change', onPeriodChange);
+      document.getElementById(id).addEventListener('input', onPeriodChange);
+    });
+    renderAll(rows);
+  } catch (err) {
+    setStatus('読み込みエラー: ' + err.message, 'err');
+  } finally {
+    document.getElementById('sheets-load-btn').disabled = false;
   }
-  fields.push(cur.trim()); return fields;
 }
 
-function parseCSV(text) {
-  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim().split('\n');
-  if (lines.length < 2) return [];
-  const headers = parseCSVLine(lines[0]);
-  const rows = [];
-  for (let i = 1; i < lines.length; i++) {
-    const vals = parseCSVLine(lines[i]);
-    if (vals.every(v => v === '')) continue;
-    const row = {};
-    headers.forEach((h, idx) => { row[h] = vals[idx] !== undefined ? vals[idx] : ''; });
-    rows.push(row);
-  }
-  return rows;
+function setStatus(msg, type) {
+  const el = document.getElementById('sheets-status');
+  el.textContent = msg;
+  el.className = 'visible ' + type;
 }
 
 // ── 列名定数 ─────────────────────────────────────────────────
@@ -445,8 +448,6 @@ function renderAll(rows) {
   renderXPost(result, rows);
   const missData = analyzeMiss(rows);
   renderMissAnalysis(missData);
-  document.getElementById('inference-result').classList.remove('visible');
-  document.getElementById('inference-result').textContent = '';
   window._lastMissData = missData;
   window._lastRows = rows;
   document.getElementById('face-tabs').classList.add('visible');
@@ -527,273 +528,31 @@ function renderMissAnalysis(data) {
     data.kimari.map(([k,v]) => missBarRow(k, v, kimariMax)).join('');
 }
 
-// ── Gemini 推論 ───────────────────────────────────────────────
-const GEMINI_SYSTEM_PROMPT = `あなたは競輪予想ロジック「自在律（華耀天輪 真・自在律）」の係数チューニング専門家です。
-以下はコード実装から抽出した全係数の正確な定義です。
-
-━━━━━━━━━━━━━━━━━━━━
-【COEFFICIENT_SETTINGS（級別基本係数）】
-━━━━━━━━━━━━━━━━━━━━
-'s-kyu':  { R_BIAS:1.15, RECENT_WEIGHT:0.90, COOP_WEIGHT:1.20, SUICIDE_LIMIT:0.97 }
-'a-kyu':  { R_BIAS:1.00, RECENT_WEIGHT:1.00, COOP_WEIGHT:1.00, SUICIDE_LIMIT:0.93 }
-'a-chal': { R_BIAS:0.90, RECENT_WEIGHT:1.20, COOP_WEIGHT:0.80, SUICIDE_LIMIT:0.90 }
-'girls':  { R_BIAS:1.00, RECENT_WEIGHT:1.10, COOP_WEIGHT:1.00, SUICIDE_LIMIT:1.00 }
-
-- R_BIAS: 競走得点の最終スコアへの影響度。式: c_score_adj = 1.0 + (score/100 - 1) * R_BIAS
-- RECENT_WEIGHT: 直近3走着順の影響度。式: c_recent = (1.0 + (4 - avgRank) * 0.05) * RECENT_WEIGHT
-- COOP_WEIGHT: ライン内協調の影響度（番手・3番手への恩恵量）
-- SUICIDE_LIMIT: C_suicideのペナルティ上限キャップ値
-
-━━━━━━━━━━━━━━━━━━━━
-【C_MARK_VALUES（W印係数）】
-━━━━━━━━━━━━━━━━━━━━
-◎ → c_wmark = 1.04
-〇 → c_wmark = 1.02
-✕ → c_wmark = 1.015
-△ → c_wmark = 1.01
-その他 → 1.0
-
-━━━━━━━━━━━━━━━━━━━━
-【SERI_STYLE_BONUS（競り脚質ボーナス）】
-━━━━━━━━━━━━━━━━━━━━
-逃:1.08 / 追:1.05 / 両:1.00 / 自:0.95
-競り勝者(IN):  ×(1 + 0.05) × (1 - 0.15) = 実質 ×0.8925
-競り敗者(OUT): × (1 - 0.25) = ×0.75
-
-━━━━━━━━━━━━━━━━━━━━
-【S1/B1ボーナス】
-━━━━━━━━━━━━━━━━━━━━
-c_s1: S1位選手 → ×1.005
-c_b1: B1位選手 → ×1.015（B1の方が負荷大のため加点大）
-
-━━━━━━━━━━━━━━━━━━━━
-【c_e（バンク脚質バイアス）】
-━━━━━━━━━━━━━━━━━━━━
-bankdata.jsonのkeirin_biasをバンクごとに参照。
-脚質マッピング: 自/逃→先行バイアス / 両→捲りバイアス / 追→差しバイアス
-
-━━━━━━━━━━━━━━━━━━━━
-【物理層: straight（直線長ペナルティ）】
-━━━━━━━━━━━━━━━━━━━━
-straight < 35m:
-  4番手以降 → physicalPenalty = 0.25（物理的到達困難）
-  3番手     → physicalPenalty = 0.60
-straight < 50m:
-  4番手以降 → physicalPenalty = 0.50
-  3番手     → physicalPenalty = 0.80
-50m以上: ペナルティなし（1.0）
-
-━━━━━━━━━━━━━━━━━━━━
-【展開層: イン突き（ワープブースト）】
-━━━━━━━━━━━━━━━━━━━━
-番手選手が競り勝利した場合、3〜4番手選手に warpBoost = ×1.35
-
-━━━━━━━━━━━━━━━━━━━━
-【kururu（風圧補正）】
-━━━━━━━━━━━━━━━━━━━━
-実効風速 v = speed × beta（バンクのbeta係数）
-風圧係数 kp:
-  v ≤ 3.0m: kp = v × 0.05
-  3.0 < v ≤ 7.0: kp = 0.15 + (v-3.0)^1.8 × 0.085
-  v > 7.0: kp = 0.51 + (v-7.0)^3.0 × 0.3
-kp *= (straight / 50)（直線長補正）
-
-位置別遮蔽率(positionShield):
-  先行(0番手)     → 0.60（風をまともに受ける）
-  番手(1番手)     → 0.50
-  3番手以降       → 0.40（乱流重複で遮蔽大）
-
-finalAdj = 1.0 + (vector × kp × alpha × positionShield)
-vector: 追い風+1.0 / 向かい風-1.0 / H→B横風+0.2 / B→H横風-0.2
-
-━━━━━━━━━━━━━━━━━━━━
-【天雲指数（calculateTenunIndex）】
-━━━━━━━━━━━━━━━━━━━━
-晴天令Top3 × 荒天令Top3 の一致数でマッピング:
-  3一致 → 指数0  （完全安定）
-  2一致 → 指数33 （やや波乱）
-  1一致 → 指数67 （波乱）
-  0一致 → 指数100（完全混沌）
-
-━━━━━━━━━━━━━━━━━━━━
-【壱耀晴乾ノ象（SUPERIOR_PATTERNS_FINAL_LIST）】
-━━━━━━━━━━━━━━━━━━━━
-発動条件（全て同時成立）:
-  天雲指数 = 33
-  風速 ≤ 2.0m
-  晴天令1位選手の脚質が「追」または「両」
-  晴天令1位選手のW印が「◎」
-有効パターン: "33_差し"（hit_rate:0.0309 > 閾値0.0206）
-
-━━━━━━━━━━━━━━━━━━━━
-【赤口呑縁（SHAKKOU_WORLD_TABLE）世界線重み】
-━━━━━━━━━━━━━━━━━━━━
-S級(合計1465): W0物理純正879 / W1ライン微崩壊147 / W2早仕掛け117 / W3突風103 / W4競り番狂わせ88 / W5複合A59 / W6複合B44 / W7落車28
-A級(合計1465): W0純正586 / W1ライン崩壊293 / W2早仕掛け失敗176 / W4突風117 / W5競り番狂わせ103 / W3成功88 / W6複合A59 / W7複合B29 / W8落車14
-チャレ(合計1465): W0/W1各366（純正と崩壊が同率）/ W2無謀220 / W3暴走147 / W4捲り自滅117 / W5ダークホース103 ...
-
-━━━━━━━━━━━━━━━━━━━━
-【荒天令 calculate_koutenrei_bias 係数】
-━━━━━━━━━━━━━━━━━━━━
-
-C_risk: p.score < avgScore-2.0 かつ recentAvg >= 4.0 → ×0.97
-  「平均以下かつ直近着順が悪い選手は荒天でさらにリスク大」
-
-C_mental: (S級レース OR 最高得点選手) かつ 直近1走1着 → × (1.0 - v×0.005)
-  「好調エースほど荒天でプレッシャーで崩れる」仮説
-
-C_recovery: 脚質「両」or「追」かつ scoreDiffRatio > 0.6 → × (1.04 + (ratio-0.6)×0.1)
-  「荒天で展開が乱れるほど高得点の差し・追込が台頭」仮説
-
-C_target: 最高得点選手 かつ 競合逃/自/両が2名以上 → × (1.0 - v×0.007)
-  「包囲された本命は荒天で潰れる」仮説
-
-C_split: ライン内 (p1.score - p2.score)/scoreRange >= 0.30 → 番手に × (1.0 - (diff-0.30)×0.15)
-  「強い先行に弱い番手は荒天では機能しない」仮説
-
-C_pace: 逃/自/両で score >= 105.0 かつ ライン数 >= 2 → ×0.96
-  「強い逃げ選手でも荒天の単独逃げは過信禁物」仮説
-
-C_timing: 脚質「両」かつラインの2番手以降 → ×0.97
-  「荒天で両脚質の選択が遅れると位置不安定」仮説
-
-C_guard: 番手選手 かつ得点がレンジ下位40% かつ攻撃選手2名以上
-  → baseRisk = 0.95（得点低） × 0.95（攻撃2名以上）= 最小0.9025
-  「荒天で弱い番手の防御は破綻する」仮説
-
-C_suicide: 3名以上ライン かつ W印持ち3名 かつ自力選手あり の"リスク極大ライン"を検出
-  → リスクライン員: × (1.0 - (1.0-SUICIDE_LIMIT) × min(v,7)/7) の動的ペナルティ
-  → 非リスクライン員: × 1.05（漁夫の利ボーナス）
-  → 単騎選手: × 1.02
-
-━━━━━━━━━━━━━━━━━━━━
-【買い目定義】
-━━━━━━━━━━━━━━━━━━━━
-晴天令: 3連単400円 + 3連複100円（1レース500円）
-荒天令: 3連複200円 + 2車単300円（1レース500円）
-合計: 1レース1000円
-
-━━━━━━━━━━━━━━━━━━━━
-
-以下の外れ解剖データをもとに分析してください。
-
-【回答形式】
-- 具体的な係数名を必ず挙げること
-- 箇条書き3〜5項目
-- 断定せず「可能性がある」「考えられる」という表現で
-- 開催場の偏りがある場合はstraightペナルティやc_eバイアスとの関連も考察すること
-- 日本語で回答すること`;
-
-async function runInference() {
-  const key = document.getElementById('gemini-key-input').value.trim();
-  if (!key) { alert('Gemini API Keyを入力してください'); return; }
-  if (!window._lastMissData) { alert('CSVを読み込んでください'); return; }
-
-  const btn = document.getElementById('inference-btn');
-  const resultEl = document.getElementById('inference-result');
-  btn.disabled = true;
-  resultEl.classList.add('visible');
-  resultEl.innerHTML = '<span class="inference-loading">── 推論中...</span>';
-
-  const d = window._lastMissData;
-  const rows = window._lastRows || [];
-  const total = rows.length;
-  const missRate = total > 0 ? (d.total / total * 100).toFixed(1) : '?';
-
-  const prompt = `【外れ解剖データ】
-総レース数: ${total} / 外れ数: ${d.total} (外れ率: ${missRate}%)
-
-■ 令種別 外れ数
-${Object.entries(d.rei).map(([k,v])=>`  ${k}: ${v}件`).join('\n')}
-
-■ 天雲指数帯別 外れ数
-${Object.entries(d.tenunBands).map(([k,v])=>`  指数${k}: ${v}件`).join('\n')}
-
-■ 開催場別 外れ数（上位）
-${d.venues.map(([k,v])=>`  ${k}: ${v}件`).join('\n')}
-
-■ 決まり手別 外れ数（上位）
-${d.kimari.map(([k,v])=>`  ${k}: ${v}件`).join('\n')}
-
-このデータから、自在律のどの係数に問題がある可能性がありますか？`;
-
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: GEMINI_SYSTEM_PROMPT }] },
-          contents: [{ role: 'user', parts: [{ text: prompt }] }]
-        })
-      }
-    );
-    const json = await res.json();
-    if (json.error) throw new Error(json.error.message);
-    const text = json.candidates?.[0]?.content?.parts?.[0]?.text || '（応答なし）';
-    resultEl.textContent = text;
-  } catch (err) {
-    resultEl.textContent = `エラー: ${err.message}`;
-  } finally {
-    btn.disabled = false;
-  }
-}
-
 // ── File Handling ────────────────────────────────────────────
-function handleFile(file) {
-  if (!file || !file.name.endsWith('.csv')) { showError('CSVファイルを選択してください'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const rows = parseCSV(e.target.result);
-      if (rows.length === 0) { showError('データが見つかりませんでした'); return; }
-      _allRows = rows;
-      document.getElementById('file-info').classList.add('visible');
-      document.getElementById('file-name-text').textContent = file.name;
-      document.getElementById('file-rows-text').textContent = `${rows.length.toLocaleString()} レース`;
-      document.getElementById('upload-zone').style.display = 'none';
-      document.getElementById('period-filter').classList.add('visible');
-      document.getElementById('period-count').textContent = `${rows.length.toLocaleString()} / ${rows.length.toLocaleString()} レース`;
-      ['f-date-from','f-date-to'].forEach(id => {
-        document.getElementById(id).addEventListener('change', onPeriodChange);
-        document.getElementById(id).addEventListener('input', onPeriodChange);
-      });
-      renderAll(rows);
-    } catch (err) { showError('解析エラー: ' + err.message); }
-  };
-  reader.readAsText(file, 'UTF-8');
-}
 
-function showError(msg) { const el = document.getElementById('error-msg'); el.textContent = msg; el.classList.add('visible'); }
+
 
 function resetAll() {
   _allRows = [];
   window._lastMissData = null;
   window._lastRows = null;
-  document.getElementById('upload-zone').style.display = '';
+  document.getElementById('sheets-zone').style.display = '';
+  document.getElementById('sheets-status').className = '';
+  document.getElementById('sheets-status').textContent = '';
   document.getElementById('file-info').classList.remove('visible');
   document.getElementById('period-filter').classList.remove('visible');
   document.getElementById('results').classList.remove('visible');
   document.getElementById('miss-analysis').classList.remove('visible');
   document.getElementById('reset-btn').classList.remove('visible');
   document.getElementById('error-msg').classList.remove('visible');
-  document.getElementById('inference-result').classList.remove('visible');
   document.getElementById('f-date-from').value = '';
   document.getElementById('f-date-to').value = '';
-  document.getElementById('file-input').value = '';
   document.getElementById('face-tabs').classList.remove('visible');
   document.getElementById('ev-section').style.display = 'none';
   document.getElementById('best-banner').classList.remove('visible');
   document.getElementById('x-post-text').value = '';
   switchFace('omote');
 }
-
-document.getElementById('file-input').addEventListener('change', e => handleFile(e.target.files[0]));
-const zone = document.getElementById('upload-zone');
-zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
 
 // ── TAB ────────────────────────────────────────────────────
 function switchFace(face) {
