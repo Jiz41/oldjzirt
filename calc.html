@@ -752,7 +752,7 @@ const COL = {
 
 function toFloat(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
 const get    = (row, key) => (row[key] || '').trim();
-const isHit  = row => { const v = get(row, COL.hantei); return v === 'T' || v === 'TRUE' || v === '1'; };
+const isHit  = row => { const v = get(row, COL.hantei); return v.includes('的中') && !v.includes('不的中'); };
 const isSeiT = row => get(row, COL.seiTF) === 'T';
 const isKoT  = row => get(row, COL.koTF)  === 'T';
 
