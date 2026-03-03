@@ -832,12 +832,33 @@ let _venueData = [];
 let _venueSortCol = null, _venueSortDir = 1;
 
 function renderVenueTable(entries) {
-  document.getElementById('venue-tbody').innerHTML = entries.map(v => {
+  const hrs = entries.map(v => v.hits/v.total*100);
+  const srs = entries.map(v => v.seiT/v.total*100);
+  const krs = entries.map(v => v.koT/v.total*100);
+
+  const maxHr = Math.max(...hrs), minHr = Math.min(...hrs);
+  const maxSr = Math.max(...srs), minSr = Math.min(...srs);
+  const maxKr = Math.max(...krs), minKr = Math.min(...krs);
+
+  const glow = (val, max, min) => {
+    if (val === max) return ' style="text-shadow:0 0 8px gold, 0 0 16px gold; color:gold;"';
+    if (val === min) return ' style="text-shadow:0 0 8px #ff4444, 0 0 16px #ff4444; color:#ff4444;"';
+    return '';
+  };
+
+  document.getElementById('venue-tbody').innerHTML = entries.map((v, i) => {
     const hr = (v.hits/v.total*100).toFixed(1);
     const sr = (v.seiT/v.total*100).toFixed(1);
     const kr = (v.koT/v.total*100).toFixed(1);
     const cls = parseFloat(hr)>=30?'val-good':parseFloat(hr)>=15?'val-neutral':'val-bad';
-    return `<tr><td>${v.venue}</td><td class="val-muted">${v.total}</td><td class="val-muted">${v.hits}</td><td class="${cls}">${hr}%</td><td>${sr}%</td><td>${kr}%</td></tr>`;
+    return `<tr>
+      <td>${v.venue}</td>
+      <td class="val-muted">${v.total}</td>
+      <td class="val-muted">${v.hits}</td>
+      <td class="${cls}"${glow(hrs[i], maxHr, minHr)}>${hr}%</td>
+      <td${glow(srs[i], maxSr, minSr)}>${sr}%</td>
+      <td${glow(krs[i], maxKr, minKr)}>${kr}%</td>
+    </tr>`;
   }).join('');
 }
 
