@@ -986,15 +986,30 @@ function renderCross() {
     if (isHit(r)) map[rv][cv].hits++;
   });
 
-  // 令種が絡む場合は行ごとの全件数・的中合計を集計
+  // 令種が絡む場合は令種と直交する軸ごとの的中合計を分母にする
   const useRowHits = (rowKey === 'rei' || colKey === 'rei');
-  const rowTotals = {};    // 行の全件数
-  const rowHitTotals = {}; // 行の的中件数合計
+  const rowHitTotals = {};
+  const rowTotals = {};
   if (useRowHits) {
-    Object.keys(map).forEach(rv => {
-      rowTotals[rv]    = Object.values(map[rv]).reduce((s, c) => s + c.total, 0);
-      rowHitTotals[rv] = Object.values(map[rv]).reduce((s, c) => s + c.hits,  0);
-    });
+    if (colKey === 'rei') {
+      // 令種が列 → 行ごとに集計
+      Object.keys(map).forEach(rv => {
+        rowTotals[rv]    = Object.values(map[rv]).reduce((s, c) => s + c.total, 0);
+        rowHitTotals[rv] = Object.values(map[rv]).reduce((s, c) => s + c.hits,  0);
+      });
+    } else {
+      // 令種が行 → 列ごとに集計
+      const colTotals = {}, colHitTotals = {};
+      Object.keys(map).forEach(rv => {
+        Object.keys(map[rv]).forEach(cv => {
+          colTotals[cv]    = (colTotals[cv]    || 0) + map[rv][cv].total;
+          colHitTotals[cv] = (colHitTotals[cv] || 0) + map[rv][cv].hits;
+        });
+      });
+      // rowHitTotals/rowTotalsをcv基準に読み替え
+      Object.assign(rowHitTotals, colHitTotals);
+      Object.assign(rowTotals,    colTotals);
+    }
   }
 
   // 行列ソート
@@ -1022,7 +1037,7 @@ function renderCross() {
   sortedCols.forEach(cv => { html += `<th>${cv}</th>`; });
   html += '</tr></thead><tbody>';
 
-  sortedRows.forEach(rv => {
+sortedRows.forEach(rv => {
     html += `<tr><td class="row-label">${rv}</td>`;
     sortedCols.forEach(cv => {
       const cell = map[rv] && map[rv][cv];
@@ -1030,13 +1045,14 @@ function renderCross() {
       if (!cell) {
         html += `<td class="sparse">—</td>`;
       } else if (useRowHits) {
-        const pct = hitRate(cell.hits, rowHitTotals[rv]);
+        const denomKey = colKey === 'rei' ? rv : cv;
+        const pct = hitRate(cell.hits, rowHitTotals[denomKey]);
         const bg  = heatColor(pct);
         const cls = sparse ? ' sparse' : '';
         const pctStr = pct !== null ? pct.toFixed(1) + '%' : '—';
         html += `<td class="${cls}" style="background:${bg}">` +
           `<span class="cross-val">${pctStr}</span>` +
-          `<span class="cross-count">${cell.hits}/${rowTotals[rv]}</span></td>`;
+          `<span class="cross-count">${cell.hits}/${rowTotals[denomKey]}</span></td>`;
       } else {
         const pct = hitRate(cell.hits, cell.total);
         const bg  = heatColor(pct);
