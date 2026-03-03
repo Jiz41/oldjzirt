@@ -986,11 +986,14 @@ function renderCross() {
     if (isHit(r)) map[rv][cv].hits++;
   });
 
-  // 全的中数合計
+  // 令種が絡む場合は構成比、それ以外は的中率
+  const useComposition = (rowKey === 'rei' || colKey === 'rei');
   let totalHits = 0;
-  Object.values(map).forEach(row =>
-    Object.values(row).forEach(cell => { totalHits += cell.hits; })
-  );
+  if (useComposition) {
+    Object.values(map).forEach(row =>
+      Object.values(row).forEach(cell => { totalHits += cell.hits; })
+    );
+  }
 
   // 行列ソート
   const sortVals = (vals, key) => {
@@ -1025,7 +1028,9 @@ function renderCross() {
       if (!cell) {
         html += `<td class="sparse">—</td>`;
       } else {
-        const pct = hitRate(cell.hits, totalHits);
+        const pct = useComposition
+          ? hitRate(cell.hits, totalHits)
+          : hitRate(cell.hits, cell.total);
         const bg  = heatColor(pct);
         const cls = sparse ? ' sparse' : '';
         html += `<td class="${cls}" style="background:${bg}">` +
