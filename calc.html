@@ -929,14 +929,14 @@ const AXIS_DEF = {
     if (v <= 67)  return '指数 67';
     return '指数 100';
   }},
-  rei:    { label: '令種', get: r => {
+rei:    { label: '令種', get: r => {
     const s = get(r, COL.seiTF), k = get(r, COL.koTF);
     const st = s === 'TRUE' || s === 'T' || s === '1';
     const kt = k === 'TRUE' || k === 'T' || k === '1';
-    if (st && kt) return '晴天T 荒天T';
-    if (st)       return '晴天T 荒天F';
-    if (kt)       return '晴天F 荒天T';
-    return '晴天F 荒天F';
+    if (st && kt) return '両令的中';
+    if (st)       return '晴天令的中';
+    if (kt)       return '荒天令的中';
+    return '外れ';
   }},
   kimari: { label: '決まり手', get: r => get(r, COL.kimariActual) || get(r, COL.kimari) || '不明' },
 };
