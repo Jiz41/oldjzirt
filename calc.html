@@ -611,8 +611,8 @@
           <th class="sortable" onclick="sortVenue('total')">レース数 <span class="sort-icon" id="si-total">▲▼</span></th>
           <th class="sortable" onclick="sortVenue('hits')">的中数 <span class="sort-icon" id="si-hits">▲▼</span></th>
           <th class="sortable" onclick="sortVenue('hitRate')">的中率 <span class="sort-icon" id="si-hitRate">▲▼</span></th>
-          <th class="sortable" onclick="sortVenue('seiRate')">晴天令T率 <span class="sort-icon" id="si-seiRate">▲▼</span></th>
-          <th class="sortable" onclick="sortVenue('koRate')">荒天令T率 <span class="sort-icon" id="si-koRate">▲▼</span></th>
+          <th class="sortable" onclick="sortVenue('seiRate')">晴天令 <span class="sort-icon" id="si-seiRate">▲▼</span></th>
+          <th class="sortable" onclick="sortVenue('koRate')">荒天令 <span class="sort-icon" id="si-koRate">▲▼</span></th>
         </tr></thead>
         <tbody id="venue-tbody"></tbody>
       </table>
@@ -1124,8 +1124,7 @@ function renderEV(result, rows) {
     evCard(ev>=0?'pos':'neg', '純損益', sign + ev.toLocaleString() + '円', '1レース平均 ' + (evPerRace>=0?'+':'') + evPerRace.toLocaleString() + '円') +
     evCard(seiEV>=0?'pos':'neg', '晴天令　回収', sSign + seiEV.toLocaleString() + '円', '回収率 ' + sRec + '%') +
     evCard(koEV>=0?'pos':'neg', '荒天令　回収', kSign + koEV.toLocaleString() + '円', '回収率 ' + kRec + '%') +
-    evCard('', '令パターン', 'TT:' + pat.TT + ' TF:' + pat.TF + ' FT:' + pat.FT + ' FF:' + pat.FF, 'FF率 ' + ffPct + '%');
-
+evCard('', '令種内訳', '両令的中:' + pat.TT + ' 晴天令的中:' + pat.TF + ' 荒天令的中:' + pat.FT + ' 外れ:' + pat.FF, '');
   // BEST HIT
   var bestRow = null, bestOdds = 0;
   for (var j = 0; j < rows.length; j++) {
