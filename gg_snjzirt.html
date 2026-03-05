@@ -786,17 +786,22 @@ function analyze(rows) {
   const koTCnt  = rows.filter(isKoT).length;
   const totalInvest = total * 1000;
 
-  const calcKiken = (tfFn, oddsKey, investPerRace) => {
+  const calcKiken = (tfFn, oddsKey, investPerRace, overrideTotal) => {
     let payout = 0, hitCount = 0;
     rows.forEach(row => { if (tfFn(row)) { const o = toFloat(get(row, oddsKey)); if (o > 0) { payout += o * 100; hitCount++; } } });
-    const invest = total * investPerRace;
+    const invest = (overrideTotal !== undefined ? overrideTotal : total) * investPerRace;
     return { payout, hitCount, invest, recovery: invest > 0 ? payout/invest*100 : 0 };
   };
+
+  const k2tanTotal = rows.filter(row => {
+    const d = get(row, COL.date).replace(/\//g, '-');
+    return d >= '2025-12-24';
+  }).length;
 
   const s3tan  = calcKiken(isSeiT, COL.odds3tan,  400);
   const s3fuku = calcKiken(isSeiT, COL.odds3fuku, 100);
   const k3fuku = calcKiken(isKoT,  COL.odds3fuku, 200);
-  const k2tan  = calcKiken(isKoT,  COL.odds2tan,  300);
+  const k2tan  = calcKiken(isKoT,  COL.odds2tan,  300, k2tanTotal);
   const totalPayout   = s3tan.payout + s3fuku.payout + k3fuku.payout + k2tan.payout;
   const totalRecovery = totalInvest > 0 ? totalPayout/totalInvest*100 : 0;
 
