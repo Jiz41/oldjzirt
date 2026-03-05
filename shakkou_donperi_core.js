@@ -55,7 +55,7 @@ const SHAKKOU_WORLD_TABLE = {
     ],
     
     'a-chal': [
-        { id: 'W0', name: '物理純正世界', weight: 366, events: [] },
+        { id: 'W0', name: '物理純正世界', weight: 249, events: [] },
         { id: 'W1', name: 'ライン完全崩壊', weight: 366, events: ['line_breakdown_severe'] },
         { id: 'W2', name: '無謀な早仕掛け', weight: 220, events: ['reckless_attack'] },
         { id: 'W3', name: 'ルーキー暴走', weight: 147, events: ['rookie_rampage'] },
@@ -64,7 +64,8 @@ const SHAKKOU_WORLD_TABLE = {
         { id: 'W6', name: '複合カオスA', weight: 59, events: ['line_breakdown', 'early_attack'] },
         { id: 'W7', name: '複合カオスB', weight: 44, events: ['rookie_rampage', 'crash'] },
         { id: 'W8', name: '落車世界', weight: 29, events: ['crash'] },
-        { id: 'W9', name: '完全崩壊世界', weight: 14, events: ['line_breakdown_severe', 'crash', 'dark_horse'] }
+        { id: 'W9', name: '完全崩壊世界', weight: 14, events: ['line_breakdown_severe', 'crash', 'dark_horse'] },
+        { id: 'W10', name: '逃げ切り成功', weight: 117, events: ['escape_success'] }
     ],
     
     'girls': [
@@ -176,6 +177,11 @@ function applyChaos(players, events, context) {
                 applyMakuriSuicide(players, context);
                 occurredEvents.push('捲り自滅');
                 break;
+            
+            case 'escape_success':
+                applyEscapeSuccess(players);
+                occurredEvents.push('逃げ切り成功');
+                break;
         }
     });
     
@@ -258,7 +264,7 @@ function applyLineBreakdownSevere(players, context) {
 }
 
 function applyEarlyAttack(players, context, successRate) {
-    const selfStarterIds = players.filter(p => p.style === '自' || p.style === '両').map(p => p.id);
+    const selfStarterIds = players.filter(p => p.style === '逃' || p.style === '自' || p.style === '両').map(p => p.id);
     
     if (selfStarterIds.length === 0) return;
     
@@ -379,6 +385,23 @@ function applyMakuriSuicide(players, context) {
     players.forEach(p => {
         if (p.id !== suicider.id && p.style === '追') {
             p.final_score *= 1.20;
+        }
+    });
+}
+
+function applyEscapeSuccess(players) {
+    const escapers = players.filter(p => p.style === '逃');
+    if (escapers.length === 0) return;
+    
+    const escaperId = escapers[
+        Math.floor(Math.random() * escapers.length)
+    ].id;
+    
+    players.forEach(p => {
+        if (p.id === escaperId) {
+            p.final_score *= 1.50;
+        } else {
+            p.final_score *= 0.85;
         }
     });
 }
