@@ -448,9 +448,17 @@ async function invokeShakkouDonperi(basePlayers, context) {
 
             const occurredEvents = applyChaos(players, world.events, context);
 
+            const flutterMap = {
+                's-kyu':  { min: 0.90, range: 0.20 },
+                'a-kyu':  { min: 0.85, range: 0.30 },
+                'girls':  { min: 0.85, range: 0.30 },
+                'a-chal': { min: 0.80, range: 0.40 },
+            };
+            const flutter = flutterMap[context.grade] 
+                || { min: 0.90, range: 0.20 };
+
             players.forEach(p => {
-                // ±5%のランダムゆらぎ：同一世界線内での個体差・レース展開の微細な揺れを表現
-                p.final_score *= (0.95 + Math.random() * 0.10);
+                p.final_score *= (flutter.min + Math.random() * flutter.range);
             });
 
             players.sort((a, b) => b.final_score - a.final_score);
