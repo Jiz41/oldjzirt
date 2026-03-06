@@ -620,6 +620,16 @@
         <tbody id="券種-tbody"></tbody>
       </table>
     </div>
+
+    <div class="divider"></div>
+    <div class="section-title">── 級班別　成績</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>級班</th><th>R数</th><th>的中率</th><th>回収率</th></tr></thead>
+        <tbody id="kyuhan-tbody"></tbody>
+      </table>
+    </div>
+
     <div class="divider"></div>
     <div class="venue-header-row">
       <div class="section-title">── 開催場別　的中率</div>
@@ -769,6 +779,7 @@ const COL = {
   date: 'レース日', venue: '開催場', tenun: '天雲指数',
   seiTF: '晴天令 T/F', koTF: '荒天令 T/F', hantei: '総合判定',
   kimari: '決まり手', odds3tan: '3連単オッズ', odds3fuku: '3連複オッズ', odds2tan: '2車単オッズ',
+  kyuhan: '級班'
 };
 
 function toFloat(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
@@ -800,21 +811,16 @@ function onPeriodChange() {
 function analyze(rows) {
   const total = rows.length;
   const empty = { payout:0, hitCount:0, invest:0, recovery:0, targetRaces: 0 };
-  if (total === 0) return { total:0, hits:0, hitRate:0, seiT:0, seiRate:0, koT:0, koRate:0, totalInvest:0, totalPayout:0, totalRecovery:0, kiken:{s3tan:empty,s3fuku:empty,k3fuku:empty,k2tan:empty}, venues:{} };
+  if (total === 0) return { total:0, hits:0, hitRate:0, seiT:0, seiRate:0, koT:0, koRate:0, totalInvest:0, totalPayout:0, totalRecovery:0, kiken:{s3tan:empty,s3fuku:empty,k3fuku:empty,k2tan:empty}, venues:{}, kyuhan:{} };
 
   const hits    = rows.filter(isHit).length;
   const seiTCnt = rows.filter(isSeiT).length;
   const koTCnt  = rows.filter(isKoT).length;
   const totalInvest = total * 1000;
 
-  //【修正】券種別成績の計算ロジック
   const calcKiken = (rowsToProcess, tfColumn, oddsKey, investPerRace) => {
     let payout = 0, hitCount = 0;
-
-    // 分母: 令が発動した（T/Fが空でない）レースの総数
     const investRaceCount = rowsToProcess.filter(row => get(row, tfColumn) !== '').length;
-
-    // 分子: 的中した（T/F が 'T' かつ オッズ > 0）レースの集計
     rowsToProcess.forEach(row => {
       if (get(row, tfColumn) === 'T') {
         const o = toFloat(get(row, oddsKey));
@@ -824,7 +830,6 @@ function analyze(rows) {
         }
       }
     });
-
     const invest = investRaceCount * investPerRace;
     return { payout, hitCount, invest, recovery: invest > 0 ? payout / invest * 100 : 0, targetRaces: investRaceCount };
   };
@@ -832,25 +837,63 @@ function analyze(rows) {
   const s3tan  = calcKiken(rows, COL.seiTF, COL.odds3tan,  400);
   const s3fuku = calcKiken(rows, COL.seiTF, COL.odds3fuku, 100);
   const k3fuku = calcKiken(rows, COL.koTF,  COL.odds3fuku, 200);
-
   const k2tanRows = rows.filter(row => get(row, COL.date).replace(/\//g, '-') >= '2025-12-24');
   const k2tan  = calcKiken(k2tanRows, COL.koTF, COL.odds2tan,  300);
-
 
   const totalPayout   = s3tan.payout + s3fuku.payout + k3fuku.payout + k2tan.payout;
   const totalRecovery = totalInvest > 0 ? totalPayout/totalInvest*100 : 0;
 
   const venueMap = {};
+  const kyuhanMap = {};
+
   rows.forEach(row => {
+    // Venue Analysis
     const v = get(row, COL.venue) || '不明';
     if (!venueMap[v]) venueMap[v] = {total:0, hits:0, seiT:0, koT:0};
     venueMap[v].total++;
     if (isHit(row))  venueMap[v].hits++;
     if (isSeiT(row)) venueMap[v].seiT++;
     if (isKoT(row))  venueMap[v].koT++;
+
+    // Kyuhan Analysis
+    const kyuhanName = get(row, COL.kyuhan) || '不明';
+    if (!kyuhanMap[kyuhanName]) {
+        kyuhanMap[kyuhanName] = { raceCount: 0, hitCount: 0, invest: 0, payout: 0 };
+    }
+    const stat = kyuhanMap[kyuhanName];
+    stat.raceCount++;
+    if(isHit(row)) {
+        stat.hitCount++;
+    }
+
+    let currentRaceInvest = 0;
+    let currentRacePayout = 0;
+
+    if (get(row, COL.seiTF) !== '') {
+        currentRaceInvest += 500; // 400 (3tan) + 100 (3fuku)
+        if(isSeiT(row)) {
+            currentRacePayout += toFloat(get(row, COL.odds3tan)) * 100;
+            currentRacePayout += toFloat(get(row, COL.odds3fuku)) * 100;
+        }
+    }
+
+    if (get(row, COL.koTF) !== '') {
+        currentRaceInvest += 200; // 3fuku
+        if (get(row, COL.date).replace(/\//g, '-') >= '2025-12-24') {
+            currentRaceInvest += 300; // 2tan
+        }
+        if(isKoT(row)) {
+            currentRacePayout += toFloat(get(row, COL.odds3fuku)) * 100;
+            if (get(row, COL.date).replace(/\//g, '-') >= '2025-12-24') {
+               currentRacePayout += toFloat(get(row, COL.odds2tan)) * 100;
+            }
+        }
+    }
+    stat.invest += currentRaceInvest;
+    stat.payout += currentRacePayout;
   });
 
-  return { total, hits, hitRate: hits/total*100, seiT:seiTCnt, seiRate:seiTCnt/total*100, koT:koTCnt, koRate:koTCnt/total*100, totalInvest, totalPayout, totalRecovery, kiken:{s3tan,s3fuku,k3fuku,k2tan}, venues:venueMap };
+  return { total, hits, hitRate: hits/total*100, seiT:seiTCnt, seiRate:seiTCnt/total*100, koT:koTCnt, koRate:koTCnt/total*100, totalInvest, totalPayout, totalRecovery, kiken:{s3tan,s3fuku,k3fuku,k2tan}, venues:venueMap, kyuhan:kyuhanMap };
 }
 
 // ── Render ───────────────────────────────────────────────────
@@ -945,7 +988,7 @@ function resetVenueGeo() {
 }
 
 function renderStats(result) {
-  const { total, hits, hitRate, seiT, seiRate, koT, koRate, totalInvest, totalPayout, totalRecovery, kiken, venues } = result;
+  const { total, hits, hitRate, seiT, seiRate, koT, koRate, totalInvest, totalPayout, totalRecovery, kiken, venues, kyuhan } = result;
 
   document.getElementById('overview-stats').innerHTML = `
     <div class="stat-card"><div class="stat-label">対象レース数</div><div class="stat-value">${total.toLocaleString()}</div><div class="stat-sub">レース</div></div>
@@ -981,7 +1024,24 @@ function renderStats(result) {
     </tr>`;
   }).join('');
 
-  // 場別データを保存してレース数順で初期表示
+  const kyuhanOrder = ['S級', 'A級', 'A級チャレンジ', 'ガールズ'];
+  let kyuhanHtml = '';
+  kyuhanOrder.forEach(kyuhanName => {
+      const data = kyuhan[kyuhanName];
+      if (!data || data.raceCount === 0) return;
+      const hitRateVal = data.raceCount > 0 ? (data.hitCount / data.raceCount * 100) : 0;
+      const recoveryRateVal = data.invest > 0 ? (data.payout / data.invest * 100) : 0;
+      const hitRateCls = hitRateVal >= 30 ? 'val-good' : hitRateVal >= 15 ? 'val-neutral' : 'val-bad';
+      const recoveryCls = recoveryRateVal >= 100 ? 'val-good' : recoveryRateVal >= 70 ? 'val-neutral' : 'val-bad';
+      kyuhanHtml += `<tr>
+          <td>${kyuhanName}</td>
+          <td class="val-muted">${data.raceCount}</td>
+          <td class="${hitRateCls}">${hitRateVal.toFixed(1)}%</td>
+          <td class="${recoveryCls}">${recoveryRateVal.toFixed(1)}%</td>
+      </tr>`;
+  });
+  document.getElementById('kyuhan-tbody').innerHTML = kyuhanHtml;
+
   _venueData = Object.entries(venues).map(([venue, v]) => ({ venue, ...v }));
   const initSorted = [..._venueData].sort((a, b) => b.total - a.total);
   renderVenueTable(initSorted);
