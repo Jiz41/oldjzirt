@@ -807,11 +807,16 @@ function analyze(rows) {
   const koTCnt  = rows.filter(isKoT).length;
   const totalInvest = total * 1000;
 
-  const calcKiken = (rowsToProcess, tfFn, oddsKey, investPerRace) => {
-    let payout = 0, hitCount = 0, investRaceCount = 0;
+  //【修正】券種別成績の計算ロジック
+  const calcKiken = (rowsToProcess, tfColumn, oddsKey, investPerRace) => {
+    let payout = 0, hitCount = 0;
+
+    // 分母: 令が発動した（T/Fが空でない）レースの総数
+    const investRaceCount = rowsToProcess.filter(row => get(row, tfColumn) !== '').length;
+
+    // 分子: 的中した（T/F が 'T' かつ オッズ > 0）レースの集計
     rowsToProcess.forEach(row => {
-      if (tfFn(row)) {
-        investRaceCount++;
+      if (get(row, tfColumn) === 'T') {
         const o = toFloat(get(row, oddsKey));
         if (o > 0) {
           payout += o * 100;
@@ -819,16 +824,18 @@ function analyze(rows) {
         }
       }
     });
+
     const invest = investRaceCount * investPerRace;
-    return { payout, hitCount, invest, recovery: invest > 0 ? payout/invest*100 : 0, targetRaces: investRaceCount };
+    return { payout, hitCount, invest, recovery: invest > 0 ? payout / invest * 100 : 0, targetRaces: investRaceCount };
   };
 
-  const s3tan  = calcKiken(rows, isSeiT, COL.odds3tan,  400);
-  const s3fuku = calcKiken(rows, isSeiT, COL.odds3fuku, 100);
-  const k3fuku = calcKiken(rows, isKoT,  COL.odds3fuku, 200);
+  const s3tan  = calcKiken(rows, COL.seiTF, COL.odds3tan,  400);
+  const s3fuku = calcKiken(rows, COL.seiTF, COL.odds3fuku, 100);
+  const k3fuku = calcKiken(rows, COL.koTF,  COL.odds3fuku, 200);
 
   const k2tanRows = rows.filter(row => get(row, COL.date).replace(/\//g, '-') >= '2025-12-24');
-  const k2tan  = calcKiken(k2tanRows, isKoT, COL.odds2tan,  300);
+  const k2tan  = calcKiken(k2tanRows, COL.koTF, COL.odds2tan,  300);
+
 
   const totalPayout   = s3tan.payout + s3fuku.payout + k3fuku.payout + k2tan.payout;
   const totalRecovery = totalInvest > 0 ? totalPayout/totalInvest*100 : 0;
