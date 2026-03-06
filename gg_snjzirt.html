@@ -228,11 +228,10 @@
   .section-title::before { content: '▍'; color: var(--red); font-size: 16px; }
 
   /* ── アニメ ── */
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes pulse  { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
 
   /* ── Results ── */
-  #results { display: none; margin-top: 32px; animation: fadeIn 0.5s ease; }
+  #results { display: none; margin-top: 32px; }
   #results.visible { display: block; }
 
   /* ── stat-card ── */
