@@ -1,24 +1,29 @@
 (function(app) {
 
-// 真自在律 実質Ver9.2 - 捌風旋炉 枢（はっぷうせんろ くるる）物理層実装
-// 【V7.3】消耗ペナルティ適用拡大 ＆ 複数競り表示修正
-// 【V7.4】壱耀メッセージ追加 ＆ 買い目変更
-// 【V8.0】動的風圧遮蔽(kururu)実装 ＆ 自滅消耗(C_suicide)・漁夫の利ブースト統合
-//  - 360度全風向ベクトル分解によるライン番手別スタミナ損耗率の算出
-//  - 激突ライン共倒れ予測による「展開的必然」の穴抽出ロジック完遂
-// 【V8.1】枢・天命連動（壱耀改修）。実効風速 v を判定ロジックへ完全バトンパス。
-//       -「壱耀晴乾ノ象」を純粋なる「差し（追）」限定へ聖域化。
-//       - 物理層（風速）と占術層（天運指数）の因果関係を統合。
-//       - 構文不整合の排除、およびデータフローの単一化。
-// 【V9.0】物理層最優先実装 - バンクデータに基づく「非情な物理演算」
-//  - straight（みなし直線）による生存判定：35m未満で4番手以降を大幅減点
-//  - canto（カント）による捲りエネルギー消費：32度超で捲りコスト×1.5
-//  - イン突き（ワープ）実装：番手ブロック時の内線選手ブースト×1.35
-//  - 計算順序: 物理層 → 展開層 → 事象層（kururu風圧・壱耀占術）
-// 【V9.1】赤口呑縁（シャッコウ・ドンペリ）導入 - 1465世界線並列シミュレーション実装
+// 真自在律 Ver9.3
+// 【V9.3】C_l非メインライン3番手ボーナス廃止
+//          各ラインの競走得点合計を算出しメインラインを特定。
+//          メインライン3番手のみC_l=1.03を維持、それ以外は1.00に変更。
+//          非メインライン3番手の過大評価を解消しランキング精度向上を図る。
 // 【V9.2】赤口呑縁独立起動統合
-//          runScenarioSimulation を本来のロジックに完全復元
-//          赤口呑縁関係の諸々不具合修正（invokeShakkouDonperi直接呼び出し・展開別表示削除）
+//          runScenarioSimulation を本来のロジックに完全復元。
+//          赤口呑縁関係の諸々不具合修正（invokeShakkouDonperi直接呼び出し・展開別表示削除）。
+// 【V9.1】赤口呑縁（シャッコウ・ドンペリ）導入 - 1465世界線並列シミュレーション実装。
+// 【V9.0】物理層最優先実装 - バンクデータに基づく「非情な物理演算」
+//          - straight（みなし直線）による生存判定：35m未満で4番手以降を大幅減点。
+//          - canto（カント）による捲りエネルギー消費：32度超で捲りコスト×1.5。
+//          - イン突き（ワープ）実装：番手ブロック時の内線選手ブースト×1.35。
+//          - 計算順序: 物理層 → 展開層 → 事象層（kururu風圧・壱耀占術）。
+// 【V8.1】枢・天命連動（壱耀改修）
+//          実効風速 v を判定ロジックへ完全バトンパス。
+//          「壱耀晴乾ノ象」を純粋なる「差し（追）」限定へ聖域化。
+//          物理層（風速）と占術層（天運指数）の因果関係を統合。
+//          構文不整合の排除、およびデータフローの単一化。
+// 【V8.0】動的風圧遮蔽(kururu)実装 ＆ 自滅消耗(C_suicide)・漁夫の利ブースト統合
+//          - 360度全風向ベクトル分解によるライン番手別スタミナ損耗率の算出。
+//          - 激突ライン共倒れ予測による「展開的必然」の穴抽出ロジック完遂。
+// 【V7.4】壱耀メッセージ追加 ＆ 買い目変更。
+// 【V7.3】消耗ペナルティ適用拡大 ＆ 複数競り表示修正。
 // ------------------------------------------------------------------------------------
 
 const COEFFICIENT_SETTINGS = {
@@ -458,7 +463,7 @@ function parseLineInput(lineInput, allPlayers) {
 }
 
 // ====================================================================================
-// calculateLineCoeffs  ★ C_L完全実装版
+// calculateLineCoeffs  ★ C_L改修版
 // ====================================================================================
 function calculateLineCoeffs(players, settings) {
 
@@ -500,50 +505,78 @@ function calculateLineCoeffs(players, settings) {
     });
     app.logMessage(`[ORDER] 最終表示順序に欠落選手を補完しました。`);
 
-    // 3. C_L（ライン結束力係数）計算 ★実装
+    // 3. C_L（ライン結束力係数）計算 ★改修ロジック
     const coop = settings.COOP_WEIGHT || 1.0;
-
-    // 競り敗者はラインから外れたので C_L = 1.0 のまま
     const seriLoserIds = new Set(parsedAllSeriInfos.map(s => s.loser));
 
     if (settings.IS_GIRLS) {
-        app.logMessage(`[C_L] ガールズ競輪モード: エースマーク係数適用 (C_MARK_VALUES)`);
+        app.logMessage(`[C_L] ガールズ競輪モード: エースマーク係数適用`);
         lines.forEach(line => {
             if (line.length < 2) return;
             const leader = participatingPlayers.find(p => p.id === line[0]);
             for (let i = 1; i < line.length; i++) {
                 const p = participatingPlayers.find(pp => pp.id === line[i]);
                 if (!p || seriLoserIds.has(p.id)) continue;
-
                 let markVal = C_MARK_VALUES.LOW;
                 if (leader && leader.wmark === '◎')      markVal = C_MARK_VALUES.HIGH;
                 else if (leader && leader.wmark === '〇') markVal = C_MARK_VALUES.MEDIUM;
-
-                // 番手は満額、3番手以降は半額ボーナス
                 p.c_l = (i === 1) ? markVal : 1.0 + (markVal - 1.0) * 0.5;
                 app.logMessage(`[C_L] 選手ID ${p.id}: ガールズC_L=${p.c_l.toFixed(3)}`);
             }
         });
     } else {
+        // ★★★ START: C_l 改修ロジック ★★★
         app.logMessage(`[C_L] 一般競輪モード: COOP_WEIGHT=${coop}`);
+
+        // ① 各ラインの競走得点合計を算出
+        const lineScores = lines.map(line => {
+            const score = line.reduce((total, playerId) => {
+                const player = participatingPlayers.find(p => p.id === playerId);
+                return total + (player ? player.score : 0);
+            }, 0);
+            return { line, score };
+        });
+
+        // ② メインラインを特定
+        let mainLine = [];
+        if (lineScores.length > 0) {
+            const mainLineData = lineScores.reduce((max, current) => (current.score > max.score) ? current : max);
+            mainLine = mainLineData.line;
+            app.logMessage(`[C_L] メインライン特定: ${mainLine.join('-')} (得点合計: ${mainLineData.score.toFixed(2)})`);
+        }
+
+        // ③ C_l の適用
         lines.forEach(line => {
             if (line.length < 2) return;
-            for (let i = 1; i < line.length; i++) {
+            for (let i = 0; i < line.length; i++) {
                 const p = participatingPlayers.find(pp => pp.id === line[i]);
                 if (!p || seriLoserIds.has(p.id)) continue;
 
-                if (i === 1) {
-                    p.c_l = 1.0 + coop * 0.05;       // 番手
-                } else {
-                    p.c_l = 1.0 + coop * 0.03;       // 3番手以降
+                if (i === 0) { // 1番手
+                    p.c_l = 1.00;
+                } else if (i === 1) { // 2番手
+                    p.c_l = 1.0 + coop * 0.05;
+                    app.logMessage(`[C_L] 選手ID ${p.id}: 2番手 C_L=${p.c_l.toFixed(3)}`);
+                } else if (i === 2) { // 3番手
+                    const isMainLine = (mainLine.toString() === line.toString());
+                    if (isMainLine) {
+                        p.c_l = 1.0 + coop * 0.03;
+                        app.logMessage(`[C_L] 選手ID ${p.id}: ★メインライン3番手★ C_L=${p.c_l.toFixed(3)}`);
+                    } else {
+                        p.c_l = 1.00;
+                        app.logMessage(`[C_L] 選手ID ${p.id}: 非メインライン3番手 C_L=1.00`);
+                    }
+                } else { // 4番手以降
+                    p.c_l = 1.00;
                 }
-                app.logMessage(`[C_L] 選手ID ${p.id}: 位置${i + 1}番手 C_L=${p.c_l.toFixed(3)}`);
             }
         });
+        // ★★★ END: C_l 改修ロジック ★★★
     }
 
     return { players: participatingPlayers, allSeriInfos: parsedAllSeriInfos, finalOrderedPlayerIds, displayLineSegments };
 }
+
 
 // ====================================================================================
 // applySeriCorrection
