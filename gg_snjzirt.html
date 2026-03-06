@@ -21,7 +21,7 @@
     --green:     #2d6b3e;
     --surface:   rgba(242,232,213,0.02);
     --surface2:  rgba(242,232,213,0.04);
-    --glass:     rgba(26,21,16,0.75);
+    --glass:     rgba(26,21,16,0.72);
     --border:    rgba(184,150,46,0.25);
     --border2:   rgba(184,150,46,0.5);
     --text:      #f2e8d5;
@@ -117,9 +117,9 @@
   /* ── ガラスカード共通 ── */
   .glass {
     background: var(--glass);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid var(--border);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(184,150,46,0.35);
     border-radius: 2px;
     position: relative;
   }
@@ -136,9 +136,9 @@
     padding: 48px 24px;
     text-align: center;
     background: var(--glass);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(184,150,46,0.35);
     border-radius: 2px;
     position: relative;
     overflow: hidden;
@@ -239,8 +239,8 @@
   .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 32px; }
   .stat-card {
     background: var(--glass);
-    backdrop-filter: blur(18px) saturate(180%);
-    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(184,150,46,0.35);
     padding: 16px; position: relative; overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -265,8 +265,8 @@
   /* ── table ── */
   .table-wrap {
     background: var(--glass);
-    backdrop-filter: blur(18px) saturate(180%);
-    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(184,150,46,0.35);
     overflow-x: auto;
     margin-bottom: 32px;
@@ -294,8 +294,8 @@
   .miss-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
   .miss-card {
     background: var(--glass);
-    backdrop-filter: blur(18px) saturate(180%);
-    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(184,150,46,0.35);
     padding: 16px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 2px 0 rgba(242,232,213,0.04) inset;
@@ -335,8 +335,8 @@
   .ev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 24px; }
   .ev-card {
     background: var(--glass);
-    backdrop-filter: blur(18px) saturate(180%);
-    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(184,150,46,0.35);
     padding: 16px; position: relative; overflow: hidden;
     box-shadow:
@@ -355,10 +355,10 @@
 
   /* ── BEST ── */
   .best-banner {
-    background: linear-gradient(135deg, rgba(184,150,46,0.12), rgba(192,57,43,0.08));
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--gold);
+    background: var(--glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(184,150,46,0.35);
     box-shadow: 0 0 24px rgba(184,150,46,0.1);
     padding: 16px 20px; margin-bottom: 24px;
     display: none; align-items: center; gap: 16px;
@@ -373,8 +373,8 @@
   /* ── X POST ── */
   .x-box {
     background: var(--glass);
-    backdrop-filter: blur(18px) saturate(180%);
-    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(184,150,46,0.35);
     padding: 20px; margin-bottom: 24px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 2px 0 rgba(242,232,213,0.04) inset;
