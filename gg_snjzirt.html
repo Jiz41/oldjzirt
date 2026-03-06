@@ -1024,17 +1024,24 @@ function renderStats(result) {
     </tr>`;
   }).join('');
 
-  const kyuhanOrder = ['S級', 'A級', 'A級チャレンジ', 'ガールズ'];
+  const kyuhanSheetKeys = ['S級', 'A級', 'Aチャレ', 'ガールズ'];
+  const kyuhanDisplayMap = {
+      'S級': 'S級',
+      'A級': 'A級',
+      'Aチャレ': 'A級チャレ',
+      'ガールズ': 'ガールズ'
+  };
   let kyuhanHtml = '';
-  kyuhanOrder.forEach(kyuhanName => {
-      const data = kyuhan[kyuhanName];
+  kyuhanSheetKeys.forEach(kyuhanKey => {
+      const data = kyuhan[kyuhanKey];
       if (!data || data.raceCount === 0) return;
+      const displayName = kyuhanDisplayMap[kyuhanKey];
       const hitRateVal = data.raceCount > 0 ? (data.hitCount / data.raceCount * 100) : 0;
       const recoveryRateVal = data.invest > 0 ? (data.payout / data.invest * 100) : 0;
       const hitRateCls = hitRateVal >= 30 ? 'val-good' : hitRateVal >= 15 ? 'val-neutral' : 'val-bad';
       const recoveryCls = recoveryRateVal >= 100 ? 'val-good' : recoveryRateVal >= 70 ? 'val-neutral' : 'val-bad';
       kyuhanHtml += `<tr>
-          <td>${kyuhanName}</td>
+          <td>${displayName}</td>
           <td class="val-muted">${data.raceCount}</td>
           <td class="${hitRateCls}">${hitRateVal.toFixed(1)}%</td>
           <td class="${recoveryCls}">${recoveryRateVal.toFixed(1)}%</td>
