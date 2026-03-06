@@ -779,7 +779,7 @@ const COL = {
   date: 'レース日', venue: '開催場', tenun: '天雲指数',
   seiTF: '晴天令 T/F', koTF: '荒天令 T/F', hantei: '総合判定',
   kimari: '決まり手', odds3tan: '3連単オッズ', odds3fuku: '3連複オッズ', odds2tan: '2車単オッズ',
-  kyuhan: '級班'
+  kyuhan: '級別'
 };
 
 function toFloat(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
@@ -967,7 +967,7 @@ function sortVenue(col) {
     if (col === 'hits')    { av = a.hits;  bv = b.hits; }
     if (col === 'hitRate') { av = a.hits/a.total; bv = b.hits/b.total; }
     if (col === 'seiRate') { av = a.seiT/a.total; bv = b.seiT/b.total; }
-    if (col === 'koRate')  { av = a.koT/a.total;  bv = b.koT/b.total; }
+    if (col === 'koRate')  { av = a.koT/a.total;  bv = b.koT/a.total; }
     return (av - bv) * _venueSortDir;
   });
   renderVenueTable(sorted);
