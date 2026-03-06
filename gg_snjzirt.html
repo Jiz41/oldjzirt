@@ -21,7 +21,7 @@
     --green:     #2d6b3e;
     --surface:   rgba(242,232,213,0.02);
     --surface2:  rgba(242,232,213,0.04);
-    --glass:     rgba(26,21,16,0.72);
+    --glass:     rgba(26,21,16,0.50);
     --border:    rgba(184,150,46,0.25);
     --border2:   rgba(184,150,46,0.5);
     --text:      #f2e8d5;
@@ -248,10 +248,10 @@
       0 0 20px rgba(184,150,46,0.08),
       0 2px 0 rgba(242,232,213,0.06) inset,
       0 -2px 0 rgba(0,0,0,0.4) inset,
-      0 8px 32px rgba(0,0,0,0.5),
+      0 8px 32px rgba(0,0,0,0.15),
       0 1px 0 rgba(184,150,46,0.1);
   }
-  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 2px 0 rgba(242,232,213,0.08) inset, 0 -2px 0 rgba(0,0,0,0.4) inset; }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.25), 0 2px 0 rgba(242,232,213,0.08) inset, 0 -2px 0 rgba(0,0,0,0.4) inset; }
   .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gold); opacity: 0.5; }
   .stat-card::after  { content: ''; position: absolute; top: 0; right: 0; width: 40px; height: 40px; background: radial-gradient(circle at top right, rgba(184,150,46,0.08), transparent); }
   .stat-card.accent2::before { background: var(--indigo); }
@@ -271,7 +271,7 @@
     overflow-x: auto;
     margin-bottom: 32px;
     -webkit-overflow-scrolling: touch;
-    box-shadow: 0 0 20px rgba(184,150,46,0.08), 0 8px 32px rgba(0,0,0,0.4), 0 2px 0 rgba(242,232,213,0.04) inset;
+    box-shadow: 0 0 20px rgba(184,150,46,0.08), 0 8px 32px rgba(0,0,0,0.15), 0 2px 0 rgba(242,232,213,0.04) inset;
   }
   table { width: 100%; border-collapse: collapse; min-width: 480px; }
   thead th {
@@ -298,7 +298,7 @@
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(184,150,46,0.35);
     padding: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 2px 0 rgba(242,232,213,0.04) inset;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 2px 0 rgba(242,232,213,0.04) inset;
   }
   .miss-card-title {
     font-family: 'Shippori Mincho', serif;
@@ -343,7 +343,7 @@
       0 0 20px rgba(184,150,46,0.08),
       0 2px 0 rgba(242,232,213,0.06) inset,
       0 -2px 0 rgba(0,0,0,0.4) inset,
-      0 8px 32px rgba(0,0,0,0.5),
+      0 8px 32px rgba(0,0,0,0.15),
       0 1px 0 rgba(184,150,46,0.1);
   }
   .ev-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gold); opacity: 0.4; }
@@ -359,7 +359,7 @@
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(184,150,46,0.35);
-    box-shadow: 0 0 24px rgba(184,150,46,0.1);
+    box-shadow: 0 0 24px rgba(184,150,46,0.1), 0 8px 32px rgba(0,0,0,0.15);
     padding: 16px 20px; margin-bottom: 24px;
     display: none; align-items: center; gap: 16px;
   }
@@ -377,7 +377,7 @@
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(184,150,46,0.35);
     padding: 20px; margin-bottom: 24px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 2px 0 rgba(242,232,213,0.04) inset;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 2px 0 rgba(242,232,213,0.04) inset;
   }
   .x-post-text { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--text); padding: 12px; font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.8; resize: vertical; min-height: 160px; }
   .x-post-text:focus { outline: none; border-color: var(--gold); }
