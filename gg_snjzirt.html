@@ -616,7 +616,7 @@
     <div class="section-title">── 券種別　回収率</div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>令</th><th>券種</th><th>点数</th><th>投資額</th><th>払戻合計</th><th>回収率</th><th>的中数</th></tr></thead>
+        <thead><tr><th>令</th><th>券種</th><th>点数</th><th>投資額</th><th>払戻合計</th><th>的中率</th><th>回収率</th><th>的中数</th></tr></thead>
         <tbody id="券種-tbody"></tbody>
       </table>
     </div>
@@ -799,7 +799,7 @@ function onPeriodChange() {
 // ── Analysis ─────────────────────────────────────────────────
 function analyze(rows) {
   const total = rows.length;
-  const empty = { payout:0, hitCount:0, invest:0, recovery:0 };
+  const empty = { payout:0, hitCount:0, invest:0, recovery:0, targetRaces: 0 };
   if (total === 0) return { total:0, hits:0, hitRate:0, seiT:0, seiRate:0, koT:0, koRate:0, totalInvest:0, totalPayout:0, totalRecovery:0, kiken:{s3tan:empty,s3fuku:empty,k3fuku:empty,k2tan:empty}, venues:{} };
 
   const hits    = rows.filter(isHit).length;
@@ -807,22 +807,29 @@ function analyze(rows) {
   const koTCnt  = rows.filter(isKoT).length;
   const totalInvest = total * 1000;
 
-  const calcKiken = (tfFn, oddsKey, investPerRace, overrideTotal) => {
-    let payout = 0, hitCount = 0;
-    rows.forEach(row => { if (tfFn(row)) { const o = toFloat(get(row, oddsKey)); if (o > 0) { payout += o * 100; hitCount++; } } });
-    const invest = (overrideTotal !== undefined ? overrideTotal : total) * investPerRace;
-    return { payout, hitCount, invest, recovery: invest > 0 ? payout/invest*100 : 0 };
+  const calcKiken = (rowsToProcess, tfFn, oddsKey, investPerRace) => {
+    let payout = 0, hitCount = 0, investRaceCount = 0;
+    rowsToProcess.forEach(row => {
+      if (tfFn(row)) {
+        investRaceCount++;
+        const o = toFloat(get(row, oddsKey));
+        if (o > 0) {
+          payout += o * 100;
+          hitCount++;
+        }
+      }
+    });
+    const invest = investRaceCount * investPerRace;
+    return { payout, hitCount, invest, recovery: invest > 0 ? payout/invest*100 : 0, targetRaces: investRaceCount };
   };
 
-  const k2tanTotal = rows.filter(row => {
-    const d = get(row, COL.date).replace(/\//g, '-');
-    return d >= '2025-12-24';
-  }).length;
+  const s3tan  = calcKiken(rows, isSeiT, COL.odds3tan,  400);
+  const s3fuku = calcKiken(rows, isSeiT, COL.odds3fuku, 100);
+  const k3fuku = calcKiken(rows, isKoT,  COL.odds3fuku, 200);
 
-  const s3tan  = calcKiken(isSeiT, COL.odds3tan,  400);
-  const s3fuku = calcKiken(isSeiT, COL.odds3fuku, 100);
-  const k3fuku = calcKiken(isKoT,  COL.odds3fuku, 200);
-  const k2tan  = calcKiken(isKoT,  COL.odds2tan,  300, k2tanTotal);
+  const k2tanRows = rows.filter(row => get(row, COL.date).replace(/\//g, '-') >= '2025-12-24');
+  const k2tan  = calcKiken(k2tanRows, isKoT, COL.odds2tan,  300);
+
   const totalPayout   = s3tan.payout + s3fuku.payout + k3fuku.payout + k2tan.payout;
   const totalRecovery = totalInvest > 0 ? totalPayout/totalInvest*100 : 0;
 
@@ -952,8 +959,19 @@ function renderStats(result) {
     {rei:'荒天令',type:'2連単',pts:3,data:kiken.k2tan},
   ];
   document.getElementById('券種-tbody').innerHTML = kikenRows.map(({rei,type,pts,data}) => {
-    const cls = data.recovery>=100?'val-good':data.recovery>=70?'val-neutral':'val-bad';
-    return `<tr><td>${rei}</td><td>${type}</td><td class="val-muted">${pts}点</td><td class="val-muted">${data.invest.toLocaleString()}円</td><td>${data.payout.toLocaleString()}円</td><td class="${cls}">${data.recovery.toFixed(1)}%</td><td class="val-muted">${data.hitCount}回</td></tr>`;
+    const hitRateVal = data.targetRaces > 0 ? (data.hitCount / data.targetRaces * 100) : 0;
+    const hitRateCls = hitRateVal >= 30 ? 'val-good' : hitRateVal >= 15 ? 'val-neutral' : 'val-bad';
+    const recoveryCls = data.recovery>=100?'val-good':data.recovery>=70?'val-neutral':'val-bad';
+    return `<tr>
+      <td>${rei}</td>
+      <td>${type}</td>
+      <td class="val-muted">${pts}点</td>
+      <td class="val-muted">${data.invest.toLocaleString()}円</td>
+      <td>${data.payout.toLocaleString()}円</td>
+      <td class="${hitRateCls}">${hitRateVal.toFixed(1)}%</td>
+      <td class="${recoveryCls}">${data.recovery.toFixed(1)}%</td>
+      <td class="val-muted">${data.hitCount}回</td>
+    </tr>`;
   }).join('');
 
   // 場別データを保存してレース数順で初期表示
