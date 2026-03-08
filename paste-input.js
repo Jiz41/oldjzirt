@@ -364,7 +364,7 @@
 
     // --- 開催場 ---
     for (const bankName of Object.keys(BANK_NAME_MAP)) {
-      if (lines.some(l => l === bankName)) {
+      if (lines.some(l => (l === bankName || l.includes(bankName)) && !l.includes('/'))) {
         result.venue = bankName;
         break;
       }
