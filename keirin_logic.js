@@ -128,50 +128,47 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
 // ====================================================================================
 // 物理層：straight による生存判定（V9.0）
 // ====================================================================================
-function applyPhysicalConstraints(players, bankData, lineInput) {
+function applyPhysicalConstraints(players, bankData, lines) {
     const straight = bankData.straight || 50;
-
-    const positionMap = getPlayerPositions(lineInput);
+    const positionMap = getPlayerPositions(lines);
 
     players.forEach(p => {
-        const pos = positionMap[p.id] || { position: 99, label: '不明' };
+        const pos = positionMap[p.id];
         let physicalPenalty = 1.0;
 
-        // 直線長による生存判定閾値（全国バンク分布に基づく区分）
-        // 35m未満：全バンク中の下位数%に相当する極端短直線 → 4番手以降は物理的到達困難
-        // 50m未満：平均を下回る短直線域 → 4番手以降に不利が生じる境界
-        if (straight < 35) {
-            if (pos.position >= 4)      { physicalPenalty = 0.25; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 物理的到達困難 (×0.25)`); }
-            else if (pos.position === 3){ physicalPenalty = 0.60; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置3番手 → 到達困難 (×0.60)`); }
-        } else if (straight < 50) {
-            if (pos.position >= 4)      { physicalPenalty = 0.50; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 到達やや困難 (×0.50)`); }
-            else if (pos.position === 3){ physicalPenalty = 0.80; }
-        }
+        if (pos) {
+            const linePos = pos.linePosition; // 0=先行, 1=番手, 2=3番手
 
+            if (straight < 35) {
+                if (linePos >= 3)      { physicalPenalty = 0.25; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/ライン内${linePos + 1}番手 → 物理的到達困難 (×0.25)`); }
+                else if (linePos === 2){ physicalPenalty = 0.60; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/ライン内3番手 → 到達困難 (×0.60)`); }
+            } else if (straight < 50) {
+                if (linePos >= 3)      { physicalPenalty = 0.50; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/ライン内${linePos + 1}番手 → 到達やや困難 (×0.50)`); }
+                else if (linePos === 2){ physicalPenalty = 0.80; }
+            }
+        }
         p.physicalPenalty = physicalPenalty;
     });
 
     return players;
 }
 
-function getPlayerPositions(lineInput) {
+function getPlayerPositions(lines) {
     const positionMap = {};
-    if (!lineInput) return positionMap;
-
-    const segments = lineInput.split(/[,、]/);
     let globalPosition = 1;
 
-    segments.forEach(segment => {
-        const cleanSegment = segment.replace(/[^\d]/g, "");
-        const playerIds = cleanSegment.split("").map(Number);
+    lines.forEach(line => {
+        line.forEach((id, localPos) => {
+            let label = '後方';
+            if (localPos === 0)      label = '先行';
+            else if (localPos === 1) label = '番手';
+            else if (localPos === 2) label = '3番手';
 
-        playerIds.forEach((id, localPos) => {
-            let label = "後方";
-            if (localPos === 0)      label = "先行";
-            else if (localPos === 1) label = "番手";
-            else if (localPos === 2) label = "3番手";
-
-            positionMap[id] = { position: globalPosition, label: label, linePosition: localPos };
+            positionMap[id] = {
+                position: globalPosition,
+                label: label,
+                linePosition: localPos  // ライン内相対位置
+            };
             globalPosition++;
         });
     });
@@ -182,8 +179,8 @@ function getPlayerPositions(lineInput) {
 // ====================================================================================
 // 展開層：カント・イン突き（V9.0）
 // ====================================================================================
-function applyTacticalAdjustments(players, bankData, lineInput, seriInfos) {
-    const positionMap = getPlayerPositions(lineInput);
+function applyTacticalAdjustments(players, bankData, lines, seriInfos) {
+    const positionMap = getPlayerPositions(lines);
 
     const warpBoostTargets = [];
 
@@ -473,7 +470,7 @@ function calculateLineCoeffs(players, settings) {
 
     if (participatingPlayers.length === 0) {
         app.logMessage("[ERROR] 出走選手がゼロのため、ライン解析をスキップします。");
-        return { players: [], allSeriInfos: [], finalOrderedPlayerIds: [], displayLineSegments: [] };
+        return { players: [], allSeriInfos: [], finalOrderedPlayerIds: [], displayLineSegments: [], lines: [] };
     }
 
     // 2. ライン解析
@@ -574,7 +571,7 @@ function calculateLineCoeffs(players, settings) {
         // ★★★ END: C_l 改修ロジック ★★★
     }
 
-    return { players: participatingPlayers, allSeriInfos: parsedAllSeriInfos, finalOrderedPlayerIds, displayLineSegments };
+    return { players: participatingPlayers, allSeriInfos: parsedAllSeriInfos, finalOrderedPlayerIds, displayLineSegments, lines };
 }
 
 
@@ -856,7 +853,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
 // ====================================================================================
 // runScenarioSimulation
 // ====================================================================================
-function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, applyKoutenrei, lineInput, windSpeed, windDirection) {
+function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, applyKoutenrei, lineInput, windSpeed, windDirection, lines) {
     const scenarios = ['先行有利', '捲り有利', '差し有利'];
     const allScenarioResults = [];
     const integratedScores   = {};
@@ -877,10 +874,10 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
         const isGirls   = settings ? settings.IS_GIRLS : false;
 
         // 🔥 物理層（V9.0）
-        applyPhysicalConstraints(scenarioPlayers, BANK_DATA, lineInput);
+        applyPhysicalConstraints(scenarioPlayers, BANK_DATA, lines);
 
         // 🔥 展開層（V9.0）
-        applyTacticalAdjustments(scenarioPlayers, BANK_DATA, lineInput, allSeriInfos);
+        applyTacticalAdjustments(scenarioPlayers, BANK_DATA, lines, allSeriInfos);
 
         scenarioPlayers.forEach(p => {
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e;
@@ -1028,7 +1025,7 @@ app.calculatePrediction = async function() {
 
     app.logMessage(`[CALC START] ${raceType} / バンク: ${bankName} / モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`);
 
-    const { players: participatingPlayers, allSeriInfos, finalOrderedPlayerIds, displayLineSegments } = calculateLineCoeffs(players, settings);
+    const { players: participatingPlayers, allSeriInfos, finalOrderedPlayerIds, displayLineSegments, lines } = calculateLineCoeffs(players, settings);
 
     if (participatingPlayers.length === 0) {
         alert("出走選手がいないため、計算を中止しました。");
@@ -1071,10 +1068,10 @@ app.calculatePrediction = async function() {
         const windSpeed     = parseFloat(document.getElementById('wind-speed').value) || 0;
         const windDirection = document.getElementById('wind-direction').value;
 
-        const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, false, currentLineInputForCalc, windSpeed, windDirection);
+        const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, false, currentLineInputForCalc, windSpeed, windDirection, lines);
         app.logMessage(`[CALC] 晴天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`);
 
-        const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, true, currentLineInputForCalc, windSpeed, windDirection);
+        const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, true, currentLineInputForCalc, windSpeed, windDirection, lines);
         app.logMessage(`[CALC] 荒天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`);
 
         const detailedScenarioResults = koutenreiModeSelected
@@ -1520,7 +1517,7 @@ const InputGuard = (() => {
         if (!el) return '';
         // 全角数字を半角変換してから不正文字を除去
         let raw   = toHalfWidth(el.value);
-        let clean = raw.replace(/[^1-9,\(\)\[\]\-]/g, '');
+        let clean = raw.replace(/[^1-9,\\(\\)\\[\\]\\-]/g, '');
         if (clean !== raw) {
             log(`INFO: 並び入力を浄化: "${el.value}" → "${clean}"`);
             el.value = clean; // UIにも反映
