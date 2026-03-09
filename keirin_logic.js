@@ -144,7 +144,7 @@ function applyPhysicalConstraints(players, bankData, lines) {
                 else if (linePos === 2){ physicalPenalty = 0.60; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/ライン内3番手 → 到達困難 (×0.60)`); }
             } else if (straight < 50) {
                 if (linePos >= 3)      { physicalPenalty = 0.50; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/ライン内${linePos + 1}番手 → 到達やや困難 (×0.50)`); }
-                else if (linePos === 2){ physicalPenalty = 0.80; }
+                else if (linePos === 2){ physicalPenalty = 0.80; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/ライン内3番手 → 到達やや不利 (×0.80)`); }
             }
         }
         p.physicalPenalty = physicalPenalty;
