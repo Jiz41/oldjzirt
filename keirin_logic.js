@@ -128,31 +128,6 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
 // ====================================================================================
 // 物理層：straight による生存判定（V9.0）
 // ====================================================================================
-function applyPhysicalConstraints(players, bankData, lines) {
-    const straight = bankData.straight || 50;
-    const positionMap = getPlayerPositions(lines);
-
-    players.forEach(p => {
-        const pos = positionMap[p.id];
-        let physicalPenalty = 1.0;
-
-        if (pos) {
-            const linePos = pos.linePosition; // 0=先行, 1=番手, 2=3番手
-
-            if (straight < 35) {
-                if (linePos >= 3)      { physicalPenalty = 0.25; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/ライン内${linePos + 1}番手 → 物理的到達困難 (×0.25)`); }
-                else if (linePos === 2){ physicalPenalty = 0.60; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/ライン内3番手 → 到達困難 (×0.60)`); }
-            } else if (straight < 50) {
-                if (linePos >= 3)      { physicalPenalty = 0.50; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/ライン内${linePos + 1}番手 → 到達やや困難 (×0.50)`); }
-                else if (linePos === 2){ physicalPenalty = 0.80; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/ライン内3番手 → 到達やや不利 (×0.80)`); }
-            }
-        }
-        p.physicalPenalty = physicalPenalty;
-    });
-
-    return players;
-}
-
 function getPlayerPositions(lines) {
     const positionMap = {};
     let globalPosition = 1;
@@ -872,9 +847,6 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
         const direction = windDirection || (BANK_DATA ? BANK_DATA.direction : '無風');
         const speed     = (windSpeed !== undefined) ? windSpeed : (BANK_DATA ? BANK_DATA.speed : 0);
         const isGirls   = settings ? settings.IS_GIRLS : false;
-
-        // 🔥 物理層（V9.0）
-        applyPhysicalConstraints(scenarioPlayers, BANK_DATA, lines);
 
         // 🔥 展開層（V9.0）
         applyTacticalAdjustments(scenarioPlayers, BANK_DATA, lines, allSeriInfos);
