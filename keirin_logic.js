@@ -61,7 +61,7 @@ let BANK_DATA = {};
 function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA) {
     const playerId = p.id;
 
-    if (!direction || speed === undefined || speed <= 1.0 || direction === 'none' || direction === '無風') {
+    if (!direction || speed === undefined || speed <= 1.0 || direction === \'none\' || direction === \'無風\') {
         return { adj: 1.0, v: 0 };
     }
 
@@ -110,21 +110,41 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
     app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 位置[${posLabel}] -> 風補正実行`);
 
     const map = BANK_DATA.wind_direction_map || {};
-    const dirType = map[selectedDir] || "横風成分";
+
+    function dirToVector(dirType) {
+        let v = 0.0;
+        if (dirType.includes("追い"))   v += 1.0;
+        if (dirType.includes("向かい")) v -= 1.0;
+        if (dirType === "H→B横風")     v += 0.2;
+        if (dirType === "B→H横風")     v -= 0.2;
+        return v;
+    }
+
+    const ADJACENT_MAP = {
+        "北東": ["北", "東"], "南東": ["南", "東"],
+        "南西": ["南", "西"], "北西": ["北", "西"],
+        "北":   ["北西", "北東"], "東": ["北東", "南東"],
+        "南":   ["南東", "南西"], "西": ["南西", "北西"]
+    };
 
     let vector = 0.0;
-    if (dirType.includes("追い"))        { vector =  1.0; }
-    else if (dirType.includes("向かい")) { vector = -1.0; }
-    else if (dirType === "H→B横風")     { vector =  0.2; }
-    else if (dirType === "B→H横風")     { vector = -0.2; }
+
+    if (map[selectedDir]) {
+        vector = dirToVector(map[selectedDir]);
+    } else if (ADJACENT_MAP[selectedDir]) {
+        const [adj1, adj2] = ADJACENT_MAP[selectedDir];
+        const v1 = map[adj1] ? dirToVector(map[adj1]) : 0.0;
+        const v2 = map[adj2] ? dirToVector(map[adj2]) : 0.0;
+        vector = (v1 + v2) * 0.707;
+    }
 
     const finalAdj = 1.0 + (vector * kp * (BANK_DATA.alpha || 1.0) * positionShield);
 
-    app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 属性[${dirType}] 位置[${posLabel}] -> 風補正実行`);
+    app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 位置[${posLabel}] -> 風補正実行`);
 
     return { adj: finalAdj, v: v };
 }
-
+ 
 // ====================================================================================
 // 物理層：straight による生存判定（V9.0）
 // ====================================================================================
