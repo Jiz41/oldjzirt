@@ -61,7 +61,7 @@ let BANK_DATA = {};
 function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA) {
     const playerId = p.id;
 
-    if (!direction || speed === undefined || speed <= 1.0 || direction === \'none\' || direction === \'無風\') {
+    if (!direction || speed === undefined || speed <= 1.0 || direction === 'none' || direction === '無風') {
         return { adj: 1.0, v: 0 };
     }
 
