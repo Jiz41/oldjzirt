@@ -94,10 +94,6 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
             if (playerIds.length > 0) {
                 const pos = playerIds.indexOf(Number(playerId));
                 if (pos !== -1) {
-                    // 位置別風圧遮蔽率（スリップストリーム効果）
-                    // 先行(0.60)：風圧をほぼ直接受ける
-                    // 番手(0.50)：前走者の乱流域で約50%遮蔽
-                    // 3番手以降(0.40)：乱流が重なり約60%遮蔽 ── 自転車空力の基本原理に準拠
                     if (pos === 0)      { positionShield = 0.60; posLabel = "先行"; }
                     else if (pos === 1) { positionShield = 0.50; posLabel = "番手"; }
                     else               { positionShield = 0.40; posLabel = "3番手以降"; }
@@ -111,39 +107,39 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
 
     const map = BANK_DATA.wind_direction_map || {};
 
-function dirToVector(dirType) {
-    let vec = 0.0;
-    if (dirType.includes("追い"))   vec += 1.0;
-    if (dirType.includes("向かい")) vec -= 1.0;
-    if (dirType === "H→B横風")     vec += 0.2;
-    if (dirType === "B→H横風")     vec -= 0.2;
-    return vec;
+    function dirToVector(dirType) {
+        let vec = 0.0;
+        if (dirType.includes("追い"))   vec += 1.0;
+        if (dirType.includes("向かい")) vec -= 1.0;
+        if (dirType === "H→B横風")     vec += 0.2;
+        if (dirType === "B→H横風")     vec -= 0.2;
+        return vec;
+    }
+
+    const ADJACENT_MAP = {
+        "北東": ["北", "東"], "南東": ["南", "東"],
+        "南西": ["南", "西"], "北西": ["北", "西"],
+        "北":   ["北西", "北東"], "東": ["北東", "南東"],
+        "南":   ["南東", "南西"], "西": ["南西", "北西"]
+    };
+
+    let vector = 0.0;
+
+    if (map[selectedDir]) {
+        vector = dirToVector(map[selectedDir]);
+    } else if (ADJACENT_MAP[selectedDir]) {
+        const [adj1, adj2] = ADJACENT_MAP[selectedDir];
+        const v1 = map[adj1] ? dirToVector(map[adj1]) : 0.0;
+        const v2 = map[adj2] ? dirToVector(map[adj2]) : 0.0;
+        vector = (v1 + v2) * 0.707;
+    }
+
+    const finalAdj = 1.0 + (vector * kp * (BANK_DATA.alpha || 1.0) * positionShield);
+
+    app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 属性[斜め補正済み] 位置[${posLabel}] -> 風補正実行`);
+
+    return { adj: finalAdj, v: v };
 }
-
-const ADJACENT_MAP = {
-    "北東": ["北", "東"], "南東": ["南", "東"],
-    "南西": ["南", "西"], "北西": ["北", "西"],
-    "北":   ["北西", "北東"], "東": ["北東", "南東"],
-    "南":   ["南東", "南西"], "西": ["南西", "北西"]
-};
-
-let vector = 0.0;
-
-if (map[selectedDir]) {
-    vector = dirToVector(map[selectedDir]);
-} else if (ADJACENT_MAP[selectedDir]) {
-    const [adj1, adj2] = ADJACENT_MAP[selectedDir];
-    const v1 = map[adj1] ? dirToVector(map[adj1]) : 0.0;
-    const v2 = map[adj2] ? dirToVector(map[adj2]) : 0.0;
-    vector = (v1 + v2) * 0.707;
-}
-
-const finalAdj = 1.0 + (vector * kp * (BANK_DATA.alpha || 1.0) * positionShield);
-
-app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 位置[${posLabel}] -> 風補正実行`);
-
-return { adj: finalAdj, v: v };
-
 // ====================================================================================
 // 物理層：straight による生存判定（V9.0）
 // ====================================================================================
