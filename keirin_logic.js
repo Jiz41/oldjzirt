@@ -112,12 +112,12 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
     const map = BANK_DATA.wind_direction_map || {};
 
 function dirToVector(dirType) {
-    let v = 0.0;
-    if (dirType.includes("追い"))   v += 1.0;
-    if (dirType.includes("向かい")) v -= 1.0;
-    if (dirType === "H→B横風")     v += 0.2;
-    if (dirType === "B→H横風")     v -= 0.2;
-    return v;
+    let vec = 0.0;
+    if (dirType.includes("追い"))   vec += 1.0;
+    if (dirType.includes("向かい")) vec -= 1.0;
+    if (dirType === "H→B横風")     vec += 0.2;
+    if (dirType === "B→H横風")     vec -= 0.2;
+    return vec;
 }
 
 const ADJACENT_MAP = {
@@ -137,6 +137,12 @@ if (map[selectedDir]) {
     const v2 = map[adj2] ? dirToVector(map[adj2]) : 0.0;
     vector = (v1 + v2) * 0.707;
 }
+
+const finalAdj = 1.0 + (vector * kp * (BANK_DATA.alpha || 1.0) * positionShield);
+
+app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 位置[${posLabel}] -> 風補正実行`);
+
+return { adj: finalAdj, v: v };
 
 // ====================================================================================
 // 物理層：straight による生存判定（V9.0）
