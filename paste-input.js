@@ -1,4 +1,3 @@
-
 (function() {
 
   const BASE_URL = 'https://keirin-proxy.onrender.com';
@@ -39,14 +38,16 @@
       + String(today.getDate()).padStart(2, '0');
   }
 
+  // ============================================================
+  // 風速取得
+  // ============================================================
 
-  /** 競輪場緯度経度マップ（屋内バンクはnull） */
   const VENUE_LATLNG = {
     '🦑函館':     [41.7686, 140.7288],
     '🍎青森':     [40.7822, 140.7380],
     '🏝️いわき平': [37.0574, 140.8877],
     '⛩️弥彦':     [37.6517, 138.8272],
-    '🏔️前橋':     null, // 屋内
+    '🏔️前橋':     null,
     '🐓取手':     [35.9103, 140.0780],
     '🥟宇都宮':   [36.5658, 139.8836],
     '🌸大宮':     [35.9065, 139.6244],
@@ -78,7 +79,7 @@
     '🦝小松島':   [33.9778, 134.5897],
     '🐳高知':     [33.5597, 133.5317],
     '🍊松山':     [33.8331, 132.7658],
-    '🚂小倉':     null, // 屋内
+    '🚂小倉':     null,
     '🍜久留米':   [33.3197, 130.5081],
     '♨️武雄':     [33.1928, 130.0194],
     '🍔佐世保':   [33.1597, 129.7186],
@@ -86,46 +87,25 @@
     '🏯熊本':     [32.7903, 130.7419],
   };
 
-  /**
-   * 度数→8方位変換
-   * @param {number} deg 0〜360
-   * @returns {string} 北/北東/東/南東/南/南西/西/北西
-   */
   function degToDirection(deg) {
     const dirs = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
     return dirs[Math.round(deg / 45) % 8];
   }
 
-  /**
-   * km/h → m/s 変換（0.5刻みに丸め）
-   * @param {number} kmh
-   * @returns {number}
-   */
   function kmhToMs(kmh) {
     return Math.round((kmh / 3.6) * 2) / 2;
   }
 
-  /**
-   * Open-Meteo APIから風速・風向を取得してフォームに反映
-   * @param {string} bankKey - BANKDATAのキー（絵文字付き）
-   */
   async function fetchAndSetWind(bankKey) {
     const latlng = VENUE_LATLNG[bankKey];
-
-    // 屋内バンク
     if (latlng === null) {
       const dirEl = document.getElementById('wind-direction');
       if (dirEl) { dirEl.value = 'none'; dirEl.dispatchEvent(new Event('change')); }
       const speedEl = document.getElementById('wind-speed');
       if (speedEl) speedEl.value = 0;
-      console.log(`[wind] ${bankKey}: 屋内バンク → 無風/屋内をセット`);
       return;
     }
-
-    if (!latlng) {
-      console.warn(`[wind] ${bankKey}: 緯度経度未登録`);
-      return;
-    }
+    if (!latlng) return;
 
     const [lat, lon] = latlng;
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=wind_speed_10m,wind_direction_10m&timezone=Asia/Tokyo`;
@@ -134,52 +114,38 @@
       const res     = await fetch(url);
       const json    = await res.json();
       const current = json.current;
-
-      // レスポンス異常チェック
-      if (!res.ok) {
-        console.warn(`[wind] APIレスポンス異常: HTTP ${res.status}`);
-        return;
-      }
-      if (!current || current.wind_speed_10m === undefined || current.wind_direction_10m === undefined) {
-        console.warn(`[wind] ${bankKey}: APIレスポンスに風速データが含まれていません`, json);
-        return;
-      }
+      if (!res.ok || !current || current.wind_speed_10m === undefined) return;
 
       const speedMs   = kmhToMs(current.wind_speed_10m);
       const direction = degToDirection(current.wind_direction_10m);
 
-      // wind-speed にセット
       const speedEl = document.getElementById('wind-speed');
       if (speedEl) speedEl.value = speedMs;
 
-      // wind-direction にセット（1m/s以下は無風扱い）
       const dirEl = document.getElementById('wind-direction');
       if (dirEl) {
         dirEl.value = speedMs < 1.0 ? 'none' : direction;
         dirEl.dispatchEvent(new Event('change'));
       }
-
-      console.log(`[wind] ${bankKey}: ${speedMs}m/s ${direction} (raw: ${current.wind_speed_10m}km/h ${current.wind_direction_10m}°)`);
-
     } catch (e) {
       console.warn(`[wind] API取得失敗: ${e.message}`);
     }
   }
 
+  // ============================================================
+  // 開催情報・レース情報取得
+  // ============================================================
+
   async function loadKaisai() {
     const date = getCurrentDate();
-
-    // キャッシュ確認
     if (cache.kaisai[date]) {
       renderVenues(cache.kaisai[date]);
       return;
     }
-
-    // fetch
     const content = document.getElementById('proxy-input-content');
     content.textContent = '読み込み中...';
     try {
-      const res = await fetch(`${BASE_URL}/kaisai?date=${date}`);
+      const res  = await fetch(`${BASE_URL}/kaisai?date=${date}`);
       const data = await res.json();
       cache.kaisai[date] = data;
       renderVenues(data);
@@ -204,7 +170,7 @@
     });
   }
 
-function renderDays(venue) {
+  function renderDays(venue) {
     const content = document.getElementById('proxy-input-content');
     content.innerHTML = '';
 
@@ -250,9 +216,9 @@ function renderDays(venue) {
       raceTypeEl.dispatchEvent(new Event('change'));
     }
 
-    // venue → #bank-name
+    // venue → #bank-name + 風速
     const bankKey = BANK_NAME_MAP[data.venue];
-    const bankEl = document.getElementById('bank-name');
+    const bankEl  = document.getElementById('bank-name');
     if (bankEl && bankKey) {
       const opt = Array.from(bankEl.options).find(o => o.value === bankKey);
       if (opt) {
@@ -262,9 +228,17 @@ function renderDays(venue) {
       }
     }
 
+    // 9車立てチェック
+    const activeRiders = data.riders.filter(r => !r.isScratched);
+    if (activeRiders.length > 7) {
+      const log = document.getElementById('proxy-input-log');
+      log.textContent = '⚠️ 9車立てのレースです。自在律は7車立て専用のため自動入力を中断しました。';
+      return;
+    }
+
     // riders → 各フィールド
     const STYLE_MAP = { '逃': '逃', '自': '自', '追': '追' };
-    const allCarNos = [1,2,3,4,5,6,7];
+    const allCarNos = [1, 2, 3, 4, 5, 6, 7];
     const detectedNos = new Set(data.riders.map(r => r.number));
 
     // 欠場リセット
@@ -277,29 +251,17 @@ function renderDays(venue) {
 
     // 選手データ反映
     const msgs = [];
-    // 9車立てチェック
-    const activeRiders = data.riders.filter(r => !r.isScratched);
-    if (activeRiders.length > 7) {
-    const log = document.getElementById('proxy-input-log');
-    log.textContent = '⚠️ 9車立てのレースです。自在律は7車立て専用のため自動入力を中断しました。';
-    return;
-  }
-
-      data.riders.forEach(rider => {
+    data.riders.forEach(rider => {
       const row = document.querySelector(`.player-row[data-id="${rider.number}"]`);
       if (!row) return;
 
-      // 欠場
       const scratchEl = row.querySelector('.is-scratch');
       if (scratchEl) scratchEl.checked = rider.isScratched;
-
       if (rider.isScratched) return;
 
-      // 得点
       const scoreEl = row.querySelector('.score');
       if (scoreEl && rider.score !== null) scoreEl.value = rider.score;
 
-      // 脚質
       const styleEl = row.querySelector('.style');
       if (styleEl && STYLE_MAP[rider.style]) {
         styleEl.value = STYLE_MAP[rider.style];
@@ -308,7 +270,6 @@ function renderDays(venue) {
       }
     });
 
-    // ログ
     const log = document.getElementById('proxy-input-log');
     msgs.push('');
     msgs.push('📝 手動入力が必要な項目:');
@@ -322,15 +283,12 @@ function renderDays(venue) {
   async function loadRace(raceId) {
     const log = document.getElementById('proxy-input-log');
     log.textContent = '読み込み中...';
-
-    // キャッシュ確認
     if (cache.race[raceId]) {
       applyRaceData(cache.race[raceId]);
       return;
     }
-
     try {
-      const res = await fetch(`${BASE_URL}/race?raceId=${raceId}`);
+      const res  = await fetch(`${BASE_URL}/race?raceId=${raceId}`);
       const data = await res.json();
       cache.race[raceId] = data;
       applyRaceData(data);
@@ -339,13 +297,14 @@ function renderDays(venue) {
     }
   }
 
+  // ============================================================
+  // UI注入
+  // ============================================================
+
   function injectUI() {
     if (document.getElementById('proxy-input-section')) return;
 
-    // ===========================================================
-    // スタイル注入
-    // ===========================================================
-const style = document.createElement('style');
+    const style = document.createElement('style');
     style.textContent = `
       #proxy-input-section {
         margin: 12px 0;
@@ -459,9 +418,7 @@ const style = document.createElement('style');
       .proxy-btn-race:active { filter: brightness(0.85); }
     `;
     document.head.appendChild(style);
-    // ===========================================================
-    // HTML注入
-    // ===========================================================
+
     const section = document.createElement('div');
     section.id = 'proxy-input-section';
     section.innerHTML = `
@@ -475,72 +432,6 @@ const style = document.createElement('style');
       </div>
     `;
 
-    .proxy-btn {
-        display: block;
-        width: 100%;
-        margin: 4px 0;
-        padding: 8px 12px;
-        text-align: left;
-        cursor: pointer;
-        font-size: 0.9em;
-        letter-spacing: 0.05em;
-        color: #c8a045;
-        background: linear-gradient(180deg, #1e341e 0%, #141f14 100%);
-        border: 1px solid rgba(179, 151, 109, 0.4);
-        border-top-color: rgba(179, 151, 109, 0.7);
-        border-radius: 5px;
-        box-shadow:
-          inset 0 1px 0 rgba(200, 160, 69, 0.15),
-          inset 0 -1px 0 rgba(0, 0, 0, 0.4),
-          0 1px 3px rgba(0, 0, 0, 0.5);
-        transition: filter 0.1s;
-      }
-      .proxy-btn:active {
-        filter: brightness(0.85);
-        box-shadow:
-          inset 0 2px 4px rgba(0, 0, 0, 0.5),
-          0 1px 2px rgba(0, 0, 0, 0.3);
-      }
-      .proxy-btn-back {
-        display: inline-block;
-        width: auto;
-        margin-bottom: 8px;
-        padding: 5px 12px;
-        font-size: 0.8em;
-        color: rgba(200, 170, 100, 0.7);
-        background: linear-gradient(180deg, #181818 0%, #111111 100%);
-        border: 1px solid rgba(179, 151, 109, 0.25);
-        border-top-color: rgba(179, 151, 109, 0.45);
-        border-radius: 5px;
-        cursor: pointer;
-        box-shadow:
-          inset 0 1px 0 rgba(200, 160, 69, 0.08),
-          inset 0 -1px 0 rgba(0, 0, 0, 0.4),
-          0 1px 3px rgba(0, 0, 0, 0.5);
-        transition: filter 0.1s;
-      }
-      .proxy-btn-back:active { filter: brightness(0.85); }
-      .proxy-btn-race {
-        display: inline-block;
-        width: auto;
-        margin: 3px;
-        padding: 7px 13px;
-        font-size: 0.85em;
-        color: #c8a045;
-        background: linear-gradient(180deg, #1e341e 0%, #141f14 100%);
-        border: 1px solid rgba(179, 151, 109, 0.4);
-        border-top-color: rgba(179, 151, 109, 0.7);
-        border-radius: 5px;
-        cursor: pointer;
-        box-shadow:
-          inset 0 1px 0 rgba(200, 160, 69, 0.15),
-          inset 0 -1px 0 rgba(0, 0, 0, 0.4),
-          0 1px 3px rgba(0, 0, 0, 0.5);
-        transition: filter 0.1s;
-      }
-      .proxy-btn-race:active { filter: brightness(0.85); }
-
-    // レースタイプ/級班の上に挿入
     const raceTypeEl = document.getElementById('race-type');
     if (raceTypeEl) {
       const insertTarget = raceTypeEl.closest('div') || raceTypeEl.parentElement;
@@ -549,16 +440,13 @@ const style = document.createElement('style');
       document.body.prepend(section);
     }
 
-    // アコーディオン開閉
     document.getElementById('proxy-input-header').addEventListener('click', () => {
       const body  = document.getElementById('proxy-input-body');
       const arrow = document.getElementById('proxy-input-arrow');
       const isOpen = body.style.display !== 'none';
-      body.style.display  = isOpen ? 'none' : 'block';
-      arrow.textContent   = isOpen ? '▶' : '▼';
-      if (!isOpen) {
-        loadKaisai();
-      }
+      body.style.display = isOpen ? 'none' : 'block';
+      arrow.textContent  = isOpen ? '▶' : '▼';
+      if (!isOpen) loadKaisai();
     });
   }
 
@@ -567,4 +455,5 @@ const style = document.createElement('style');
   } else {
     injectUI();
   }
+
 })();
