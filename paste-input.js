@@ -1,624 +1,44 @@
+
 (function() {
 
-  // ============================================================
-  // 1. 定数・変換マップ
-  // ============================================================
+  const BASE_URL = 'https://keirin-proxy.onrender.com';
 
-  /** keirin.jp 開催場名（漢字）→ BANKDATA キー */
+  const SERIES_MAP = {
+    'S級': 's-kyu',
+    'A級': 'a-kyu',
+    'A級チャレンジ': 'a-chal',
+    'ガールズ': 'girls',
+  };
+
   const BANK_NAME_MAP = {
-    '函館':   '🦑函館',
-    '青森':   '🍎青森',
-    'いわき平': '🏝️いわき平',
-    '弥彦':   '⛩️弥彦',
-    '前橋':   '🏔️前橋',
-    '取手':   '🐓取手',
-    '宇都宮': '🥟宇都宮',
-    '大宮':   '🌸大宮',
-    '西武園': '🎡西武園',
-    '京王閣': '🏦京王閣',
-    '立川':   '🏙️立川',
-    '松戸':   '🏰松戸',
-    '川崎':   '🏭川崎',
-    '平塚':   '🎋平塚',
-    '小田原': '🏯小田原',
-    '伊東':   '♨️伊東',
-    '静岡':   '🗻静岡',
-    '富山':   '🐟富山',
-    '名古屋': '🏯名古屋',
-    '岐阜':   '🎣岐阜',
-    '大垣':   '💧大垣',
-    '豊橋':   '🧨豊橋',
-    '松阪':   '🥩松阪',
-    '四日市': '🌃四日市',
-    '福井':   '🦖福井',
-    '奈良':   '🦌奈良',
-    '向日町': '🎋向日町',
-    '和歌山': '🍊和歌山',
-    '岸和田': '🏮岸和田',
-    '玉野':   '🛳️玉野',
-    '広島':   '🍁広島',
-    '防府':   '⛩️防府',
-    '高松':   '🍜高松',
-    '小松島': '🦝小松島',
-    '高知':   '🐳高知',
-    '松山':   '🍊松山',
-    '小倉':   '🚂小倉',
-    '久留米': '🍜久留米',
-    '武雄':   '♨️武雄',
-    '佐世保': '🍔佐世保',
-    '別府':   '♨️別府',
-    '熊本':   '🏯熊本',
+    '函館':'🦑函館', '青森':'🍎青森', 'いわき平':'🏝️いわき平',
+    '弥彦':'⛩️弥彦', '前橋':'🏔️前橋', '取手':'🐓取手',
+    '宇都宮':'🥟宇都宮', '大宮':'🌸大宮', '西武園':'🎡西武園',
+    '京王閣':'🏦京王閣', '立川':'🏙️立川', '松戸':'🏰松戸',
+    '川崎':'🏭川崎', '平塚':'🎋平塚', '小田原':'🏯小田原',
+    '伊東':'♨️伊東', '静岡':'🗻静岡', '富山':'🐟富山',
+    '名古屋':'🏯名古屋', '岐阜':'🎣岐阜', '大垣':'💧大垣',
+    '豊橋':'🧨豊橋', '松阪':'🥩松阪', '四日市':'🌃四日市',
+    '福井':'🦖福井', '奈良':'🦌奈良', '向日町':'🎋向日町',
+    '和歌山':'🍊和歌山', '岸和田':'🏮岸和田', '玉野':'🛳️玉野',
+    '広島':'🍁広島', '防府':'⛩️防府', '高松':'🍜高松',
+    '小松島':'🦝小松島', '高知':'🐳高知', '松山':'🍊松山',
+    '小倉':'🚂小倉', '久留米':'🍜久留米', '武雄':'♨️武雄',
+    '佐世保':'🍔佐世保', '別府':'♨️別府', '熊本':'🏯熊本',
   };
 
-  /** keirin.jp レース種別テキスト → race-type value */
-  const RACE_TYPE_MAP = [
-    { pattern: /ガールズ|Ｌ級ガ|L級ガ/ ,          value: 'girls'  },
-    { pattern: /Ｓ級|S級/,          value: 's-kyu'  },
-    { pattern: /Ａ級チ|A級チ/,      value: 'a-chal' },
-    { pattern: /Ａ級|A級/,          value: 'a-kyu'  },
-  ];
-
-  /**
-   * 開催府県 → 選手府県の照合用マップ
-   * keirin.jp の選手府県表記（スペース入り短縮形）を正規化する
-   */
-  const VENUE_PREF_MAP = {
-    '函館':   '北海道',
-    '青森':   '青森',
-    'いわき平': '福島',
-    '弥彦':   '新潟',
-    '前橋':   '群馬',
-    '取手':   '茨城',
-    '宇都宮': '栃木',
-    '大宮':   '埼玉',
-    '西武園': '埼玉',
-    '京王閣': '東京',
-    '立川':   '東京',
-    '松戸':   '千葉',
-    '川崎':   '神奈川',
-    '平塚':   '神奈川',
-    '小田原': '神奈川',
-    '伊東':   '静岡',
-    '静岡':   '静岡',
-    '富山':   '富山',
-    '名古屋': '愛知',
-    '岐阜':   '岐阜',
-    '大垣':   '岐阜',
-    '豊橋':   '愛知',
-    '松阪':   '三重',
-    '四日市': '三重',
-    '福井':   '福井',
-    '奈良':   '奈良',
-    '向日町': '京都',
-    '和歌山': '和歌山',
-    '岸和田': '大阪',
-    '玉野':   '岡山',
-    '広島':   '広島',
-    '防府':   '山口',
-    '高松':   '香川',
-    '小松島': '徳島',
-    '高知':   '高知',
-    '松山':   '愛媛',
-    '小倉':   '福岡',
-    '久留米': '福岡',
-    '武雄':   '佐賀',
-    '佐世保': '長崎',
-    '別府':   '大分',
-    '熊本':   '熊本',
+  const cache = {
+    kaisai: {},
+    race: {},
   };
 
-  // ============================================================
-  // 2. UI注入
-  // ============================================================
-
-  function injectUI() {
-    // 既に注入済みならスキップ
-    if (document.getElementById('paste-input-section')) return;
-
-    // ============================================================
-    // スタイル注入
-    // ============================================================
-    const style = document.createElement('style');
-    style.textContent = `
-      #paste-input-section {
-        margin: 12px 0;
-        border-radius: 10px;
-        overflow: hidden;
-        border: 1px solid rgba(179, 151, 109, 0.55);
-        box-shadow:
-          0 0 0 1px rgba(179, 151, 109, 0.15),
-          0 0 18px rgba(179, 151, 109, 0.18),
-          0 0 40px rgba(179, 151, 109, 0.08),
-          0 4px 24px rgba(0, 0, 0, 0.5);
-        background:
-          radial-gradient(circle, rgba(180, 200, 80, 0.07) 1px, transparent 1px),
-          repeating-linear-gradient(90deg, transparent, transparent 14px, rgba(180, 200, 80, 0.06) 14px, rgba(180, 200, 80, 0.06) 15px),
-          repeating-linear-gradient(0deg, transparent, transparent 14px, rgba(180, 200, 80, 0.06) 14px, rgba(180, 200, 80, 0.06) 15px),
-          #0f1a0f;
-        background-size: 15px 15px, 15px 15px, 15px 15px, auto;
-      }
-
-      #paste-input-header {
-        padding: 14px 16px;
-        font-weight: bold;
-        color: #c8a045;
-        font-size: 1em;
-        letter-spacing: 0.2em;
-        position: relative;
-        text-shadow: 0 0 10px rgba(200, 160, 69, 0.5);
-        overflow: hidden;
-        border-bottom: 1px solid rgba(179, 151, 109, 0.2);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        user-select: none;
-      }
-
-      #paste-input-header::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 3px;
-        background: linear-gradient(90deg,
-          transparent 0%,
-          transparent 25%,
-          rgba(180, 30, 30, 0.06) 32%,
-          rgba(200, 35, 35, 0.55) 42%,
-          rgba(230, 45, 45, 1.0)  50%,
-          rgba(200, 35, 35, 0.55) 58%,
-          rgba(180, 30, 30, 0.06) 68%,
-          transparent 75%,
-          transparent 100%
-        );
-        animation:
-          paste-scanner 2.8s ease-in-out infinite,
-          paste-flicker 3.3s ease-in-out infinite;
-      }
-
-      @keyframes paste-scanner {
-        0%   { transform: translateX(-12%); }
-        50%  { transform: translateX(12%); }
-        100% { transform: translateX(-12%); }
-      }
-
-      @keyframes paste-flicker {
-        0%   { opacity: 1;    }
-        12%  { opacity: 0.6;  }
-        18%  { opacity: 1;    }
-        45%  { opacity: 0.75; }
-        52%  { opacity: 1;    }
-        73%  { opacity: 0.5;  }
-        80%  { opacity: 0.9;  }
-        88%  { opacity: 0.65; }
-        100% { opacity: 1;    }
-      }
-
-      #paste-input-body {
-        padding: 14px 14px 16px;
-      }
-
-      #paste-input-instructions {
-        font-size: 11px;
-        color: rgba(220, 200, 150, 0.75);
-        line-height: 2.0;
-        margin-bottom: 12px;
-        letter-spacing: 0.05em;
-        border-left: 2px solid rgba(179, 151, 109, 0.3);
-        padding-left: 10px;
-      }
-
-      #paste-input-instructions .paste-caution {
-        color: rgba(192, 119, 119, 0.85);
-        line-height: 1.8;
-      }
-
-      #paste-input-row {
-        display: flex;
-        gap: 8px;
-        align-items: stretch;
-      }
-
-      #paste-input-area {
-        flex: 1;
-        padding: 8px 10px;
-        font-size: 12px;
-        border-radius: 6px;
-        border: 1px solid rgba(179, 151, 109, 0.3);
-        background: rgba(250, 250, 240, 0.92);
-        color: #2a2a1a;
-        resize: none;
-        line-height: 1.5;
-        outline: none;
-        box-sizing: border-box;
-        width: 100%;
-      }
-
-      #paste-input-area::placeholder {
-        color: #aaa;
-        font-size: 11px;
-      }
-
-      #paste-input-run {
-        padding: 0 14px;
-        border-radius: 6px;
-        background: #2d4a2d;
-        color: #c8c88a;
-        border: 1px solid rgba(179, 151, 109, 0.4);
-        cursor: pointer;
-        font-weight: bold;
-        font-size: 0.85em;
-        letter-spacing: 0.1em;
-        white-space: nowrap;
-        width: auto !important;
-        margin-top: 0 !important;
-        box-shadow: 0 0 8px rgba(105, 139, 105, 0.3);
-        flex-shrink: 0;
-      }
-
-      #paste-input-run:active {
-        transform: translateY(1px);
-      }
-
-      #paste-input-clear {
-        padding: 6px 12px;
-        border-radius: 6px;
-        background: #555;
-        color: rgba(220, 200, 150, 0.8);
-        border: 1px solid rgba(179, 151, 109, 0.2);
-        cursor: pointer;
-        font-size: 0.8em;
-        width: auto !important;
-        margin-top: 8px !important;
-        align-self: flex-start;
-      }
-
-      #paste-input-log {
-        font-size: 11px;
-        color: rgba(220, 200, 150, 0.9);
-        letter-spacing: 0.05em;
-        margin-top: 10px;
-        font-family: monospace;
-        white-space: pre-wrap;
-        max-height: 160px;
-        overflow-y: auto;
-      }
-    `;
-    document.head.appendChild(style);
-
-    // ============================================================
-    // HTML注入
-    // ============================================================
-    const section = document.createElement('div');
-    section.id = 'paste-input-section';
-    section.innerHTML = `
-      <div id="paste-input-header">
-        <span>📋 出走表テキスト貼り付け自動入力</span>
-        <span id="paste-input-arrow">▶</span>
-      </div>
-      <div id="paste-input-body" style="display:none;">
-        <div id="paste-input-instructions">
-          ① keirin.jp のスマホ版ページを開きます<br>
-          ② 調べたいレースの出走表ページを表示します<br>
-          ③ ページ内のテキストをページ最上部から最下部まですべて選択してコピーします<br>
-          　（余分な文字が入っても問題ありません）<br>
-          ④ このエリアに貼り付けます<br>
-          ⑤「実行」を押すと該当項目が自動で埋まります<br>
-          <br>
-          <span class="paste-caution">
-            ※ 解析精度の都合上、誤入力が発生することがあります。<br>
-            　 実際の出走表などの情報と照合のうえご使用ください。
-          </span>
-        </div>
-        <div id="paste-input-row">
-          <textarea id="paste-input-area" rows="5" placeholder="keirin.jpの出走表をコピーしてここに貼り付けてください"></textarea>
-          <button id="paste-input-run">▶ 実行</button>
-        </div>
-        <button id="paste-input-clear">クリア</button>
-        <div id="paste-input-log"></div>
-      </div>
-    `;
-
-    // レースタイプ/級班の上に挿入
-    const raceTypeEl = document.getElementById('race-type');
-    if (raceTypeEl) {
-      const insertTarget = raceTypeEl.closest('div') || raceTypeEl.parentElement;
-      insertTarget.parentElement.insertBefore(section, insertTarget);
-    } else {
-      document.body.prepend(section);
-    }
-
-    // アコーディオン開閉
-    document.getElementById('paste-input-header').addEventListener('click', () => {
-      const body  = document.getElementById('paste-input-body');
-      const arrow = document.getElementById('paste-input-arrow');
-      const isOpen = body.style.display !== 'none';
-      body.style.display  = isOpen ? 'none' : 'block';
-      arrow.textContent   = isOpen ? '▶' : '▼';
-    });
-
-    document.getElementById('paste-input-run').addEventListener('click', runAutoInput);
-    document.getElementById('paste-input-clear').addEventListener('click', () => {
-      document.getElementById('paste-input-area').value = '';
-      document.getElementById('paste-input-log').textContent = '';
-    });
+  function getCurrentDate() {
+    const today = new Date();
+    return today.getFullYear().toString()
+      + String(today.getMonth() + 1).padStart(2, '0')
+      + String(today.getDate()).padStart(2, '0');
   }
 
-  // ============================================================
-  // 3. パーサー
-  // ============================================================
-
-  /**
-   * テキスト全体を解析してデータオブジェクトを返す
-   * @param {string} text
-   * @returns {{ venue: string|null, raceType: string|null, players: Object[], error?: string }}
-   */
-  function parseText(text) {
-    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-
-    const result = {
-      venue: null,
-      raceType: null,
-      players: [],  // { carNo, name, pref, style_raw, score, kimatete, scoreUndetected }
-    };
-
-    // --- 開催場 ---
-    for (const bankName of Object.keys(BANK_NAME_MAP)) {
-      const playerLinePattern = /^.{2,6}\/(?:[ASGLa-z][0-9]?){2,}\//;
-      if (lines.some(l => l.includes(bankName) && !playerLinePattern.test(l))) {
-        result.venue = bankName;
-        break;
-      }
-    }
-
-    // --- レースタイプ ---
-    for (const line of lines) {
-      for (const { pattern, value } of RACE_TYPE_MAP) {
-        if (pattern.test(line)) {
-          result.raceType = value;
-          break;
-        }
-      }
-      if (result.raceType) break;
-    }
-
-    // --- 選手データ ---
-    const normalizedLines = lines.flatMap(l => l.split('\t').map(s => s.trim())).filter(s => s.length > 0);
-    const prefStylePattern = /^(.{2,6})\/((?:[ASGLa-z][0-9]?){2,})\/(逃|捲|差|マ|両|追)$/;
-    const scorePattern = /^(\d+\.\d+)$/;
-    const carNoPattern = /^([1-7])$/;
-    const intPattern = /^\d+$/;
-
-    for (let i = 0; i < normalizedLines.length; i++) {
-      const prefMatch = prefStylePattern.exec(normalizedLines[i]);
-      if (!prefMatch) continue;
-
-      let carNo = null;
-      let nameLine = '';
-
-      if (i >= 2 && carNoPattern.test(normalizedLines[i - 2])) {
-        carNo    = parseInt(normalizedLines[i - 2], 10);
-        nameLine = normalizedLines[i - 1] || '';
-      } else if (i >= 1 && carNoPattern.test(normalizedLines[i - 1])) {
-        carNo    = parseInt(normalizedLines[i - 1], 10);
-        nameLine = '';
-      }
-
-      if (carNo === null) continue;
-
-      const pref     = prefMatch[1].replace(/[\s　]/g, '');
-      const styleRaw = prefMatch[3];
-
-      let score = null;
-      let scoreIdx = -1;
-      for (let j = i + 1; j <= i + 3 && j < normalizedLines.length; j++) {
-        if (scorePattern.test(normalizedLines[j])) {
-          score    = parseFloat(normalizedLines[j]);
-          scoreIdx = j;
-          break;
-        }
-      }
-
-      let kimatete = { 逃: 0, 捲: 0, 差: 0, マ: 0 };
-      if (scoreIdx !== -1) {
-        const cols = ['逃', '捲', '差', 'マ'];
-        cols.forEach((key, idx) => {
-          const val = normalizedLines[scoreIdx + 1 + idx];
-          if (val !== undefined && intPattern.test(val)) {
-            kimatete[key] = parseInt(val, 10);
-          }
-        });
-      }
-
-      result.players.push({
-        carNo,
-        name: nameLine,
-        pref,
-        styleRaw,
-        score,
-        kimatete,
-        scoreUndetected: score === null,
-      });
-    }
-
-    // 全項目が未検出の場合はエラーフラグを立てる
-    if (result.venue === null && result.raceType === null && result.players.length === 0) {
-      result.error = 'UNRECOGNIZED_FORMAT';
-    }
-
-    return result;
-  }
-
-  // ============================================================
-  // 4. 脚質判定
-  // ============================================================
-
-  /**
-   * 決まり手集計から自在律の脚質値を返す
-   * @param {{ 逃:number, 捲:number, 差:number, マ:number }} kimatete
-   * @returns { value: '自'|'両'|'追'|null, warn: boolean }
-   */
-  function resolveStyle(kimatete) {
-    const nige  = kimatete['逃'] || 0;
-    const maku  = kimatete['捲'] || 0;
-    const sashi = kimatete['差'] || 0;
-    const ma    = kimatete['マ'] || 0;
-
-    const groups = [
-      { value: '逃', score: nige },
-      { value: '自', score: maku },
-      { value: '追', score: Math.max(sashi, ma) },
-    ];
-
-    groups.sort((a, b) => b.score - a.score);
-
-    if (groups[0].score === 0) {
-      return { value: null, warn: true };
-    }
-    if (groups[0].score === groups[1].score) {
-      return { value: null, warn: true };
-    }
-    return { value: groups[0].value, warn: false };
-  }
-
-  // ============================================================
-  // 5. フォームへの反映
-  // ============================================================
-
-  function runAutoInput() {
-    const text = document.getElementById('paste-input-area').value;
-    const log  = document.getElementById('paste-input-log');
-    const msgs = [];
-
-    if (!text.trim()) {
-      log.textContent = '⚠️ テキストが空です。';
-      return;
-    }
-
-    const data = parseText(text);
-
-    // フォーマット完全不認識
-    if (data.error === 'UNRECOGNIZED_FORMAT') {
-      log.textContent = '❌ テキスト形式を認識できませんでした。\nkeirin.jp スマホ版の出走表ページを最上部〜最下部まで全選択してコピーしてください。';
-      return;
-    }
-
-    // 選手データが1件も取れていない
-    if (data.players.length === 0) {
-      log.textContent = '⚠️ 選手データを検出できませんでした。\nkeirin.jp のフォーマットが変更された可能性があります。\n手動で入力してください。';
-      return;
-    }
-
-    // --- バンク名 ---
-    if (data.venue) {
-      const bankKey = BANK_NAME_MAP[data.venue];
-      const bankEl  = document.getElementById('bank-name');
-      if (bankEl) {
-        const opt = Array.from(bankEl.options).find(o => o.value === bankKey);
-        if (opt) {
-          bankEl.value = bankKey;
-          bankEl.dispatchEvent(new Event('change'));
-          msgs.push(`✅ バンク: ${bankKey}`);
-        } else {
-          msgs.push(`⚠️ バンク「${bankKey}」がプルダウンに見つかりません`);
-        }
-      }
-    } else {
-      msgs.push('⚠️ 開催場を検出できませんでした');
-    }
-
-    // --- レースタイプ ---
-    if (data.raceType) {
-      const rtEl = document.getElementById('race-type');
-      if (rtEl) {
-        rtEl.value = data.raceType;
-        rtEl.dispatchEvent(new Event('change'));
-        msgs.push(`✅ レースタイプ: ${data.raceType}`);
-      }
-    } else {
-      msgs.push('⚠️ レースタイプを検出できませんでした');
-    }
-
-    // --- 開催府県（is-local判定用） ---
-    const venuePref = data.venue ? VENUE_PREF_MAP[data.venue] : null;
-
-    // --- 出走車番セット（欠番検出） ---
-    const detectedCarNos = new Set(data.players.map(p => p.carNo));
-    const allCarNos = [1, 2, 3, 4, 5, 6, 7];
-    const scratchNos = allCarNos.filter(n => !detectedCarNos.has(n));
-    if (scratchNos.length > 0) {
-      msgs.push(`⚠️ 欠番検出: 車番 ${scratchNos.join(', ')} → is-scratch ON`);
-    }
-
-    // --- 全行をリセット ---
-    allCarNos.forEach(carNo => {
-      const row = document.querySelector(`.player-row[data-id="${carNo}"]`);
-      if (!row) return;
-      const scratchEl = row.querySelector('.is-scratch');
-      if (scratchEl) scratchEl.checked = scratchNos.includes(carNo);
-    });
-
-    // --- 選手データを反映 ---
-    const warnCarNos = [];
-
-    data.players.forEach(player => {
-      const row = document.querySelector(`.player-row[data-id="${player.carNo}"]`);
-      if (!row) {
-        msgs.push(`⚠️ 車番${player.carNo}の行が見つかりません`);
-        return;
-      }
-
-      // 競走得点
-      if (player.score !== null) {
-        const scoreEl = row.querySelector('.score');
-        if (scoreEl) scoreEl.value = player.score;
-      }
-
-      // 脚質
-      const { value: styleValue, warn: styleWarn } = resolveStyle(player.kimatete);
-      const styleEl = row.querySelector('.style');
-      if (styleEl) {
-        if (styleValue !== null) {
-          styleEl.value = styleValue;
-        } else {
-          warnCarNos.push(player.carNo);
-        }
-      }
-
-      // 地元判定
-      const localEl = row.querySelector('.is-local');
-      if (localEl && venuePref) {
-        const playerPref = player.pref.replace(/[\s　]/g, '');
-        localEl.checked = playerPref.includes(venuePref) || venuePref.includes(playerPref);
-      }
-    });
-
-    // 競走得点未検出の選手を警告
-    const noScorePlayers = data.players.filter(p => p.scoreUndetected).map(p => p.carNo);
-    if (noScorePlayers.length > 0) {
-      msgs.push(`⚠️ 車番 ${noScorePlayers.join(', ')}: 競走得点を検出できませんでした（手動入力してください）`);
-    }
-
-    if (warnCarNos.length > 0) {
-      msgs.push(`⚠️ 車番 ${warnCarNos.join(', ')}: 脚質が同数のため手動設定してください`);
-    }
-   
-    // --- 手入力案内 ---
-    msgs.push('');
-    msgs.push('📝 手動入力が必要な項目:');
-    msgs.push('  ・直近3走着順（.recent）');
-    msgs.push('  ・S/B 1位ラジオボタン');
-    msgs.push('  ・W印（◎○△）');
-    msgs.push('  ・並び予想（#line-input）');
-
-    log.textContent = msgs.join('\n');
-  }
-
-  // ============================================================
-  // 6. 風速自動取得（Open-Meteo API）
-  // ============================================================
 
   /** 競輪場緯度経度マップ（屋内バンクはnull） */
   const VENUE_LATLNG = {
@@ -746,26 +166,302 @@
     }
   }
 
-  /**
-   * #bank-name の change イベントを監視して風速を自動取得
-   */
-  function initWindFetch() {
-    const bankEl = document.getElementById('bank-name');
-    if (!bankEl) return;
-    bankEl.addEventListener('change', () => {
-      const bankKey = bankEl.value;
-      if (bankKey) fetchAndSetWind(bankKey);
+  async function loadKaisai() {
+    const date = getCurrentDate();
+
+    // キャッシュ確認
+    if (cache.kaisai[date]) {
+      renderVenues(cache.kaisai[date]);
+      return;
+    }
+
+    // fetch
+    const content = document.getElementById('proxy-input-content');
+    content.textContent = '読み込み中...';
+    try {
+      const res = await fetch(`${BASE_URL}/kaisai?date=${date}`);
+      const data = await res.json();
+      cache.kaisai[date] = data;
+      renderVenues(data);
+    } catch (e) {
+      content.textContent = '❌ 開催情報の取得に失敗しました';
+    }
+  }
+
+  function renderVenues(data) {
+    const content = document.getElementById('proxy-input-content');
+    if (!data.venues || data.venues.length === 0) {
+      content.textContent = '本日の開催はございません';
+      return;
+    }
+    content.innerHTML = '';
+    data.venues.forEach(venue => {
+      const btn = document.createElement('button');
+      btn.textContent = `${BANK_NAME_MAP[venue.name] || venue.name} ${venue.grade}`;
+      btn.style.cssText = `
+        display: block; width: 100%; margin: 4px 0;
+        padding: 8px; text-align: left;
+        background: #1a2e1a; color: #c8a045;
+        border: 1px solid rgba(179,151,109,0.3);
+        border-radius: 6px; cursor: pointer;
+      `;
+      btn.addEventListener('click', () => renderDays(venue));
+      content.appendChild(btn);
     });
   }
 
-  // ============================================================
-  // 7. 初期化
-  // ============================================================
+  function renderDays(venue) {
+    const content = document.getElementById('proxy-input-content');
+    content.innerHTML = '';
+
+    // 戻るボタン
+    const back = document.createElement('button');
+    back.textContent = '← 開催場に戻る';
+    back.style.cssText = `
+      margin-bottom: 8px; padding: 6px 12px;
+      background: #111; color: #c8a045;
+      border: 1px solid rgba(179,151,109,0.3);
+      border-radius: 6px; cursor: pointer;
+    `;
+    back.addEventListener('click', () => renderVenues(cache.kaisai[getCurrentDate()]));
+    content.appendChild(back);
+
+    venue.days.forEach(day => {
+      const btn = document.createElement('button');
+      btn.textContent = day.label;
+      btn.style.cssText = `
+        display: block; width: 100%; margin: 4px 0;
+        padding: 8px; text-align: left;
+        background: #1a2e1a; color: #c8a045;
+        border: 1px solid rgba(179,151,109,0.3);
+        border-radius: 6px; cursor: pointer;
+      `;
+      btn.addEventListener('click', () => renderRaces(venue, day));
+      content.appendChild(btn);
+    });
+  }
+
+  function renderRaces(venue, day) {
+    const content = document.getElementById('proxy-input-content');
+    content.innerHTML = '';
+
+    // 戻るボタン
+    const back = document.createElement('button');
+    back.textContent = '← 日次に戻る';
+    back.style.cssText = `
+      margin-bottom: 8px; padding: 6px 12px;
+      background: #111; color: #c8a045;
+      border: 1px solid rgba(179,151,109,0.3);
+      border-radius: 6px; cursor: pointer;
+    `;
+    back.addEventListener('click', () => renderDays(venue));
+    content.appendChild(back);
+
+    day.races.forEach(race => {
+      const btn = document.createElement('button');
+      btn.textContent = `${race.raceNo}R`;
+      btn.style.cssText = `
+        display: inline-block; margin: 4px;
+        padding: 8px 14px;
+        background: #1a2e1a; color: #c8a045;
+        border: 1px solid rgba(179,151,109,0.3);
+        border-radius: 6px; cursor: pointer;
+      `;
+      btn.addEventListener('click', () => loadRace(race.raceId));
+      content.appendChild(btn);
+    });
+  }
+
+  function applyRaceData(data) {
+    // series → #race-type
+    const raceTypeEl = document.getElementById('race-type');
+    if (raceTypeEl && SERIES_MAP[data.series]) {
+      raceTypeEl.value = SERIES_MAP[data.series];
+      raceTypeEl.dispatchEvent(new Event('change'));
+    }
+
+    // venue → #bank-name
+    const bankKey = BANK_NAME_MAP[data.venue];
+    const bankEl = document.getElementById('bank-name');
+    if (bankEl && bankKey) {
+      const opt = Array.from(bankEl.options).find(o => o.value === bankKey);
+      if (opt) {
+        bankEl.value = bankKey;
+        bankEl.dispatchEvent(new Event('change'));
+        fetchAndSetWind(bankKey);
+      }
+    }
+
+    // riders → 各フィールド
+    const STYLE_MAP = { '逃': '逃', '差': '追', '捲': '自' };
+    const allCarNos = [1,2,3,4,5,6,7];
+    const detectedNos = new Set(data.riders.map(r => r.number));
+
+    // 欠場リセット
+    allCarNos.forEach(n => {
+      const row = document.querySelector(`.player-row[data-id="${n}"]`);
+      if (!row) return;
+      const scratchEl = row.querySelector('.is-scratch');
+      if (scratchEl) scratchEl.checked = !detectedNos.has(n);
+    });
+
+    // 選手データ反映
+    const msgs = [];
+    data.riders.forEach(rider => {
+      const row = document.querySelector(`.player-row[data-id="${rider.number}"]`);
+      if (!row) return;
+
+      // 欠場
+      const scratchEl = row.querySelector('.is-scratch');
+      if (scratchEl) scratchEl.checked = rider.isScratched;
+
+      if (rider.isScratched) return;
+
+      // 得点
+      const scoreEl = row.querySelector('.score');
+      if (scoreEl && rider.score !== null) scoreEl.value = rider.score;
+
+      // 脚質
+      const styleEl = row.querySelector('.style');
+      if (styleEl && STYLE_MAP[rider.style]) {
+        styleEl.value = STYLE_MAP[rider.style];
+      } else {
+        msgs.push(`⚠️ 車番${rider.number}: 脚質「${rider.style}」を変換できませんでした`);
+      }
+    });
+
+    // ログ
+    const log = document.getElementById('proxy-input-log');
+    msgs.push('');
+    msgs.push('📝 手動入力が必要な項目:');
+    msgs.push('  ・W印（◎○△✕）');
+    msgs.push('  ・直近3走着順');
+    msgs.push('  ・S/B 1位ラジオボタン');
+    msgs.push('  ・並び予想');
+    log.textContent = `✅ ${data.venue} 自動入力完了\n` + msgs.join('\n');
+  }
+
+  async function loadRace(raceId) {
+    const log = document.getElementById('proxy-input-log');
+    log.textContent = '読み込み中...';
+
+    // キャッシュ確認
+    if (cache.race[raceId]) {
+      applyRaceData(cache.race[raceId]);
+      return;
+    }
+
+    try {
+      const res = await fetch(`${BASE_URL}/race?raceId=${raceId}`);
+      const data = await res.json();
+      cache.race[raceId] = data;
+      applyRaceData(data);
+    } catch (e) {
+      log.textContent = `❌ レース情報の取得に失敗しました: ${e.message}`;
+    }
+  }
+
+  function injectUI() {
+    if (document.getElementById('proxy-input-section')) return;
+
+    // ===========================================================
+    // スタイル注入
+    // ===========================================================
+    const style = document.createElement('style');
+    style.textContent = `
+      #proxy-input-section {
+        margin: 12px 0;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid rgba(179, 151, 109, 0.55);
+        box-shadow:
+          0 0 0 1px rgba(179, 151, 109, 0.15),
+          0 0 18px rgba(179, 151, 109, 0.18),
+          0 0 40px rgba(179, 151, 109, 0.08),
+          0 4px 24px rgba(0, 0, 0, 0.5);
+        background:
+          radial-gradient(circle, rgba(180, 200, 80, 0.07) 1px, transparent 1px),
+          repeating-linear-gradient(90deg, transparent, transparent 14px, rgba(180, 200, 80, 0.06) 14px, rgba(180, 200, 80, 0.06) 15px),
+          repeating-linear-gradient(0deg, transparent, transparent 14px, rgba(180, 200, 80, 0.06) 14px, rgba(180, 200, 80, 0.06) 15px),
+          #0f1a0f;
+        background-size: 15px 15px, 15px 15px, 15px 15px, auto;
+      }
+
+      #proxy-input-header {
+        padding: 14px 16px;
+        font-weight: bold;
+        color: #c8a045;
+        font-size: 1em;
+        letter-spacing: 0.2em;
+        position: relative;
+        text-shadow: 0 0 10px rgba(200, 160, 69, 0.5);
+        overflow: hidden;
+        border-bottom: 1px solid rgba(179, 151, 109, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+      }
+      
+      #proxy-input-body {
+        padding: 14px 14px 16px;
+      }
+
+      #proxy-input-log {
+        font-size: 11px;
+        color: rgba(220, 200, 150, 0.9);
+        letter-spacing: 0.05em;
+        margin-top: 10px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        max-height: 160px;
+        overflow-y: auto;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // ===========================================================
+    // HTML注入
+    // ===========================================================
+    const section = document.createElement('div');
+    section.id = 'proxy-input-section';
+    section.innerHTML = `
+      <div id="proxy-input-header">
+        <span>🔗 レース情報自動取得</span>
+        <span id="proxy-input-arrow">▶</span>
+      </div>
+      <div id="proxy-input-body" style="display:none;">
+        <div id="proxy-input-content">読み込み中...</div>
+        <div id="proxy-input-log"></div>
+      </div>
+    `;
+
+    // レースタイプ/級班の上に挿入
+    const raceTypeEl = document.getElementById('race-type');
+    if (raceTypeEl) {
+      const insertTarget = raceTypeEl.closest('div') || raceTypeEl.parentElement;
+      insertTarget.parentElement.insertBefore(section, insertTarget);
+    } else {
+      document.body.prepend(section);
+    }
+
+    // アコーディオン開閉
+    document.getElementById('proxy-input-header').addEventListener('click', () => {
+      const body  = document.getElementById('proxy-input-body');
+      const arrow = document.getElementById('proxy-input-arrow');
+      const isOpen = body.style.display !== 'none';
+      body.style.display  = isOpen ? 'none' : 'block';
+      arrow.textContent   = isOpen ? '▶' : '▼';
+      if (!isOpen) {
+        loadKaisai();
+      }
+    });
+  }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { injectUI(); initWindFetch(); });
+    document.addEventListener('DOMContentLoaded', injectUI);
   } else {
     injectUI();
-    initWindFetch();
   }
 })();
