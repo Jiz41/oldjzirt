@@ -326,7 +326,7 @@
       if (styleEl && STYLE_MAP[rider.style]) {
         styleEl.value = STYLE_MAP[rider.style];
       } else {
-        msgs.push(`⚠️ 車番${rider.number}: 脚質「${rider.style}」を変換できませんでした`);
+        msgs.push(`⚠️ 車番${rider.number}: 脚質を検出できませんでした（決まり手が同数のため手動で入力ください）`);
       }
     });
 
