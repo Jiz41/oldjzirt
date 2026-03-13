@@ -345,7 +345,7 @@ function renderDays(venue) {
     // ===========================================================
     // スタイル注入
     // ===========================================================
-    const style = document.createElement('style');
+const style = document.createElement('style');
     style.textContent = `
       #proxy-input-section {
         margin: 12px 0;
@@ -364,7 +364,6 @@ function renderDays(venue) {
           #0f1a0f;
         background-size: 15px 15px, 15px 15px, 15px 15px, auto;
       }
-
       #proxy-input-header {
         padding: 14px 16px;
         font-weight: bold;
@@ -381,11 +380,9 @@ function renderDays(venue) {
         cursor: pointer;
         user-select: none;
       }
-      
       #proxy-input-body {
         padding: 14px 14px 16px;
       }
-
       #proxy-input-log {
         font-size: 11px;
         color: rgba(220, 200, 150, 0.9);
@@ -396,9 +393,72 @@ function renderDays(venue) {
         max-height: 160px;
         overflow-y: auto;
       }
+      .proxy-btn {
+        display: block;
+        width: 100%;
+        margin: 4px 0;
+        padding: 8px 12px;
+        text-align: left;
+        cursor: pointer;
+        font-size: 0.9em;
+        letter-spacing: 0.05em;
+        color: #c8a045;
+        background: linear-gradient(180deg, #1e341e 0%, #141f14 100%);
+        border: 1px solid rgba(179, 151, 109, 0.4);
+        border-top-color: rgba(179, 151, 109, 0.7);
+        border-radius: 5px;
+        box-shadow:
+          inset 0 1px 0 rgba(200, 160, 69, 0.15),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+          0 1px 3px rgba(0, 0, 0, 0.5);
+        transition: filter 0.1s;
+      }
+      .proxy-btn:active {
+        filter: brightness(0.85);
+        box-shadow:
+          inset 0 2px 4px rgba(0, 0, 0, 0.5),
+          0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+      .proxy-btn-back {
+        display: inline-block;
+        width: auto;
+        margin-bottom: 8px;
+        padding: 5px 12px;
+        font-size: 0.8em;
+        color: rgba(200, 170, 100, 0.7);
+        background: linear-gradient(180deg, #181818 0%, #111111 100%);
+        border: 1px solid rgba(179, 151, 109, 0.25);
+        border-top-color: rgba(179, 151, 109, 0.45);
+        border-radius: 5px;
+        cursor: pointer;
+        box-shadow:
+          inset 0 1px 0 rgba(200, 160, 69, 0.08),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+          0 1px 3px rgba(0, 0, 0, 0.5);
+        transition: filter 0.1s;
+      }
+      .proxy-btn-back:active { filter: brightness(0.85); }
+      .proxy-btn-race {
+        display: inline-block;
+        width: auto;
+        margin: 3px;
+        padding: 7px 13px;
+        font-size: 0.85em;
+        color: #c8a045;
+        background: linear-gradient(180deg, #1e341e 0%, #141f14 100%);
+        border: 1px solid rgba(179, 151, 109, 0.4);
+        border-top-color: rgba(179, 151, 109, 0.7);
+        border-radius: 5px;
+        cursor: pointer;
+        box-shadow:
+          inset 0 1px 0 rgba(200, 160, 69, 0.15),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+          0 1px 3px rgba(0, 0, 0, 0.5);
+        transition: filter 0.1s;
+      }
+      .proxy-btn-race:active { filter: brightness(0.85); }
     `;
     document.head.appendChild(style);
-
     // ===========================================================
     // HTML注入
     // ===========================================================
