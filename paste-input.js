@@ -293,7 +293,7 @@
     }
 
     // riders → 各フィールド
-    const STYLE_MAP = { '逃': '逃', '差': '追', '捲': '自' };
+    const STYLE_MAP = { '逃': '逃', '自': '自', '追': '追' };
     const allCarNos = [1,2,3,4,5,6,7];
     const detectedNos = new Set(data.riders.map(r => r.number));
 
