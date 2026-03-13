@@ -307,7 +307,14 @@
 
     // 選手データ反映
     const msgs = [];
-    data.riders.forEach(rider => {
+    // 9車立てチェック
+    const activeRiders = data.riders.filter(r => !r.isScratched);
+    if (activeRiders.length > 7) {
+    alert('⚠️ 9車立てのレースです。自在律は7車立て専用のため自動入力を中断しました。');
+    return;
+  }
+
+      data.riders.forEach(rider => {
       const row = document.querySelector(`.player-row[data-id="${rider.number}"]`);
       if (!row) return;
 
