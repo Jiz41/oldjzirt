@@ -26,6 +26,23 @@
     '佐世保':'🍔佐世保', '別府':'♨️別府', '熊本':'🏯熊本',
   };
 
+  const VENUE_PREF_MAP = {
+  '函館':'北海道', '青森':'青森', 'いわき平':'福島',
+  '弥彦':'新潟', '前橋':'群馬', '取手':'茨城',
+  '宇都宮':'栃木', '大宮':'埼玉', '西武園':'埼玉',
+  '京王閣':'東京', '立川':'東京', '松戸':'千葉',
+  '川崎':'神奈川', '平塚':'神奈川', '小田原':'神奈川',
+  '伊東':'静岡', '静岡':'静岡', '富山':'富山',
+  '名古屋':'愛知', '岐阜':'岐阜', '大垣':'岐阜',
+  '豊橋':'愛知', '松阪':'三重', '四日市':'三重',
+  '福井':'福井', '奈良':'奈良', '向日町':'京都',
+  '和歌山':'和歌山', '岸和田':'大阪', '玉野':'岡山',
+  '広島':'広島', '防府':'山口', '高松':'香川',
+  '小松島':'徳島', '高知':'高知', '松山':'愛媛',
+  '小倉':'福岡', '久留米':'福岡', '武雄':'佐賀',
+  '佐世保':'長崎', '別府':'大分', '熊本':'熊本',
+  };
+
   const cache = {
     kaisai: {},
     race: {},
@@ -250,6 +267,7 @@
     });
 
     // 選手データ反映
+    const venuePref = VENUE_PREF_MAP[data.venue] || null;
     const msgs = [];
     data.riders.forEach(rider => {
       const row = document.querySelector(`.player-row[data-id="${rider.number}"]`);
@@ -258,6 +276,10 @@
       const scratchEl = row.querySelector('.is-scratch');
       if (scratchEl) scratchEl.checked = rider.isScratched;
       if (rider.isScratched) return;
+      const localEl = row.querySelector('.is-local');
+      if (localEl && venuePref && rider.pref) {
+      localEl.checked = rider.pref.includes(venuePref) || venuePref.includes(rider.pref);
+    }
 
       const scoreEl = row.querySelector('.score');
       if (scoreEl && rider.score !== null) scoreEl.value = rider.score;
