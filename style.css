@@ -514,8 +514,8 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
 
     /* --- 入力エリア・共通パーツ --- */
     .input-group, .result-section, .scenario-detail {
-        background-color: #252525 !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background-color: rgba(37, 37, 37, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
     }
     label, .input-item label, .player-field label, .subtitle { color: #a0b0a0 !important; }
     select, input[type="number"], input[type="text"], textarea {
