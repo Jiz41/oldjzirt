@@ -306,116 +306,116 @@
 
     const style = document.createElement('style');
     style.textContent = `
-      #proxy-input-section {
-        margin: 12px 0;
-        border-radius: 10px;
-        overflow: hidden;
-        border: 1px solid rgba(179, 151, 109, 0.55);
-        box-shadow:
-          0 0 0 1px rgba(179, 151, 109, 0.15),
-          0 0 18px rgba(179, 151, 109, 0.18),
-          0 0 40px rgba(179, 151, 109, 0.08),
-          0 4px 24px rgba(0, 0, 0, 0.5);
-        background:
-          radial-gradient(circle, rgba(180, 200, 80, 0.07) 1px, transparent 1px),
-          repeating-linear-gradient(90deg, transparent, transparent 14px, rgba(180, 200, 80, 0.06) 14px, rgba(180, 200, 80, 0.06) 15px),
-          repeating-linear-gradient(0deg, transparent, transparent 14px, rgba(180, 200, 80, 0.06) 14px, rgba(180, 200, 80, 0.06) 15px),
-          #0f1a0f;
-        background-size: 15px 15px, 15px 15px, 15px 15px, auto;
-      }
-      #proxy-input-header {
-        padding: 14px 16px;
-        font-weight: bold;
-        color: #c8a045;
-        font-size: 1em;
-        letter-spacing: 0.2em;
-        position: relative;
-        text-shadow: 0 0 10px rgba(200, 160, 69, 0.5);
-        overflow: hidden;
-        border-bottom: 1px solid rgba(179, 151, 109, 0.2);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        user-select: none;
-      }
-      #proxy-input-body {
-        padding: 14px 14px 16px;
-      }
-      #proxy-input-log {
-        font-size: 11px;
-        color: rgba(220, 200, 150, 0.9);
-        letter-spacing: 0.05em;
-        margin-top: 10px;
-        font-family: monospace;
-        white-space: pre-wrap;
-        max-height: 160px;
-        overflow-y: auto;
-      }
-      .proxy-btn {
-        display: block;
-        width: 100%;
-        margin: 4px 0;
-        padding: 8px 12px;
-        text-align: left;
-        cursor: pointer;
-        font-size: 0.9em;
-        letter-spacing: 0.05em;
-        color: #c8a045;
-        background: linear-gradient(180deg, #1e341e 0%, #141f14 100%);
-        border: 1px solid rgba(179, 151, 109, 0.4);
-        border-top-color: rgba(179, 151, 109, 0.7);
-        border-radius: 5px;
-        box-shadow:
-          inset 0 1px 0 rgba(200, 160, 69, 0.15),
-          inset 0 -1px 0 rgba(0, 0, 0, 0.4),
-          0 1px 3px rgba(0, 0, 0, 0.5);
-        transition: filter 0.1s;
-      }
-      .proxy-btn:active {
-        filter: brightness(0.85);
-        box-shadow:
-          inset 0 2px 4px rgba(0, 0, 0, 0.5),
-          0 1px 2px rgba(0, 0, 0, 0.3);
-      }
-      .proxy-btn-back {
-        display: inline-block;
-        width: auto;
-        margin-bottom: 8px;
-        padding: 5px 12px;
-        font-size: 0.8em;
-        color: rgba(200, 170, 100, 0.7);
-        background: linear-gradient(180deg, #181818 0%, #111111 100%);
-        border: 1px solid rgba(179, 151, 109, 0.25);
-        border-top-color: rgba(179, 151, 109, 0.45);
-        border-radius: 5px;
-        cursor: pointer;
-        box-shadow:
-          inset 0 1px 0 rgba(200, 160, 69, 0.08),
-          inset 0 -1px 0 rgba(0, 0, 0, 0.4),
-          0 1px 3px rgba(0, 0, 0, 0.5);
-        transition: filter 0.1s;
-      }
-      .proxy-btn-back:active { filter: brightness(0.85); }
-      .proxy-btn-race {
-        display: inline-block;
-        width: auto;
-        margin: 3px;
-        padding: 7px 13px;
-        font-size: 0.85em;
-        color: #c8a045;
-        background: linear-gradient(180deg, #1e341e 0%, #141f14 100%);
-        border: 1px solid rgba(179, 151, 109, 0.4);
-        border-top-color: rgba(179, 151, 109, 0.7);
-        border-radius: 5px;
-        cursor: pointer;
-        box-shadow:
-          inset 0 1px 0 rgba(200, 160, 69, 0.15),
-          inset 0 -1px 0 rgba(0, 0, 0, 0.4),
-          0 1px 3px rgba(0, 0, 0, 0.5);
-        transition: filter 0.1s;
-      }
-      .proxy-btn-race:active { filter: brightness(0.85); }
+#proxy-input-section {
+    margin: 12px 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(232, 122, 48, 0.5);
+    box-shadow:
+        0 0 0 1px rgba(232, 122, 48, 0.12),
+        0 0 18px rgba(232, 122, 48, 0.15),
+        0 0 40px rgba(232, 122, 48, 0.06),
+        0 4px 24px rgba(0, 0, 0, 0.6);
+    background:
+        radial-gradient(circle, rgba(232, 122, 48, 0.06) 1px, transparent 1px),
+        repeating-linear-gradient(90deg, transparent, transparent 14px, rgba(232, 122, 48, 0.04) 14px, rgba(232, 122, 48, 0.04) 15px),
+        repeating-linear-gradient(0deg, transparent, transparent 14px, rgba(232, 122, 48, 0.04) 14px, rgba(232, 122, 48, 0.04) 15px),
+        #0a0a0a;
+    background-size: 15px 15px, 15px 15px, 15px 15px, auto;
+}
+#proxy-input-header {
+    padding: 14px 16px;
+    font-weight: bold;
+    color: #e87a30;
+    font-size: 1em;
+    letter-spacing: 0.2em;
+    position: relative;
+    text-shadow: 0 0 10px rgba(232, 122, 48, 0.6);
+    overflow: hidden;
+    border-bottom: 1px solid rgba(232, 122, 48, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+#proxy-input-body {
+    padding: 14px 14px 16px;
+}
+#proxy-input-log {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.05em;
+    margin-top: 10px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    max-height: 160px;
+    overflow-y: auto;
+}
+.proxy-btn {
+    display: block;
+    width: 100%;
+    margin: 4px 0;
+    padding: 8px 12px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.9em;
+    letter-spacing: 0.05em;
+    color: #e87a30;
+    background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+    border: 1px solid rgba(232, 122, 48, 0.35);
+    border-top-color: rgba(232, 122, 48, 0.6);
+    border-radius: 5px;
+    box-shadow:
+        inset 0 1px 0 rgba(232, 122, 48, 0.12),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+        0 1px 3px rgba(0, 0, 0, 0.6);
+    transition: filter 0.1s;
+}
+.proxy-btn:active {
+    filter: brightness(0.85);
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.6),
+        0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.proxy-btn-back {
+    display: inline-block;
+    width: auto;
+    margin-bottom: 8px;
+    padding: 5px 12px;
+    font-size: 0.8em;
+    color: rgba(232, 122, 48, 0.6);
+    background: linear-gradient(180deg, #141414 0%, #0a0a0a 100%);
+    border: 1px solid rgba(232, 122, 48, 0.2);
+    border-top-color: rgba(232, 122, 48, 0.4);
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow:
+        inset 0 1px 0 rgba(232, 122, 48, 0.08),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+        0 1px 3px rgba(0, 0, 0, 0.6);
+    transition: filter 0.1s;
+}
+.proxy-btn-back:active { filter: brightness(0.85); }
+.proxy-btn-race {
+    display: inline-block;
+    width: auto;
+    margin: 3px;
+    padding: 7px 13px;
+    font-size: 0.85em;
+    color: #e87a30;
+    background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+    border: 1px solid rgba(232, 122, 48, 0.35);
+    border-top-color: rgba(232, 122, 48, 0.6);
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow:
+        inset 0 1px 0 rgba(232, 122, 48, 0.12),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+        0 1px 3px rgba(0, 0, 0, 0.6);
+    transition: filter 0.1s;
+}
+.proxy-btn-race:active { filter: brightness(0.85); }
     `;
     document.head.appendChild(style);
 
