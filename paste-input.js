@@ -385,7 +385,7 @@
     padding: 5px 12px;
     font-size: 0.8em;
     color: rgba(200, 120, 74, 0.6);
-    background: linear-gradient(180deg, #141414 0%, #0a0a0a 100%);
+    background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
     border: 1px solid rgba(200, 120, 74, 0.2);
     border-top-color: rgba(200, 120, 74, 0.4);
     border-radius: 5px;
