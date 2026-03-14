@@ -310,29 +310,29 @@
     margin: 12px 0;
     border-radius: 10px;
     overflow: hidden;
-    border: 1px solid rgba(232, 122, 48, 0.5);
+    border: 1px solid rgba(200, 120, 74, 0.5);
     box-shadow:
-        0 0 0 1px rgba(232, 122, 48, 0.12),
-        0 0 18px rgba(232, 122, 48, 0.15),
-        0 0 40px rgba(232, 122, 48, 0.06),
+        0 0 0 1px rgba(200, 120, 74, 0.12),
+        0 0 18px rgba(200, 120, 74, 0.15),
+        0 0 40px rgba(200, 120, 74, 0.06),
         0 4px 24px rgba(0, 0, 0, 0.6);
     background:
-        radial-gradient(circle, rgba(232, 122, 48, 0.06) 1px, transparent 1px),
-        repeating-linear-gradient(90deg, transparent, transparent 14px, rgba(232, 122, 48, 0.04) 14px, rgba(232, 122, 48, 0.04) 15px),
-        repeating-linear-gradient(0deg, transparent, transparent 14px, rgba(232, 122, 48, 0.04) 14px, rgba(232, 122, 48, 0.04) 15px),
+        radial-gradient(circle, rgba(200, 120, 74, 0.06) 1px, transparent 1px),
+        repeating-linear-gradient(90deg, transparent, transparent 14px, rgba(200, 120, 74, 0.04) 14px, rgba(200, 120, 74, 0.04) 15px),
+        repeating-linear-gradient(0deg, transparent, transparent 14px, rgba(200, 120, 74, 0.04) 14px, rgba(200, 120, 74, 0.04) 15px),
         #0a0a0a;
     background-size: 15px 15px, 15px 15px, 15px 15px, auto;
 }
 #proxy-input-header {
     padding: 14px 16px;
     font-weight: bold;
-    color: #e87a30;
+    color: #c8784a;
     font-size: 1em;
     letter-spacing: 0.2em;
     position: relative;
-    text-shadow: 0 0 10px rgba(232, 122, 48, 0.6);
+    text-shadow: 0 0 10px rgba(200, 120, 74, 0.6);
     overflow: hidden;
-    border-bottom: 1px solid rgba(232, 122, 48, 0.2);
+    border-bottom: 1px solid rgba(200, 120, 74, 0.2);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -361,13 +361,13 @@
     cursor: pointer;
     font-size: 0.9em;
     letter-spacing: 0.05em;
-    color: #e87a30;
+    color: #c8784a;
     background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
-    border: 1px solid rgba(232, 122, 48, 0.35);
-    border-top-color: rgba(232, 122, 48, 0.6);
+    border: 1px solid rgba(200, 120, 74, 0.35);
+    border-top-color: rgba(200, 120, 74, 0.6);
     border-radius: 5px;
     box-shadow:
-        inset 0 1px 0 rgba(232, 122, 48, 0.12),
+        inset 0 1px 0 rgba(200, 120, 74, 0.12),
         inset 0 -1px 0 rgba(0, 0, 0, 0.5),
         0 1px 3px rgba(0, 0, 0, 0.6);
     transition: filter 0.1s;
@@ -384,14 +384,14 @@
     margin-bottom: 8px;
     padding: 5px 12px;
     font-size: 0.8em;
-    color: rgba(232, 122, 48, 0.6);
+    color: rgba(200, 120, 74, 0.6);
     background: linear-gradient(180deg, #141414 0%, #0a0a0a 100%);
-    border: 1px solid rgba(232, 122, 48, 0.2);
-    border-top-color: rgba(232, 122, 48, 0.4);
+    border: 1px solid rgba(200, 120, 74, 0.2);
+    border-top-color: rgba(200, 120, 74, 0.4);
     border-radius: 5px;
     cursor: pointer;
     box-shadow:
-        inset 0 1px 0 rgba(232, 122, 48, 0.08),
+        inset 0 1px 0 rgba(200, 120, 74, 0.08),
         inset 0 -1px 0 rgba(0, 0, 0, 0.5),
         0 1px 3px rgba(0, 0, 0, 0.6);
     transition: filter 0.1s;
@@ -403,14 +403,14 @@
     margin: 3px;
     padding: 7px 13px;
     font-size: 0.85em;
-    color: #e87a30;
+    color: #c8784a;
     background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
-    border: 1px solid rgba(232, 122, 48, 0.35);
-    border-top-color: rgba(232, 122, 48, 0.6);
+    border: 1px solid rgba(200, 120, 74, 0.35);
+    border-top-color: rgba(200, 120, 74, 0.6);
     border-radius: 5px;
     cursor: pointer;
     box-shadow:
-        inset 0 1px 0 rgba(232, 122, 48, 0.12),
+        inset 0 1px 0 rgba(200, 120, 74, 0.12),
         inset 0 -1px 0 rgba(0, 0, 0, 0.5),
         0 1px 3px rgba(0, 0, 0, 0.6);
     transition: filter 0.1s;
