@@ -1024,14 +1024,21 @@ app.calculatePrediction = async function() {
     basePlayers.forEach(p => {
         p.c_score_adj = 1.0 + (p.score / 100 - 1) * settings.R_BIAS;
 
-        const recentScores = p.recent.split('').map(Number);
-        const avgRank = recentScores.length > 0 ? recentScores.reduce((a, b) => a + b, 0) / recentScores.length : 4.0;
-        p.c_recent = (1.0 + (4 - avgRank) * 0.05) * settings.RECENT_WEIGHT;
+    const recentScores = p.recent.split('').map(Number);
+    const avgRank = recentScores.length > 0 ? recentScores.reduce((a, b) => a + b, 0) / recentScores.length : 4.0;
+    let trendBonus = 0;
+    if (recentScores.length >= 3) {
+    const d1 = recentScores[1] - recentScores[0];
+    const d2 = recentScores[2] - recentScores[1];
+    if (d1 > 0 && d2 > 0) trendBonus = +0.03;
+    if (d1 < 0 && d2 < 0) trendBonus = -0.03;
+    }
+    p.c_recent = (1.0 + (4 - avgRank) * 0.05 + trendBonus) * settings.RECENT_WEIGHT;
 
         if      (p.wmark === '◎') p.c_wmark = 1.04;
         else if (p.wmark === '〇') p.c_wmark = 1.02;
-        else if (p.wmark === '✕') p.c_wmark = 1.015;
-        else if (p.wmark === '△') p.c_wmark = 1.01;
+        else if (p.wmark === '△') p.c_wmark = 1.015;
+        else if (p.wmark === '✕') p.c_wmark = 1.01;
         else                       p.c_wmark = 1.0;
 
         // S1位(+0.5%)：ライン先頭の象徴的優位
