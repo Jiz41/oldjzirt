@@ -16,7 +16,7 @@ body {
     width: calc(100% - 20px);
     max-width: 600px;
     margin: 15px auto;
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.75);
     padding: 0;
     border-radius: 12px; 
     box-shadow: 
@@ -130,7 +130,7 @@ h3 {
     padding: 15px; 
     border: 1px solid #e0e0e0; 
     border-radius: 8px; 
-    background: rgba(252, 252, 240, 0.9);
+    background: rgba(252, 252, 240, 0.6);
     box-sizing: border-box;
     box-shadow: 
         0 2px 6px rgba(0, 0, 0, 0.06),
