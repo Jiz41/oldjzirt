@@ -3,639 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>華耀天輪 真・自在律</title>
+    <title>KAYOU SHAKKOU 自在律：RONDE</title>
     <link rel="stylesheet" href="./style.css">
-    
-    <!-- 🌌 赤口呑縁：サイバーパンク配色 -->
-    <link rel="stylesheet" href="./kiyone_cyberpunk_addon.css">
-
-    <!-- 🌐 PWA設定 -->
-    <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="真自在律">
-    <link rel="apple-touch-icon" href="./icon-192.png">
-
-    <script>
-  if ('serviceWorker' in navigator) {
-    document.addEventListener('DOMContentLoaded', () => {
-      navigator.serviceWorker.register('./sw.js');
-    });
-  }
-    </script>
-    <script data-goatcounter="https://jiz41.goatcounter.com/count"
-    data-goatcounter-settings='{"allow_frame": true}'
-    async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 
-<!--<div id="hf-maintenance-shield" style="display: none;">
-    <div style="
-        position: fixed !important;
-        inset: 0 !important;
-        width: 100vw !important;
-        height: 100dvh !important;
-        background-color: rgba(0, 0, 0, 0.85) !important;
-        z-index: 2147483647 !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        pointer-events: auto !important;
-    ">
-        <div style="
-            color: white !important;
-            font-size: 28px !important;
-            font-weight: bold !important;
-            padding: 40px !important;
-            border: 4px solid white !important;
-            background: black !important;
-            border-radius: 15px !important;
-        ">
-            只今工事中です 👷‍♀️
-        </div>
-    </div>
-</div>-->
-
- <script>
-    (function() {
-        // URLの末尾が「?edit=true」なら何もしない
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('oudon') === 'tabetai') {
-            console.log("確認用：ロックを解除しました。");
-            return; 
-        }
-
-        // それ以外（通常アクセス）はロック発動
-        const shield = document.getElementById('hf-maintenance-shield');
-        shield.style.display = 'block';
-        document.body.classList.add('locked-body');
-        document.body.appendChild(shield);
-        
-        window.onscroll = function() { window.scrollTo(0, 0); };
-    })();
-</script>
-
-<script>
-(function() {
-    function addCopyButton() {
-        const target = document.getElementById('copy-button-container');
-        if (!target || document.getElementById('easy-copy-btn')) return;
-        const scenarioOutput = document.getElementById('scenario-output');
-        if (!scenarioOutput || scenarioOutput.innerHTML.trim() === "") return;
-
-        const btn = document.createElement('button');
-        btn.id = 'easy-copy-btn';
-        btn.innerHTML = '予想結果をコピー';
-        
-        // --- ソリッド & メカニカル・フィードバック定義 ---
-        btn.style = `
-            display: block;
-            width: 160px;
-            margin: 25px auto;
-            padding: 10px 0;
-            background: #000;
-            color: #fff;
-            border: 1px solid #444;
-            border-radius: 1px;         /* 鋭い角 */
-            font-family: 'Helvetica', sans-serif;
-            font-size: 10px;
-            font-weight: 400;
-            letter-spacing: 0.25em;
-            cursor: pointer;
-            transition: transform 0.05s, background 0.05s; /* 応答速度を極限まで速く */
-            text-transform: uppercase;
-            outline: none;
-            -webkit-tap-highlight-color: transparent; /* スマホ特有の青枠を消す */
-        `;
-        
-        // 「カチッ」とした押し心地の再現（スペースキーの挙動）
-        btn.onmousedown = () => {
-            btn.style.transform = "scale(0.96) translateY(2px)"; // 物理的な沈み込み
-            btn.style.background = "#fff";                       // 反転（発光）
-            btn.style.color = "#000";
-        };
-        btn.onmouseup = () => {
-            btn.style.transform = "scale(1) translateY(0)";      // 即座に復帰
-            btn.style.background = "#000";
-            btn.style.color = "#fff";
-        };
-        // 指を離した時やスマホでのタッチ対応
-        btn.ontouchstart = btn.onmousedown;
-        btn.ontouchend = btn.onmouseup;
-
-        target.appendChild(btn);
-
-        btn.onclick = async () => {
-            try {
-                const bank = document.getElementById('bank-name').value;
-                const windDir = document.getElementById('wind-direction').value;
-                const windSpd = document.getElementById('wind-speed').value;
-                const windText = (windDir === 'none' || windDir === '無風') ? "無風 0m" : `${windDir} ${windSpd}m`;
-
-                const getBet = (id) => {
-                    const el = document.getElementById(id);
-                    if (!el) return "---";
-                    return Array.from(el.querySelectorAll('li')).map(li => li.innerText.trim()).join(', ');
-                };
-                const sunny = getBet('seitenrei-output');
-                const rainy = getBet('koutenrei-output');
-
-                let scenarioText = "";
-                document.querySelectorAll('.scenario-detail').forEach(div => {
-                    const title = div.querySelector('h4')?.innerText.replace('シミュレーション', '').trim() || "";
-                    const pTags = div.querySelectorAll('p');
-                    let bets = "";
-                    pTags.forEach(p => {
-                        if (p.innerText.includes('三連')) {
-                            const val = p.innerText.split(':')[1]?.trim();
-                            if (val) bets += (bets ? ", " : "") + val;
-                        }
-                    });
-                    if (title) scenarioText += `${title} ${bets}\n`;
-                });
-
-                const finalText = `${bank} ［レース番号を入力］R\n\n☀️ 晴天令：${sunny}\n⛈️ 荒天令：${rainy}\n\n${scenarioText}\n（${windText}）`;
-                await navigator.clipboard.writeText(finalText);
-                
-                // 成功時の控えめなフィードバック
-                const originalText = btn.innerHTML;
-                btn.innerHTML = 'コピー完了';
-                setTimeout(() => { btn.innerHTML = originalText; }, 1200);
-            } catch (err) { console.error(err); }
-        };
-    }
-    setInterval(addCopyButton, 500);
-})();
-</script>
-
 <div class="container">
+
     <header>
-        <div class="subtitle">演算制御多重交響体</div>
+        <div class="subtitle">異聞演算制御多重交響体</div>
         <div class="title-image-container">
-            <img src="./title.png" alt="華耀天輪 真・自在律" class="title-image">
+            <img src="./title.png" alt="華耀灼 自在律：RONDE" class="title-image">
         </div>
-    </header>    
-        <div id="maxim-display-container"></div>
+    </header>
 
-        <div class="manual-header" onclick="toggleManual()">
-            <span id="manual-toggle-icon">▶</span> 📖 操作説明書・マニュアル
-        </div>
-<div class="manual-content" id="manual-content">
-    <h2>⚙️ ツールの全体構成と基本操作</h2>
-    <p>このツールは、入力されたレース情報と選手データに基づき、複数の展開パターンをシミュレーションし、独自ロジックで評価した予想結果を提供するモバイル向け競輪予想支援ツールです。</p>
-
-    <h3>1. レース基本情報の入力（土台を作る）</h3>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 30%;">項目</th>
-                <th>入力内容・例</th>
-                <th>解説：システムへの影響</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><b>級班</b></td>
-                <td>ガールズ / S級 / A級等</td>
-                <td>級班に応じた計算係数の最適化。</td>
-            </tr>
-            <tr>
-                <td><b>バンク名</b></td>
-                <td>開催場所を選択</td>
-                <td>バンク固有の展開傾向（逃げ・差し等）を自動抽出。</td>
-            </tr>
-            <tr>
-                <td><b>風向・風速</b></td>
-                <td>8方位 / 0.5m単位</td>
-                <td><b>V8.0 捌風旋炉 枢</b>：風によるライン位置別のスタミナ損耗（kururu係数）を演算。</td>
-            </tr>
-        </tbody>
-    </table>
-    <p style="font-size: 0.85em;">※風情報は <a href="https://tenki.jp/lite/leisure/horse/" target="_blank">tenki.jp</a> や <a href="https://kazekeirin.info/" target="_blank">風競輪.info</a> を参照。無風や屋内時は「無風/屋内」を選択してください。</p>
-
-    <h3>2. 選手個別データの入力（精度を高める）</h3>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 30%;">項目</th>
-                <th>内容・選択</th>
-                <th>解説：入力の目的</th>
-            </tr>
-        </thead>
-        <tbody>
-                  <tr>
-            <td><b>👑 GCボタン</b></td>
-            <td>チェックボックス</td>
-            <td>
-                若手の潜在能力補正。得点以上の実力を持つ選手を、上位層の期待値へ引き上げます。<br>
-                <small>※<b>過度な補正がかかるため、使用は慎重に判断してください。</b>本来の予想精度を大きく損なう恐れがあります。</small>
-            </td>
-        </tr>
-               <tr>
-            <td><b>地元 / 欠場</b></td>
-            <td>チェックボックス</td>
-            <td>
-                地元利の個別補正、および欠場選手の計算除外。<br>
-                <small>※<b>システムによる自動判別は行いません。</b>出走表等で確認し、手動でチェックを入れてください。</small>
-            </td>
-        </tr>
-            <tr>
-                        <tr>
-            <td><b>脚質 / 得点</b></td>
-            <td>逃先・差マ・捲り / 競走得点</td>
-            <td>
-                選手の基本戦術と機力の評価。<b>決まり手の中で最も高い値のもの</b>を指定してください。<br>
-                <small>※数値が同数の場合は、<b>今回の役割・位置</b>（自力か番手か）を優先して選択してください。</small>
-            </td>
-        </tr>
-
-<tr>
-    <td><b>W印 / 3走</b></td>
-    <td>◎〇△等 / 3走成績</td>
-    <td>
-        専門紙評価と近況のリズムを反映。<br>
-        <b>新しい順に</b>、3走の成績を入力してください。<br>
-        <small>※欠場・落車・棄権などは「<b>9</b>」を代入。</small>
-    </td>
-</tr>
-<td><b>S 1位 / B 1位</b></td>
-                <td>ラジオボタン指定</td>
-                <td>スタンディングとバックの1着候補から展開の核を決定。</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h3>3. 展開（ライン構成）の入力</h3>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 30%;">状態・項目</th>
-                <th>書き方（例）</th>
-                <th>解説：計算への反映</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-        <tr>
-            <td><b>基本並び</b></td>
-            <td><code>123,45,67</code></td>
-            <td>通常レース用。ライン毎にカンマで区切る。</td>
-        </tr>
-        <tr>
-            <td><b>ガールズ</b></td>
-            <td><code>1,2,3,4,5,6,7</code></td>
-            <td>全員単騎扱い。全選手の間をカンマで区切る。</td>
-        </tr>
-<td><b>競り発生</b></td>
-                <td><code>1(3)2, 45</code></td>
-                <td>カッコ内を競り選手と認識。展開の紛れを反映。</td>
-            </tr>
-            <tr>
-                <td><b>🎌地元スイッチ</b></td>
-                <td>チェックON</td>
-                <td>地元勢への恩義や番組構成を加味した全体補正。</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h3>4. 予想の実行とアウトプット</h3>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 30%;">出力項目</th>
-                <th>内容と活用方法</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><b>天雲指数</b></td>
-                <td>独自ロジックによる安定値：七曜院パラドキサ環による単次元的解析。</td>
-            </tr>
-            <tr>
-                <td><b>☀️ 晴天令</b></td>
-                <td>最も支持率と物理条件が安定した推奨買い目。</td>
-            </tr>
-            <tr>
-                <td><b>⛈️ 荒天令</b></td>
-                <td><b>自滅消耗や風の影響による波乱狙い。</td>
-            </tr>
-            <tr>
-                <td><b>🌌 赤口呑縁</b></td>
-                <td>
-                    <b>1,465の並行世界シミュレーション</b>：五更斎アメンティア清音による多次元展開解析。<br>
-                    <small>
-                        • <b>出現出目</b>：最も頻度の高い決着パターンTOP3を表示<br>
-                        • <b>因果分岐</b>：ライン崩壊や波乱イベント発生時の出目傾向<br>
-                        • <b>選手の生存濃度</b>：各選手の1着〜3着入線回数と圏外率を集計<br>
-                        ※級班ごとに異なる「世界線の重み付け」により、安定志向と波乱志向のバランスを調整
-                    </small>
-                </td>
-            </tr>
-            <tr>
-                <td><b>処理ログ</b></td>
-                <td>物理演算や各選手の補正ステップの確認。</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h3>5. 赤口呑縁（しゃっこうどんぺり）について</h3>
-    <p><b>偽典『赤口呑縁』</b>は、1,465通りの並行世界をシミュレーションし、展開の「揺らぎ」を可視化する解析機構です。</p>
-    
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 30%;">要素</th>
-                <th>説明</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><b>世界線の構成</b></td>
-                <td>
-                    通常展開（晴天令ベース）と波乱展開（荒天令ベース）を級班ごとの比率で混合。<br>
-                    <small>例：S級 = 879通常 + 586波乱 / A級 = 586通常 + 879波乱</small>
-                </td>
-            </tr>
-            <tr>
-                <td><b>”ゆらぎ”の詳細</b></td>
-                <td>
-                    ライン微崩壊・早駆け・風煽り・競り乱れ・落車・ダークホース・新人暴走・捲り自滅など、<br>
-                    展開を変動させる8種のイベントをランダム発生させる。
-                </td>
-            </tr>
-            <tr>
-                <td><b>出現出目</b></td>
-                <td>
-                    1,465回の試行で最も多く出現した決着パターンを、頻度順にTOP3表示。<br>
-                    <small>※頻度が高いほど「その決着に収束しやすい」ことを示す。</small>
-                </td>
-            </tr>
-            <tr>
-                <td><b>因果分岐</b></td>
-                <td>
-                    特定のカオスイベント（ライン崩壊など）が発生した世界線のみを抽出し、<br>
-                    その条件下で最も出やすい決着パターンを分析。<br>
-                    <small>※「波乱時の保険」として活用可能。</small>
-                </td>
-            </tr>
-            <tr>
-                <td><b>生存濃度</b></td>
-                <td>
-                    各選手が1着・2着・3着・圏外にそれぞれ何回入線したかを集計。<br>
-                    <small>※着順分布を見ることで、選手の「安定性」や「ヒモ適性」が判断できる。</small>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h4>🎯 赤口呑縁の活用方法</h4>
-    <ul style="line-height: 1.8;">
-        <li><b>本命固め</b>：出現出目TOP1が晴天令と一致 → 安定した展開</li>
-        <li><b>ヒモ選択</b>：生存濃度で2着・3着の入線回数が多い選手を狙う</li>
-        <li><b>波乱対策</b>：因果分岐の出目を保険として買う</li>
-        <li><b>買い目の絞り込み</b>：頻度が極端に低い決着（10回未満など）を除外</li>
-    </ul>
-
-    <p style="font-size: 0.85em; color: #999;">
-        ※赤口呑縁は疑似統計的な傾向を示すものであり、実際のレース結果を保証するものではありません。<br>
-        ※計算には数秒かかる場合があります（1,465回のシミュレーション実行のため）。
-    </p>
-</div>
-
-        <h2>🎛️ レース/選手情報入力</h2>
-        <div class="input-group">
-            <div class="input-item">
-                <label for="race-type">レースタイプ/級班:</label>
-                <select id="race-type">
-                    <option value="girls">👩 ガールズ</option>
-                    <option value="s-kyu">🥇 S級</option>
-                    <option value="a-kyu">🥈 A級</option>
-                    <option value="a-chal">🥉 A級チャレ</option>
-                </select>
-            </div>
-            <div class="input-item">
-                <label for="bank-name">バンク名:</label>
-                <select id="bank-name" onchange="App.displayBankTendency()"></select>
-            </div>
-
-<div class="input-item" id="kururu-ui-container" style="margin-bottom: 15px;">
-    <label style="font-weight: bold; display: block; margin-bottom: 5px;">風向き・風速</label>
-    <div style="display: flex; gap: 10px; margin-bottom: 5px;">
-        <div style="flex: 1;">
-            <label for="wind-direction" style="font-size: 0.8em; color: #555;">風向</label>
-            <select id="wind-direction" style="width: 100%; padding: 5px;">
-                <option value="none">🍃 無風/屋内</option>
-                <option value="北">北</option><option value="北東">北東</option>
-                <option value="東">東</option><option value="南東">南東</option>
-                <option value="南">南</option><option value="南西">南西</option>
-                <option value="西">西</option><option value="北西">北西</option>
+    <!-- 入力フォーム -->
+    <h2>📡 レース情報取得</h2>
+    <div class="input-group">
+        <div class="input-item">
+            <label for="venue-select">会場</label>
+            <select id="venue-select">
+                <option value="kawaguchi">川口</option>
+                <option value="isesaki">伊勢崎</option>
+                <option value="hamamatsu">浜松</option>
+                <option value="iizuka">飯塚</option>
+                <option value="sanyo">山陽</option>
             </select>
         </div>
-        <div style="flex: 1;">
-            <label for="wind-speed" style="font-size: 0.8em; color: #555;">風速(m)</label>
-            <input type="number" id="wind-speed" value="0" min="0" max="15" step="0.5" style="width: 100%; padding: 5px; box-sizing: border-box;">
+        <div class="input-item">
+            <label for="kaisai-id">開催ID（例：2026031503）</label>
+            <input type="text" id="kaisai-id" placeholder="2026031503" maxlength="12">
         </div>
-    </div>
-    <div style="font-size: 0.75em; color: #666; line-height: 1.4;">
-        ※<a href="https://tenki.jp/lite/leisure/horse/" target="_blank" style="color: #0066cc; text-decoration: none;">tenki.jp</a> や 
-        <a href="https://kazekeirin.info/" target="_blank" style="color: #0066cc; text-decoration: none;">風競輪.info</a> で競輪場の風向風速を調べて下さい
-    </div>
-</div>
-
-            <p><strong>選手データ入力 (7名)</strong></p>
-            <div class="player-input-list" id="player-data">
-                <script>
-                    const defaultScores = [110, 105, 100, 95, 90, 85, 80];
-                    const defaultRecent = ["111", "111", "111", "111", "111", "111", "111"];
-                    for(let i=1; i<=7; i++) {
-                        document.write(`
-                        <div class="player-row id-${i}" data-id="${i}">
-                            <div class="player-header">
-    <span>選手ID ${i}</span>
-    
-    <div class="gold-cap-group" style="margin-left: auto; margin-right: 12px;">
-    <label class="crown-switch">
-        <input type="checkbox" id="goldcap-${i}" class="is-gold-cap">
-        <span class="crown-icon">👑</span>
-    </label>
-</div>
-
-    <div class="local-group">
-        <label for="local-${i}">地元:</label>
-        <input type="checkbox" id="local-${i}" class="is-local">
+        <div class="input-item">
+            <label for="day-input">日目</label>
+            <input type="number" id="day-input" value="1" min="1" max="5">
+        </div>
+        <div class="input-item">
+            <label for="race-no">レース番号</label>
+            <input type="number" id="race-no" value="1" min="1" max="12">
+        </div>
+        <button id="fetch-btn" onclick="fetchRace()">🚀 データ取得・予想</button>
     </div>
 
-    <div class="local-group" style="color: #c07777; margin-left: 10px;">
-        <label for="scratch-${i}">欠場:</label>
-        <input type="checkbox" id="scratch-${i}" class="is-scratch">
-    </div>
-    
-                                <div class="sb-group">
-                                    <label>S 1位: <input type="radio" name="s-leader" class="s1" data-id="${i}" ${i===1?'checked':''}></label>
-                                    <label>B 1位: <input type="radio" name="b-leader" class="b1" data-id="${i}" ${i===1?'checked':''}></label>
-                                </div>
-                            </div>
-                            <div class="player-fields">
-    <div class="player-field"><label>脚質</label><select class="style"><option value="逃">逃先</option><option value="追">差マ</option><option value="自">捲り</option></select></div>
-    <div class="player-field"><label>得点 (R)</label><input type="number" class="score" value="${defaultScores[i-1].toFixed(2)}"></div>
-    <div class="player-field"><label>W印</label><select class="wmark"><option value="◎">◎</option><option value="〇">〇</option><option value="△">△</option><option value="✕">✕</option><option value="無" ${i!==3?'selected':''}>無</option></select></div>
-    <div class="player-field"><label>直近3走</label><input type="text" class="recent" value="${defaultRecent[i-1]}"></div>
-</div>
-                        </div>`);
-                    }
-                </script>
-            </div>
-            <div class="input-item">
-                <label for="line-input">全体並び: (例: 123,45,67)</label>
-                <input type="text" id="line-input" value="123,45,67">
-            </div>
-            <div class="local-switch-group">
-                <input type="checkbox" id="local-switch">
-                <label for="local-switch">🎌 **地元スイッチ ON**</label>
-            </div>
-            <button onclick="calculatePrediction()">🚀 予想を計算 (実行)</button>
+    <!-- 結果エリア -->
+    <div id="results-area" style="display:none;">
+
+        <!-- 走路状態 -->
+        <div style="padding: 0 15px;">
+            <span id="road-badge" class="road-badge">−</span>
         </div>
 
-        <div id="results-container">
-            <h2>📊 予想結果・推奨買い目</h2>
-            <div class="result-section">
-                <div id="bank-tendency-display"></div>
-                <h3>🔗 ライン強度（強弱グラデーション）</h3>
-                <div id="line-display" class="line-display">計算結果待ち...</div>
-                
-                <div id="tenun-index-output">
-                    <span class="tenun-title" style="font-weight: bold; margin-bottom: 8px; display: block;">天雲指数</span>
-                </div>
+        <!-- 選手カード -->
+        <h2>🏍️ 出走選手</h2>
+        <div class="riders-section" id="riders-container"></div>
 
-                <h3>☀️ 晴天令 (安定推奨)</h3>
-                <div class="recommendation" id="seitenrei-output">計算結果待ち...</div>
-                <h3>⛈️ 荒天令 (波乱推奨)</h3>
-                <div class="recommendation" id="koutenrei-output">計算結果待ち...</div>
-                <div id="scenario-output">
-    <div id="shakkou-status-board" style="display:none;">
-        <span id="span_0">0</span> / 1465
-    </div>
-</div>
-                <div id="copy-button-container"></div>
-
-            </div>
+        <!-- 荒れ度・買い目 -->
+        <h2>🎯 予想結果</h2>
+        <div class="result-section">
+            <div id="volatility-display"></div>
+            <h3>3連単</h3>
+            <ul class="bet-list" id="sanrentan-list"></ul>
+            <h3>2連単</h3>
+            <ul class="bet-list" id="nirentan-list"></ul>
         </div>
+
     </div>
 
-<div id="share-area" class="share-align-fixed">
-  <span style="font-size: 10px !important; color: #888 !important; font-weight: bold !important; transform: translateY(6px) !important; flex-shrink: 0;">共有</span>
-  
-  <div onclick="execShareX()" class="btn-share-box">
-    <svg viewBox="0 0 24 24" width="16" height="16" class="icon-x-fix" style="fill: #000;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
-  </div>
-
-  <div onclick="execShareLine()" class="btn-share-box">
-    <svg viewBox="0 0 24 24" width="18" height="18"><path d="M24 10.304c0-4.369-4.705-7.923-10.5-7.923S3 5.935 3 10.304c0 3.913 3.73 7.18 8.775 7.818.341.073.805.226.921.518.106.265.07.679.034 0.947l-.149.894c-.045.27-.211 1.054.912.575 1.123-.479 6.064-3.57 8.271-6.111C23.081 13.528 24 12.012 24 10.304z" fill="#06C755"></path></svg>
-  </div>
-
-  <div onclick="execCopy()" class="btn-share-box">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-copy-fix" style="stroke: #000;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-  </div>
-</div>
-
-<script>
-const S_TXT = "【華耀天輪 真自在律】\nデータで有利な買い目を提案📊\n無料の予想アシストツールはこちら👇";
-const S_URL = "https://huggingface.co/spaces/Jiz41/Jiz41r1t5u";
-
-function execShareX() {
-    window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(S_TXT) + "&url=" + encodeURIComponent(S_URL), '_blank');
-}
-function execShareLine() {
-    const lineUrl = "https://line.me/R/share?text=" + encodeURIComponent(S_TXT + "\n" + S_URL);
-    window.open(lineUrl, '_blank');
-}
-function execCopy() {
-    const t = S_TXT + "\n" + S_URL;
-    navigator.clipboard.writeText(t).then(() => alert("コピーしました！")).catch(() => {
-        const a = document.createElement("textarea"); a.value = t; document.body.appendChild(a);
-        a.select(); document.execCommand("copy"); document.body.removeChild(a);
-        alert("コピーしました！");
-    });
-}
-</script>
-
+    <!-- デバッグログ -->
     <div class="debug-log-header" onclick="toggleDebugLog()">
-        <span id="log-toggle-icon">▶</span> 🛠️ デバッグ・処理ログ
+        <span id="log-toggle-icon">▶</span> 🛠️ デバッグログ
     </div>
     <div class="debug-log" id="debug-log">
-        [TOOL START] ツール起動。すべての係数とロジックを読み込みました。<br>
-        [INFO] bankdata.jsonの読み込みを待機しています...<br>
-    </div>
-    
-    <div style="text-align: center; margin-bottom: 5px;">
-        <a href="./manual_details.html" target="_blank" style="font-size: 0.85em; color: #a37200; text-decoration: underline;">
-            📖ツール利用ガイド・各項目の解説はこちら
-        </a>
+        [RONDE] 起動待機中...
     </div>
 
-    <div class="bug-report-container">
-        <a href="https://forms.gle/f2uW4UxpGpeT9n8g6" target="_blank" rel="noopener noreferrer" class="bug-button">
-        不具合を報告する
-    </a>
-    </div>
+    <footer class="copyright-footer">
+        <div class="footer-bottom-row">
+            <span>(C)2025-2026 Mushyn Reagan</span>
+        </div>
+    </footer>
 
-    <div class="bug-log-container" style="text-align: center; margin: 20px 0;">
-    <p style="font-size: 0.7em; color: #666; margin-bottom: 8px;">不具合かな？と思ったら確認してみてください</p>
-    <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vR4HnK6A5_WvJYhvFfc-M5HMDRCwiVDwxW49d3bRxOltzLrhaI0C79Sry2xsZsiEIxehLOW4KlCuk5r/pubhtml?gid=237056219&single=true&gridlines=true" 
-       target="_blank" 
-       rel="noopener noreferrer" 
-       style="color: #007bff; text-decoration: underline; font-weight: bold;">
-        皆様からのご報告と回答一覧
-    </a>
 </div>
-  
-<footer class="copyright-footer">
-    <div class="footer-sns-row">
-        <a href="https://note.com/kytnrnsnjzitr" target="_blank" class="footer-sns-card note">
-            <span class="footer-sns-label">📝 note</span>
-            <span class="footer-sns-desc">最新アプデ情報・開発の裏側・よろず語り。</span>
-        </a>
-        <a href="https://x.com/kayoutouidou01" target="_blank" class="footer-sns-card x-card">
-            <span class="footer-sns-label">𝕏 @Mushyn_Reagan</span>
-            <span class="footer-sns-desc">開発の徒然、競輪雑談はこちら。</span>
-        </a>
-    </div>
-    <div class="footer-bottom-row">
-        <a href="https://note.com/kytnrnsnjzitr/n/nbc069a03d13c" target="_blank" class="footer-link">免責事項・利用規約</a>
-        <span class="footer-divider">|</span>
-        <span>(C)2025-2026 Mushyn Reagan</span>
-    </div>
-</footer>
-    <script>
-        function toggleDebugLog() {
-            const logElement = document.getElementById('debug-log');
-            const iconElement = document.getElementById('log-toggle-icon');
-            if (logElement.style.display === 'block') { logElement.style.display = 'none'; iconElement.textContent = '▶'; }
-            else { logElement.style.display = 'block'; iconElement.textContent = '▼'; }
-        }
-        function toggleManual() {
-            const manualElement = document.getElementById('manual-content');
-            const iconElement = document.getElementById('manual-toggle-icon');
-            if (manualElement.style.display === 'block') { manualElement.style.display = 'none'; iconElement.textContent = '▶'; }
-            else { manualElement.style.display = 'block'; iconElement.textContent = '▼'; }
-        }
-    </script>
 
-<!-- ============================================================================
-     スクリプト実行エンジン
-     ============================================================================ -->
-<!-- 1. グローバル名前空間の定義 -->
-<script>var App = {};</script>
+<script src="./ar_ronde.js" defer></script>
+<script src="./ar_adapter.js" defer></script>
+<script src="./ar_main.js" defer></script>
 
-<!-- 2. 機能モジュールの読み込み (deferによりHTML解析後に記述順で実行) -->
-<script src="./tamaki_speech.js" defer></script>
-<script src="./kiyone_voice.js" defer></script>
-<script src="./shakkou_donperi_display.js" defer></script>
-<script src="./shakkou_donperi_core.js" defer></script>
-<script src="./keirin_logic.js" defer></script>
-<script src="./meigen.js" defer></script>
-<script src="./paste-input.js" defer></script>
+<script>
+function toggleDebugLog() {
+    const el = document.getElementById('debug-log');
+    const ic = document.getElementById('log-toggle-icon');
+    if (el.style.display === 'block') { el.style.display = 'none'; ic.textContent = '▶'; }
+    else { el.style.display = 'block'; ic.textContent = '▼'; }
+}
+</script>
 
 </body>
 </html>
