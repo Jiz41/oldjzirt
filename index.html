@@ -645,7 +645,8 @@ function execCopy() {
 (function() {
     const now = new Date();
     const isAprilFool = now.getMonth() === 3 && now.getDate() === 1;
-    if (!isAprilFool) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!isAprilFool || urlParams.get('corgi') === 'false') return;
 
     // body直下の全要素を非表示
     Array.from(document.body.children).forEach(el => { el.style.display = 'none'; });
@@ -803,7 +804,7 @@ function execCopy() {
         realLink.style.cssText = 'display:inline-block; padding:12px 28px; background:#fff; color:#000; text-decoration:none; font-size:12px; font-weight:bold; letter-spacing:0.2em; border-radius:2px; cursor:pointer;';
         realLink.onclick = function(e) {
             e.preventDefault();
-            window.open('https://huggingface.co/spaces/Jiz41/Jiz41r1t5u', '_blank');
+            window.open('https://huggingface.co/spaces/Jiz41/Jiz41r1t5u?corgi=false', '_blank');
         };
     }
 
@@ -897,6 +898,7 @@ function calcCorgi() {
     document.getElementById('c-results').scrollIntoView({ behavior: 'smooth' });
 }
 </script>
+
 
 </body>
 </html>
