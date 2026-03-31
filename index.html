@@ -637,7 +637,7 @@ function execCopy() {
 <script src="./meigen.js" defer></script>
 <script src="./paste-input.js" defer></script>
 
-  <!-- ============================================================================
+<!-- ============================================================================
      🐾 エイプリルフール専用ブロック：競コーギー予想システム
      index.htmlの </body> 直前に丸ごと挿入してください
      ============================================================================ -->
@@ -647,11 +647,8 @@ function execCopy() {
     const isAprilFool = now.getMonth() === 3 && now.getDate() === 1;
     if (!isAprilFool) return;
 
-    // 通常ページを非表示
-// body直下の全要素を非表示
-Array.from(document.body.children).forEach(el => {
-    el.style.display = 'none';
-});
+    // body直下の全要素を非表示
+    Array.from(document.body.children).forEach(el => { el.style.display = 'none'; });
 
     // コーギーページを注入
     const corgiApp = document.createElement('div');
@@ -786,22 +783,12 @@ Array.from(document.body.children).forEach(el => {
     ">
         <div style="font-size: 22px; margin-bottom: 10px;">🐾🐾🐾</div>
         <div style="font-size: 14px; color: #88cc88; font-weight: bold; margin-bottom: 8px;">
-            エイプリルフールのネタでございました
+            エイプリルフールで🐕
         </div>
         <div style="font-size: 12px; color: #888; margin-bottom: 16px; line-height: 1.6;">
             本日4月1日限定の競コーギー予想システムでした。<br>実際のページはこちらです。
         </div>
-        <a href="https://huggingface.co/spaces/Jiz41/Jiz41r1t5u" target="_top" style="...">
-            display: inline-block;
-            padding: 12px 28px;
-            background: #fff;
-            color: #000;
-            text-decoration: none;
-            font-size: 12px;
-            font-weight: bold;
-            letter-spacing: 0.2em;
-            border-radius: 2px;
-        ">華耀天輪 真・自在律を開く →</a>
+        <a id="c-real-link" href="https://huggingface.co/spaces/Jiz41/Jiz41r1t5u" target="_top">華耀天輪 真・自在律を開く →</a>
     </div>
 </div>
 
@@ -809,6 +796,12 @@ Array.from(document.body.children).forEach(el => {
     `;
 
     document.body.appendChild(corgiApp);
+
+    // aタグのstyleをJS後付け（innerHTML内でのstyle属性崩れ回避）
+    const realLink = document.getElementById('c-real-link');
+    if (realLink) {
+        realLink.style.cssText = 'display:inline-block; padding:12px 28px; background:#fff; color:#000; text-decoration:none; font-size:12px; font-weight:bold; letter-spacing:0.2em; border-radius:2px;';
+    }
 
     // コーギー選手名（固定9頭、7頭分使用）
     const corgiNames = ['もこ丸', 'ずんだ', 'ぽてち', 'ごまたろう', 'ふわり', 'どんぐり', 'くるみ'];
@@ -853,7 +846,7 @@ Array.from(document.body.children).forEach(el => {
 
 // ============ コーギー予想ロジック ============
 function calcCorgi() {
-    const corgiNames = ['ぷりん', 'もこたろう', 'ころすけ', 'きなこ', 'コッペ', 'ちび', 'ぽこた'];
+    const corgiNames = ['もこ丸', 'ずんだ', 'ぽてち', 'ごまたろう', 'ふわり', 'どんぐり', 'くるみ'];
     const windDir = document.getElementById('c-wind-dir').value;
     const windSpd = parseFloat(document.getElementById('c-wind-speed').value) || 0;
 
@@ -900,6 +893,7 @@ function calcCorgi() {
     document.getElementById('c-results').scrollIntoView({ behavior: 'smooth' });
 }
 </script>
+
 
 </body>
 </html>
