@@ -783,7 +783,7 @@ function execCopy() {
     ">
         <div style="font-size: 22px; margin-bottom: 10px;">🐾🐾🐾</div>
         <div style="font-size: 14px; color: #88cc88; font-weight: bold; margin-bottom: 8px;">
-            エイプリルフールで🐕
+            エイプリルフールのネタでございました
         </div>
         <div style="font-size: 12px; color: #888; margin-bottom: 16px; line-height: 1.6;">
             本日4月1日限定の競コーギー予想システムでした。<br>実際のページはこちらです。
@@ -797,10 +797,14 @@ function execCopy() {
 
     document.body.appendChild(corgiApp);
 
-    // aタグのstyleをJS後付け（innerHTML内でのstyle属性崩れ回避）
+    // リンクボタンのstyle＋クリック処理をJS後付け
     const realLink = document.getElementById('c-real-link');
     if (realLink) {
-        realLink.style.cssText = 'display:inline-block; padding:12px 28px; background:#fff; color:#000; text-decoration:none; font-size:12px; font-weight:bold; letter-spacing:0.2em; border-radius:2px;';
+        realLink.style.cssText = 'display:inline-block; padding:12px 28px; background:#fff; color:#000; text-decoration:none; font-size:12px; font-weight:bold; letter-spacing:0.2em; border-radius:2px; cursor:pointer;';
+        realLink.onclick = function(e) {
+            e.preventDefault();
+            window.open('https://huggingface.co/spaces/Jiz41/Jiz41r1t5u', '_blank');
+        };
     }
 
     // コーギー選手名（固定9頭、7頭分使用）
@@ -893,7 +897,6 @@ function calcCorgi() {
     document.getElementById('c-results').scrollIntoView({ behavior: 'smooth' });
 }
 </script>
-
 
 </body>
 </html>
