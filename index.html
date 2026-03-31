@@ -623,21 +623,6 @@ function execCopy() {
     </script>
 
 <!-- ============================================================================
-     スクリプト実行エンジン
-     ============================================================================ -->
-<!-- 1. グローバル名前空間の定義 -->
-<script>var App = {};</script>
-
-<!-- 2. 機能モジュールの読み込み (deferによりHTML解析後に記述順で実行) -->
-<script src="./tamaki_speech.js" defer></script>
-<script src="./kiyone_voice.js" defer></script>
-<script src="./shakkou_donperi_display.js" defer></script>
-<script src="./shakkou_donperi_core.js" defer></script>
-<script src="./keirin_logic.js" defer></script>
-<script src="./meigen.js" defer></script>
-<script src="./paste-input.js" defer></script>
-
-<!-- ============================================================================
      🐾 エイプリルフール専用ブロック：競コーギー予想システム
      index.htmlの </body> 直前に丸ごと挿入してください
      ============================================================================ -->
@@ -891,7 +876,6 @@ function calcCorgi() {
     document.getElementById('c-results').scrollIntoView({ behavior: 'smooth' });
 }
 </script>
-
 
 </body>
 </html>
