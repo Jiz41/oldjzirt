@@ -631,7 +631,7 @@ function execCopy() {
     const now = new Date();
     const isAprilFool = now.getMonth() === 3 && now.getDate() === 1;
     const urlParams = new URLSearchParams(window.location.search);
-    if (!isAprilFool || urlParams.get('corgi') === 'false') return;
+    if (!isAprilFool || urlParams.get('corgi') === 'false' || urlParams.get('oudon') === 'tabetai') return;
 
     // body直下の全要素を非表示
     Array.from(document.body.children).forEach(el => { el.style.display = 'none'; });
