@@ -648,8 +648,10 @@ function execCopy() {
     if (!isAprilFool) return;
 
     // 通常ページを非表示
-    document.querySelector('.container') && (document.querySelector('.container').style.display = 'none');
-    document.getElementById('share-area') && (document.getElementById('share-area').style.display = 'none');
+// body直下の全要素を非表示
+Array.from(document.body.children).forEach(el => {
+    el.style.display = 'none';
+});
 
     // コーギーページを注入
     const corgiApp = document.createElement('div');
@@ -851,7 +853,7 @@ function execCopy() {
 
 // ============ コーギー予想ロジック ============
 function calcCorgi() {
-    const corgiNames = ['もこ丸', 'ずんだ', 'ぽてち', 'ごまたろう', 'ふわり', 'どんぐり', 'くるみ'];
+    const corgiNames = ['ぷりん', 'もこたろう', 'ころすけ', 'きなこ', 'コッペ', 'ちび', 'ぽこた'];
     const windDir = document.getElementById('c-wind-dir').value;
     const windSpd = parseFloat(document.getElementById('c-wind-speed').value) || 0;
 
