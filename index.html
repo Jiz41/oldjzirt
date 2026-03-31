@@ -636,35 +636,23 @@ function execCopy() {
     // body直下の全要素を非表示
     Array.from(document.body.children).forEach(el => { el.style.display = 'none'; });
 
-    // コーギーページを注入
+    // ============ コーギーページ注入 ============
     const corgiApp = document.createElement('div');
     corgiApp.id = 'corgi-app';
     corgiApp.innerHTML = `
-<div style="
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 16px;
-    font-family: 'Helvetica Neue', sans-serif;
-    background: #0a0a0a;
-    min-height: 100vh;
-    color: #e8e8e8;
-">
+<div style="max-width:480px; margin:0 auto; padding:16px; font-family:'Helvetica Neue',sans-serif; background:#0a0a0a; min-height:100vh; color:#e8e8e8;">
 
-<!-- ヘッダー -->
-<header style="text-align: center; padding: 24px 0 16px;">
+<header style="text-align:center; padding:24px 0 16px;">
     <div class="title-image-container">
         <img src="./0401.png" alt="華耀犬輪 真・走在律" class="title-image">
     </div>
 </header>
 
-<!-- 入力フォーム -->
-<div style="background: #111; border: 1px solid #2a2a2a; border-radius: 4px; padding: 16px; margin-bottom: 16px;">
-    <h2 style="font-size: 13px; letter-spacing: 0.2em; color: #aaa; margin: 0 0 16px; border-bottom: 1px solid #222; padding-bottom: 8px;">
-        🎛️ 競走/コーギー情報入力
-    </h2>
+<div style="background:#111; border:1px solid #2a2a2a; border-radius:4px; padding:16px; margin-bottom:16px;">
+    <h2 style="font-size:13px; letter-spacing:0.2em; color:#aaa; margin:0 0 16px; border-bottom:1px solid #222; padding-bottom:8px;">🎛️ 競走/コーギー情報入力</h2>
 
-    <div style="margin-bottom: 12px;">
-        <label style="font-size: 11px; color: #888; display: block; margin-bottom: 4px;">競走タイプ/毛並み</label>
+    <div style="margin-bottom:12px;">
+        <label style="font-size:11px; color:#888; display:block; margin-bottom:4px;">競走タイプ/毛並み</label>
         <select id="c-race-type" style="width:100%; background:#1a1a1a; color:#e8e8e8; border:1px solid #333; padding:8px; border-radius:2px; font-size:13px;">
             <option value="girls">🎀 ガールズ（小型）</option>
             <option value="s-kyu" selected>🥇 S級（もふもふ上位）</option>
@@ -673,8 +661,8 @@ function execCopy() {
         </select>
     </div>
 
-    <div style="margin-bottom: 12px;">
-        <label style="font-size: 11px; color: #888; display: block; margin-bottom: 4px;">競コーギー場</label>
+    <div style="margin-bottom:12px;">
+        <label style="font-size:11px; color:#888; display:block; margin-bottom:4px;">競コーギー場</label>
         <select id="c-bank" style="width:100%; background:#1a1a1a; color:#e8e8e8; border:1px solid #333; padding:8px; border-radius:2px; font-size:13px;">
             <option>ふわふわバンク（室内芝）</option>
             <option>もこもこスタジアム</option>
@@ -684,8 +672,8 @@ function execCopy() {
         </select>
     </div>
 
-    <div style="margin-bottom: 16px;">
-        <label style="font-size: 11px; color: #888; display: block; margin-bottom: 4px;">お外の状況</label>
+    <div style="margin-bottom:16px;">
+        <label style="font-size:11px; color:#888; display:block; margin-bottom:4px;">お外の状況</label>
         <div style="display:flex; gap:8px;">
             <select id="c-wind-dir" style="flex:1; background:#1a1a1a; color:#e8e8e8; border:1px solid #333; padding:8px; border-radius:2px; font-size:13px;">
                 <option value="none">🍃 無風/室内</option>
@@ -699,75 +687,44 @@ function execCopy() {
         </div>
     </div>
 
-    <p style="font-size: 12px; color: #aaa; margin: 0 0 12px; font-weight: bold;">コーギー選手データ（7頭）</p>
+    <p style="font-size:12px; color:#aaa; margin:0 0 12px; font-weight:bold;">コーギー選手データ（7頭）</p>
     <div id="c-player-list"></div>
 
-    <div style="margin-top: 12px;">
-        <label style="font-size: 11px; color: #888; display: block; margin-bottom: 4px;">全体並び（例: 123,45,67）</label>
+    <div style="margin-top:12px;">
+        <label style="font-size:11px; color:#888; display:block; margin-bottom:4px;">全体並び（例: 123,45,67）</label>
         <input type="text" id="c-line-input" value="123,45,67"
             style="width:100%; background:#1a1a1a; color:#e8e8e8; border:1px solid #333; padding:8px; border-radius:2px; font-size:13px; box-sizing:border-box;">
     </div>
 </div>
 
-<button onclick="calcCorgi()" style="
-    width: 100%;
-    padding: 14px;
-    background: #fff;
-    color: #000;
-    border: none;
-    border-radius: 2px;
-    font-size: 13px;
-    font-weight: bold;
-    letter-spacing: 0.2em;
-    cursor: pointer;
-    margin-bottom: 16px;
-">🐾 予想を計算（実行）</button>
+<button id="c-calc-btn" style="width:100%; padding:14px; background:#fff; color:#000; border:none; border-radius:2px; font-size:13px; font-weight:bold; letter-spacing:0.2em; cursor:pointer; margin-bottom:16px;">🐾 予想を計算（実行）</button>
 
-<!-- 結果エリア -->
 <div id="c-results" style="display:none;">
     <div style="background:#111; border:1px solid #2a2a2a; border-radius:4px; padding:16px; margin-bottom:16px;">
-        <h2 style="font-size:13px; letter-spacing:0.2em; color:#aaa; margin:0 0 16px; border-bottom:1px solid #222; padding-bottom:8px;">
-            📊 予想結果・推奨もふ目
-        </h2>
-
-        <div style="margin-bottom: 14px;">
+        <h2 style="font-size:13px; letter-spacing:0.2em; color:#aaa; margin:0 0 16px; border-bottom:1px solid #222; padding-bottom:8px;">📊 予想結果・推奨もふ目</h2>
+        <div style="margin-bottom:14px;">
             <div style="font-size:11px; color:#888; margin-bottom:6px; font-weight:bold;">もふ雲指数</div>
             <div id="c-mofukumo" style="font-size:13px; color:#e8e8e8; line-height:1.8;"></div>
         </div>
-
-        <div style="margin-bottom: 14px;">
+        <div style="margin-bottom:14px;">
             <h3 style="font-size:12px; color:#f0a000; margin:0 0 6px;">☀️ 晴天吠（安定推奨）</h3>
             <div id="c-sunny" style="font-size:13px; color:#e8e8e8; line-height:1.8;"></div>
         </div>
-
-        <div style="margin-bottom: 14px;">
+        <div style="margin-bottom:14px;">
             <h3 style="font-size:12px; color:#7090ff; margin:0 0 6px;">⛈️ 荒天吠（波乱推奨）</h3>
             <div id="c-rainy" style="font-size:13px; color:#e8e8e8; line-height:1.8;"></div>
         </div>
-
-        <div style="margin-bottom: 8px;">
+        <div style="margin-bottom:8px;">
             <h3 style="font-size:12px; color:#cc66ff; margin:0 0 6px;">🌌 偽典『尾振縁』シミュレーション</h3>
             <div id="c-sim" style="font-size:12px; color:#ccc; line-height:1.8;"></div>
         </div>
     </div>
 
-    <!-- 種明かし -->
-    <div id="c-reveal" style="
-        background: #0d1a0d;
-        border: 1px solid #2a4a2a;
-        border-radius: 4px;
-        padding: 20px;
-        text-align: center;
-        margin-bottom: 24px;
-    ">
-        <div style="font-size: 22px; margin-bottom: 10px;">🐾🐾🐾</div>
-        <div style="font-size: 14px; color: #88cc88; font-weight: bold; margin-bottom: 8px;">
-            エイプリルフールのネタでございました
-        </div>
-        <div style="font-size: 12px; color: #888; margin-bottom: 16px; line-height: 1.6;">
-            本日4月1日限定の競コーギー予想システムでした。<br>実際のページはこちらです。
-        </div>
-        <a id="c-real-link" href="https://huggingface.co/spaces/Jiz41/Jiz41r1t5u" target="_top">華耀天輪 真・自在律を開く →</a>
+    <div style="background:#0d1a0d; border:1px solid #2a4a2a; border-radius:4px; padding:20px; text-align:center; margin-bottom:24px;">
+        <div style="font-size:22px; margin-bottom:10px;">🐾🐾🐾</div>
+        <div style="font-size:14px; color:#88cc88; font-weight:bold; margin-bottom:8px;">エイプリルフールのネタでございました</div>
+        <div style="font-size:12px; color:#888; margin-bottom:16px; line-height:1.6;">本日4月1日限定の競コーギー予想システムでした。<br>実際のページはこちらです。</div>
+        <button id="c-real-link" style="display:inline-block; padding:12px 28px; background:#fff; color:#000; border:none; font-size:12px; font-weight:bold; letter-spacing:0.2em; border-radius:2px; cursor:pointer;">華耀天輪 真・自在律を開く →</button>
     </div>
 </div>
 
@@ -776,22 +733,15 @@ function execCopy() {
 
     document.body.appendChild(corgiApp);
 
-    // リンクボタンのstyle＋クリック処理をJS後付け
-    const realLink = document.getElementById('c-real-link');
-    if (realLink) {
-        realLink.style.cssText = 'display:inline-block; padding:12px 28px; background:#fff; color:#000; text-decoration:none; font-size:12px; font-weight:bold; letter-spacing:0.2em; border-radius:2px; cursor:pointer;';
-        realLink.onclick = function(e) {
-            e.preventDefault();
-            window.open('https://huggingface.co/spaces/Jiz41/Jiz41r1t5u?corgi=false', '_blank');
-        };
-    }
+    // ============ イベント登録 ============
+    document.getElementById('c-real-link').onclick = function() {
+        window.open('https://huggingface.co/spaces/Jiz41/Jiz41r1t5u?corgi=false', '_blank');
+    };
+    document.getElementById('c-calc-btn').onclick = function() { calcCorgi(); };
 
-    // コーギー選手名（固定9頭、7頭分使用）
+    // ============ 選手フォーム生成 ============
     const corgiNames = ['もこ丸', 'ずんだ', 'ぽてち', 'ごまたろう', 'ふわり', 'どんぐり', 'くるみ'];
-    const corgiStyles = ['全力型', 'もふ型', '横転型'];
     const defaultScores = [110, 105, 100, 95, 90, 85, 80];
-
-    // 選手入力フォーム生成
     const list = document.getElementById('c-player-list');
     for (let i = 1; i <= 7; i++) {
         const row = document.createElement('div');
@@ -825,56 +775,111 @@ function execCopy() {
         `;
         list.appendChild(row);
     }
-})();
 
-// ============ コーギー予想ロジック ============
-function calcCorgi() {
-    const corgiNames = ['もこ丸', 'ずんだ', 'ぽてち', 'ごまたろう', 'ふわり', 'どんぐり', 'くるみ'];
-    const windDir = document.getElementById('c-wind-dir').value;
-    const windSpd = parseFloat(document.getElementById('c-wind-speed').value) || 0;
+    // ============ 縦横無尽コーギー ============
+    const FRAME_W = 125;
+    const CROP_Y = 187;
+    const CROP_H = 133;
+    const DRAW_W = 80;
+    const DRAW_H = Math.round(CROP_H * (DRAW_W / FRAME_W));
+    const FRAME_COUNT = 4;
 
-    const scores = Array.from(document.querySelectorAll('.c-score')).map(el => parseFloat(el.value) || 80);
+    const img = new Image();
+    img.src = './tekuteku.png';
 
-    // もふ雲指数（ランダム＋スコア加味）
-    const mofukomoDiv = document.getElementById('c-mofukumo');
-    mofukomoDiv.innerHTML = corgiNames.map((name, i) => {
-        const base = scores[i] || 80;
-        const mofuIndex = ((base / 110) * 80 + Math.random() * 20).toFixed(1);
-        const bar = '🐾'.repeat(Math.floor(mofuIndex / 20));
-        return `<div style="margin-bottom:3px;"><span style="color:#aaa; min-width:80px; display:inline-block;">${i+1}. ${name}</span> <span style="color:#f0c060;">${mofuIndex}</span> ${bar}</div>`;
-    }).join('');
+    const canvas = document.createElement('canvas');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    canvas.style.cssText = 'position:fixed; top:0; left:0; pointer-events:none; z-index:9999;';
+    document.body.appendChild(canvas);
 
-    // ランダムで3頭選ぶ
-    const pick3 = () => {
-        const arr = [...Array(7).keys()].map(i => i + 1);
-        arr.sort(() => Math.random() - 0.5);
-        return arr.slice(0, 3);
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+
+    const corgis = Array.from({length: 3}, (_, i) => ({
+        x: Math.random() * (window.innerWidth - DRAW_W),
+        y: Math.random() * (window.innerHeight - DRAW_H),
+        vx: (Math.random() * 2 + 1.5) * (Math.random() < 0.5 ? 1 : -1),
+        vy: (Math.random() * 1.5 + 0.5) * (Math.random() < 0.5 ? 1 : -1),
+        frame: i % FRAME_COUNT,
+        tick: 0,
+        speed: Math.floor(Math.random() * 3 + 6),
+    }));
+
+    img.onload = function() {
+        function loop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            corgis.forEach(c => {
+                c.tick++;
+                if (c.tick >= c.speed) { c.tick = 0; c.frame = (c.frame + 1) % FRAME_COUNT; }
+                c.x += c.vx;
+                c.y += c.vy;
+                if (c.x < 0) { c.x = 0; c.vx *= -1; }
+                if (c.x + DRAW_W > canvas.width) { c.x = canvas.width - DRAW_W; c.vx *= -1; }
+                if (c.y < 0) { c.y = 0; c.vy *= -1; }
+                if (c.y + DRAW_H > canvas.height) { c.y = canvas.height - DRAW_H; c.vy *= -1; }
+                ctx.save();
+                if (c.vx < 0) {
+                    ctx.translate(c.x + DRAW_W, c.y);
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(img, c.frame * FRAME_W, CROP_Y, FRAME_W, CROP_H, 0, 0, DRAW_W, DRAW_H);
+                } else {
+                    ctx.drawImage(img, c.frame * FRAME_W, CROP_Y, FRAME_W, CROP_H, c.x, c.y, DRAW_W, DRAW_H);
+                }
+                ctx.restore();
+            });
+            requestAnimationFrame(loop);
+        }
+        loop();
     };
 
-    const sunnyPick = pick3();
-    const rainyPick = pick3();
+    // ============ 予想ロジック ============
+    function calcCorgi() {
+        const scores = Array.from(document.querySelectorAll('.c-score')).map(el => parseFloat(el.value) || 80);
 
-    document.getElementById('c-sunny').innerHTML =
-        `<div>3連単：${sunnyPick.join(' → ')}（${corgiNames[sunnyPick[0]-1]} 頭！）</div>
-         <div>3連複：${[...sunnyPick].sort((a,b)=>a-b).join(' - ')}</div>`;
+        document.getElementById('c-mofukumo').innerHTML = corgiNames.map((name, i) => {
+            const base = scores[i] || 80;
+            const mofuIndex = ((base / 110) * 80 + Math.random() * 20).toFixed(1);
+            const bar = '🐾'.repeat(Math.floor(mofuIndex / 20));
+            return `<div style="margin-bottom:3px;"><span style="color:#aaa; min-width:80px; display:inline-block;">${i+1}. ${name}</span> <span style="color:#f0c060;">${mofuIndex}</span> ${bar}</div>`;
+        }).join('');
 
-    document.getElementById('c-rainy').innerHTML =
-        `<div>3連単：${rainyPick.join(' → ')}（波乱！${corgiNames[rainyPick[0]-1]} がすっ飛ぶ）</div>
-         <div>3連複：${[...rainyPick].sort((a,b)=>a-b).join(' - ')}</div>`;
+        const pick3 = () => {
+            const arr = [...Array(7).keys()].map(i => i + 1);
+            arr.sort(() => Math.random() - 0.5);
+            return arr.slice(0, 3);
+        };
 
-    // 偽典『尾振縁』シミュレーション
-    const simLines = [];
-    for (let i = 0; i < 3; i++) {
-        const p = pick3();
-        const freq = Math.floor(Math.random() * 300 + 100);
-        simLines.push(`<div>出現出目${i+1}位：${p.join(' → ')} / ${freq}回（${corgiNames[p[0]-1]}の尾振り角${(Math.random()*60+30).toFixed(0)}°）</div>`);
+        const sunnyPick = pick3();
+        const rainyPick = pick3();
+
+        document.getElementById('c-sunny').innerHTML =
+            `<div>3連単：${sunnyPick.join(' → ')}（${corgiNames[sunnyPick[0]-1]} 頭！）</div>
+             <div>3連複：${[...sunnyPick].sort((a,b)=>a-b).join(' - ')}</div>`;
+
+        document.getElementById('c-rainy').innerHTML =
+            `<div>3連単：${rainyPick.join(' → ')}（波乱！${corgiNames[rainyPick[0]-1]} がすっ飛ぶ）</div>
+             <div>3連複：${[...rainyPick].sort((a,b)=>a-b).join(' - ')}</div>`;
+
+        const simLines = [];
+        for (let i = 0; i < 3; i++) {
+            const p = pick3();
+            const freq = Math.floor(Math.random() * 300 + 100);
+            simLines.push(`<div>出現出目${i+1}位：${p.join(' → ')} / ${freq}回（${corgiNames[p[0]-1]}の尾振り角${(Math.random()*60+30).toFixed(0)}°）</div>`);
+        }
+        simLines.push(`<div style="color:#666; margin-top:6px; font-size:11px;">※1465尾振りシミュレーション完了。おやつ補正加味済み。</div>`);
+        document.getElementById('c-sim').innerHTML = simLines.join('');
+
+        document.getElementById('c-results').style.display = 'block';
+        document.getElementById('c-results').scrollIntoView({ behavior: 'smooth' });
     }
-    simLines.push(`<div style="color:#666; margin-top:6px; font-size:11px;">※1465尾振りシミュレーション完了。おやつ補正加味済み。</div>`);
-    document.getElementById('c-sim').innerHTML = simLines.join('');
 
-    document.getElementById('c-results').style.display = 'block';
-    document.getElementById('c-results').scrollIntoView({ behavior: 'smooth' });
-}
+})();
 </script>
 
 </body>
