@@ -637,5 +637,267 @@ function execCopy() {
 <script src="./meigen.js" defer></script>
 <script src="./paste-input.js" defer></script>
 
+  <!-- ============================================================================
+     🐾 エイプリルフール専用ブロック：競コーギー予想システム
+     index.htmlの </body> 直前に丸ごと挿入してください
+     ============================================================================ -->
+<script>
+(function() {
+    const now = new Date();
+    const isAprilFool = now.getMonth() === 3 && now.getDate() === 1;
+    if (!isAprilFool) return;
+
+    // 通常ページを非表示
+    document.querySelector('.container') && (document.querySelector('.container').style.display = 'none');
+    document.getElementById('share-area') && (document.getElementById('share-area').style.display = 'none');
+
+    // コーギーページを注入
+    const corgiApp = document.createElement('div');
+    corgiApp.id = 'corgi-app';
+    corgiApp.innerHTML = `
+<div style="
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 16px;
+    font-family: 'Helvetica Neue', sans-serif;
+    background: #0a0a0a;
+    min-height: 100vh;
+    color: #e8e8e8;
+">
+
+<!-- ヘッダー -->
+<header style="text-align: center; padding: 24px 0 16px;">
+    <div style="font-size: 11px; letter-spacing: 0.3em; color: #888; margin-bottom: 8px;">
+        嗅覚制御多重尾振体
+    </div>
+    <div style="font-size: 26px; font-weight: bold; letter-spacing: 0.1em; color: #fff;">
+        華耀犬輪<br>
+        <span style="font-size: 20px;">真・走在律</span>
+    </div>
+    <div style="font-size: 10px; color: #6a6a6a; margin-top: 8px; letter-spacing: 0.2em;">
+        🐾 CORGI PREDICTION SYSTEM 🐾
+    </div>
+</header>
+
+<!-- 入力フォーム -->
+<div style="background: #111; border: 1px solid #2a2a2a; border-radius: 4px; padding: 16px; margin-bottom: 16px;">
+    <h2 style="font-size: 13px; letter-spacing: 0.2em; color: #aaa; margin: 0 0 16px; border-bottom: 1px solid #222; padding-bottom: 8px;">
+        🎛️ 競走/コーギー情報入力
+    </h2>
+
+    <div style="margin-bottom: 12px;">
+        <label style="font-size: 11px; color: #888; display: block; margin-bottom: 4px;">競走タイプ/毛並み</label>
+        <select id="c-race-type" style="width:100%; background:#1a1a1a; color:#e8e8e8; border:1px solid #333; padding:8px; border-radius:2px; font-size:13px;">
+            <option value="girls">🎀 ガールズ（小型）</option>
+            <option value="s-kyu" selected>🥇 S級（もふもふ上位）</option>
+            <option value="a-kyu">🥈 A級（ふつうもふ）</option>
+            <option value="a-chal">🥉 チャレンジ（子犬）</option>
+        </select>
+    </div>
+
+    <div style="margin-bottom: 12px;">
+        <label style="font-size: 11px; color: #888; display: block; margin-bottom: 4px;">競コーギー場</label>
+        <select id="c-bank" style="width:100%; background:#1a1a1a; color:#e8e8e8; border:1px solid #333; padding:8px; border-radius:2px; font-size:13px;">
+            <option>ふわふわバンク（室内芝）</option>
+            <option>もこもこスタジアム</option>
+            <option>ぽてちアリーナ</option>
+            <option>ごろごろ競走場</option>
+            <option>尾振り記念公園</option>
+        </select>
+    </div>
+
+    <div style="margin-bottom: 16px;">
+        <label style="font-size: 11px; color: #888; display: block; margin-bottom: 4px;">お外の状況</label>
+        <div style="display:flex; gap:8px;">
+            <select id="c-wind-dir" style="flex:1; background:#1a1a1a; color:#e8e8e8; border:1px solid #333; padding:8px; border-radius:2px; font-size:13px;">
+                <option value="none">🍃 無風/室内</option>
+                <option value="北">おやつの風（北）</option>
+                <option value="南">散歩の風（南）</option>
+                <option value="東">公園の風（東）</option>
+                <option value="西">川の風（西）</option>
+            </select>
+            <input type="number" id="c-wind-speed" value="0" min="0" max="15" step="0.5"
+                style="width:70px; background:#1a1a1a; color:#e8e8e8; border:1px solid #333; padding:8px; border-radius:2px; font-size:13px; text-align:center;">
+        </div>
+    </div>
+
+    <p style="font-size: 12px; color: #aaa; margin: 0 0 12px; font-weight: bold;">コーギー選手データ（7頭）</p>
+    <div id="c-player-list"></div>
+
+    <div style="margin-top: 12px;">
+        <label style="font-size: 11px; color: #888; display: block; margin-bottom: 4px;">全体並び（例: 123,45,67）</label>
+        <input type="text" id="c-line-input" value="123,45,67"
+            style="width:100%; background:#1a1a1a; color:#e8e8e8; border:1px solid #333; padding:8px; border-radius:2px; font-size:13px; box-sizing:border-box;">
+    </div>
+</div>
+
+<button onclick="calcCorgi()" style="
+    width: 100%;
+    padding: 14px;
+    background: #fff;
+    color: #000;
+    border: none;
+    border-radius: 2px;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    margin-bottom: 16px;
+">🐾 予想を計算（実行）</button>
+
+<!-- 結果エリア -->
+<div id="c-results" style="display:none;">
+    <div style="background:#111; border:1px solid #2a2a2a; border-radius:4px; padding:16px; margin-bottom:16px;">
+        <h2 style="font-size:13px; letter-spacing:0.2em; color:#aaa; margin:0 0 16px; border-bottom:1px solid #222; padding-bottom:8px;">
+            📊 予想結果・推奨もふ目
+        </h2>
+
+        <div style="margin-bottom: 14px;">
+            <div style="font-size:11px; color:#888; margin-bottom:6px; font-weight:bold;">もふ雲指数</div>
+            <div id="c-mofukumo" style="font-size:13px; color:#e8e8e8; line-height:1.8;"></div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <h3 style="font-size:12px; color:#f0a000; margin:0 0 6px;">☀️ 晴天吠（安定推奨）</h3>
+            <div id="c-sunny" style="font-size:13px; color:#e8e8e8; line-height:1.8;"></div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <h3 style="font-size:12px; color:#7090ff; margin:0 0 6px;">⛈️ 荒天吠（波乱推奨）</h3>
+            <div id="c-rainy" style="font-size:13px; color:#e8e8e8; line-height:1.8;"></div>
+        </div>
+
+        <div style="margin-bottom: 8px;">
+            <h3 style="font-size:12px; color:#cc66ff; margin:0 0 6px;">🌌 偽典『尾振縁』シミュレーション</h3>
+            <div id="c-sim" style="font-size:12px; color:#ccc; line-height:1.8;"></div>
+        </div>
+    </div>
+
+    <!-- 種明かし -->
+    <div id="c-reveal" style="
+        background: #0d1a0d;
+        border: 1px solid #2a4a2a;
+        border-radius: 4px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 24px;
+    ">
+        <div style="font-size: 22px; margin-bottom: 10px;">🐾🐾🐾</div>
+        <div style="font-size: 14px; color: #88cc88; font-weight: bold; margin-bottom: 8px;">
+            エイプリルフールのネタでございました
+        </div>
+        <div style="font-size: 12px; color: #888; margin-bottom: 16px; line-height: 1.6;">
+            本日4月1日限定の競コーギー予想システムでした。<br>実際のページはこちらです。
+        </div>
+        <a href="https://huggingface.co/spaces/Jiz41/Jiz41r1t5u" style="
+            display: inline-block;
+            padding: 12px 28px;
+            background: #fff;
+            color: #000;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 0.2em;
+            border-radius: 2px;
+        ">華耀天輪 真・自在律を開く →</a>
+    </div>
+</div>
+
+</div>
+    `;
+
+    document.body.appendChild(corgiApp);
+
+    // コーギー選手名（固定9頭、7頭分使用）
+    const corgiNames = ['もこ丸', 'ずんだ', 'ぽてち', 'ごまたろう', 'ふわり', 'どんぐり', 'くるみ'];
+    const corgiStyles = ['全力型', 'もふ型', '横転型'];
+    const defaultScores = [110, 105, 100, 95, 90, 85, 80];
+
+    // 選手入力フォーム生成
+    const list = document.getElementById('c-player-list');
+    for (let i = 1; i <= 7; i++) {
+        const row = document.createElement('div');
+        row.style.cssText = 'background:#161616; border:1px solid #222; border-radius:2px; padding:10px; margin-bottom:8px;';
+        row.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                <span style="font-size:12px; color:#888; width:20px; text-align:center;">${i}</span>
+                <span style="font-size:13px; color:#e8e8e8; font-weight:bold;">${corgiNames[i-1]}</span>
+                <span style="font-size:10px; color:#666;">（犬籍 ${String(i).padStart(6,'0')}）</span>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <div style="flex:1; min-width:80px;">
+                    <label style="font-size:10px; color:#666; display:block; margin-bottom:3px;">走法</label>
+                    <select class="c-style" style="width:100%; background:#1a1a1a; color:#e8e8e8; border:1px solid #333; padding:5px; font-size:11px; border-radius:1px;">
+                        <option value="逃">全力型</option>
+                        <option value="追">もふ型</option>
+                        <option value="自">横転型</option>
+                    </select>
+                </div>
+                <div style="flex:1; min-width:80px;">
+                    <label style="font-size:10px; color:#666; display:block; margin-bottom:3px;">もふ度(R)</label>
+                    <input type="number" class="c-score" value="${defaultScores[i-1]}"
+                        style="width:100%; background:#1a1a1a; color:#e8e8e8; border:1px solid #333; padding:5px; font-size:11px; border-radius:1px; box-sizing:border-box;">
+                </div>
+                <div style="flex:1; min-width:80px;">
+                    <label style="font-size:10px; color:#666; display:block; margin-bottom:3px;">直近3走</label>
+                    <input type="text" class="c-recent" value="111"
+                        style="width:100%; background:#1a1a1a; color:#e8e8e8; border:1px solid #333; padding:5px; font-size:11px; border-radius:1px; box-sizing:border-box;">
+                </div>
+            </div>
+        `;
+        list.appendChild(row);
+    }
+})();
+
+// ============ コーギー予想ロジック ============
+function calcCorgi() {
+    const corgiNames = ['もこ丸', 'ずんだ', 'ぽてち', 'ごまたろう', 'ふわり', 'どんぐり', 'くるみ'];
+    const windDir = document.getElementById('c-wind-dir').value;
+    const windSpd = parseFloat(document.getElementById('c-wind-speed').value) || 0;
+
+    const scores = Array.from(document.querySelectorAll('.c-score')).map(el => parseFloat(el.value) || 80);
+
+    // もふ雲指数（ランダム＋スコア加味）
+    const mofukomoDiv = document.getElementById('c-mofukumo');
+    mofukomoDiv.innerHTML = corgiNames.map((name, i) => {
+        const base = scores[i] || 80;
+        const mofuIndex = ((base / 110) * 80 + Math.random() * 20).toFixed(1);
+        const bar = '🐾'.repeat(Math.floor(mofuIndex / 20));
+        return `<div style="margin-bottom:3px;"><span style="color:#aaa; min-width:80px; display:inline-block;">${i+1}. ${name}</span> <span style="color:#f0c060;">${mofuIndex}</span> ${bar}</div>`;
+    }).join('');
+
+    // ランダムで3頭選ぶ
+    const pick3 = () => {
+        const arr = [...Array(7).keys()].map(i => i + 1);
+        arr.sort(() => Math.random() - 0.5);
+        return arr.slice(0, 3);
+    };
+
+    const sunnyPick = pick3();
+    const rainyPick = pick3();
+
+    document.getElementById('c-sunny').innerHTML =
+        `<div>3連単：${sunnyPick.join(' → ')}（${corgiNames[sunnyPick[0]-1]} 頭！）</div>
+         <div>3連複：${[...sunnyPick].sort((a,b)=>a-b).join(' - ')}</div>`;
+
+    document.getElementById('c-rainy').innerHTML =
+        `<div>3連単：${rainyPick.join(' → ')}（波乱！${corgiNames[rainyPick[0]-1]} がすっ飛ぶ）</div>
+         <div>3連複：${[...rainyPick].sort((a,b)=>a-b).join(' - ')}</div>`;
+
+    // 偽典『尾振縁』シミュレーション
+    const simLines = [];
+    for (let i = 0; i < 3; i++) {
+        const p = pick3();
+        const freq = Math.floor(Math.random() * 300 + 100);
+        simLines.push(`<div>出現出目${i+1}位：${p.join(' → ')} / ${freq}回（${corgiNames[p[0]-1]}の尾振り角${(Math.random()*60+30).toFixed(0)}°）</div>`);
+    }
+    simLines.push(`<div style="color:#666; margin-top:6px; font-size:11px;">※1465尾振りシミュレーション完了。おやつ補正加味済み。</div>`);
+    document.getElementById('c-sim').innerHTML = simLines.join('');
+
+    document.getElementById('c-results').style.display = 'block';
+    document.getElementById('c-results').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+
 </body>
 </html>
