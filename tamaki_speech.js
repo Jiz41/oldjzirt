@@ -165,7 +165,7 @@
 .tamaki-character { flex-shrink: 0; width: 90px; height: auto; }
 .tamaki-image { width: 100%; height: auto; border-radius: 10px; }
 .tamaki-speech-bubble {
-    flex: 1; background: white; border: 2px solid #d6a300; border-radius: 15px;
+    flex: 1; background: #fafaf8; border: 2px solid #d6a300; border-radius: 15px;
     padding: 12px; position: relative; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 .tamaki-speech-bubble::before {
@@ -174,7 +174,7 @@
 }
 .tamaki-speech-bubble::after {
     content: ''; position: absolute; left: -6px; top: 17px;
-    border-style: solid; border-width: 6px 8px 6px 0; border-color: transparent white transparent transparent;
+    border-style: solid; border-width: 6px 8px 6px 0; border-color: transparent #fafaf8 transparent transparent;
 }
 .tamaki-name { font-size: 0.85em; font-weight: bold; color: #8b2222; margin-bottom: 5px; }
 .tamaki-speech-text { line-height: 1.6; color: #333; font-size: 0.9em; }
