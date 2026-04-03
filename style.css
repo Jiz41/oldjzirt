@@ -14,12 +14,15 @@ body {
 }
 
 .container {
+  width: calc(100% - 20px);
+  max-width: 600px;
   background: var(--neu-bg);
   border-radius: var(--neu-radius);
   box-shadow: var(--neu-shadow-convex);
   padding: 20px;
-  margin: 20px auto;
+  margin: 15px auto;
   border: none;
+  box-sizing: border-box;
 }
 
 
@@ -125,7 +128,7 @@ h3 {
     padding: 15px; 
     border: 1px solid #e0e0e0; 
     border-radius: 8px; 
-    background: rgba(252, 252, 240, 0.9);
+    background: rgba(252, 252, 240, 0.6);
     box-sizing: border-box;
     box-shadow: 
         0 2px 6px rgba(0, 0, 0, 0.06),
@@ -497,19 +500,28 @@ button:active {
 
 .copyright-footer { text-align: center; font-size: 0.75em; color: #aaa; margin-top: 20px; width: 100%; padding: 15px; box-sizing: border-box; }
 
+.footer-sns-row { display: flex; justify-content: center; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+.footer-sns-card { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 18px; border-radius: 10px; text-decoration: none; transition: all 0.25s; min-width: 160px; }
+.footer-sns-card.note { background: rgba(65, 201, 180, 0.08); border: 1px solid rgba(65, 201, 180, 0.25); color: #41c9b4; }
+.footer-sns-card.note:hover { background: rgba(65, 201, 180, 0.18); border-color: rgba(65, 201, 180, 0.6); box-shadow: 0 0 12px rgba(65, 201, 180, 0.25); transform: translateY(-2px); }
+.footer-sns-card.x-card { background: rgba(200, 200, 200, 0.06); border: 1px solid rgba(200, 200, 200, 0.15); color: #ccc; }
+.footer-sns-card.x-card:hover { background: rgba(200, 200, 200, 0.12); border-color: rgba(200, 200, 200, 0.4); box-shadow: 0 0 12px rgba(200, 200, 200, 0.15); transform: translateY(-2px); }
+.footer-sns-label { font-size: 1.1em; font-weight: bold; letter-spacing: 0.05em; }
+.footer-sns-desc { font-size: 0.85em; opacity: 0.75; letter-spacing: 0.02em; }
+.footer-bottom-row { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; color: #666; }
+.footer-link { color: #666; text-decoration: none; transition: color 0.2s; }
+.footer-link:hover { color: #aaa; }
+.footer-divider { color: #444; }
+
 @media (prefers-color-scheme: dark) {
     /* --- 全体空間 --- */
     body { background-color: #121212 !important; color: #e0e0e0 !important; }
-    
-.container {
-  background: var(--neu-bg);
-  border-radius: var(--neu-radius);
-  box-shadow: var(--neu-shadow-convex);
-  padding: 20px;
-  margin: 20px auto;
-  border: none;
-}
-
+    .container {
+        background: var(--neu-bg);
+        border-radius: var(--neu-radius);
+        box-shadow: var(--neu-shadow-convex) !important;
+        border: none !important;
+    }
 
     /* --- 選手データ：色分けと夜用調整 --- */
     
@@ -543,8 +555,8 @@ button:active {
 
     /* --- 入力エリア・共通パーツ --- */
     .input-group, .result-section, .scenario-detail {
-        background-color: #252525 !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background-color: rgba(37, 37, 37, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
     }
     label, .input-item label, .player-field label, .subtitle { color: #a0b0a0 !important; }
     select, input[type="number"], input[type="text"], textarea {

@@ -1,22 +1,29 @@
-// 真自在律 実質Ver9.2 - 捌風旋炉 枢（はっぷうせんろ くるる）物理層実装
-// 【V7.3】消耗ペナルティ適用拡大 ＆ 複数競り表示修正
-// 【V7.4】壱耀メッセージ追加 ＆ 買い目変更
-// 【V8.0】動的風圧遮蔽(kururu)実装 ＆ 自滅消耗(C_suicide)・漁夫の利ブースト統合
-//  - 360度全風向ベクトル分解によるライン番手別スタミナ損耗率の算出
-//  - 激突ライン共倒れ予測による「展開的必然」の穴抽出ロジック完遂
-// 【V8.1】枢・天命連動（壱耀改修）。実効風速 v を判定ロジックへ完全バトンパス。
-//       -「壱耀晴乾ノ象」を純粋なる「差し（追）」限定へ聖域化。
-//       - 物理層（風速）と占術層（天運指数）の因果関係を統合。
-//       - 構文不整合の排除、およびデータフローの単一化。
+(function(app) {
+
+// 真自在律 Ver9.3
+// 【V9.3】C_l非メインライン3番手ボーナス廃止
+//          各ラインの競走得点合計を算出しメインラインを特定。
+//          メインライン3番手のみC_l=1.03を維持、それ以外は1.00に変更。
+//          非メインライン3番手の過大評価を解消しランキング精度向上を図る。
+// 【V9.2】赤口呑縁独立起動統合
+//          runScenarioSimulation を本来のロジックに完全復元。
+//          赤口呑縁関係の諸々不具合修正（invokeShakkouDonperi直接呼び出し・展開別表示削除）。
+// 【V9.1】赤口呑縁（シャッコウ・ドンペリ）導入 - 1465世界線並列シミュレーション実装。
 // 【V9.0】物理層最優先実装 - バンクデータに基づく「非情な物理演算」
-//  - straight（みなし直線）による生存判定：35m未満で4番手以降を大幅減点
-//  - canto（カント）による捲りエネルギー消費：32度超で捲りコスト×1.5
-//  - イン突き（ワープ）実装：番手ブロック時の内線選手ブースト×1.35
-//  - 計算順序: 物理層 → 展開層 → 事象層（kururu風圧・壱耀占術）
-// 【V9.1】赤口呑縁（シャッコウ・ドンペリ）導入 - 1465世界線並列シミュレーション実装
-// 【V9.2】C_L（ライン結束力係数）完全実装 ＆ 赤口呑縁独立起動統合
-//          runScenarioSimulation を本来のロジックに完全復元
-//          赤口呑縁関係の諸々不具合修正（invokeShakkouDonperi直接呼び出し・展開別表示削除）
+//          - straight（みなし直線）による生存判定：35m未満で4番手以降を大幅減点。
+//          - canto（カント）による捲りエネルギー消費：32度超で捲りコスト×1.5。
+//          - イン突き（ワープ）実装：番手ブロック時の内線選手ブースト×1.35。
+//          - 計算順序: 物理層 → 展開層 → 事象層（kururu風圧・壱耀占術）。
+// 【V8.1】枢・天命連動（壱耀改修）
+//          実効風速 v を判定ロジックへ完全バトンパス。
+//          「壱耀晴乾ノ象」を純粋なる「差し（追）」限定へ聖域化。
+//          物理層（風速）と占術層（天運指数）の因果関係を統合。
+//          構文不整合の排除、およびデータフローの単一化。
+// 【V8.0】動的風圧遮蔽(kururu)実装 ＆ 自滅消耗(C_suicide)・漁夫の利ブースト統合
+//          - 360度全風向ベクトル分解によるライン番手別スタミナ損耗率の算出。
+//          - 激突ライン共倒れ予測による「展開的必然」の穴抽出ロジック完遂。
+// 【V7.4】壱耀メッセージ追加 ＆ 買い目変更。
+// 【V7.3】消耗ペナルティ適用拡大 ＆ 複数競り表示修正。
 // ------------------------------------------------------------------------------------
 
 const COEFFICIENT_SETTINGS = {
@@ -39,6 +46,9 @@ const SERI_STYLE_BONUS = {
     '自': 0.95
 };
 
+// 競り消耗率：実戦経験則に基づく設計
+// 勝者(IN)：消耗はあるが前に出られる → 15%減 + 5%ボーナスで実質10%減
+// 敗者(OUT)：競り負けてほぼ脚が終わる → 25%減（「ほぼ死ぬ」状態）
 const SERI_FATIGUE_PENALTY_IN  = 0.15;
 const SERI_FATIGUE_PENALTY_OUT = 0.25;
 const SERI_WIN_BONUS           = 0.05;
@@ -59,7 +69,7 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
     const v = speed * beta;
     const selectedDir = direction;
 
-    logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 風速[${speed}m] → 実効[${v.toFixed(2)}m](β:${beta})`);
+    app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 風速[${speed}m] → 実効[${v.toFixed(2)}m](β:${beta})`);
 
     const straightBonus = (BANK_DATA.straight || 50) / 50;
     let kp;
@@ -93,39 +103,60 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
         }
     }
 
-    logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 位置[${posLabel}] -> 風補正実行`);
+    app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 位置[${posLabel}] -> 風補正実行`);
 
     const map = BANK_DATA.wind_direction_map || {};
-    const dirType = map[selectedDir] || "横風成分";
 
-    let vector = -0.2;
-    if (dirType.includes("追い"))   { vector =  1.0; }
-    else if (dirType.includes("向かい")) { vector = -1.0; }
+    function dirToVector(dirType) {
+        let vec = 0.0;
+        if (dirType.includes("追い"))   vec += 1.0;
+        if (dirType.includes("向かい")) vec -= 1.0;
+        if (dirType === "H→B横風")     vec += 0.2;
+        if (dirType === "B→H横風")     vec -= 0.2;
+        return vec;
+    }
+
+    const ADJACENT_MAP = {
+        "北東": ["北", "東"], "南東": ["南", "東"],
+        "南西": ["南", "西"], "北西": ["北", "西"],
+        "北":   ["北西", "北東"], "東": ["北東", "南東"],
+        "南":   ["南東", "南西"], "西": ["南西", "北西"]
+    };
+
+    let vector = 0.0;
+
+    if (map[selectedDir]) {
+        vector = dirToVector(map[selectedDir]);
+    } else if (ADJACENT_MAP[selectedDir]) {
+        const [adj1, adj2] = ADJACENT_MAP[selectedDir];
+        const v1 = map[adj1] ? dirToVector(map[adj1]) : 0.0;
+        const v2 = map[adj2] ? dirToVector(map[adj2]) : 0.0;
+        vector = (v1 + v2) * 0.707;
+    }
 
     const finalAdj = 1.0 + (vector * kp * (BANK_DATA.alpha || 1.0) * positionShield);
 
-    logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 属性[${dirType}] 位置[${posLabel}] -> 風補正実行`);
+    app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 属性[斜め補正済み] 位置[${posLabel}] -> 風補正実行`);
 
     return { adj: finalAdj, v: v };
 }
-
 // ====================================================================================
 // 物理層：straight による生存判定（V9.0）
 // ====================================================================================
-function applyPhysicalConstraints(players, bankData, lineInput) {
+function applyPhysicalConstraints(players, bankData, lines) {
     const straight = bankData.straight || 50;
 
-    const positionMap = getPlayerPositions(lineInput);
+    const positionMap = getPlayerPositions(lines);
 
     players.forEach(p => {
         const pos = positionMap[p.id] || { position: 99, label: '不明' };
         let physicalPenalty = 1.0;
 
         if (straight < 35) {
-            if (pos.position >= 4)      { physicalPenalty = 0.75; logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 物理的到達困難 (×0.25)`); }
-            else if (pos.position === 3){ physicalPenalty = 0.85; logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置3番手 → 到達困難 (×0.60)`); }
+            if (pos.position >= 4)      { physicalPenalty = 0.75; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 物理的到達困難 (×0.75)`); }
+            else if (pos.position === 3){ physicalPenalty = 0.85; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置3番手 → 到達困難 (×0.85)`); }
         } else if (straight < 50) {
-            if (pos.position >= 4)      { physicalPenalty = 0.80; logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 到達やや困難 (×0.50)`); }
+            if (pos.position >= 4)      { physicalPenalty = 0.80; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 到達やや困難 (×0.80)`); }
             else if (pos.position === 3){ physicalPenalty = 0.80; }
         }
 
@@ -135,24 +166,22 @@ function applyPhysicalConstraints(players, bankData, lineInput) {
     return players;
 }
 
-function getPlayerPositions(lineInput) {
+function getPlayerPositions(lines) {
     const positionMap = {};
-    if (!lineInput) return positionMap;
-
-    const segments = lineInput.split(/[,、]/);
     let globalPosition = 1;
 
-    segments.forEach(segment => {
-        const cleanSegment = segment.replace(/[^\d]/g, "");
-        const playerIds = cleanSegment.split("").map(Number);
+    lines.forEach(line => {
+        line.forEach((id, localPos) => {
+            let label = '後方';
+            if (localPos === 0)      label = '先行';
+            else if (localPos === 1) label = '番手';
+            else if (localPos === 2) label = '3番手';
 
-        playerIds.forEach((id, localPos) => {
-            let label = "後方";
-            if (localPos === 0)      label = "先行";
-            else if (localPos === 1) label = "番手";
-            else if (localPos === 2) label = "3番手";
-
-            positionMap[id] = { position: globalPosition, label: label, linePosition: localPos };
+            positionMap[id] = {
+                position: globalPosition,
+                label: label,
+                linePosition: localPos  // ライン内相対位置
+            };
             globalPosition++;
         });
     });
@@ -163,15 +192,15 @@ function getPlayerPositions(lineInput) {
 // ====================================================================================
 // 展開層：カント・イン突き（V9.0）
 // ====================================================================================
-function applyTacticalAdjustments(players, bankData, lineInput, seriInfos) {
+function applyTacticalAdjustments(players, bankData, lines, seriInfos) {
     const canto = bankData.canto || 30;
-    const positionMap = getPlayerPositions(lineInput);
+    const positionMap = getPlayerPositions(lines);
 
     const cantoThreshold = 32;
     const makuriPenalty = (canto > cantoThreshold) ? 1.12 : 1.0;
 
     if (canto > cantoThreshold) {
-        logMessage(`[展開層] カント${canto}度 > ${cantoThreshold}度 → 捲りコスト×1.5 (補正係数×0.67)`);
+        app.logMessage(`[展開層] カント${canto}度 > ${cantoThreshold}度 → 捲り補正×1.12`);
     }
 
     const warpBoostTargets = [];
@@ -180,7 +209,7 @@ function applyTacticalAdjustments(players, bankData, lineInput, seriInfos) {
         seriInfos.forEach(seri => {
             const winnerPos = positionMap[seri.winner];
             if (winnerPos && winnerPos.position === 2) {
-                logMessage(`[展開層] 番手選手${seri.winner}が競り勝利 → イン突き（ワープ）発動`);
+                app.logMessage(`[展開層] 番手選手${seri.winner}が競り勝利 → イン突き（ワープ）発動`);
                 Object.keys(positionMap).forEach(id => {
                     const pos = positionMap[id];
                     if (pos.position >= 3 && pos.position <= 4) {
@@ -194,16 +223,12 @@ function applyTacticalAdjustments(players, bankData, lineInput, seriInfos) {
     players.forEach(p => {
         const pos = positionMap[p.id];
 
-        if ((p.style === '自' || p.style === '両') && canto > cantoThreshold) {
-            p.cantoMakuriPenalty = makuriPenalty;
-            logMessage(`[展開層] 選手${p.id}(捲り): カント補正 ×${makuriPenalty.toFixed(2)}`);
-        } else {
-            p.cantoMakuriPenalty = 1.0;
-        }
-
         if (warpBoostTargets.includes(p.id)) {
+            // イン突き（ワープ）ブースト ×1.35
+            // 番手が競りを制しインを突いた際、外の選手を一気に抜き去る経験則的優位
+            // 約35%のアドバンテージは実戦上の「イン突きはそういうもの」に準拠
             p.warpBoost = 1.35;
-            logMessage(`[展開層] 選手${p.id}: イン突き（ワープ）ブースト ×1.35`);
+            app.logMessage(`[展開層] 選手${p.id}: イン突き（ワープ）ブースト ×1.35`);
         } else {
             p.warpBoost = 1.0;
         }
@@ -223,6 +248,9 @@ const RAW_COMPOSITE_STATS = [
 
 function calculateSuperiorityList() {
     const superiorPatterns = [];
+    // 壱耀晴乾ノ象：実測統計に基づく優位パターン採用
+    // 天雲指数33 × 差しスタイル が最も的中率が高いと統計的に確認済み
+    // hit_rate: 0.0309 > 閾値0.0206（33_逃げは閾値同値のため除外）
     const targetPatterns = ["33_差し"];
     for (const data of RAW_COMPOSITE_STATS) {
         if (targetPatterns.includes(data.pattern_key) && data.hit_rate >= SUPERIORITY_THRESHOLD_RATE) {
@@ -236,12 +264,14 @@ const SUPERIOR_PATTERNS_FINAL_LIST = calculateSuperiorityList();
 // ====================================================================================
 // ロギング
 // ====================================================================================
-function logMessage(message) {
+let _logScrollTimer = null;
+app.logMessage = function(message) {
     const logArea = document.getElementById('debug-log');
     if (!logArea) return;
     const timestamp = new Date().toLocaleTimeString('ja-JP', { hour12: false });
     logArea.insertAdjacentHTML('beforeend', `[${timestamp}] ${message}<br>`);
-    requestAnimationFrame(() => { logArea.scrollTop = logArea.scrollHeight; });
+    if (_logScrollTimer) clearTimeout(_logScrollTimer);
+    _logScrollTimer = setTimeout(() => { logArea.scrollTop = logArea.scrollHeight; }, 50);
 }
 
 // ====================================================================================
@@ -285,12 +315,12 @@ function getPlayerData() {
 // ====================================================================================
 async function loadBANK_DATA() {
     try {
-        logMessage("[INIT] bankdata.jsonの読み込みを開始します...");
-        const response = await fetch('bankdata.json');
+        app.logMessage("[INIT] bankdata.jsonの読み込みを開始します...");
+        const response = await fetch('./bankdata.json');
         if (!response.ok) throw new Error(`HTTP status ${response.status}`);
 
         BANK_DATA = await response.json();
-        logMessage(`[SUCCESS] bankdata.jsonを正常に読み込みました。 ${Object.keys(BANK_DATA).length}件のバンクデータをロード。`);
+        app.logMessage(`[SUCCESS] bankdata.jsonを正常に読み込みました。 ${Object.keys(BANK_DATA).length}件のバンクデータをロード。`);
 
         const bankSelect = document.getElementById('bank-name');
         if (bankSelect) {
@@ -301,11 +331,11 @@ async function loadBANK_DATA() {
                 option.textContent = bankName;
                 bankSelect.appendChild(option);
             });
-            logMessage("[UI] バンク名の選択肢を動的に構築しました。");
+            app.logMessage("[UI] バンク名の選択肢を動的に構築しました。");
             displayBankTendency();
         }
     } catch (error) {
-        logMessage(`[FATAL ERROR] データ読み込み処理中に重大なエラーが発生: ${error.message}`);
+        app.logMessage(`[FATAL ERROR] データ読み込み処理中に重大なエラーが発生: ${error.message}`);
         BANK_DATA = { 'ダミーバンク': { length: 400, keirin_bias: { '先行': 1.0, '捲り': 1.0, '差し': 1.0 }, wind_or_position: {} } };
         const bankSelect = document.getElementById('bank-name');
         if (bankSelect) bankSelect.innerHTML = '<option value="ダミーバンク">データ読み込み失敗</option>';
@@ -362,7 +392,7 @@ function displayBankTendency() {
     }
 
     displayArea.innerHTML = message;
-    logMessage(`[BANK] ${bankName} の展開傾向: ${message.replace(/<[^>]*>?/gm, '')}`);
+    app.logMessage(`[BANK] ${bankName} の展開傾向: ${message.replace(/<[^>]*>?/gm, '')}`);
 }
 
 (async function() { await loadBANK_DATA(); })();
@@ -406,7 +436,7 @@ function parseLineInput(lineInput, allPlayers) {
                 const follower  = parseInt(seriMatch[1]);
                 const contender = parseInt(seriMatch[2]);
 
-                logMessage(`[PARSE] 競り検出: 選手${follower} (イン) vs 選手${contender} (アウト)`);
+                app.logMessage(`[PARSE] 競り検出: 選手${follower} (イン) vs 選手${contender} (アウト)`);
 
                 const followerCoef  = allPlayers.find(p => p.id === follower)?.seri_coef  || 0;
                 const contenderCoef = allPlayers.find(p => p.id === contender)?.seri_coef || 0;
@@ -416,7 +446,7 @@ function parseLineInput(lineInput, allPlayers) {
                 else                               { winnerId = contender; loserId = follower;  }
 
                 allSeriInfos.push({ exists: true, follower, contender, winner: winnerId, loser: loserId });
-                logMessage(`[PARSE] 競り勝者予測: 選手${winnerId} (C_seriに基づき予測)`);
+                app.logMessage(`[PARSE] 競り勝者予測: 選手${winnerId} (C_seriに基づき予測)`);
 
                 currentLine.push(winnerId);
                 lines.push([loserId]);
@@ -451,22 +481,22 @@ function parseLineInput(lineInput, allPlayers) {
 }
 
 // ====================================================================================
-// calculateLineCoeffs  ★ C_L完全実装版
+// calculateLineCoeffs  ★ C_L改修版
 // ====================================================================================
 function calculateLineCoeffs(players, settings) {
 
     // 1. 欠場除外
     const participatingPlayers = players.filter(p => !p.is_scratch);
-    logMessage(`[SCRATCH] 欠場選手を除外しました。出走選手数: ${participatingPlayers.length}`);
+    app.logMessage(`[SCRATCH] 欠場選手を除外しました。出走選手数: ${participatingPlayers.length}`);
 
     if (participatingPlayers.length === 0) {
-        logMessage("[ERROR] 出走選手がゼロのため、ライン解析をスキップします。");
-        return { players: [], allSeriInfos: [], finalOrderedPlayerIds: [], displayLineSegments: [] };
+        app.logMessage("[ERROR] 出走選手がゼロのため、ライン解析をスキップします。");
+        return { players: [], allSeriInfos: [], finalOrderedPlayerIds: [], displayLineSegments: [], lines: [] };
     }
 
     // 2. ライン解析
     const lineInput = document.getElementById('line-input').value;
-    logMessage(`[PARSE] ライン入力解析: ${lineInput}`);
+    app.logMessage(`[PARSE] ライン入力解析: ${lineInput}`);
     const {
         lines: initialLines,
         allSeriInfos: parsedAllSeriInfos,
@@ -491,78 +521,106 @@ function calculateLineCoeffs(players, settings) {
         }
         if (!allRidersInLines.has(p.id)) lines.push([p.id]);
     });
-    logMessage(`[ORDER] 最終表示順序に欠落選手を補完しました。`);
+    app.logMessage(`[ORDER] 最終表示順序に欠落選手を補完しました。`);
 
-    // 3. C_L（ライン結束力係数）計算 ★実装
+    // 3. C_L（ライン結束力係数）計算 ★改修ロジック
     const coop = settings.COOP_WEIGHT || 1.0;
-
-    // 競り敗者はラインから外れたので C_L = 1.0 のまま
     const seriLoserIds = new Set(parsedAllSeriInfos.map(s => s.loser));
 
     if (settings.IS_GIRLS) {
-        logMessage(`[C_L] ガールズ競輪モード: エースマーク係数適用 (C_MARK_VALUES)`);
+        app.logMessage(`[C_L] ガールズ競輪モード: エースマーク係数適用`);
         lines.forEach(line => {
             if (line.length < 2) return;
             const leader = participatingPlayers.find(p => p.id === line[0]);
             for (let i = 1; i < line.length; i++) {
                 const p = participatingPlayers.find(pp => pp.id === line[i]);
                 if (!p || seriLoserIds.has(p.id)) continue;
-
                 let markVal = C_MARK_VALUES.LOW;
                 if (leader && leader.wmark === '◎')      markVal = C_MARK_VALUES.HIGH;
                 else if (leader && leader.wmark === '〇') markVal = C_MARK_VALUES.MEDIUM;
-
-                // 番手は満額、3番手以降は半額ボーナス
                 p.c_l = (i === 1) ? markVal : 1.0 + (markVal - 1.0) * 0.5;
-                logMessage(`[C_L] 選手ID ${p.id}: ガールズC_L=${p.c_l.toFixed(3)}`);
+                app.logMessage(`[C_L] 選手ID ${p.id}: ガールズC_L=${p.c_l.toFixed(3)}`);
             }
         });
     } else {
-        logMessage(`[C_L] 一般競輪モード: COOP_WEIGHT=${coop}`);
+        // ★★★ START: C_l 改修ロジック ★★★
+        app.logMessage(`[C_L] 一般競輪モード: COOP_WEIGHT=${coop}`);
+
+        // ① 各ラインの競走得点合計を算出
+        const lineScores = lines.map(line => {
+            const score = line.reduce((total, playerId) => {
+                const player = participatingPlayers.find(p => p.id === playerId);
+                return total + (player ? player.score : 0);
+            }, 0);
+            return { line, score };
+        });
+
+        // ② メインラインを特定
+        let mainLine = [];
+        if (lineScores.length > 0) {
+            const mainLineData = lineScores.reduce((max, current) => (current.score > max.score) ? current : max);
+            mainLine = mainLineData.line;
+            app.logMessage(`[C_L] メインライン特定: ${mainLine.join('-')} (得点合計: ${mainLineData.score.toFixed(2)})`);
+        }
+
+        // ③ C_l の適用
         lines.forEach(line => {
             if (line.length < 2) return;
-            for (let i = 1; i < line.length; i++) {
+            for (let i = 0; i < line.length; i++) {
                 const p = participatingPlayers.find(pp => pp.id === line[i]);
                 if (!p || seriLoserIds.has(p.id)) continue;
 
-                if (i === 1) {
-                    p.c_l = 1.0 + coop * 0.05;       // 番手
-                } else {
-                    p.c_l = 1.0 + coop * 0.03;       // 3番手以降
+                if (i === 0) { // 1番手
+                    p.c_l = 1.00;
+                } else if (i === 1) { // 2番手
+                    p.c_l = 1.0 + coop * 0.05;
+                    app.logMessage(`[C_L] 選手ID ${p.id}: 2番手 C_L=${p.c_l.toFixed(3)}`);
+                } else if (i === 2) { // 3番手
+                    const isMainLine = (mainLine.toString() === line.toString());
+                    if (isMainLine) {
+                        p.c_l = 1.0 + coop * 0.03;
+                        app.logMessage(`[C_L] 選手ID ${p.id}: ★メインライン3番手★ C_L=${p.c_l.toFixed(3)}`);
+                    } else {
+                        p.c_l = 1.00;
+                        app.logMessage(`[C_L] 選手ID ${p.id}: 非メインライン3番手 C_L=1.00`);
+                    }
+                } else { // 4番手以降
+                    p.c_l = 1.00;
                 }
-                logMessage(`[C_L] 選手ID ${p.id}: 位置${i + 1}番手 C_L=${p.c_l.toFixed(3)}`);
             }
         });
+        // ★★★ END: C_l 改修ロジック ★★★
     }
 
-    return { players: participatingPlayers, allSeriInfos: parsedAllSeriInfos, finalOrderedPlayerIds, displayLineSegments };
+    return { players: participatingPlayers, allSeriInfos: parsedAllSeriInfos, finalOrderedPlayerIds, displayLineSegments, lines };
 }
+
 
 // ====================================================================================
 // applySeriCorrection
 // ====================================================================================
 function applySeriCorrection(scoredPlayers, allSeriInfos) {
     if (allSeriInfos.length === 0) {
-        logMessage("[SERI] 競り入力がないため、競り補正はスキップします。");
+        app.logMessage("[SERI] 競り入力がないため、競り補正はスキップします。");
         return scoredPlayers;
     }
-    logMessage(`[SERI] 競り補正処理（${allSeriInfos.length}件）を開始します。`);
+    app.logMessage(`[SERI] 競り補正処理（${allSeriInfos.length}件）を開始します。`);
 
     allSeriInfos.forEach(seriInfo => {
         const winner = scoredPlayers.find(p => p.id === seriInfo.winner);
         if (winner) {
             winner.final_score = winner.final_score * (1 + SERI_WIN_BONUS) * (1 - SERI_FATIGUE_PENALTY_IN);
-            logMessage(`[SERI] 競り勝者 選手${winner.id}: スコア微増/体力減点補正が適用されました。`);
+            app.logMessage(`[SERI] 競り勝者 選手${winner.id}: スコア微増/体力減点補正が適用されました。`);
         }
         const loser = scoredPlayers.find(p => p.id === seriInfo.loser);
         if (loser) {
             loser.final_score *= (1 - SERI_FATIGUE_PENALTY_OUT);
-            logMessage(`[SERI] 競り敗者 選手${loser.id}: スコア大幅減点補正が適用されました。`);
+            app.logMessage(`[SERI] 競り敗者 選手${loser.id}: スコア大幅減点補正が適用されました。`);
         }
     });
 
     scoredPlayers.forEach(p => {
-        logMessage(`[SERI] 選手ID ${p.id}: 競り処理後のスコアは ${p.final_score.toFixed(3)} になりました。`);
+        app.logMessage(`[SERI] 選手ID ${p.id}: 競り処理後のスコアは ${p.final_score.toFixed(3)} になりました。`);
     });
 
     return scoredPlayers;
@@ -590,16 +648,13 @@ function generateScenarioWagers(results, v) {
     const tenunText  = document.getElementById('tenun-index-output')?.innerText || "";
     const isTenunZero = tenunText.includes("指数: 0") || tenunText.includes("大安吉日");
 
-    if (isTenunZero && v <= 3.0) {
-        const top4 = results.slice(0, 4);
-        const trueIchiyo = top4.find(p => {
-            const stats = RAW_COMPOSITE_STATS.find(s => s.pattern_key.includes(p.style));
-            return (p.style === '追') && (stats && stats.hit_rate >= 0.0206);
-        });
-        if (trueIchiyo) {
-            superiorPatternMessage = `【壱耀晴乾ノ象】天命、${trueIchiyo.id}番車に収束。`;
-        }
+ if (isTenunZero && v <= 3.0) {
+    const top4 = results.slice(0, 4);
+    const trueIchiyo = top4.find(p => p.style === '追');
+    if (trueIchiyo) {
+        superiorPatternMessage = `【壱耀晴乾ノ象】天命、${trueIchiyo.id}番車に収束。`;
     }
+}
 
     const tritan = [
         `${r[0]}-${r[1]}-${r[2]}`,
@@ -665,11 +720,6 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
     tempPlayers.forEach(p => { if (!allRidersInLines.has(p.id)) lines.push([p.id]); });
 
     tempPlayers.forEach(p => {
-        // 1. C_short
-        if (BANK_DATA.length === 333) {
-            p.final_score *= 0.985;
-            appliedCoeffs.push('C_short');
-        }
 
         // 2. C_risk
         const avgScore  = allScores.reduce((a, b) => a + b, 0) / allScores.length;
@@ -689,7 +739,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
             appliedCoeffs.push('C_mental');
         }
 
-        // 4. C_recovery
+// 4. C_recovery
         if (p.style === '両' || p.style === '追') {
             const scoreDiffRatio = (p.score - scoreMin) / scoreRange;
             if (scoreDiffRatio > 0.6) {
@@ -698,64 +748,64 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
                 appliedCoeffs.push('C_recovery');
             }
         }
+    });
 
-        // 5. C_target
-        const targetPlayer = tempPlayers.find(pp => pp.score === scoreMax);
-        if (targetPlayer) {
-            let rivalAutos = 0;
-            tempPlayers.forEach(pp => { if (pp.id !== targetPlayer.id && (pp.style === '逃' || pp.style === '自' || pp.style === '両')) rivalAutos++; });
-            if (rivalAutos >= 2) {
-                const targetAdj = 1.0 - (v * 0.007);
-                targetPlayer.final_score *= targetAdj;
-                appliedCoeffs.push('C_target');
+    // 5. C_target
+    const targetPlayer = tempPlayers.find(pp => pp.score === scoreMax);
+    if (targetPlayer) {
+        let rivalAutos = 0;
+        tempPlayers.forEach(pp => { if (pp.id !== targetPlayer.id && (pp.style === '逃' || pp.style === '自' || pp.style === '両')) rivalAutos++; });
+        if (rivalAutos >= 2) {
+            const targetAdj = 1.0 - (v * 0.007);
+            targetPlayer.final_score *= targetAdj;
+            appliedCoeffs.push('C_target');
+        }
+    }
+
+    // 6. C_split
+    lines.forEach(line => {
+        const p1 = tempPlayers.find(pp => pp.id === line[0]);
+        const p2 = tempPlayers.find(pp => pp.id === line[1]);
+        if (p1 && p2) {
+            const relativeDiff = (p1.score - p2.score) / scoreRange;
+            if (relativeDiff >= 0.30) {
+                const penalty = 1.0 - (relativeDiff - 0.30) * 0.15;
+                p2.final_score *= penalty;
+                appliedCoeffs.push('C_split');
             }
         }
+    });
 
-        // 6. C_split
-        lines.forEach(line => {
-            const p1 = tempPlayers.find(pp => pp.id === line[0]);
-            const p2 = tempPlayers.find(pp => pp.id === line[1]);
-            if (p1 && p2) {
-                const relativeDiff = (p1.score - p2.score) / scoreRange;
-                if (relativeDiff >= 0.30) {
-                    const penalty = 1.0 - (relativeDiff - 0.30) * 0.15;
-                    p2.final_score *= penalty;
-                    appliedCoeffs.push('C_split');
-                }
+    // 7. C_pace
+    const leaderPlayer = tempPlayers.find(pp => pp.style === '逃' || pp.style === '自' || pp.style === '両');
+    if (leaderPlayer && leaderPlayer.score >= 105.0 && lines.length - 1 >= 2) {
+        leaderPlayer.final_score *= 0.96;
+        appliedCoeffs.push('C_pace');
+    }
+
+    // 8. C_timing
+    tempPlayers.forEach(pp => {
+        if (pp.style === '両') {
+            const line = lines.find(l => l.includes(pp.id));
+            if (line && line.indexOf(pp.id) >= 1) {
+                pp.final_score *= 0.97;
+                appliedCoeffs.push('C_timing');
             }
-        });
-
-        // 7. C_pace
-        const leaderPlayer = tempPlayers.find(pp => pp.style === '逃' || pp.style === '自' || pp.style === '両');
-        if (leaderPlayer && leaderPlayer.score >= 105.0 && lines.length - 1 >= 2) {
-            leaderPlayer.final_score *= 0.96;
-            appliedCoeffs.push('C_pace');
         }
+    });
 
-        // 8. C_timing
-        tempPlayers.forEach(pp => {
-            if (pp.style === '両') {
-                const line = lines.find(l => l.includes(pp.id));
-                if (line && line.indexOf(pp.id) >= 1) {
-                    pp.final_score *= 0.97;
-                    appliedCoeffs.push('C_timing');
-                }
-            }
-        });
-
-        // 9. C_guard
-        lines.forEach(line => {
-            const p2 = tempPlayers.find(pp => pp.id === line[1]);
-            if (p2) {
-                const lowScoreThreshold = scoreMin + scoreRange * 0.4;
-                let baseRisk = 1.0;
-                if (p2.score < lowScoreThreshold) baseRisk = 0.95;
-                const attackers = tempPlayers.filter(pp => pp.id !== p2.id && (pp.style === '逃' || pp.style === '自' || pp.style === '両')).length;
-                if (attackers >= 2) baseRisk *= 0.95;
-                p2.final_score *= baseRisk;
-                appliedCoeffs.push('C_guard');
-            }
-        });
+    // 9. C_guard
+    lines.forEach(line => {
+        const p2 = tempPlayers.find(pp => pp.id === line[1]);
+        if (p2) {
+            const lowScoreThreshold = scoreMin + scoreRange * 0.4;
+            let baseRisk = 1.0;
+            if (p2.score < lowScoreThreshold) baseRisk = 0.95;
+            const attackers = tempPlayers.filter(pp => pp.id !== p2.id && (pp.style === '逃' || pp.style === '自' || pp.style === '両')).length;
+            if (attackers >= 2) baseRisk *= 0.95;
+            p2.final_score *= baseRisk;
+            appliedCoeffs.push('C_guard');
+        }
     });
 
     // 10. C_suicide
@@ -790,7 +840,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
     Object.keys(lineEvaluations).forEach(lineIndex => {
         const ev = lineEvaluations[lineIndex];
         if (ev.lineLength >= 3 && ev.totalWeightScore === 3 && ev.hasSelfStarter) {
-            logMessage(`[C_suicide] 🔴 リスク極大ライン検出！ (ライン${ev.lineMembers.join('-')})`);
+            app.logMessage(`[C_suicide] 🔴 リスク極大ライン検出！ (ライン${ev.lineMembers.join('-')})`);
             isSuicideRiskDetected = true;
             ev.lineMembers.forEach(id => suicideRiskLineMembers.add(id));
         }
@@ -827,22 +877,22 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
 
     // シナリオ単位でまとめてログ出力
     const uniqueCoeffs = [...new Set(appliedCoeffs)];
-    logMessage(`[KOUTENREI] ${scenario}: ${uniqueCoeffs.length > 0 ? uniqueCoeffs.join(' / ') : 'なし'}`);
+    app.logMessage(`[KOUTENREI] ${scenario}: ${uniqueCoeffs.length > 0 ? uniqueCoeffs.join(' / ') : 'なし'}`);
 
     return tempPlayers;
 }
 
 // ====================================================================================
-// runScenarioSimulation  ★本来のロジック完全復元版（V10.0）
+// runScenarioSimulation
 // ====================================================================================
-function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, applyKoutenrei, lineInput, windSpeed, windDirection) {
+function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, applyKoutenrei, lineInput, windSpeed, windDirection, lines) {
     const scenarios = ['先行有利', '捲り有利', '差し有利'];
     const allScenarioResults = [];
     const integratedScores   = {};
     const completedScenarios = [];
     const scenarioPrefix = applyKoutenrei ? '[KOUTEN]' : '[SEITEN]';
 
-    logMessage(`${scenarioPrefix} バンク直線: ${BANK_DATA.straight || 50}m / カント: ${BANK_DATA.canto || 30}度`);
+    app.logMessage(`${scenarioPrefix} バンク直線: ${BANK_DATA.straight || 50}m / カント: ${BANK_DATA.canto || 30}度`);
 
     basePlayers.forEach(p => integratedScores[p.id] = 0);
 
@@ -855,11 +905,8 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
         const speed     = (windSpeed !== undefined) ? windSpeed : (BANK_DATA ? BANK_DATA.speed : 0);
         const isGirls   = settings ? settings.IS_GIRLS : false;
 
-        // 🔥 物理層（V9.0）
-        applyPhysicalConstraints(scenarioPlayers, BANK_DATA, lineInput);
-
         // 🔥 展開層（V9.0）
-        applyTacticalAdjustments(scenarioPlayers, BANK_DATA, lineInput, allSeriInfos);
+        applyTacticalAdjustments(scenarioPlayers, BANK_DATA, lines, allSeriInfos);
 
         scenarioPlayers.forEach(p => {
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e;
@@ -891,7 +938,7 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
         completedScenarios.push(scenario);
     });
 
-    logMessage(`${scenarioPrefix} ${completedScenarios.join(' / ')} 完了`);
+    app.logMessage(`${scenarioPrefix} ${completedScenarios.join(' / ')} 完了`);
 
     return { allScenarioResults, integratedScores };
 }
@@ -919,6 +966,9 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
     let matchCount = 0;
     koutenTop3.forEach(id => { if (seitenTop3.has(id)) matchCount++; });
 
+    // 天雲指数マッピング：晴天令・荒天令Top3の一致数 → 4段階指数
+    // 100段階は分岐過多のため33刻みに圧縮。実用上4段階で十分な解像度
+    // 3一致→0（完全安定）/ 2一致→33 / 1一致→67 / 0一致→100（完全混沌）
     const tenunIndexMap = { 3: 0, 2: 33, 1: 67, 0: 100 };
     const tIndex = tenunIndexMap[matchCount] ?? 50;
 
@@ -932,14 +982,14 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
             const isWeightTop = (firstPlayer.wmark === '◎');
             if (isSashiMa && isWeightTop) {
                 targetPlayerId = firstPlayer.id;
-                logMessage(`壱耀晴乾ノ象：○${targetPlayerId}`);
+                app.logMessage(`壱耀晴乾ノ象：○${targetPlayerId}`);
             }
         }
     }
 
-    let finalHtml = window.generateTamakiTenunHTML(tIndex, false, null);
+    let finalHtml = app.generateTamakiTenunHTML(tIndex, false, null);
     if (targetPlayerId !== null) {
-        finalHtml += window.generateTamakiTenunHTML(tIndex, true, targetPlayerId);
+        finalHtml += app.generateTamakiTenunHTML(tIndex, true, targetPlayerId);
     }
 
     return {
@@ -951,12 +1001,12 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
 }
 
 // ====================================================================================
-// calculatePrediction  ★赤口呑縁独立起動統合版
+// calculatePrediction
 // ====================================================================================
-async function calculatePrediction() {
+app.calculatePrediction = async function() {
     const tenunOutputArea = document.getElementById('tenun-index-output');
-    if (tenunOutputArea && typeof window.generateTamakiObservingHTML === 'function') {
-        tenunOutputArea.innerHTML = window.generateTamakiObservingHTML();
+    if (tenunOutputArea) {
+        tenunOutputArea.innerHTML = ''
     }
     await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -975,9 +1025,12 @@ async function calculatePrediction() {
         const isScratch = row.querySelector('.is-scratch')?.checked || false;
 
         const isGoldCap = document.getElementById(`goldcap-${id}`)?.checked || false;
+        // goldcap：データ不足新人の地力再定義装置
+        // A級平均スコア≒95.0 を下限として設定
+        // 実績データが少ないことによる過小評価を補正する措置
         if (isGoldCap && score < 95.0) {
             score = 95.0;
-            logMessage(`[ROYAL] 選手${id}: 👑 戴冠（地力再定義)`);
+            app.logMessage(`[ROYAL] 選手${id}: 👑 戴冠（地力再定義)`);
         }
 
         players.push({
@@ -999,9 +1052,9 @@ async function calculatePrediction() {
     const modeSelector = document.getElementById('mode-selector');
     const koutenreiModeSelected = modeSelector ? modeSelector.value === 'koutenrei' : false;
 
-    logMessage(`[CALC START] ${raceType} / バンク: ${bankName} / モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`);
+    app.logMessage(`[CALC START] ${raceType} / バンク: ${bankName} / モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`);
 
-    const { players: participatingPlayers, allSeriInfos, finalOrderedPlayerIds, displayLineSegments } = calculateLineCoeffs(players, settings);
+    const { players: participatingPlayers, allSeriInfos, finalOrderedPlayerIds, displayLineSegments, lines } = calculateLineCoeffs(players, settings);
 
     if (participatingPlayers.length === 0) {
         alert("出走選手がいないため、計算を中止しました。");
@@ -1013,22 +1066,32 @@ async function calculatePrediction() {
     basePlayers.forEach(p => {
         p.c_score_adj = 1.0 + (p.score / 100 - 1) * settings.R_BIAS;
 
-        const recentScores = p.recent.split('').map(Number);
-        const avgRank = recentScores.length > 0 ? recentScores.reduce((a, b) => a + b, 0) / recentScores.length : 4.0;
-        p.c_recent = (1.0 + (4 - avgRank) * 0.05) * settings.RECENT_WEIGHT;
+    const recentScores = p.recent.split('').map(Number);
+    const avgRank = recentScores.length > 0 ? recentScores.reduce((a, b) => a + b, 0) / recentScores.length : 4.0;
+    let trendBonus = 0;
+    if (recentScores.length >= 3) {
+    const d1 = recentScores[1] - recentScores[0];
+    const d2 = recentScores[2] - recentScores[1];
+    if (d1 > 0 && d2 > 0) trendBonus = +0.03;
+    if (d1 < 0 && d2 < 0) trendBonus = -0.03;
+    }
+    p.c_recent = (1.0 + (4 - avgRank) * 0.05 + trendBonus) * settings.RECENT_WEIGHT;
 
         if      (p.wmark === '◎') p.c_wmark = 1.04;
         else if (p.wmark === '〇') p.c_wmark = 1.02;
-        else if (p.wmark === '✕') p.c_wmark = 1.015;
-        else if (p.wmark === '△') p.c_wmark = 1.01;
+        else if (p.wmark === '△') p.c_wmark = 1.015;
+        else if (p.wmark === '✕') p.c_wmark = 1.01;
         else                       p.c_wmark = 1.0;
 
+        // S1位(+0.5%)：ライン先頭の象徴的優位
+        // B1位(+1.5%)：先行を守りながら自身も着を狙う二重負荷への実戦的評価
+        // B1位の方がしんどい → 加点大
         p.c_s1 = p.is_s1 ? 1.005 : 1.0;
         p.c_b1 = p.is_b1 ? 1.015 : 1.0;
 
         let biasKey = '';
-        if      (p.style === '逃') biasKey = '先行';
-        else if (p.style === '自') biasKey = '捲り';
+        if      (p.style === '自') biasKey = '先行';
+        else if (p.style === '逃') biasKey = '先行';
         else if (p.style === '両') biasKey = '捲り';
         else if (p.style === '追') biasKey = '差し';
         p.c_e = selectedBank.keirin_bias[biasKey] || 1.0;
@@ -1036,16 +1099,16 @@ async function calculatePrediction() {
 
     try {
         const currentLineInputForCalc = document.getElementById('line-input').value;
-        logMessage(`[DEBUG] シミュレーション開始: ラインデータ "${currentLineInputForCalc}"`);
+        app.logMessage(`[DEBUG] シミュレーション開始: ラインデータ "${currentLineInputForCalc}"`);
 
         const windSpeed     = parseFloat(document.getElementById('wind-speed').value) || 0;
         const windDirection = document.getElementById('wind-direction').value;
 
-        const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, false, currentLineInputForCalc, windSpeed, windDirection);
-        logMessage(`[CALC] 晴天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`);
+        const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, false, currentLineInputForCalc, windSpeed, windDirection, lines);
+        app.logMessage(`[CALC] 晴天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`);
 
-        const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, true, currentLineInputForCalc, windSpeed, windDirection);
-        logMessage(`[CALC] 荒天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`);
+        const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, true, currentLineInputForCalc, windSpeed, windDirection, lines);
+        app.logMessage(`[CALC] 荒天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`);
 
         const detailedScenarioResults = koutenreiModeSelected
             ? koutenreiResults.allScenarioResults
@@ -1079,7 +1142,11 @@ async function calculatePrediction() {
         if (resultsContainer) resultsContainer.classList.add('visible');
 
         // 🌌 赤口呑縁：晴天令・荒天令完了後に直接起動
-        if (typeof invokeShakkouDonperi === 'function') {
+        app.logMessage('[DEBUG] invokeShakkouDonperi type: ' + typeof app.invokeShakkouDonperi);
+        if (typeof app.invokeShakkouDonperi === 'function') {
+            if (typeof app.startShakkouCalculation === 'function') {
+                app.startShakkouCalculation(gradeKey);
+            }
             const context = {
                 grade: gradeKey,
                 seriInfos: allSeriInfos,
@@ -1089,19 +1156,19 @@ async function calculatePrediction() {
                 isGirls: settings.IS_GIRLS || false,
                 BANK_DATA: selectedBank
             };
-            return invokeShakkouDonperi(basePlayers, context).then(cosmosResult => {
-                if (typeof completeShakkouCalculation === 'function') {
-                    completeShakkouCalculation(cosmosResult, gradeKey);
+            return app.invokeShakkouDonperi(basePlayers, context).then(cosmosResult => {
+                if (typeof app.completeShakkouCalculation === 'function') {
+                    app.completeShakkouCalculation(cosmosResult, gradeKey);
                 }
-                logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
+                app.logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
             });
         } else {
-            logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
+            app.logMessage('[CALC END] 予想計算が完了し、結果が表示されました。');
         }
 
     } catch (error) {
         console.error("計算実行中にエラー:", error);
-        logMessage(`[ERROR] 計算中断: ${error.message}`);
+        app.logMessage(`[ERROR] 計算中断: ${error.message}`);
     }
 }
 
@@ -1162,10 +1229,11 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
 
     if (lineDisplay) lineDisplay.innerHTML = displayHtml;
 
-　　// 競りサマリー
+    // 競りサマリー
     let seriSummaryHtml = '';
     if (allSeriInfos.length > 0) {
-            seriSummaryHtml += `<div style="padding: 15px; margin-bottom: 15px; border: 4px dashed #f8b500; background: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255, 255, 255, 0.05) 2px, rgba(255, 255, 255, 0.05) 3px), repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.05) 2px, rgba(255, 255, 255, 0.05) 3px), #3a3a3a; border-radius: 6px; color: #ffffff; background-clip: padding-box;"><h4 style="color: #ffffff; margin-top: 0;">⚠️ 競り発生！</h4>`;        allSeriInfos.forEach((info, index) => {
+            seriSummaryHtml += `<div id="seri-summary" style="padding: 15px; margin-bottom: 15px; border: 4px dashed #f8b500; background: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255, 255, 255, 0.05) 2px, rgba(255, 255, 255, 0.05) 3px), repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.05) 2px, rgba(255, 255, 255, 0.05) 3px), #3a3a3a; border-radius: 6px; color: #ffffff; background-clip: padding-box;"><h4 style="color: #ffffff; margin-top: 0;">⚠️ 競り発生！</h4>`;
+        allSeriInfos.forEach((info, index) => {
             const prefix = (index === 0) ? '最初の競りは、' : '<strong>さらに、</strong>';
             seriSummaryHtml += `<p>${prefix}選手<strong>${info.follower}</strong> vs 選手<strong>${info.contender}</strong>。予測勝者は **選手${info.winner}** です。</p>`;
         });
@@ -1205,12 +1273,15 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
 
     const scenarioOutput = document.getElementById('scenario-output');
     if (scenarioOutput) {
-        scenarioOutput.innerHTML = ''; // 毎回クリア
+        const oldSummary = document.getElementById('seri-summary');
+        if (oldSummary) {
+            oldSummary.remove();
+        }
         if (seriSummaryHtml) {
             scenarioOutput.insertAdjacentHTML('afterbegin', seriSummaryHtml);
         }
     }
-　}
+}
 
 // ====================================================================================
 // 買い目生成ユーティリティ
@@ -1259,3 +1330,385 @@ document.querySelectorAll('select').forEach(select => {
         window.scrollBy(0, -1);
     });
 });
+
+// ============================================================
+// 🔐 InputGuard : 入力値の正規化・バリデーション・型変換を担う
+//                 全ての入力値はこのモジュールを経由してロジックへ渡す
+// ============================================================
+const InputGuard = (() => {
+
+    // ──────────────────────────────────────────────────────
+    // § 1. 内部ユーティリティ
+    // ──────────────────────────────────────────────────────
+
+    /** 全角数字 → 半角数字へ変換 */
+    function toHalfWidth(str) {
+        return String(str).replace(/[０-９]/g, ch =>
+            String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)
+        );
+    }
+
+    /** デバッグログへの書き込み（debug-log 要素があれば追記） */
+    function log(msg) {
+        const el = document.getElementById('debug-log');
+        if (el) el.innerHTML += `[InputGuard] ${msg}<br>`;
+        console.log('[InputGuard]', msg);
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 2. レース・環境設定系 バリデーション
+    //       対象: id="race-info" 配下の各要素
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * race-type: 未選択ガード
+     * @returns {string|null} 選択値、または null（ロック対象）
+     */
+    function getRaceType() {
+        const el = document.getElementById('race-type');
+        if (!el || !el.value) {
+            log('ERROR: 級班(race-type)が未選択です。計算をロックします。');
+            return null;
+        }
+        return el.value;
+    }
+
+    /**
+     * bank-name: bankdata.json 取得失敗時のフォールバック（400m）
+     * @returns {string} バンク名
+     */
+    function getBankName() {
+        const el = document.getElementById('bank-name');
+        const val = el ? el.value : '';
+        if (!val || val.trim() === '') {
+            log('WARN: バンク名が空値です。デフォルト値(400)を使用します。');
+            return '400';
+        }
+        return val;
+    }
+
+    /**
+     * wind-direction / wind-speed: 論理矛盾の解消
+     * 「none」選択時は wind-speed を強制的に 0 にして disabled 化する。
+     * @returns {{ direction: string, speed: number }}
+     */
+    function getWindInfo() {
+        const dirEl   = document.getElementById('wind-direction');
+        const speedEl = document.getElementById('wind-speed');
+        const dir     = dirEl   ? dirEl.value   : 'none';
+        let   speed   = speedEl ? Number(speedEl.value) : 0;
+
+        if (dir === 'none' || dir === '無風') {
+            if (speedEl) {
+                speedEl.value    = 0;
+                speedEl.disabled = true;
+            }
+            speed = 0;
+            log(`INFO: 風向=無風 → 風速を強制的に 0 にセット。`);
+        } else {
+            if (speedEl) speedEl.disabled = false;
+            // サイレント・コレクト: 0.0〜20.0 の範囲外を補正
+            if (isNaN(speed) || speed < 0)  { log(`WARN: 風速(${speed})が範囲外 → 0 に補正`); speed = 0; }
+            if (speed > 20)                  { log(`WARN: 風速(${speed})が範囲外 → 20 に補正`); speed = 20; }
+            speed = Math.round(speed * 10) / 10; // 小数1桁に丸め
+        }
+        return { direction: dir, speed };
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 3. 選手データ入力系 バリデーション
+    //       対象: class="player-card" / "player-row" 全7スロット
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * .score (得点): 全角→半角変換、NaN/空は0、範囲 0〜130 にサイレント補正
+     * @param {Element} card - 選手カード要素
+     * @param {number}  idx  - 選手番号（ログ用）
+     * @returns {number}
+     */
+    function getScore(card, idx) {
+        const el  = card.querySelector('.score');
+        if (!el) return 0;
+        let raw   = toHalfWidth(el.value);
+        let val   = parseFloat(raw);
+        if (isNaN(val) || el.value.trim() === '') {
+            log(`WARN: 選手${idx}の得点が非数値 → 0 に補正`);
+            val = 0;
+        }
+        if (val < 0)   { log(`WARN: 選手${idx}の得点(${val})が範囲外 → 0 に補正`);   val = 0; }
+        if (val > 130) { log(`WARN: 選手${idx}の得点(${val})が範囲外 → 130 に補正`); val = 130; }
+        return val;
+    }
+
+    /**
+     * .recent (3走): 数字以外を即座に 9 へ置換し、必ず3桁の文字列に整形
+     * @param {Element} card
+     * @param {number}  idx
+     * @returns {string} 例: "192"
+     */
+    function getRecent(card, idx) {
+        const el  = card.querySelector('.recent');
+        if (!el) return '999';
+        // 全角数字を半角変換してから非数字を 9 に置換
+        let raw   = toHalfWidth(el.value);
+        let clean = raw.replace(/[^0-9]/g, '9');  // 欠・休・英字なども全て 9
+        // 3桁に整形（不足は 9 で補填、超過は先頭3桁のみ）
+        while (clean.length < 3) clean += '9';
+        clean = clean.slice(0, 3);
+        if (clean !== raw.slice(0, 3)) {
+            log(`INFO: 選手${idx}の3走成績を正規化: "${el.value}" → "${clean}"`);
+        }
+        el.value = clean; // UIにも反映
+        return clean;
+    }
+
+    /**
+     * .style (脚質): 未選択時のガード
+     * @param {Element} card
+     * @param {number}  idx
+     * @returns {string} "自" | "追" | "両"
+     */
+    function getStyle(card, idx) {
+        const el  = card.querySelector('.style');
+        const val = el ? el.value : '';
+        if (!val || !['逃', '自', '追', '両'].includes(val)) {
+        log(`WARN: 選手${idx}の脚質が未選択 → "逃" をデフォルト適用`);
+        return '逃';
+        }
+        return val;
+    }
+
+    /**
+     * .wmark (W印): 未選択時は "無" を返して未定義エラーを回避
+     * @param {Element} card
+     * @param {number}  idx
+     * @returns {string}
+     */
+    function getWmark(card, idx) {
+        const el  = card.querySelector('.wmark');
+        const val = el ? el.value : '無';
+        return (val && val.trim() !== '') ? val : '無';
+    }
+
+    /**
+     * ラジオボタン排他制御の整合性確認
+     * S1位・B1位がそれぞれ正しく1名選出されているかを検証する。
+     * @returns {{ s1Id: number, b1Id: number, valid: boolean }}
+     */
+    function validateRadioButtons() {
+        const s1Checked = document.querySelectorAll('input[name="s-leader"]:checked');
+        const b1Checked = document.querySelectorAll('input[name="b-leader"]:checked');
+
+        const s1Id = s1Checked.length === 1 ? Number(s1Checked[0].dataset.id) : -1;
+        const b1Id = b1Checked.length === 1 ? Number(b1Checked[0].dataset.id) : -1;
+
+        let valid = true;
+        if (s1Checked.length !== 1) {
+            log(`WARN: S1位ラジオボタンが ${s1Checked.length} 名選択されています（正: 1名）。`);
+            valid = false;
+        }
+        if (b1Checked.length !== 1) {
+            log(`WARN: B1位ラジオボタンが ${b1Checked.length} 名選択されています（正: 1名）。`);
+            valid = false;
+        }
+        return { s1Id, b1Id, valid };
+    }
+
+    /**
+     * 全7選手のデータを一括バリデーションして配列で返す
+     * @returns {Array<Object>}
+     */
+    function getAllPlayersData() {
+        const cards  = document.querySelectorAll('.player-row');
+        const result = [];
+        cards.forEach((card, i) => {
+            const idx      = i + 1;
+            const isScratch = card.querySelector('.is-scratch')?.checked ?? false;
+            result.push({
+                id       : idx,
+                isScratch,
+                score    : getScore(card, idx),
+                recent   : getRecent(card, idx),
+                style    : getStyle(card, idx),
+                wmark    : getWmark(card, idx),
+                isLocal  : card.querySelector('.is-local')?.checked   ?? false,
+                isGoldCap: card.querySelector('.is-gold-cap')?.checked ?? false,
+            });
+        });
+        return result;
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 4. 展開・スイッチ系 バリデーション
+    //       対象: id="line-input-container" 配下
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * line-input: 許可文字以外を一括削除して純粋な並び文字列に浄化
+     * 許可: 1234567 , ( ) [ ] -
+     * @returns {string}
+     */
+    function getLineInput() {
+        const el  = document.getElementById('line-input');
+        if (!el) return '';
+        // 全角数字を半角変換してから不正文字を除去
+        let raw   = toHalfWidth(el.value);
+        let clean = raw.replace(/[^1-9,\\(\\)\\[\\]\\-]/g, '');
+        if (clean !== raw) {
+            log(`INFO: 並び入力を浄化: "${el.value}" → "${clean}"`);
+            el.value = clean; // UIにも反映
+        }
+        return clean;
+    }
+
+    /**
+     * local-switch: Boolean型として確実に抽出
+     * @returns {boolean}
+     */
+    function getLocalSwitch() {
+        const el = document.getElementById('local-switch');
+        return el ? Boolean(el.checked) : false;
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 5. システム基盤: ReadOnly ロック / アンロック
+    // ──────────────────────────────────────────────────────
+
+    /** 全入力要素を一時的に無効化（計算中のデータ改ざん防止） */
+    function lockAllInputs() {
+        document.querySelectorAll(
+            'input, select, textarea, button'
+        ).forEach(el => {
+            el.dataset.prevDisabled = el.disabled; // 元の状態を保存
+            el.disabled = true;
+        });
+        log('INFO: 計算開始 — 全入力をロックしました。');
+    }
+
+    /** ロックを解除して元の状態へ復元 */
+    function unlockAllInputs() {
+        document.querySelectorAll(
+            'input, select, textarea, button'
+        ).forEach(el => {
+            // 元から disabled だった要素はそのまま維持
+            el.disabled = el.dataset.prevDisabled === 'true';
+        });
+        log('INFO: 計算完了 — 全入力のロックを解除しました。');
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 6. メイン収集関数
+    //       calculatePrediction() から呼び出す統合エントリーポイント
+    //       全値を Number() でサイレント・キャストして返す
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * 全入力値を検証・正規化して構造化オブジェクトとして返す。
+     * バリデーションエラーがあれば { valid: false, errors: [...] } を返す。
+     * @returns {{ valid: boolean, data?: Object, errors?: string[] }}
+     */
+    function collectAndValidate() {
+        const errors = [];
+
+        // 1) 級班チェック
+        const raceType = getRaceType();
+        if (raceType === null) errors.push('級班(race-type)が未選択です。');
+
+        // 2) 風向・風速
+        const wind = getWindInfo();
+
+        // 3) 選手データ
+        const players = getAllPlayersData();
+
+        // 4) ラジオボタン整合性
+        const radio = validateRadioButtons();
+        if (!radio.valid) errors.push('S1位またはB1位のラジオボタンが正しく設定されていません。');
+
+        // 5) 展開入力
+        const lineInput   = getLineInput();
+        const localSwitch = getLocalSwitch();
+
+        if (errors.length > 0) {
+            return { valid: false, errors };
+        }
+
+        return {
+            valid: true,
+            data: {
+                raceType,
+                bankName   : getBankName(),
+                wind,
+                players,
+                radio,
+                lineInput,
+                localSwitch,
+            }
+        };
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 7. 風向セレクト変更時のリアルタイム連動
+    //       ページロード後に wind-direction に監視を設定する
+    // ──────────────────────────────────────────────────────
+    function initWindDirectionWatcher() {
+        const dirEl = document.getElementById('wind-direction');
+        if (!dirEl) return;
+        dirEl.addEventListener('change', () => {
+            getWindInfo(); // バリデーション & disabled 制御を即時実行
+        });
+        // 初期状態の反映
+        getWindInfo();
+    }
+
+    // Public API
+    return {
+        collectAndValidate,
+        lockAllInputs,
+        unlockAllInputs,
+        getWindInfo,
+        getLineInput,
+        getLocalSwitch,
+        getAllPlayersData,
+        initWindDirectionWatcher,
+        log,
+    };
+})();
+
+// DOMContentLoaded 後に風向ウォッチャーを初期化
+document.addEventListener('DOMContentLoaded', () => {
+    InputGuard.initWindDirectionWatcher();
+    InputGuard.log('初期化完了 — 入力層堅牢化モジュール(InputGuard)が起動しました。');
+});
+
+// ============================================================
+// 🔗 calculatePrediction() のラッパー
+//    calculatePredictionをグローバルに公開し、ボタンから呼び出せるようにする。
+//    内部では、App.calculatePrediction（本体ロジック）をバリデーション付きで呼び出す。
+// ============================================================
+function initInputGuardWrapper() {
+    if (window.App && typeof window.App.calculatePrediction === 'function') {
+        const _original = window.App.calculatePrediction;
+        InputGuard.log('INFO: App.calculatePredictionを検出しました。ラッパーを設置します。');
+
+        window.calculatePrediction = function() {
+            const result = InputGuard.collectAndValidate();
+            if (!result.valid) {
+                const msg = '⚠️ 入力エラー:\n' + result.errors.join('\n');
+                alert(msg);
+                InputGuard.log('ERROR: バリデーション失敗 — 計算を中断しました。' + result.errors.join(' / '));
+                return;
+            }
+            InputGuard.lockAllInputs();
+            return _original.call(window.App).finally(() => InputGuard.unlockAllInputs());
+        };
+
+        InputGuard.log('ラッパー設置完了 — グローバルな calculatePrediction から App.calculatePrediction を呼び出します。');
+
+    } else {
+        setTimeout(initInputGuardWrapper, 50);
+    }
+}
+
+initInputGuardWrapper();
+
+})(App);

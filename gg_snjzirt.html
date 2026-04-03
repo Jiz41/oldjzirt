@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>◆号外◆真自在律 成績一覧＆熱度分布図</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Noto+Serif+JP:wght@400;700&display=swap');
+
+  :root {
+    --bg:        #1a1510;
+    --bg2:       #221c15;
+    --paper:     #f2e8d5;
+    --paper2:    #e8dcc4;
+    --ink:       #1a1208;
+    --red:       #c0392b;
+    --red2:      #e74c3c;
+    --gold:      #b8962e;
+    --gold2:     #d4a843;
+    --indigo:    #2c3e6b;
+    --green:     #2d6b3e;
+    --surface:   rgba(242,232,213,0.02);
+    --surface2:  rgba(242,232,213,0.04);
+    --glass:     rgba(26,21,16,0.50);
+    --border:    rgba(184,150,46,0.25);
+    --border2:   rgba(184,150,46,0.5);
+    --text:      #f2e8d5;
+    --text-muted: rgba(242,232,213,0.5);
+    --text-dim:  rgba(242,232,213,0.2);
+    --hit:       #4caf78;
+    --miss:      #e05252;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+  }
+
+  /* ── ノイズ・グラデ背景 ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 15% 10%, rgba(184,150,46,0.07) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 80% at 85% 90%, rgba(192,57,43,0.06) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(44,62,107,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 100% 40% at 50% 0%, rgba(184,150,46,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 100% 40% at 50% 100%, rgba(0,0,0,0.3) 0%, transparent 60%);
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.6;
+  }
+
+  #app { max-width: 900px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 1; }
+
+  /* ── ヘッダー ── */
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    position: relative;
+  }
+  header::before {
+    content: '◆　　　◆　　　◆';
+    display: block;
+    font-size: 8px;
+    color: var(--gold);
+    letter-spacing: 0.8em;
+    margin-bottom: 20px;
+    opacity: 0.6;
+  }
+  header::after {
+    content: '';
+    display: block;
+    height: 2px;
+    margin: 20px auto 0;
+    width: 200px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--red), var(--gold), transparent);
+  }
+  .title-jp {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(22px, 6vw, 36px);
+    font-weight: 700;
+    color: var(--gold2);
+    letter-spacing: 0.5em;
+    line-height: 1;
+    text-shadow: 0 0 40px rgba(184,150,46,0.4), 0 2px 4px rgba(0,0,0,0.8);
+  }
+  .title-sub {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.4em;
+    margin-top: 10px;
+  }
+  .title-stamp {
+    display: inline-block;
+    border: 2px solid var(--red);
+    color: var(--red);
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.6em;
+    padding: 4px 20px;
+    margin-bottom: 16px;
+    text-shadow: 0 0 12px rgba(192,57,43,0.5);
+    box-shadow: 0 0 16px rgba(192,57,43,0.15), inset 0 0 8px rgba(192,57,43,0.05);
+  }
+
+  /* ── ガラスカード共通 ── */
+  .glass {
+    background: var(--glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(184,150,46,0.35);
+    border-radius: 2px;
+    position: relative;
+  }
+  .glass::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 2px;
+    background: linear-gradient(135deg, rgba(242,232,213,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* ── Sheets ゾーン ── */
+  #sheets-zone {
+    padding: 48px 24px;
+    text-align: center;
+    background: var(--glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(184,150,46,0.35);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  #sheets-zone::after {
+    content: '成　績　照　会';
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    font-family: 'Shippori Mincho', serif;
+    font-size: 9px; letter-spacing: 0.5em;
+    color: var(--gold); opacity: 0.5;
+  }
+  #sheets-load-btn {
+    background: linear-gradient(135deg, rgba(184,150,46,0.15), rgba(192,57,43,0.1));
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--gold);
+    color: var(--gold2);
+    padding: 14px 40px;
+    border-radius: 1px;
+    cursor: pointer;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 14px;
+    letter-spacing: 0.4em;
+    transition: all 0.3s;
+    box-shadow: 0 0 20px rgba(184,150,46,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  #sheets-load-btn:hover {
+    background: linear-gradient(135deg, rgba(184,150,46,0.3), rgba(192,57,43,0.2));
+    box-shadow: 0 0 30px rgba(184,150,46,0.25);
+    color: var(--gold2);
+  }
+  #sheets-load-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  #sheets-status { font-size: 11px; margin-top: 16px; display: none; font-family: 'Shippori Mincho', serif; letter-spacing: 0.1em; }
+  #sheets-status.visible { display: block; }
+  #sheets-status.loading { color: var(--gold); animation: pulse 1.5s infinite; }
+  #sheets-status.ok  { color: var(--hit); }
+  #sheets-status.err { color: var(--miss); }
+
+  /* ── file-info ── */
+  #file-info { display: none; background: var(--surface); border: 1px solid var(--border); padding: 14px 20px; margin-top: 12px; align-items: center; gap: 12px; }
+  #file-info.visible { display: flex; }
+  .file-name { color: var(--gold2); flex: 1; font-family: 'Shippori Mincho', serif; letter-spacing: 0.1em; }
+  .file-rows { color: var(--text-muted); font-size: 11px; }
+
+  /* ── 期間フィルタ ── */
+  #period-filter {
+    display: none; background: var(--surface);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    padding: 14px 20px; margin-top: 12px;
+    gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  #period-filter.visible { display: flex; }
+  .period-label { font-family: 'Shippori Mincho', serif; font-size: 12px; color: var(--gold); letter-spacing: 0.2em; }
+  #period-filter input[type="date"] {
+    background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+    color: var(--text); padding: 6px 10px;
+    font-family: 'DM Mono', monospace; font-size: 12px; border-radius: 1px;
+  }
+  #period-filter input[type="date"]:focus { outline: none; border-color: var(--gold); }
+  .period-sep { color: var(--text-muted); }
+  #period-count { font-size: 11px; color: var(--gold2); margin-left: auto; }
+
+  /* ── divider ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border2), transparent);
+    margin: 32px 0;
+    position: relative;
+  }
+  .divider::after {
+    content: '◇';
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--gold); font-size: 8px;
+    background: var(--bg); padding: 0 8px;
+  }
+
+  /* ── section-title ── */
+  .section-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 13px; font-weight: 600;
+    color: var(--gold2); letter-spacing: 0.3em;
+    margin-bottom: 16px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::before { content: '▍'; color: var(--red); font-size: 16px; }
+
+  /* ── アニメ ── */
+  @keyframes pulse  { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+  /* ── Results ── */
+  #results { display: none; margin-top: 32px; }
+  #results.visible { display: block; }
+
+  /* ── stat-card ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 32px; }
+  .stat-card {
+    background: rgba(26,21,16,0.45);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(184,150,46,0.35);
+    padding: 16px; position: relative; 
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow:
+      0 0 20px rgba(184,150,46,0.08),
+      0 2px 0 rgba(242,232,213,0.06) inset,
+      0 -2px 0 rgba(0,0,0,0.4) inset,
+      0 8px 32px rgba(0,0,0,0.15),
+      0 1px 0 rgba(184,150,46,0.1);
+  }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.25), 0 2px 0 rgba(242,232,213,0.08) inset, 0 -2px 0 rgba(0,0,0,0.4) inset; }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gold); opacity: 0.5; }
+  .stat-card::after  { content: ''; position: absolute; top: 0; right: 0; width: 40px; height: 40px; background: radial-gradient(circle at top right, rgba(184,150,46,0.08), transparent); }
+  .stat-card.accent2::before { background: var(--indigo); }
+  .stat-card.hit::before     { background: #7ab8a0; opacity: 1; box-shadow: 0 0 8px rgba(122,184,160,0.4); }
+  .stat-card.miss::before    { background: #c0614a; opacity: 1; box-shadow: 0 0 8px rgba(192,97,74,0.4); }
+  .stat-label { font-family: 'Shippori Mincho', serif; font-size: 10px; color: var(--text-muted); letter-spacing: 0.2em; margin-bottom: 10px; }
+  .stat-value { font-size: 26px; font-weight: 500; color: var(--text); line-height: 1; font-family: 'DM Mono', monospace; }
+  .stat-value.pct::after { content: '%'; font-size: 13px; color: var(--text-muted); margin-left: 2px; }
+  .stat-sub { font-size: 10px; color: var(--text-muted); margin-top: 6px; }
+
+  /* ── table ── */
+  .table-wrap {
+    background: rgba(26,21,16,0.45);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(184,150,46,0.35);
+    overflow-x: auto;
+    margin-bottom: 32px;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: 0 0 20px rgba(184,150,46,0.08), 0 8px 32px rgba(0,0,0,0.15), 0 2px 0 rgba(242,232,213,0.04) inset;
+  }
+  table { width: 100%; border-collapse: collapse; min-width: 480px; }
+  thead th {
+    background: rgba(184,150,46,0.08);
+    padding: 10px 14px; text-align: left;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 10px; color: var(--gold); letter-spacing: 0.2em;
+    border-bottom: 1px solid var(--border2); white-space: nowrap;
+  }
+  tbody td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(184,150,46,0.04); }
+
+  .val-good    { color: var(--hit); }
+  .val-bad     { color: var(--miss); }
+  .val-neutral { color: var(--gold2); }
+  .val-muted   { color: var(--text-muted); }
+
+  /* ── 外れ解剖 ── */
+  .miss-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .miss-card {
+    background: rgba(26,21,16,0.45);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(184,150,46,0.35);
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 2px 0 rgba(242,232,213,0.04) inset;
+  }
+  .miss-card-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 10px; color: var(--gold); letter-spacing: 0.2em;
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .miss-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .miss-row:last-child { border-bottom: none; }
+  .miss-bar-wrap { flex: 1; margin: 0 10px; height: 2px; background: var(--border); }
+  .miss-bar { height: 100%; background: linear-gradient(90deg, var(--red), var(--red2)); transition: width 0.5s ease; }
+  .miss-pct   { color: var(--miss); font-size: 11px; min-width: 36px; text-align: right; }
+  .miss-label { color: var(--text); min-width: 60px; font-family: 'Shippori Mincho', serif; }
+  .miss-count { color: var(--text-muted); font-size: 11px; min-width: 28px; }
+
+  /* ── TAB ── */
+  .face-tabs { display: none; margin-top: 24px; border-bottom: 1px solid var(--border); }
+  .face-tabs.visible { display: flex; }
+  .face-tab {
+    padding: 12px 24px;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 13px; color: var(--text-muted);
+    cursor: pointer; border: none;
+    border-bottom: 2px solid transparent;
+    background: none; letter-spacing: 0.3em; transition: all 0.2s;
+  }
+  .face-tab:hover { color: var(--text); }
+  .face-tab.active { color: var(--gold2); border-bottom-color: var(--gold2); }
+  .face-tab.ura.active { color: var(--miss); border-bottom-color: var(--miss); }
+  .face-panel { display: none; }
+  .face-panel.active { display: block; }
+
+  /* ── EV ── */
+  .ev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .ev-card {
+    background: rgba(26,21,16,0.45);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(184,150,46,0.35);
+    padding: 16px; position: relative; 
+    box-shadow:
+      0 0 20px rgba(184,150,46,0.08),
+      0 2px 0 rgba(242,232,213,0.06) inset,
+      0 -2px 0 rgba(0,0,0,0.4) inset,
+      0 8px 32px rgba(0,0,0,0.15),
+      0 1px 0 rgba(184,150,46,0.1);
+  }
+  .ev-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gold); opacity: 0.4; }
+  .ev-card.pos::before { background: #7ab8a0; opacity: 1; box-shadow: 0 0 8px rgba(122,184,160,0.4); }
+  .ev-card.neg::before { background: #c0614a; opacity: 1; box-shadow: 0 0 8px rgba(192,97,74,0.4); }
+  .ev-label { font-family: 'Shippori Mincho', serif; font-size: 10px; color: var(--text-muted); letter-spacing: 0.2em; margin-bottom: 8px; }
+  .ev-value { font-size: 20px; font-weight: 500; line-height: 1; font-family: 'DM Mono', monospace; }
+  .ev-sub   { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+  /* ── BEST ── */
+  .best-banner {
+    background: rgba(26,21,16,0.45);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(184,150,46,0.35);
+    box-shadow: 0 0 24px rgba(184,150,46,0.1), 0 8px 32px rgba(0,0,0,0.15);
+    padding: 16px 20px; margin-bottom: 24px;
+    display: none; align-items: center; gap: 16px;
+  }
+  .best-banner.visible { display: flex; }
+  .best-icon { font-size: 24px; }
+  .best-main { flex: 1; }
+  .best-title { font-family: 'Shippori Mincho', serif; font-size: 10px; color: var(--gold); letter-spacing: 0.3em; margin-bottom: 4px; }
+  .best-val   { font-size: 20px; color: var(--gold2); font-weight: 500; font-family: 'DM Mono', monospace; }
+  .best-detail{ font-family: 'Shippori Mincho', serif; font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── X POST ── */
+  .x-box {
+    background: rgba(26,21,16,0.45);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(184,150,46,0.35);
+    padding: 20px; margin-bottom: 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 2px 0 rgba(242,232,213,0.04) inset;
+  }
+  .x-post-text { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--text); padding: 12px; font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.8; resize: vertical; min-height: 160px; }
+  .x-post-text:focus { outline: none; border-color: var(--gold); }
+  .x-actions { display: flex; gap: 8px; margin-top: 10px; align-items: center; flex-wrap: wrap; }
+  .x-char { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+  .x-char.over { color: var(--miss); }
+  .btn-x {
+    background: linear-gradient(135deg, rgba(44,62,107,0.3), rgba(44,62,107,0.1));
+    border: 1px solid rgba(100,130,200,0.4); color: #8ab4e8;
+    padding: 7px 16px; cursor: pointer;
+    font-family: 'Shippori Mincho', serif; font-size: 12px; letter-spacing: 0.15em; transition: all 0.2s;
+  }
+  .btn-x:hover { background: rgba(44,62,107,0.5); }
+  .btn-cp {
+    background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+    padding: 7px 16px; cursor: pointer;
+    font-family: 'Shippori Mincho', serif; font-size: 12px; letter-spacing: 0.1em; transition: all 0.2s;
+  }
+  .btn-cp:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── reset / error ── */
+  #reset-btn {
+    display: none; background: transparent; border: 1px solid var(--border);
+    color: var(--text-muted); padding: 8px 20px; cursor: pointer;
+    font-family: 'Shippori Mincho', serif; font-size: 12px; letter-spacing: 0.15em;
+    margin-top: 8px; transition: all 0.2s;
+  }
+  #reset-btn:hover { border-color: var(--red); color: var(--miss); }
+  #reset-btn.visible { display: inline-block; }
+  .error-msg { color: var(--miss); font-size: 11px; margin-top: 8px; display: none; font-family: 'Shippori Mincho', serif; }
+  .error-msg.visible { display: block; }
+
+  /* ── クロス分析 ── */
+  .cross-selectors { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .cross-sel-group { display: flex; align-items: center; gap: 8px; }
+  .cross-sel-label { font-family: 'Shippori Mincho', serif; font-size: 11px; color: var(--gold); letter-spacing: 0.2em; }
+  .cross-sel-sep { font-family: 'Shippori Mincho', serif; font-size: 18px; color: var(--red); opacity: 0.7; }
+  .cross-select {
+    background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+    color: var(--text); padding: 6px 12px;
+    font-family: 'Shippori Mincho', serif; font-size: 12px;
+    letter-spacing: 0.1em; cursor: pointer;
+    backdrop-filter: blur(8px);
+  }
+  .cross-select:focus { outline: none; border-color: var(--gold); }
+  .cross-legend { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); font-family: 'Shippori Mincho', serif; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .legend-note { font-size: 10px; color: var(--text-dim); margin-left: auto; font-family: 'Shippori Mincho', serif; }
+  .cross-table { width: 100%; border-collapse: collapse; min-width: 400px; }
+  .cross-table th {
+    background: rgba(184,150,46,0.08); padding: 8px 12px;
+    font-family: 'Shippori Mincho', serif; font-size: 10px;
+    color: var(--gold); letter-spacing: 0.15em;
+    border-bottom: 1px solid var(--border2); border-right: 1px solid var(--border);
+    white-space: nowrap; text-align: center;
+  }
+  .cross-table th.row-header { text-align: left; min-width: 80px; }
+  .cross-table td {
+    padding: 7px 10px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border);
+    text-align: center; font-size: 11px; font-family: 'DM Mono', monospace;
+    position: relative; transition: background 0.3s;
+  }
+  .cross-table td.row-label {
+    font-family: 'Shippori Mincho', serif; font-size: 11px;
+    color: var(--text-muted); text-align: left; white-space: nowrap;
+    background: rgba(184,150,46,0.04);
+  }
+  .cross-table td.sparse { opacity: 0.3; }
+  .cross-val { font-size: 12px; font-weight: 500; }
+  .cross-count { font-size: 9px; color: var(--text-dim); display: block; margin-top: 2px; }
+
+  /* ── 場別ソート ── */
+  .sortable { cursor: pointer; user-select: none; }
+  .sortable:hover { color: var(--gold2); }
+  .sort-icon { margin-left: 4px; font-size: 8px; opacity: 0.6; }
+  .geo-reset-btn {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-muted); padding: 4px 12px; cursor: pointer;
+    font-family: 'Shippori Mincho', serif; font-size: 11px;
+    letter-spacing: 0.1em; transition: all 0.2s;
+  }
+  .geo-reset-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .venue-header-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .venue-header-row .section-title { margin-bottom: 0; border-bottom: none; padding-bottom: 0; flex: 1; }
+
+  /* ── スマホ対応 ── */
+  @media (max-width: 600px) {
+    #app { padding: 24px 14px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .ev-grid { grid-template-columns: repeat(2, 1fr); }
+    .miss-grid { grid-template-columns: 1fr; }
+    .face-tab { padding: 10px 14px; font-size: 12px; letter-spacing: 0.15em; }
+    .title-jp { letter-spacing: 0.3em; }
+    .x-actions { flex-direction: column; align-items: stretch; }
+    .x-char { margin-left: 0; }
+    .best-banner { flex-direction: column; align-items: flex-start; gap: 8px; }
+  }
+</style>
+
+</head>
+<body>
+<canvas id="particle-canvas" style="position:fixed;inset:0;pointer-events:none;z-index:0;"></canvas>
+<script>
+(function(){
+  const canvas = document.getElementById('particle-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const COLORS = [
+    'rgba(184,150,46,',   // 金
+    'rgba(212,168,67,',   // 明金
+    'rgba(192,57,43,',    // 朱
+    'rgba(242,232,213,',  // 紙白
+  ];
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function Particle() {
+    this.reset = function() {
+      this.x    = rand(0, W);
+      this.y    = rand(0, H);
+      this.vx   = rand(-0.3, 0.3);
+      this.vy   = rand(-0.6, -0.1);
+      this.size = rand(0.8, 2.5);
+      this.life = rand(0.4, 1.0);
+      this.decay= rand(0.0015, 0.004);
+      this.color= COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.twinkle = rand(0, Math.PI * 2);
+    };
+    this.reset();
+    this.y = rand(0, H); // 初期位置をバラけさせる
+  }
+
+  for (let i = 0; i < 120; i++) particles.push(new Particle());
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.twinkle += 0.04;
+      const alpha = p.life * (0.7 + 0.3 * Math.sin(p.twinkle));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + alpha + ')';
+      ctx.shadowBlur  = p.size * 4;
+      ctx.shadowColor = p.color + '0.8)';
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= p.decay;
+
+      if (p.life <= 0 || p.y < -10) p.reset();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+<div id="app">
+
+  <header>
+    <div class="title-stamp">◆ 号 外 ◆</div>
+    <div class="title-jp">真・自在律</div>
+    <div class="title-sub">成績一覧　＆　熱度分布図</div>
+  </header>
+
+  <div id="sheets-zone">
+    <div class="sheets-title">── 成績データ読み込み</div>
+    <input type="hidden" id="sheets-id-input" value="1S9U_AR4dM8tKTUTKx3_wAJBLW5x4zB3h7annjv7z8iw">
+    <input type="hidden" id="sheets-name-input" value="データ入力">
+    <button id="sheets-load-btn" onclick="loadSheet()">⊕ データを読み込む</button>
+    <div id="sheets-status"></div>
+  </div>
+
+  <div id="file-info">
+    <span class="file-name" id="file-name-text">—</span>
+    <span class="file-rows" id="file-rows-text">—</span>
+  </div>
+
+  <div class="error-msg" id="error-msg"></div>
+  <button id="reset-btn" onclick="resetAll()">× リセット</button>
+
+  <!-- 期間フィルタのみ -->
+  <div id="period-filter">
+    <span class="period-label">期間</span>
+    <input type="date" id="f-date-from">
+    <span class="period-sep">〜</span>
+    <input type="date" id="f-date-to">
+    <span id="period-count">— レース</span>
+  </div>
+
+  <!-- TAB -->
+  <div class="face-tabs" id="face-tabs">
+    <button class="face-tab active" onclick="switchFace('omote')">&#34920; &#8212;&#8212; &#21213;&#21106;&#12398;&#35352;&#37682;</button>
+    <button class="face-tab ura" onclick="switchFace('ura')">裏 ── 条件別　強度</button>
+  </div>
+  <!-- omote -->
+  <div id="face-omote" class="face-panel active">
+    <div id="ev-section" style="display:none;margin-top:24px;">
+      <div class="section-title">&#8212;&#8212; &#26399;&#24453;&#20516; &#12480;&#12483;&#12471;&#12517;&#12508;&#12540;&#12489;</div>
+      <div class="ev-grid" id="ev-cards"></div>
+      <div class="best-banner" id="best-banner">
+        <div class="best-icon">&#127942;</div>
+        <div class="best-main">
+          <div class="best-title">&#26368;&#39640;&#37197;&#24403;</div>
+          <div class="best-val" id="best-val">&#8212;</div>
+          <div class="best-detail" id="best-detail">&#8212;</div>
+        </div>
+      </div>
+      <div class="section-title">&#8212;&#8212; X &#25295;&#31295;&#25991; &#29983;&#25104;</div>
+      <div class="x-box">
+        <textarea class="x-post-text" id="x-post-text" readonly></textarea>
+        <div class="x-actions">
+          <button class="btn-x" onclick="openX()">X へ投稿</button>
+          <button class="btn-cp" onclick="copyX()">&#12467;&#12500;&#12540;</button>
+          <span class="x-char" id="x-char">0 / 280</span>
+        </div>
+      </div>
+      <div class="divider"></div>
+    </div>
+  <!-- 成績サマリ -->
+  <div id="results">
+    <div class="section-title">── 総合成績</div>
+    <div class="stats-grid" id="overview-stats"></div>
+    <div class="divider"></div>
+    <div class="section-title">── 令別　精度</div>
+    <div class="stats-grid" id="rei-stats"></div>
+    <div class="divider"></div>
+    <div class="section-title">── 券種別　回収率</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>令</th><th>券種</th><th>点数</th><th>投資額</th><th>払戻合計</th><th>的中率</th><th>回収率</th><th>的中数</th></tr></thead>
+        <tbody id="券種-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-title">── 級班別　成績</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>級班</th><th>R数</th><th>的中率</th><th>回収率</th></tr></thead>
+        <tbody id="kyuhan-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="divider"></div>
+    <div class="venue-header-row">
+      <div class="section-title">── 開催場別　的中率</div>
+      <button class="geo-reset-btn" onclick="resetVenueGeo()">地理順</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th class="sortable" onclick="sortVenue('venue')">開催場 <span class="sort-icon" id="si-venue">▲▼</span></th>
+          <th class="sortable" onclick="sortVenue('total')">レース数 <span class="sort-icon" id="si-total">▲▼</span></th>
+          <th class="sortable" onclick="sortVenue('hits')">的中数 <span class="sort-icon" id="si-hits">▲▼</span></th>
+          <th class="sortable" onclick="sortVenue('hitRate')">的中率 <span class="sort-icon" id="si-hitRate">▲▼</span></th>
+          <th class="sortable" onclick="sortVenue('seiRate')">晴天令 <span class="sort-icon" id="si-seiRate">▲▼</span></th>
+          <th class="sortable" onclick="sortVenue('koRate')">荒天令 <span class="sort-icon" id="si-koRate">▲▼</span></th>
+        </tr></thead>
+        <tbody id="venue-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  </div><!-- /face-omote -->
+  <!-- ura -->
+  <div id="face-ura" class="face-panel">
+    <div id="cross-analysis" style="margin-top:24px;">
+      <div class="section-title">── 条件別　強度マップ</div>
+
+      <!-- 軸セレクタ -->
+      <div class="cross-selectors">
+        <div class="cross-sel-group">
+          <span class="cross-sel-label">行　軸</span>
+          <select id="cross-row-axis" class="cross-select" onchange="renderCross()">
+            <option value="venue">開催場</option>
+            <option value="tenun">天雲指数</option>
+            <option value="rei">令種</option>
+            <option value="kimari">決まり手</option>
+          </select>
+        </div>
+        <div class="cross-sel-sep">×</div>
+        <div class="cross-sel-group">
+          <span class="cross-sel-label">列　軸</span>
+          <select id="cross-col-axis" class="cross-select" onchange="renderCross()">
+            <option value="tenun">天雲指数</option>
+            <option value="venue">開催場</option>
+            <option value="rei">令種</option>
+            <option value="kimari">決まり手</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="cross-legend">
+        <span class="legend-item"><span class="legend-dot" style="background:var(--miss)"></span>低</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--gold)"></span>中</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--hit)"></span>高</span>
+        <span class="legend-note">※ 5件未満は薄表示</span>
+      </div>
+
+      <div class="table-wrap" id="cross-table-wrap">
+        <div id="cross-table-inner"></div>
+      </div>
+    </div>
+  </div><!-- /face-ura -->
+
+</div>
+<script>
+// ── State ────────────────────────────────────────────────────
+let _allRows = [];
+
+// ── Google Sheets API（APIキー方式） ─────────────────────────
+const SHEETS_API_KEY = 'AIzaSyBSjIboD5mR-Zv0GA-xVd6tpjf04lWNepM'; // ← 発行したAPIキーに差し替え
+
+async function loadSheet() {
+  const sid   = document.getElementById('sheets-id-input').value.trim();
+  const sname = document.getElementById('sheets-name-input').value.trim() || 'データ入力';
+  if (!sid) { setStatus('Spreadsheet IDを入力してください', 'err'); return; }
+
+  document.getElementById('sheets-load-btn').disabled = true;
+  setStatus('① APIキー確認中...', 'loading');
+
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${encodeURIComponent(sname)}?key=${SHEETS_API_KEY}`;
+
+  try {
+    setStatus('② シートへ接続中...', 'loading');
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+
+    setStatus('③ データ解析中...', 'loading');
+
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      const code = res.status;
+      const msg  = errJson.error?.message || res.statusText || '不明';
+      throw new Error(`HTTP ${code}: ${msg}`);
+    }
+
+    const json = await res.json();
+    const values = json.values;
+    if (!values || values.length < 2) { setStatus('データが見つかりませんでした（シート名を確認してください）', 'err'); return; }
+
+    const headers = values[0].map(h => String(h).trim());
+    const rows = [];
+    for (let i = 1; i < values.length; i++) {
+      const r = values[i];
+      if (!r || r.every(v => !v)) continue;
+      const obj = {};
+      headers.forEach((h, idx) => { obj[h] = r[idx] !== undefined ? String(r[idx]).trim() : ''; });
+      rows.push(obj);
+    }
+    if (rows.length === 0) { setStatus('有効なデータ行がありませんでした', 'err'); return; }
+
+    _allRows = rows;
+    setStatus('✓ ' + rows.length.toLocaleString() + ' レース読み込み完了', 'ok');
+    document.getElementById('file-info').classList.add('visible');
+    document.getElementById('file-name-text').textContent = sname;
+    document.getElementById('file-rows-text').textContent = rows.length.toLocaleString() + ' レース';
+    document.getElementById('sheets-zone').style.display = 'none';
+    document.getElementById('period-filter').classList.add('visible');
+    document.getElementById('period-count').textContent =
+      rows.length.toLocaleString() + ' / ' + rows.length.toLocaleString() + ' レース';
+    ['f-date-from','f-date-to'].forEach(id => {
+      document.getElementById(id).addEventListener('change', onPeriodChange);
+      document.getElementById(id).addEventListener('input', onPeriodChange);
+    });
+    renderAll(rows);
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      setStatus('タイムアウト: ネットワーク接続を確認してください', 'err');
+    } else {
+      setStatus('エラー: ' + err.message, 'err');
+    }
+  } finally {
+    document.getElementById('sheets-load-btn').disabled = false;
+  }
+}
+
+function setStatus(msg, type) {
+  const el = document.getElementById('sheets-status');
+  el.textContent = msg;
+  el.className = 'visible ' + type;
+}
+
+// ── 列名定数 ─────────────────────────────────────────────────
+const COL = {
+  date: 'レース日', venue: '開催場', tenun: '天雲指数',
+  seiTF: '晴天令 T/F', koTF: '荒天令 T/F', hantei: '総合判定',
+  kimari: '決まり手', odds3tan: '3連単オッズ', odds3fuku: '3連複オッズ', odds2tan: '2車単オッズ',
+  kyuhan: '級別'
+};
+
+function toFloat(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+const get    = (row, key) => (row[key] || '').trim();
+const isHit  = row => { const v = get(row, COL.hantei); return v.includes('的中') && !v.includes('不的中'); };
+const isSeiT = row => get(row, COL.seiTF) === 'T';
+const isKoT  = row => get(row, COL.koTF)  === 'T';
+
+// ── 期間フィルタ ─────────────────────────────────────────────
+function getFilteredRows() {
+  const from = document.getElementById('f-date-from').value;
+  const to   = document.getElementById('f-date-to').value;
+  return _allRows.filter(row => {
+    const d = get(row, COL.date).replace(/\//g, '-');
+    if (from && d < from) return false;
+    if (to   && d > to)   return false;
+    return true;
+  });
+}
+
+function onPeriodChange() {
+  const rows = getFilteredRows();
+  document.getElementById('period-count').textContent =
+    `${rows.length.toLocaleString()} / ${_allRows.length.toLocaleString()} レース`;
+  renderAll(rows);
+}
+
+// ── Analysis ─────────────────────────────────────────────────
+function analyze(rows) {
+  const total = rows.length;
+  const empty = { payout:0, hitCount:0, invest:0, recovery:0, targetRaces: 0 };
+  if (total === 0) return { total:0, hits:0, hitRate:0, seiT:0, seiRate:0, koT:0, koRate:0, totalInvest:0, totalPayout:0, totalRecovery:0, kiken:{s3tan:empty,s3fuku:empty,k3fuku:empty,k2tan:empty}, venues:{}, kyuhan:{} };
+
+  const hits    = rows.filter(isHit).length;
+  const seiTCnt = rows.filter(isSeiT).length;
+  const koTCnt  = rows.filter(isKoT).length;
+  const totalInvest = total * 1000;
+
+  const calcKiken = (rowsToProcess, tfColumn, oddsKey, investPerRace) => {
+    let payout = 0, hitCount = 0;
+    const investRaceCount = rowsToProcess.filter(row => get(row, tfColumn) !== '').length;
+    rowsToProcess.forEach(row => {
+      if (get(row, tfColumn) === 'T') {
+        const o = toFloat(get(row, oddsKey));
+        if (o > 0) {
+          payout += o * 100;
+          hitCount++;
+        }
+      }
+    });
+    const invest = investRaceCount * investPerRace;
+    return { payout, hitCount, invest, recovery: invest > 0 ? payout / invest * 100 : 0, targetRaces: investRaceCount };
+  };
+
+  const s3tan  = calcKiken(rows, COL.seiTF, COL.odds3tan,  400);
+  const s3fuku = calcKiken(rows, COL.seiTF, COL.odds3fuku, 100);
+  const k3fuku = calcKiken(rows, COL.koTF,  COL.odds3fuku, 200);
+  const k2tanRows = rows.filter(row => get(row, COL.date).replace(/\//g, '-') >= '2025-12-24');
+  const k2tan  = calcKiken(k2tanRows, COL.koTF, COL.odds2tan,  300);
+
+  const totalPayout   = s3tan.payout + s3fuku.payout + k3fuku.payout + k2tan.payout;
+  const totalRecovery = totalInvest > 0 ? totalPayout/totalInvest*100 : 0;
+
+  const venueMap = {};
+  const kyuhanMap = {};
+
+  rows.forEach(row => {
+    // Venue Analysis
+    const v = get(row, COL.venue) || '不明';
+    if (!venueMap[v]) venueMap[v] = {total:0, hits:0, seiT:0, koT:0};
+    venueMap[v].total++;
+    if (isHit(row))  venueMap[v].hits++;
+    if (isSeiT(row)) venueMap[v].seiT++;
+    if (isKoT(row))  venueMap[v].koT++;
+
+    // Kyuhan Analysis
+    const kyuhanName = get(row, COL.kyuhan) || '不明';
+    if (!kyuhanMap[kyuhanName]) {
+        kyuhanMap[kyuhanName] = { raceCount: 0, hitCount: 0, invest: 0, payout: 0 };
+    }
+    const stat = kyuhanMap[kyuhanName];
+    stat.raceCount++;
+    if(isHit(row)) {
+        stat.hitCount++;
+    }
+
+    let currentRaceInvest = 0;
+    let currentRacePayout = 0;
+
+    if (get(row, COL.seiTF) !== '') {
+        currentRaceInvest += 500; // 400 (3tan) + 100 (3fuku)
+        if(isSeiT(row)) {
+            currentRacePayout += toFloat(get(row, COL.odds3tan)) * 100;
+            currentRacePayout += toFloat(get(row, COL.odds3fuku)) * 100;
+        }
+    }
+
+    if (get(row, COL.koTF) !== '') {
+        currentRaceInvest += 200; // 3fuku
+        if (get(row, COL.date).replace(/\//g, '-') >= '2025-12-24') {
+            currentRaceInvest += 300; // 2tan
+        }
+        if(isKoT(row)) {
+            currentRacePayout += toFloat(get(row, COL.odds3fuku)) * 100;
+            if (get(row, COL.date).replace(/\//g, '-') >= '2025-12-24') {
+               currentRacePayout += toFloat(get(row, COL.odds2tan)) * 100;
+            }
+        }
+    }
+    stat.invest += currentRaceInvest;
+    stat.payout += currentRacePayout;
+  });
+
+  return { total, hits, hitRate: hits/total*100, seiT:seiTCnt, seiRate:seiTCnt/total*100, koT:koTCnt, koRate:koTCnt/total*100, totalInvest, totalPayout, totalRecovery, kiken:{s3tan,s3fuku,k3fuku,k2tan}, venues:venueMap, kyuhan:kyuhanMap };
+}
+
+// ── Render ───────────────────────────────────────────────────
+function renderAll(rows) {
+  const result = analyze(rows);
+  renderStats(result);
+  renderEV(result, rows);
+  renderXPost(result, rows);
+  window._lastRows = rows;
+  document.getElementById('face-tabs').classList.add('visible');
+  renderCross();
+}
+
+// ── 競輪場地理順（北→南） ─────────────────────────────────────
+const GEO_ORDER = ['函館','青森','いわき平','前橋','取手','松戸','川崎','西武園','京王閣','立川','小田原','伊東','静岡','名古屋','岐阜','大垣','豊橋','富山','松阪','四日市','向日町','和歌山','岸和田','玉野','広島','防府','高松','高知','松山','小倉'];
+
+// ── 場別ソート状態 ─────────────────────────────────────────────
+let _venueData = [];
+let _venueSortCol = null, _venueSortDir = 1;
+
+function renderVenueTable(entries) {
+  const hrs = entries.map(v => v.hits/v.total*100);
+  const srs = entries.map(v => v.seiT/v.total*100);
+  const krs = entries.map(v => v.koT/v.total*100);
+
+  const maxHr = Math.max(...hrs), minHr = Math.min(...hrs);
+  const maxSr = Math.max(...srs), minSr = Math.min(...srs);
+  const maxKr = Math.max(...krs), minKr = Math.min(...krs);
+
+  const glow = (val, max, min) => {
+    if (val === max) return ' style="text-shadow:0 0 8px gold, 0 0 16px gold; color:gold;"';
+    if (val === min) return ' style="text-shadow:0 0 8px #ff4444, 0 0 16px #ff4444; color:#ff4444;"';
+    return '';
+  };
+
+  document.getElementById('venue-tbody').innerHTML = entries.map((v, i) => {
+    const hr = (v.hits/v.total*100).toFixed(1);
+    const sr = (v.seiT/v.total*100).toFixed(1);
+    const kr = (v.koT/v.total*100).toFixed(1);
+    const cls = parseFloat(hr)>=30?'val-good':parseFloat(hr)>=15?'val-neutral':'val-bad';
+    return `<tr>
+      <td>${v.venue}</td>
+      <td class="val-muted">${v.total}</td>
+      <td class="val-muted">${v.hits}</td>
+      <td class="${cls}"${glow(hrs[i], maxHr, minHr)}>${hr}%</td>
+      <td${glow(srs[i], maxSr, minSr)}>${sr}%</td>
+      <td${glow(krs[i], maxKr, minKr)}>${kr}%</td>
+    </tr>`;
+  }).join('');
+}
+
+function sortVenue(col) {
+  if (_venueSortCol === col) {
+    _venueSortDir *= -1;
+  } else {
+    _venueSortCol = col;
+    _venueSortDir = -1;
+  }
+  // アイコンリセット
+  ['venue','total','hits','hitRate','seiRate','koRate'].forEach(c => {
+    const el = document.getElementById('si-' + c);
+    if (el) el.textContent = '▲▼';
+  });
+  const el = document.getElementById('si-' + col);
+  if (el) el.textContent = _venueSortDir === 1 ? '▲' : '▼';
+
+  const sorted = [..._venueData].sort((a, b) => {
+    let av, bv;
+    if (col === 'venue')   { av = a.venue; bv = b.venue; return av.localeCompare(bv, 'ja') * _venueSortDir; }
+    if (col === 'total')   { av = a.total; bv = b.total; }
+    if (col === 'hits')    { av = a.hits;  bv = b.hits; }
+    if (col === 'hitRate') { av = a.hits/a.total; bv = b.hits/b.total; }
+    if (col === 'seiRate') { av = a.seiT/a.total; bv = b.seiT/b.total; }
+    if (col === 'koRate')  { av = a.koT/a.total;  bv = b.koT/a.total; }
+    return (av - bv) * _venueSortDir;
+  });
+  renderVenueTable(sorted);
+}
+
+function resetVenueGeo() {
+  _venueSortCol = null;
+  ['venue','total','hits','hitRate','seiRate','koRate'].forEach(c => {
+    const el = document.getElementById('si-' + c);
+    if (el) el.textContent = '▲▼';
+  });
+  const geoSorted = [..._venueData].sort((a, b) => {
+    const ai = GEO_ORDER.indexOf(a.venue), bi = GEO_ORDER.indexOf(b.venue);
+    const an = ai === -1 ? 999 : ai, bn = bi === -1 ? 999 : bi;
+    return an - bn;
+  });
+  renderVenueTable(geoSorted);
+}
+
+function renderStats(result) {
+  const { total, hits, hitRate, seiT, seiRate, koT, koRate, totalInvest, totalPayout, totalRecovery, kiken, venues, kyuhan } = result;
+
+  document.getElementById('overview-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">対象レース数</div><div class="stat-value">${total.toLocaleString()}</div><div class="stat-sub">レース</div></div>
+    <div class="stat-card hit"><div class="stat-label">的中数</div><div class="stat-value">${hits}</div><div class="stat-sub">/ ${total} レース</div></div>
+    <div class="stat-card hit"><div class="stat-label">的中率</div><div class="stat-value pct">${hitRate.toFixed(1)}</div><div class="stat-sub">総合判定</div></div>
+    <div class="stat-card ${totalRecovery>=100?'hit':'miss'}"><div class="stat-label">総合回収率</div><div class="stat-value pct">${totalRecovery.toFixed(1)}</div><div class="stat-sub">${totalPayout.toLocaleString()}円 / ${totalInvest.toLocaleString()}円</div></div>`;
+
+  document.getElementById('rei-stats').innerHTML = `
+    <div class="stat-card accent2"><div class="stat-label">晴天令　的中数</div><div class="stat-value">${seiT}</div><div class="stat-sub">/ ${total} レース</div></div>
+    <div class="stat-card accent2"><div class="stat-label">晴天令　精度</div><div class="stat-value pct">${seiRate.toFixed(1)}</div><div class="stat-sub">晴天令 T/F</div></div>
+    <div class="stat-card"><div class="stat-label">荒天令　的中数</div><div class="stat-value">${koT}</div><div class="stat-sub">/ ${total} レース</div></div>
+    <div class="stat-card"><div class="stat-label">荒天令　精度</div><div class="stat-value pct">${koRate.toFixed(1)}</div><div class="stat-sub">荒天令 T/F</div></div>`;
+
+  const kikenRows = [
+    {rei:'晴天令',type:'3連単',pts:4,data:kiken.s3tan},
+    {rei:'晴天令',type:'3連複',pts:1,data:kiken.s3fuku},
+    {rei:'荒天令',type:'3連複',pts:2,data:kiken.k3fuku},
+    {rei:'荒天令',type:'2連単',pts:3,data:kiken.k2tan},
+  ];
+  document.getElementById('券種-tbody').innerHTML = kikenRows.map(({rei,type,pts,data}) => {
+    const hitRateVal = data.targetRaces > 0 ? (data.hitCount / data.targetRaces * 100) : 0;
+    const hitRateCls = hitRateVal >= 30 ? 'val-good' : hitRateVal >= 15 ? 'val-neutral' : 'val-bad';
+    const recoveryCls = data.recovery>=100?'val-good':data.recovery>=70?'val-neutral':'val-bad';
+    return `<tr>
+      <td>${rei}</td>
+      <td>${type}</td>
+      <td class="val-muted">${pts}点</td>
+      <td class="val-muted">${data.invest.toLocaleString()}円</td>
+      <td>${data.payout.toLocaleString()}円</td>
+      <td class="${hitRateCls}">${hitRateVal.toFixed(1)}%</td>
+      <td class="${recoveryCls}">${data.recovery.toFixed(1)}%</td>
+      <td class="val-muted">${data.hitCount}回</td>
+    </tr>`;
+  }).join('');
+
+  const kyuhanSheetKeys = ['S級', 'A級', 'Aチャレ', 'ガールズ'];
+  const kyuhanDisplayMap = {
+      'S級': 'S級',
+      'A級': 'A級',
+      'Aチャレ': 'A級チャレ',
+      'ガールズ': 'ガールズ'
+  };
+  let kyuhanHtml = '';
+  kyuhanSheetKeys.forEach(kyuhanKey => {
+      const data = kyuhan[kyuhanKey];
+      if (!data || data.raceCount === 0) return;
+      const displayName = kyuhanDisplayMap[kyuhanKey];
+      const hitRateVal = data.raceCount > 0 ? (data.hitCount / data.raceCount * 100) : 0;
+      const recoveryRateVal = data.invest > 0 ? (data.payout / data.invest * 100) : 0;
+      const hitRateCls = hitRateVal >= 30 ? 'val-good' : hitRateVal >= 15 ? 'val-neutral' : 'val-bad';
+      const recoveryCls = recoveryRateVal >= 100 ? 'val-good' : recoveryRateVal >= 70 ? 'val-neutral' : 'val-bad';
+      kyuhanHtml += `<tr>
+          <td>${displayName}</td>
+          <td class="val-muted">${data.raceCount}</td>
+          <td class="${hitRateCls}">${hitRateVal.toFixed(1)}%</td>
+          <td class="${recoveryCls}">${recoveryRateVal.toFixed(1)}%</td>
+      </tr>`;
+  });
+  document.getElementById('kyuhan-tbody').innerHTML = kyuhanHtml;
+
+  _venueData = Object.entries(venues).map(([venue, v]) => ({ venue, ...v }));
+  const initSorted = [..._venueData].sort((a, b) => b.total - a.total);
+  renderVenueTable(initSorted);
+
+  document.getElementById('results').classList.add('visible');
+  document.getElementById('reset-btn').classList.add('visible');
+}
+
+// ── クロス分析 ───────────────────────────────────────────────
+const AXIS_DEF = {
+  venue:  { label: '開催場',   get: r => get(r, COL.venue) || '不明' },
+  tenun:  { label: '天雲指数', get: r => {
+    const v = parseInt(get(r, COL.tenun));
+    if (isNaN(v)) return '不明';
+    if (v === 0)  return '指数 0';
+    if (v <= 33)  return '指数 33';
+    if (v <= 67)  return '指数 67';
+    return '指数 100';
+  }},
+rei:    { label: '令種', get: r => {
+    const s = get(r, COL.seiTF), k = get(r, COL.koTF);
+    const st = s === 'TRUE' || s === 'T' || s === '1';
+    const kt = k === 'TRUE' || k === 'T' || k === '1';
+    if (st && kt) return '両令的中';
+    if (st)       return '晴天令的中';
+    if (kt)       return '荒天令的中';
+    return '外れ';
+  }},
+  kimari: { label: '決まり手', get: r => get(r, COL.kimariActual) || get(r, COL.kimari) || '不明' },
+};
+
+function hitRate(n, d) { return d > 0 ? n / d * 100 : null; }
+
+function heatColor(pct) {
+  if (pct === null) return 'rgba(255,255,255,0.03)';
+  // 0%→朱, 50%→金, 100%→緑
+  if (pct < 50) {
+    const t = pct / 50;
+    const r = Math.round(192 + (184 - 192) * t);
+    const g = Math.round(57  + (150 - 57)  * t);
+    const b = Math.round(43  + (46  - 43)  * t);
+    return `rgba(${r},${g},${b},0.35)`;
+  } else {
+    const t = (pct - 50) / 50;
+    const r = Math.round(184 + (45  - 184) * t);
+    const g = Math.round(150 + (175 - 150) * t);
+    const b = Math.round(46  + (100 - 46)  * t);
+    return `rgba(${r},${g},${b},0.35)`;
+  }
+}
+
+function renderCross() {
+  const rows = window._lastRows;
+  if (!rows || rows.length === 0) return;
+
+  const rowKey = document.getElementById('cross-row-axis').value;
+  const colKey = document.getElementById('cross-col-axis').value;
+  if (rowKey === colKey) return;
+
+  const rowDef = AXIS_DEF[rowKey];
+  const colDef = AXIS_DEF[colKey];
+
+  // 集計
+  const map = {};
+  const rowVals = new Set(), colVals = new Set();
+
+  rows.forEach(r => {
+    const rv = rowDef.get(r);
+    const cv = colDef.get(r);
+    rowVals.add(rv); colVals.add(cv);
+    if (!map[rv]) map[rv] = {};
+    if (!map[rv][cv]) map[rv][cv] = { total: 0, hits: 0 };
+    map[rv][cv].total++;
+    if (isHit(r)) map[rv][cv].hits++;
+  });
+
+  // 令種が絡む場合は令種と直交する軸ごとの的中合計を分母にする
+  const useRowHits = (rowKey === 'rei' || colKey === 'rei');
+  const rowHitTotals = {};
+  const rowTotals = {};
+  if (useRowHits) {
+    if (colKey === 'rei') {
+      // 令種が列 → 行ごとに集計
+      Object.keys(map).forEach(rv => {
+        rowTotals[rv]    = Object.values(map[rv]).reduce((s, c) => s + c.total, 0);
+        rowHitTotals[rv] = Object.values(map[rv]).reduce((s, c) => s + c.hits,  0);
+      });
+    } else {
+      // 令種が行 → 列ごとに集計
+      const colTotals = {}, colHitTotals = {};
+      Object.keys(map).forEach(rv => {
+        Object.keys(map[rv]).forEach(cv => {
+          colTotals[cv]    = (colTotals[cv]    || 0) + map[rv][cv].total;
+          colHitTotals[cv] = (colHitTotals[cv] || 0) + map[rv][cv].hits;
+        });
+      });
+      // rowHitTotals/rowTotalsをcv基準に読み替え
+      Object.assign(rowHitTotals, colHitTotals);
+      Object.assign(rowTotals,    colTotals);
+    }
+  }
+
+  // 行列ソート
+  const sortVals = (vals, key) => {
+    const arr = [...vals];
+    if (key === 'venue') {
+      return arr.sort((a, b) => {
+        const ai = GEO_ORDER.indexOf(a), bi = GEO_ORDER.indexOf(b);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+    }
+    if (key === 'tenun') {
+      const order = ['指数 0','指数 33','指数 67','指数 100','不明'];
+      return arr.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    }
+    return arr.sort((a, b) => a.localeCompare(b, 'ja'));
+  };
+
+  const sortedRows = sortVals(rowVals, rowKey);
+  const sortedCols = sortVals(colVals, colKey);
+
+  // HTML生成
+  let html = '<table class="cross-table"><thead><tr>';
+  html += `<th class="row-header">${rowDef.label} \\ ${colDef.label}</th>`;
+  sortedCols.forEach(cv => { html += `<th>${cv}</th>`; });
+  html += '</tr></thead><tbody>';
+
+sortedRows.forEach(rv => {
+    html += `<tr><td class="row-label">${rv}</td>`;
+    sortedCols.forEach(cv => {
+      const cell = map[rv] && map[rv][cv];
+      const sparse = !cell || cell.total < 5;
+      if (!cell) {
+        html += `<td class="sparse">—</td>`;
+      } else if (useRowHits) {
+        const denomKey = colKey === 'rei' ? rv : cv;
+        const pct = hitRate(cell.hits, rowHitTotals[denomKey]);
+        const bg  = heatColor(pct);
+        const cls = sparse ? ' sparse' : '';
+        const pctStr = pct !== null ? pct.toFixed(1) + '%' : '—';
+        html += `<td class="${cls}" style="background:${bg}">` +
+          `<span class="cross-val">${pctStr}</span>` +
+          `<span class="cross-count">${cell.hits}/${rowTotals[denomKey]}</span></td>`;
+      } else {
+        const pct = hitRate(cell.hits, cell.total);
+        const bg  = heatColor(pct);
+        const cls = sparse ? ' sparse' : '';
+        html += `<td class="${cls}" style="background:${bg}">` +
+          `<span class="cross-val">${pct !== null ? pct.toFixed(1) + '%' : '—'}</span>` +
+          `<span class="cross-count">${cell.hits}/${cell.total}</span></td>`;
+      }
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('cross-table-inner').innerHTML = html;
+}
+
+// ── File Handling ────────────────────────────────────────────
+
+function resetAll() {
+  _allRows = [];
+  _venueData = [];
+  window._lastRows = null;
+  document.getElementById('sheets-zone').style.display = '';
+  document.getElementById('sheets-status').className = '';
+  document.getElementById('sheets-status').textContent = '';
+  document.getElementById('file-info').classList.remove('visible');
+  document.getElementById('period-filter').classList.remove('visible');
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('reset-btn').classList.remove('visible');
+  document.getElementById('error-msg').classList.remove('visible');
+  document.getElementById('f-date-from').value = '';
+  document.getElementById('f-date-to').value = '';
+  document.getElementById('face-tabs').classList.remove('visible');
+  document.getElementById('ev-section').style.display = 'none';
+  document.getElementById('best-banner').classList.remove('visible');
+  document.getElementById('x-post-text').value = '';
+  document.getElementById('cross-table-inner').innerHTML = '';
+  switchFace('omote');
+}
+
+// ── TAB ────────────────────────────────────────────────────
+function switchFace(face) {
+  document.getElementById('face-omote').classList.toggle('active', face === 'omote');
+  document.getElementById('face-ura').classList.toggle('active', face === 'ura');
+  var tabs = document.querySelectorAll('.face-tab');
+  tabs[0].classList.toggle('active', face === 'omote');
+  tabs[1].classList.toggle('active', face === 'ura');
+}
+
+// ── EV DASHBOARD ───────────────────────────────────────────
+function renderEV(result, rows) {
+  var total = result.total, hits = result.hits, hitRate = result.hitRate;
+  var totalInvest = result.totalInvest, totalPayout = result.totalPayout;
+  var kiken = result.kiken;
+  var ev = totalPayout - totalInvest;
+  var evPerRace = total > 0 ? Math.round(ev / total) : 0;
+  var seiPayout = kiken.s3tan.payout + kiken.s3fuku.payout;
+  var koPayout  = kiken.k3fuku.payout + kiken.k2tan.payout;
+  var seiInvest = total * 500, koInvest = total * 500;
+  var seiEV = seiPayout - seiInvest, koEV = koPayout - koInvest;
+
+  // TT/TF/FT/FF
+  var pat = {TT:0, TF:0, FT:0, FF:0};
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var s = isSeiT(r), k = isKoT(r);
+    if (s && k) pat.TT++; else if (s) pat.TF++; else if (k) pat.FT++; else pat.FF++;
+  }
+
+  function evCard(cls, label, val, sub) {
+    return '<div class="ev-card ' + cls + '">' +
+      '<div class="ev-label">' + label + '</div>' +
+      '<div class="ev-value" style="color:' + (cls==='pos'?'var(--hit)':cls==='neg'?'var(--miss)':'var(--text)') + '">' + val + '</div>' +
+      '<div class="ev-sub">' + sub + '</div></div>';
+  }
+
+  var sign = ev >= 0 ? '+' : '';
+  var sSign = seiEV >= 0 ? '+' : '';
+  var kSign = koEV >= 0 ? '+' : '';
+  var ffPct = total > 0 ? (pat.FF / total * 100).toFixed(1) : '0.0';
+  var sRec = seiInvest > 0 ? (seiPayout / seiInvest * 100).toFixed(1) : '0.0';
+  var kRec = koInvest  > 0 ? (koPayout  / koInvest  * 100).toFixed(1) : '0.0';
+
+  document.getElementById('ev-cards').innerHTML =
+    evCard(ev>=0?'pos':'neg', '純損益', sign + ev.toLocaleString() + '円', '1レース平均 ' + (evPerRace>=0?'+':'') + evPerRace.toLocaleString() + '円') +
+    evCard(seiEV>=0?'pos':'neg', '晴天令　回収', sSign + seiEV.toLocaleString() + '円', '回収率 ' + sRec + '%') +
+    evCard(koEV>=0?'pos':'neg', '荒天令　回収', kSign + koEV.toLocaleString() + '円', '回収率 ' + kRec + '%') +
+    evCard('', '令種内訳',
+    '<span style="font-size:13px;line-height:1.8">' +
+    '両令的中：' + pat.TT + '<br>' +
+    '晴天令的中：' + pat.TF + '<br>' +
+    '荒天令的中：' + pat.FT + '<br>' +
+    '外れ：' + pat.FF +
+    '</span>', '');
+  // BEST HIT
+  var bestRow = null, bestOdds = 0;
+  for (var j = 0; j < rows.length; j++) {
+    var rr = rows[j];
+    if (!isSeiT(rr) && !isKoT(rr)) continue;
+    var o = Math.max(toFloat(get(rr, COL.odds3tan)), toFloat(get(rr, COL.odds3fuku)), toFloat(get(rr, COL.odds2tan)));
+    if (o > bestOdds) { bestOdds = o; bestRow = rr; }
+  }
+  if (bestRow) {
+    document.getElementById('best-banner').classList.add('visible');
+    var payout = Math.round(bestOdds * 100);
+    document.getElementById('best-val').textContent = bestOdds.toFixed(1) + ' 倍 / ' + payout.toLocaleString() + ' 円';
+    document.getElementById('best-detail').textContent = get(bestRow, COL.date) + ' ' + get(bestRow, COL.venue);
+  }
+
+  document.getElementById('ev-section').style.display = 'block';
+}
+
+// ── X POST ──────────────────────────────────────────────────
+function renderXPost(result, rows) {
+  var total = result.total, hits = result.hits;
+  var hitRate = result.hitRate, totalRecovery = result.totalRecovery;
+  var ev = result.totalPayout - result.totalInvest;
+  var from = document.getElementById('f-date-from').value;
+  var to   = document.getElementById('f-date-to').value;
+  var period = (from || to) ? (from || '') + '〜' + (to || '') : '全期間';
+  var sign = ev >= 0 ? '+' : '-';
+  var bestOdds = 0, bestDate = '', bestVenue = '';
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    if (!isSeiT(r) && !isKoT(r)) continue;
+    var o = Math.max(toFloat(get(r, COL.odds3tan)), toFloat(get(r, COL.odds3fuku)), toFloat(get(r, COL.odds2tan)));
+    if (o > bestOdds) { bestOdds = o; bestDate = get(r, COL.date); bestVenue = get(r, COL.venue); }
+  }
+  var lines = [
+    '【自在律 ' + period + ' 成績】',
+    '',
+    total + ' レース',
+    '的中率 ' + hitRate.toFixed(1) + '% (' + hits + '/' + total + ')',
+    '回収率 ' + totalRecovery.toFixed(1) + '%',
+    '損益 ' + sign + Math.abs(ev).toLocaleString() + '円'
+  ];
+  if (bestOdds > 0) {
+    lines.push('');
+    lines.push('【最高配当】');
+    lines.push(bestDate + ' ' + bestVenue);
+    lines.push(bestOdds.toFixed(1) + ' 倍 / ' + Math.round(bestOdds*100).toLocaleString() + ' 円');
+  }
+  lines.push('');
+  lines.push('#競輪 #自在律');
+  var post = lines.join('\n');
+  var ta = document.getElementById('x-post-text');
+  var cc = document.getElementById('x-char');
+  ta.value = post;
+  cc.textContent = post.length + ' / 280';
+  cc.classList.toggle('over', post.length > 280);
+}
+
+function openX() {
+  var t = document.getElementById('x-post-text').value;
+  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(t), '_blank');
+}
+function copyX() {
+  var t = document.getElementById('x-post-text').value;
+  navigator.clipboard.writeText(t).then(function() {
+    var b = document.querySelector('.btn-cp');
+    b.textContent = 'COPIED';
+    setTimeout(function(){ b.textContent = 'COPY'; }, 1500);
+  });
+}
+
+</script>
+</body>
+</html>

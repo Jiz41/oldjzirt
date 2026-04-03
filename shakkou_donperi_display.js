@@ -1,3 +1,4 @@
+(function(app) {
 // ============================================================================
 // 儀術『赤口呑縁（しゃっこうどんぺり）』表示制御システム
 // ============================================================================
@@ -16,15 +17,7 @@ function showShakkouProgress(grade) {
     const scenarioOutput = document.getElementById('scenario-output');
     
     if (scenarioOutput) {
-        // 1. 既存の内容（Logicの結果）を消去しない
-        // scenarioOutput.innerHTML = ''; 👈 執事の命により封印
-
-        // 2. 進捗バー用のHTMLを生成
-        const progressHTML = generateCalculationStartMessage(grade);
-        
-        // 3. 🔍 重要：innerHTMLではなく「insertAdjacentHTML」で末尾に追記
-        // これにより、Logicの結果の下に赤口のバーが現れます
-        scenarioOutput.insertAdjacentHTML('beforeend', progressHTML);
+        // 進捗表示はスキップ
     }
 }
 
@@ -54,10 +47,13 @@ function updateShakkouProgress(current, total) {
  * @param {string} grade - 階級
  */
 function displayShakkouResults(cosmosResult, grade) {
-    const kiyoneMessage = generateKiyoneMessage(cosmosResult, grade);
+    const kiyoneMessage = app.generateKiyoneMessage(cosmosResult, grade);
     const scenarioOutput = document.getElementById('scenario-output');
     
     if (scenarioOutput) {
+        const existing = scenarioOutput.querySelector('.shakkou-results-container');
+        if (existing) existing.remove();
+        
         const resultHTML = `
 <div class="shakkou-results-container">
     <div class="shakkou-header">
@@ -243,7 +239,6 @@ function injectShakkouStyles() {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
     flex-wrap: wrap;
     gap: 10px;
 }
@@ -418,15 +413,20 @@ function injectShakkouStyles() {
 // 🔗 既存コードとの統合用関数
 // ----------------------------------------------------------------------------
 
-function startShakkouCalculation(grade) {
+app.startShakkouCalculation = function(grade) {
     showShakkouProgress(grade);
 }
 
-function completeShakkouCalculation(cosmosResult, grade) {
-    displayShakkouResults(cosmosResult, grade);
+app.completeShakkouCalculation = function(cosmosResult, grade) {
+    try {
+        displayShakkouResults(cosmosResult, grade);
+    } catch(e) {
+        app.logMessage('[ERROR] displayShakkouResults: ' + e.message);
+    }
 }
 
 // 🚀 初期化
 if (typeof document !== 'undefined') {
     console.log('[赤口呑縁] 表示システム初期化完了');
 }
+})(App);

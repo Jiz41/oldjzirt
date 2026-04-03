@@ -1,3 +1,7 @@
+(function(app) {
+  if (app && typeof app.logMessage === 'function') {
+    app.logMessage('[DEBUG] shakkou_donperi_core.js 開始');
+  }
 // ============================================================================
 // 儀術『赤口呑縁（しゃっこうどんぺり）』コア実装
 // ============================================================================
@@ -5,9 +9,27 @@
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// 🔧 parseLines：カオス事象用ライン解析ラッパー
+// ----------------------------------------------------------------------------
+function parseLines(lineInput) {
+    if (!lineInput) return [];
+    const processedInput = lineInput.replace(/\s/g, '');
+    const segments = processedInput.split(',');
+    return segments.map(seg => {
+        // 競り記法 1(2) → 両選手をライン員として扱う
+        const clean = seg.replace(/\((\d)\)/g, '$1');
+        return clean.split('').map(Number).filter(id => id > 0);
+    }).filter(line => line.length > 0);
+}
+
+// ----------------------------------------------------------------------------
 // 🌌 世界線定義テーブル
 // ----------------------------------------------------------------------------
 
+// weight値：各世界線の出現頻度（各grade合計 = TOTAL_ITERATIONSの1465に統一）
+// S級：W0(879/1465≒60%) が支配的 ── 実力通りに決まりやすい
+// チャレンジ：W0=W1=366 ── 純正と崩壊が同率の混沌設計
+// weight = その世界線が選ばれる世界線数として直読できる
 const SHAKKOU_WORLD_TABLE = {
     's-kyu': [
         { id: 'W0', name: '物理純正世界', weight: 879, events: [] },
@@ -33,7 +55,7 @@ const SHAKKOU_WORLD_TABLE = {
     ],
     
     'a-chal': [
-        { id: 'W0', name: '物理純正世界', weight: 366, events: [] },
+        { id: 'W0', name: '物理純正世界', weight: 249, events: [] },
         { id: 'W1', name: 'ライン完全崩壊', weight: 366, events: ['line_breakdown_severe'] },
         { id: 'W2', name: '無謀な早仕掛け', weight: 220, events: ['reckless_attack'] },
         { id: 'W3', name: 'ルーキー暴走', weight: 147, events: ['rookie_rampage'] },
@@ -42,7 +64,8 @@ const SHAKKOU_WORLD_TABLE = {
         { id: 'W6', name: '複合カオスA', weight: 59, events: ['line_breakdown', 'early_attack'] },
         { id: 'W7', name: '複合カオスB', weight: 44, events: ['rookie_rampage', 'crash'] },
         { id: 'W8', name: '落車世界', weight: 29, events: ['crash'] },
-        { id: 'W9', name: '完全崩壊世界', weight: 14, events: ['line_breakdown_severe', 'crash', 'dark_horse'] }
+        { id: 'W9', name: '完全崩壊世界', weight: 14, events: ['line_breakdown_severe', 'crash', 'dark_horse'] },
+        { id: 'W10', name: '逃げ切り成功', weight: 117, events: ['escape_success'] }
     ],
     
     'girls': [
@@ -154,6 +177,11 @@ function applyChaos(players, events, context) {
                 applyMakuriSuicide(players, context);
                 occurredEvents.push('捲り自滅');
                 break;
+            
+            case 'escape_success':
+                applyEscapeSuccess(players);
+                occurredEvents.push('逃げ切り成功');
+                break;
         }
     });
     
@@ -236,7 +264,7 @@ function applyLineBreakdownSevere(players, context) {
 }
 
 function applyEarlyAttack(players, context, successRate) {
-    const selfStarterIds = players.filter(p => p.style === '自' || p.style === '両').map(p => p.id);
+    const selfStarterIds = players.filter(p => p.style === '逃' || p.style === '自' || p.style === '両').map(p => p.id);
     
     if (selfStarterIds.length === 0) return;
     
@@ -283,14 +311,28 @@ function applyRecklessAttack(players, context) {
 }
 
 function applyWindGust(players, context) {
-    players.forEach(p => {
-        const rand = Math.random();
-        if (rand < 0.33) {
-            p.final_score *= 1.15;
-        } else if (rand < 0.66) {
-            p.final_score *= 0.90;
-        }
-    });
+    const rand = Math.random(); // 突風の方向を1回だけ決定
+    
+    if (rand < 0.33) {
+        // 追い風：先行・自走型に有利
+        players.forEach(p => {
+            if (p.style === '逃' || p.style === '自' || p.style === '両') {
+                p.final_score *= 1.15;
+            } else {
+                p.final_score *= 0.95;
+            }
+        });
+    } else if (rand < 0.66) {
+        // 向かい風：差し・追い込みに有利
+        players.forEach(p => {
+            if (p.style === '追' || p.style === '両') {
+                p.final_score *= 1.15;
+            } else {
+                p.final_score *= 0.90;
+            }
+        });
+    }
+    // 0.66以上：横風（影響なし）
 }
 
 function applySeriUpset(players, context) {
@@ -319,7 +361,7 @@ function applyDarkHorse(players, context) {
 }
 
 function applyRookieRampage(players, context) {
-    const rookies = players.filter(p => p.style === '自' || p.style === '両');
+    const rookies = players.filter(p => p.score < 90);
     
     if (rookies.length === 0) return;
     
@@ -347,6 +389,23 @@ function applyMakuriSuicide(players, context) {
     });
 }
 
+function applyEscapeSuccess(players) {
+    const escapers = players.filter(p => p.style === '逃');
+    if (escapers.length === 0) return;
+    
+    const escaperId = escapers[
+        Math.floor(Math.random() * escapers.length)
+    ].id;
+    
+    players.forEach(p => {
+        if (p.id === escaperId) {
+            p.final_score *= 1.50;
+        } else {
+            p.final_score *= 0.85;
+        }
+    });
+}
+
 // ----------------------------------------------------------------------------
 // 🔧 ユーティリティ関数
 // ----------------------------------------------------------------------------
@@ -364,12 +423,15 @@ function parseLines(lineInput) {
 // ----------------------------------------------------------------------------
 
 async function invokeShakkouDonperi(basePlayers, context) {
+    // 1465：ドクター・ストレンジが観測した並行世界数へのオマージュ
+    // （Marvel『インフィニティ・ウォー』：1400万605の未来から勝利への道を探す）
+    // 競輪における「唯一の正解」を探す儀術として設定
     const TOTAL_ITERATIONS = 1465;
+    // 50件ずつ非同期分割処理：UI応答性を確保するためのバッチサイズ
+    // await setTimeout(0) と組み合わせてメインスレッドのブロックを防止
     const BATCH_SIZE = 50;
 
-    if (typeof logMessage === 'function') {
-        logMessage(`[赤口] 世界蛇回路:嚥下開始 (${TOTAL_ITERATIONS}世界線)`);
-    }
+    app.logMessage(`[赤口] 世界蛇回路:嚥下開始 (${TOTAL_ITERATIONS}世界線)`);
 
     const allResults = [];
 
@@ -386,8 +448,17 @@ async function invokeShakkouDonperi(basePlayers, context) {
 
             const occurredEvents = applyChaos(players, world.events, context);
 
+            const flutterMap = {
+                's-kyu':  { min: 0.90, range: 0.20 },
+                'a-kyu':  { min: 0.85, range: 0.30 },
+                'girls':  { min: 0.85, range: 0.30 },
+                'a-chal': { min: 0.80, range: 0.40 },
+            };
+            const flutter = flutterMap[context.grade] 
+                || { min: 0.90, range: 0.20 };
+
             players.forEach(p => {
-                p.final_score *= (0.95 + Math.random() * 0.10);
+                p.final_score *= (flutter.min + Math.random() * flutter.range);
             });
 
             players.sort((a, b) => b.final_score - a.final_score);
@@ -404,18 +475,14 @@ async function invokeShakkouDonperi(basePlayers, context) {
         }
 
         // 500刻みで進捗ログ
-        if (typeof logMessage === 'function' && (end === 500 || end === 1000)) {
-            logMessage(`[赤口] 世界蛇回路:嚥下中... ${end} / ${TOTAL_ITERATIONS}`);
-        }
+        app.logMessage(`[赤口] 世界蛇回路:嚥下中... ${end} / ${TOTAL_ITERATIONS}`);
 
         await new Promise(resolve => setTimeout(resolve, 0));
     }
 
     const cosmosResult = cosmosObserver(allResults, basePlayers);
 
-    if (typeof logMessage === 'function') {
-        logMessage(`[赤口] 世界蛇回路:嚥下完了`);
-    }
+    app.logMessage(`[赤口] 世界蛇回路:嚥下完了`);
 
     return cosmosResult;
 }
@@ -554,49 +621,11 @@ function cosmosObserver(allResults, basePlayers) {
 // 🔗 既存コードとの統合用ラッパー関数
 // ----------------------------------------------------------------------------
 
-async function runScenarioSimulationMultiverse(basePlayers, allSeriInfos, settings, BANK_DATA, applyKoutenrei, lineInput, windSpeed, windDirection) {
-    // コンテキスト構築
-    const context = {
-        grade: settings.GRADE || Object.keys(COEFFICIENT_SETTINGS).find(key => 
-            COEFFICIENT_SETTINGS[key] === settings) || 'a-kyu',
-        seriInfos: allSeriInfos,
-        lineInput: lineInput,
-        windSpeed: windSpeed,
-        windDirection: windDirection,
-        isGirls: settings.IS_GIRLS || false,
-        BANK_DATA: BANK_DATA
-    };
-    
-    console.log('[赤口呑縁] 開始:', context.grade);
-    
-    // 赤口呑縁実行
-    const cosmosResult = await invokeShakkouDonperi(basePlayers, context);
-    
-    console.log('[赤口呑縁] 完了');
-    
-    // 既存形式に変換（互換性のため）
-    const allScenarioResults = [{
-        scenario: 'マルチバース統合',
-        results: cosmosResult.statistics.map(s => ({
-            id: s.id,
-            final_score: s.winProbability * 1000,
-            grade: calculateGradeFromProbability(s.winProbability),
-            strength_mark: generateStrengthMark(s.winProbability, s.top3Probability)
-        }))
-    }];
-    
-    const integratedScores = {};
-    cosmosResult.statistics.forEach(s => {
-        integratedScores[s.id] = s.winProbability * 1000;
-    });
-    
-    return {
-        allScenarioResults: allScenarioResults,
-        integratedScores: integratedScores,
-        cosmosResult: cosmosResult
-    };
-}
-
+/**
+ * 勝率をグレード1〜10に変換する
+ * 7車レースの均等分布なら理論勝率≒14.3%
+ * 30%以上で最高グレード10、2%未満で最低グレード1
+ */
 function calculateGradeFromProbability(winProb) {
     if (winProb >= 0.30) return 10;
     if (winProb >= 0.25) return 9;
@@ -610,6 +639,11 @@ function calculateGradeFromProbability(winProb) {
     return 1;
 }
 
+/**
+ * 勝率・3着内確率から競輪印（◎〇▲△×・）を返す
+ * 勝率28%以上かつ3着内70%以上で本命◎
+ * 勝率5%未満は消し（・）
+ */
 function generateStrengthMark(winProb, top3Prob) {
     if (winProb >= 0.28 && top3Prob >= 0.70) return '◎';
     if (winProb >= 0.20 && top3Prob >= 0.60) return '○';
@@ -618,5 +652,11 @@ function generateStrengthMark(winProb, top3Prob) {
     if (winProb >= 0.05) return '×';
     return '・';
 }
-
+  
+if (app && typeof app.logMessage === 'function') {
+    app.logMessage('[DEBUG] invokeShakkouDonperi 実行開始');
+  }
+  app.invokeShakkouDonperi = invokeShakkouDonperi;
+  
 console.log('[赤口呑縁] コアシステム初期化完了');
+})(App);
