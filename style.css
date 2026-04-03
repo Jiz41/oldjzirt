@@ -425,7 +425,7 @@ button:active { transform: translateY(1px); box-shadow: inset 3px 3px 8px rgba(0
 .tamaki-speech-bubble {
     flex: 1 !important;
     min-width: 0 !important;
-    background: var(--nm-bg);
+    background: #fafaf8;
     border: 2px solid #d6a300;
     border-radius: 12px;
     padding: 12px;
