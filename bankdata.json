@@ -151,7 +151,7 @@
   },
   "🦌奈良": {
     "length": 333, "straight": 38.0, "straight_deviation": 29.4, "canto": 33.43, "width_home": 10.8, "width_back": 7.8, "width_center": 7.8, "alpha": 0.70, "indoor": false, "beta": 0.65,
-    "keirin_bias": { "先行": 1.0, "捲り": 1.05, "差し": 0.98 },
+    "keirin_bias": { "先行": 1.0, "捲り": 0.95, "差し": 1.10 },
     "wind_direction_map": { "西": "H向かい風", "東": "H追い風", "北": "H→B横風", "南": "B→H横風" },
     "_archived_legacy_notes": { "B向かい風": 0.95 }
   },
