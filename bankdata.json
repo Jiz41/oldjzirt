@@ -31,7 +31,7 @@
   },
   "🐓取手": {
     "length": 400, "straight": 54.8, "straight_deviation": 50.9, "canto": 31.51, "width_home": 10.0, "width_back": 10.0, "width_center": 7.5, "alpha": 1.01, "indoor": false, "beta": 0.75,
-    "keirin_bias": { "先行": 0.98, "捲り": 1.05, "差し": 1.05 },
+    "keirin_bias": { "先行": 0.98, "捲り": 0.95, "差し": 1.10 },
     "wind_direction_map": { "南西": "H向かい風", "北東": "H追い風", "北西": "H→B横風", "南東": "B→H横風" },
     "_archived_legacy_notes": { "向かい風": 0.95 }
   },
@@ -121,7 +121,7 @@
   },
   "💧大垣": {
     "length": 400, "straight": 56.0, "straight_deviation": 52.5, "canto": 30.62, "width_home": 10.2, "width_back": 9.0, "width_center": 7.4, "alpha": 1.04, "indoor": false, "beta": 0.72,
-    "keirin_bias": { "先行": 1.0, "捲り": 1.05, "差し": 1.0 },
+    "keirin_bias": { "先行": 1.0, "捲り": 0.98, "差し": 1.10 },
     "wind_direction_map": { "南西": "H向かい風", "北東": "H追い風", "北西": "H→B横風", "南東": "B→H横風" },
     "_archived_legacy_notes": {}
   },
@@ -163,7 +163,7 @@
   },
   "🍊和歌山": {
     "length": 400, "straight": 59.9, "straight_deviation": 57.5, "canto": 32.25, "width_home": 11.4, "width_back": 9.3, "width_center": 7.7, "alpha": 1.11, "indoor": false, "beta": 0.78,
-    "keirin_bias": { "先行": 1.0, "捲り": 1.0, "差し": 1.05 },
+    "keirin_bias": { "先行": 1.0, "捲り": 0.95, "差し": 1.10 },
     "wind_direction_map": { "北東": "H向かい風", "南西": "H追い風", "南東": "H→B横風", "北西": "B→H横風" },
     "_archived_legacy_notes": { "風の影響大": 0.95 }
   },
@@ -223,7 +223,7 @@
   },
   "🍜久留米": {
     "length": 400, "straight": 50.7, "straight_deviation": 45.7, "canto": 31.48, "width_home": 11.0, "width_back": 10.0, "width_center": 9.0, "alpha": 0.94, "indoor": false, "beta": 0.72,
-    "keirin_bias": { "先行": 1.0, "捲り": 1.05, "差し": 1.0 },
+    "keirin_bias": { "先行": 1.0, "捲り": 0.95, "差し": 1.10 },
     "wind_direction_map": { "南東": "H向かい風", "北西": "H追い風", "南西": "H→B横風", "北東": "B→H横風" },
     "_archived_legacy_notes": {}
   },
