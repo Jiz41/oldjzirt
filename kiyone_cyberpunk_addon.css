@@ -137,7 +137,7 @@
 .section-title {
     color: #ff1493 !important;
     border-bottom: 2px solid #9c27b0 !important;
-    text-shadow: 0 0 8px rgba(255, 20, 147, 0.5);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
 /* ========================================
@@ -331,74 +331,3 @@
         0 0 10px rgba(0, 255, 255, 0.4);
     font-weight: bold;
 }
-
-/* ========================================
-   グリッチエフェクト（オプション）
-   ======================================== */
-
-/* タイトルにグリッチエフェクトを追加したい場合 */
-@keyframes glitch {
-    0% {
-        transform: translate(0);
-    }
-    20% {
-        transform: translate(-2px, 2px);
-    }
-    40% {
-        transform: translate(-2px, -2px);
-    }
-    60% {
-        transform: translate(2px, 2px);
-    }
-    80% {
-        transform: translate(2px, -2px);
-    }
-    100% {
-        transform: translate(0);
-    }
-}
-
-/* グリッチを適用したい要素に追加
-.shakkou-title:hover {
-    animation: glitch 0.3s infinite;
-}
-*/
-
-/* ========================================
-   ネオングリーン（アクセント）
-   ======================================== */
-
-/* 特定の数値やキーワードを強調したい場合に使用 */
-.neon-green-accent {
-    color: #39ff14 !important;
-    text-shadow: 
-        0 0 5px rgba(57, 255, 20, 0.8),
-        0 0 10px rgba(57, 255, 20, 0.4);
-}
-
-/* ========================================
-   デジタルノイズ（背景オプション）
-   ======================================== */
-
-/* より強いグリッチ感が欲しい場合
-.shakkou-results-container::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-        radial-gradient(circle at 50% 50%, 
-            rgba(255, 20, 147, 0.05) 0%, 
-            transparent 50%);
-    pointer-events: none;
-    z-index: 0;
-    animation: noise 0.2s infinite;
-}
-
-@keyframes noise {
-    0%, 100% { opacity: 0.05; }
-    50% { opacity: 0.1; }
-}
-*/
