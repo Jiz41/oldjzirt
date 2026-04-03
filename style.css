@@ -253,7 +253,7 @@ h3 {
    ========================================== */
 .input-item { margin-bottom: 15px; }
 .input-item label { display: block; font-weight: bold; margin-bottom: 5px; color: #5a5a5a; }
-select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #dcdcdc; border-radius: 4px; font-size: 1em; background-color: #ffffff; }
+select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; box-sizing: border-box; border: none; border-radius: 8px; font-size: 1em; background: var(--neu-bg); color: #fff; box-shadow: var(--neu-shadow-concave); outline: none; }
 
 .local-switch-group { display: flex; align-items: center; padding: 5px 0; margin-bottom: 5px; font-size: 0.95em; color: #555; border-top: 1px dashed #e0e0e0; border-bottom: 1px dashed #e0e0e0; }
 .local-switch-group input[type="checkbox"] { width: auto; margin-right: 8px; margin-left: 0; transform: scale(1.1); vertical-align: middle; }
@@ -270,8 +270,6 @@ select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; bo
   margin-bottom: 15px;
   padding: 15px;
   border: none;
-  display: flex;
-  align-items: center;
 }
 
 .player-header { font-weight: bold; font-size: 1.0em; color: #333; padding: 8px 10px; margin-bottom: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
@@ -532,8 +530,6 @@ button:active {
   margin-bottom: 15px;
   padding: 15px;
   border: none;
-  display: flex;
-  align-items: center;
 }
 
     .id-1 { border-left: 6px solid #9ca3af !important; } /* グレー系を少し落とす */
