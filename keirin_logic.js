@@ -84,9 +84,9 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
             if (playerIds.length > 0) {
                 const pos = playerIds.indexOf(Number(playerId));
                 if (pos !== -1) {
-                    if (pos === 0)      { positionShield = 0.60; posLabel = "先行"; }
-                    else if (pos === 1) { positionShield = 0.50; posLabel = "番手"; }
-                    else               { positionShield = 0.40; posLabel = "3番手以降"; }
+                    if (pos === 0)      { positionShield = 1.00; posLabel = "先行"; }
+                    else if (pos === 1) { positionShield = 0.65; posLabel = "番手"; }
+                    else               { positionShield = 0.50; posLabel = "3番手以降"; }
                     break;
                 }
             }
@@ -122,10 +122,10 @@ function applyPhysicalConstraints(players, bankData, lineInput) {
         let physicalPenalty = 1.0;
 
         if (straight < 35) {
-            if (pos.position >= 4)      { physicalPenalty = 0.25; logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 物理的到達困難 (×0.25)`); }
-            else if (pos.position === 3){ physicalPenalty = 0.60; logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置3番手 → 到達困難 (×0.60)`); }
+            if (pos.position >= 4)      { physicalPenalty = 0.75; logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 物理的到達困難 (×0.25)`); }
+            else if (pos.position === 3){ physicalPenalty = 0.85; logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置3番手 → 到達困難 (×0.60)`); }
         } else if (straight < 50) {
-            if (pos.position >= 4)      { physicalPenalty = 0.50; logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 到達やや困難 (×0.50)`); }
+            if (pos.position >= 4)      { physicalPenalty = 0.80; logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 到達やや困難 (×0.50)`); }
             else if (pos.position === 3){ physicalPenalty = 0.80; }
         }
 
@@ -168,7 +168,7 @@ function applyTacticalAdjustments(players, bankData, lineInput, seriInfos) {
     const positionMap = getPlayerPositions(lineInput);
 
     const cantoThreshold = 32;
-    const makuriPenalty = (canto > cantoThreshold) ? 0.67 : 1.0;
+    const makuriPenalty = (canto > cantoThreshold) ? 1.12 : 1.0;
 
     if (canto > cantoThreshold) {
         logMessage(`[展開層] カント${canto}度 > ${cantoThreshold}度 → 捲りコスト×1.5 (補正係数×0.67)`);
@@ -813,6 +813,17 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
         });
         appliedCoeffs.push('C_suicide(発動)');
     }
+
+    // デバフの乗算下限キャップ（0.85）
+    tempPlayers.forEach(p => {
+        if (p.score > 0) {
+            const originalBase = p.score;
+            if (p.final_score / originalBase < 0.85) {
+                p.final_score = originalBase * 0.85;
+                appliedCoeffs.push('C_cap');
+            }
+        }
+    });
 
     // シナリオ単位でまとめてログ出力
     const uniqueCoeffs = [...new Set(appliedCoeffs)];

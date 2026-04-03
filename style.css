@@ -12,21 +12,16 @@ body {
     -moz-osx-font-smoothing: grayscale;
     letter-spacing: 0.05em;
 }
+
 .container {
-    width: calc(100% - 20px);
-    max-width: 600px;
-    margin: 15px auto;
-    background-color: #ffffff;
-    padding: 0;
-    border-radius: 12px; 
-    box-shadow: 
-        0 2px 4px rgba(56, 78, 56, 0.04),
-        0 8px 20px rgba(56, 78, 56, 0.08),
-        0 16px 40px rgba(56, 78, 56, 0.06) !important;
-    border: 1px solid rgba(0, 0, 0, 0.03);
-    box-sizing: border-box;
-    
+  background: var(--neu-bg);
+  border-radius: var(--neu-radius);
+  box-shadow: var(--neu-shadow-convex);
+  padding: 20px;
+  margin: 20px auto;
+  border: none;
 }
+
 
 .keep-alive-dot {
     position: fixed; bottom: 0; right: 0; width: 1px; height: 1px;
@@ -264,7 +259,18 @@ select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; bo
    5. 選手データ行・枠色指定（変更なし）
    ========================================== */
 .player-input-list { margin-top: 10px; }
-.player-row { border: 1px solid #e0e0e0; padding: 0; margin-bottom: 10px; border-radius: 6px; background-color: #ffffff; overflow: hidden; contain: content; backface-visibility: hidden; border-left: 6px solid #ccc !important; }
+
+.player-row {
+  background: var(--neu-bg);
+  border-radius: var(--neu-radius);
+  box-shadow: var(--neu-shadow-convex);
+  margin-bottom: 15px;
+  padding: 15px;
+  border: none;
+  display: flex;
+  align-items: center;
+}
+
 .player-header { font-weight: bold; font-size: 1.0em; color: #333; padding: 8px 10px; margin-bottom: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
 
 .id-1 { border-left-color: #d1d5db !important; }
@@ -419,7 +425,22 @@ select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; bo
 /* ==========================================
    7. ボタン・たまきちゃん・不具合報告（変更なし）
    ========================================== */
-button { width: 100%; padding: 14px; background-color: #384e38 !important; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; font-size: 1.05em; font-weight: bold; letter-spacing: 0.2em; transition: all 0.2s; box-shadow: 0 2px 0 #2a3a2a; }
+
+button {
+  background: var(--neu-bg);
+  color: #e0e0e0;
+  border: none;
+  border-radius: var(--neu-radius);
+  box-shadow: var(--neu-shadow-convex);
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: bold;
+}
+button:active {
+  box-shadow: var(--neu-shadow-concave);
+}
+
 button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
 
 .tamaki-display { display: flex !important; flex-direction: row !important; align-items: flex-start !important; }
@@ -455,17 +476,22 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
     border: none !important;                  /* 枠線も排除 */
 }
 
-.bug-button {
-    display: inline-block;
-    padding: 8px 20px;
-    background-color: #666666;
-    color: #ffffff;
-    text-decoration: none;
-    border-radius: 6px; /* 少し丸みのある角 */
-    font-size: 13px;
-    border: 1px solid rgba(0,0,0,0.1);
-    transition: 0.2s;
+.bug-
+button {
+  background: var(--neu-bg);
+  color: #e0e0e0;
+  border: none;
+  border-radius: var(--neu-radius);
+  box-shadow: var(--neu-shadow-convex);
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: bold;
 }
+button:active {
+  box-shadow: var(--neu-shadow-concave);
+}
+
 
 .bug-button:hover { background-color: #d93025; border-color: #a50e0e; }
 
@@ -474,14 +500,30 @@ button:active { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
 @media (prefers-color-scheme: dark) {
     /* --- 全体空間 --- */
     body { background-color: #121212 !important; color: #e0e0e0 !important; }
-    .container {
-        background-color: #1e1e1e !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
+    
+.container {
+  background: var(--neu-bg);
+  border-radius: var(--neu-radius);
+  box-shadow: var(--neu-shadow-convex);
+  padding: 20px;
+  margin: 20px auto;
+  border: none;
+}
+
 
     /* --- 選手データ：色分けと夜用調整 --- */
-    .player-row { background-color: #252525 !important; border-color: rgba(255, 255, 255, 0.05) !important; }
+    
+.player-row {
+  background: var(--neu-bg);
+  border-radius: var(--neu-radius);
+  box-shadow: var(--neu-shadow-convex);
+  margin-bottom: 15px;
+  padding: 15px;
+  border: none;
+  display: flex;
+  align-items: center;
+}
+
     .id-1 { border-left: 6px solid #9ca3af !important; } /* グレー系を少し落とす */
     .id-2 { border-left: 6px solid #555555 !important; } /* 黒を少し持ち上げる */
     .id-3 { border-left: 6px solid #d64d55 !important; } /* 赤 */
