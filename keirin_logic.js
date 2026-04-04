@@ -73,6 +73,7 @@ resetSnapshot();
 
 app.getCurrentCoefficients = () => JSON.parse(JSON.stringify(CalculationSnapshot));
 app.resetSnapshot = resetSnapshot;
+app.setRaceId = function(id) { CalculationSnapshot.race_id = id; };
 // ------------------------------------------
 
 let BANK_DATA = {};
