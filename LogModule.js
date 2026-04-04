@@ -1,5 +1,5 @@
 (function(app) {
-  const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbyRy5JST_GWa5lMHnsEiCMn3nbHUghPBzUMz6HAPav8uiMTkowlAPjWSZnz6k8xUWrW/exec";
+  const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbyEvWMjBUdy-94bNpifNRl7SG4aTFuK-5xqRJTeq2PwhXzWaF23RVNSMVuDCK7BL-sg/exec";
 
   function generateLogId() {
     return "log_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
