@@ -255,6 +255,7 @@ function applyTacticalAdjustments(players, bankData, lines, seriInfos) {
         } else {
             p.warpBoost = 1.0;
         }
+        CalculationSnapshot.tactical.warpBoost[p.id] = p.warpBoost;
     });
 
     return players;
@@ -1074,6 +1075,13 @@ app.calculatePrediction = async function() {
     const raceType  = document.getElementById('race-type').value;
     const settings  = COEFFICIENT_SETTINGS[raceType];
     const bankName  = document.getElementById('bank-name').value;
+    CalculationSnapshot.bank = BANK_DATA[bankName] ? {
+      straight: BANK_DATA[bankName].straight,
+      canto: BANK_DATA[bankName].canto,
+      alpha: BANK_DATA[bankName].alpha,
+      beta: BANK_DATA[bankName].beta,
+      keirin_bias: BANK_DATA[bankName].keirin_bias
+    } : {};
     const selectedBank = BANK_DATA[bankName];
     const modeSelector = document.getElementById('mode-selector');
     const koutenreiModeSelected = modeSelector ? modeSelector.value === 'koutenrei' : false;
@@ -1088,6 +1096,7 @@ app.calculatePrediction = async function() {
     }
 
     let basePlayers = JSON.parse(JSON.stringify(participatingPlayers));
+    CalculationSnapshot.scores.base = JSON.parse(JSON.stringify(basePlayers));
 
     basePlayers.forEach(p => {
         p.c_score_adj = 1.0 + (p.score / 100 - 1) * settings.R_BIAS;
@@ -1135,6 +1144,11 @@ app.calculatePrediction = async function() {
 
         const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, true, currentLineInputForCalc, windSpeed, windDirection, lines);
         app.logMessage(`[CALC] 荒天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`);
+
+        CalculationSnapshot.scores.final = {
+            seiten: seitenreiResults.integratedScores,
+            kouten: koutenreiResults.integratedScores
+        };
 
         const detailedScenarioResults = koutenreiModeSelected
             ? koutenreiResults.allScenarioResults
