@@ -53,6 +53,28 @@ const SERI_FATIGUE_PENALTY_IN  = 0.15;
 const SERI_FATIGUE_PENALTY_OUT = 0.25;
 const SERI_WIN_BONUS           = 0.05;
 
+// --- 外れ解剖：係数スナップショット領域 ---
+let CalculationSnapshot = {};
+
+function resetSnapshot() {
+  CalculationSnapshot = {
+    race_id: "",
+    bank: { straight: 0, canto: 0, alpha: 0, beta: 0, keirin_bias: {} },
+    line_coop: {},
+    tactical: { warpBoost: {}, cantoPenalty: 1.0 },
+    wind_physics: { finalAdj: {}, v: 0 },
+    physical: { physicalPenalty: {} },
+    seri: { seri_coef: {}, seri_bonuses: [], seri_info: [] },
+    event_flags: { suicide_detected: false, suicide_targets: [] },
+    scores: { base: {}, final: {} }
+  };
+}
+resetSnapshot();
+
+app.getCurrentCoefficients = () => JSON.parse(JSON.stringify(CalculationSnapshot));
+app.resetSnapshot = resetSnapshot;
+// ------------------------------------------
+
 let BANK_DATA = {};
 
 // ====================================================================================
@@ -138,6 +160,7 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
 
     app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 属性[斜め補正済み] 位置[${posLabel}] -> 風補正実行`);
 
+    CalculationSnapshot.wind_physics = { finalAdj: finalAdj, v: v };
     return { adj: finalAdj, v: v };
 }
 // ====================================================================================
@@ -446,6 +469,7 @@ function parseLineInput(lineInput, allPlayers) {
                 else                               { winnerId = contender; loserId = follower;  }
 
                 allSeriInfos.push({ exists: true, follower, contender, winner: winnerId, loser: loserId });
+                CalculationSnapshot.seri.seri_info = allSeriInfos;
                 app.logMessage(`[PARSE] 競り勝者予測: 選手${winnerId} (C_seriに基づき予測)`);
 
                 currentLine.push(winnerId);
@@ -539,6 +563,7 @@ function calculateLineCoeffs(players, settings) {
                 if (leader && leader.wmark === '◎')      markVal = C_MARK_VALUES.HIGH;
                 else if (leader && leader.wmark === '〇') markVal = C_MARK_VALUES.MEDIUM;
                 p.c_l = (i === 1) ? markVal : 1.0 + (markVal - 1.0) * 0.5;
+                CalculationSnapshot.line_coop[p.id] = p.c_l;
                 app.logMessage(`[C_L] 選手ID ${p.id}: ガールズC_L=${p.c_l.toFixed(3)}`);
             }
         });
@@ -587,6 +612,7 @@ function calculateLineCoeffs(players, settings) {
                 } else { // 4番手以降
                     p.c_l = 1.00;
                 }
+                CalculationSnapshot.line_coop[p.id] = p.c_l;
             }
         });
         // ★★★ END: C_l 改修ロジック ★★★
