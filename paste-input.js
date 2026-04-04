@@ -220,7 +220,7 @@
       const btn = document.createElement('button');
       btn.textContent = `${race.raceNo}R`;
       btn.className = 'proxy-btn-race';
-      btn.addEventListener('click', () => loadRace(race.raceId));
+      btn.addEventListener('click', () => { App.getCurrentCoefficients().race_id = race.raceNo; loadRace(race.raceId); });
       content.appendChild(btn);
     });
   }
