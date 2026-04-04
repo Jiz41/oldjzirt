@@ -1307,6 +1307,22 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             scenarioOutput.insertAdjacentHTML('afterbegin', seriSummaryHtml);
         }
     }
+
+    App.sendLog(
+      {
+        bank: document.getElementById('bank-name').value,
+        grade: document.getElementById('race-type').value,
+        wind: {
+          speed: parseFloat(document.getElementById('wind-speed').value) || 0,
+          direction: document.getElementById('wind-direction').value
+        },
+        tenun: tIndex
+      },
+      {
+        seiten: document.getElementById('seitenrei-output').innerHTML,
+        kouten: document.getElementById('koutenrei-output').innerHTML
+      }
+    );
 }
 
 // ====================================================================================
