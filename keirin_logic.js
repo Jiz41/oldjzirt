@@ -1316,7 +1316,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
           speed: parseFloat(document.getElementById('wind-speed').value) || 0,
           direction: document.getElementById('wind-direction').value
         },
-        tenun: tIndex
+        tenun: tenunIndexData.tenunIndex
       },
       {
         seiten: document.getElementById('seitenrei-output').innerHTML,
