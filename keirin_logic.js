@@ -165,30 +165,6 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA)
     return { adj: finalAdj, v: v };
 }
 // ====================================================================================
-// 物理層：straight による生存判定（V9.0）
-// ====================================================================================
-function applyPhysicalConstraints(players, bankData, lines) {
-    const straight = bankData.straight || 50;
-
-    const positionMap = getPlayerPositions(lines);
-
-    players.forEach(p => {
-        const pos = positionMap[p.id] || { position: 99, label: '不明' };
-        let physicalPenalty = 1.0;
-
-        if (straight < 35) {
-            if (pos.position >= 4)      { physicalPenalty = 0.75; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 物理的到達困難 (×0.75)`); }
-            else if (pos.position === 3){ physicalPenalty = 0.85; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置3番手 → 到達困難 (×0.85)`); }
-        } else if (straight < 50) {
-            if (pos.position >= 4)      { physicalPenalty = 0.80; app.logMessage(`[物理層] 選手${p.id}: 直線${straight}m/位置${pos.position}番手 → 到達やや困難 (×0.80)`); }
-            else if (pos.position === 3){ physicalPenalty = 0.80; }
-        }
-
-        p.physicalPenalty = physicalPenalty;
-    });
-
-    return players;
-}
 
 function getPlayerPositions(lines) {
     const positionMap = {};
@@ -927,7 +903,6 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
     scenarios.forEach(scenario => {
         const cDCoeffs      = getScenarioCoeffs(scenario);
         let scenarioPlayers = JSON.parse(JSON.stringify(basePlayers));
-        const logPrefix     = applyKoutenrei ? '[KOUTEN-SCN]' : '[SEITEN-SCN]';
 
         const direction = windDirection || (BANK_DATA ? BANK_DATA.direction : '無風');
         const speed     = (windSpeed !== undefined) ? windSpeed : (BANK_DATA ? BANK_DATA.speed : 0);
