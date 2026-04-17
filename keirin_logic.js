@@ -222,7 +222,7 @@ function applyTacticalAdjustments(players, bankData, lines, seriInfos) {
 
     players.forEach(p => {
         const pos = positionMap[p.id];
-        p.cantoMakuriPenalty = makuriPenalty;
+        p.cantoMakuriPenalty = (p.style === '両') ? makuriPenalty : 1.0;
 
         if (warpBoostTargets.includes(p.id)) {
             // イン突き（ワープ）ブースト ×1.35
