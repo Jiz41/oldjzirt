@@ -197,10 +197,10 @@ function applyTacticalAdjustments(players, bankData, lines, seriInfos) {
     const positionMap = getPlayerPositions(lines);
 
     const cantoThreshold = 32;
-    const makuriPenalty = (canto > cantoThreshold) ? 1.12 : 1.0;
+    const makuriPenalty = (canto > cantoThreshold) ? 1.25 : 1.0;
 
     if (canto > cantoThreshold) {
-        app.logMessage(`[展開層] カント${canto}度 > ${cantoThreshold}度 → 捲り補正×1.12`);
+        app.logMessage(`[展開層] カント${canto}度 > ${cantoThreshold}度 → 捲り補正×1.25`);
     }
 
     const warpBoostTargets = [];
@@ -222,6 +222,7 @@ function applyTacticalAdjustments(players, bankData, lines, seriInfos) {
 
     players.forEach(p => {
         const pos = positionMap[p.id];
+        p.cantoMakuriPenalty = makuriPenalty;
 
         if (warpBoostTargets.includes(p.id)) {
             // イン突き（ワープ）ブースト ×1.35
@@ -914,7 +915,7 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
         scenarioPlayers.forEach(p => {
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e;
             p.final_score *= (p.physicalPenalty     || 1.0);
-            p.final_score *= (p.cantoMakuriPenalty  || 1.0);
+            p.final_score /= (p.cantoMakuriPenalty  || 1.0);
             p.final_score *= (p.warpBoost           || 1.0);
             const res = getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA);
             p.final_score *= res.adj;
