@@ -407,18 +407,6 @@ function applyEscapeSuccess(players) {
 }
 
 // ----------------------------------------------------------------------------
-// 🔧 ユーティリティ関数
-// ----------------------------------------------------------------------------
-
-function parseLines(lineInput) {
-    if (!lineInput || lineInput.trim() === '') return [];
-    
-    return lineInput.split(/\s+/).map(lineStr => {
-        return lineStr.split('-').map(id => parseInt(id)).filter(id => !isNaN(id));
-    }).filter(line => line.length > 0);
-}
-
-// ----------------------------------------------------------------------------
 // 🎯 メイン実行関数：儀術発動
 // ----------------------------------------------------------------------------
 
