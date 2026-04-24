@@ -1276,7 +1276,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // 荒天令買い目
     const koutenreiBox  = document.getElementById('koutenrei-output');
     const seitenTop3Ids = new Set(tenunIndexData.rankingWithData.slice(0, 3).map(p => p.id));
-    const koutenreiBets = generateKoutenreiBets(tenunIndexData.koutenRankingWithData, seitenTop3Ids);
+    const koutenreiBets = generateKoutenreiBets(tenunIndexData.rankingWithData, seitenTop3Ids);
     if (koutenreiBox && koutenreiBets) {
         const L = koutenreiBets.targetL;
         let html = `<h4>⛈️ 荒天令</h4>`;
