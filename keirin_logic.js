@@ -1008,7 +1008,9 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
 // calculatePrediction
 // ====================================================================================
 app.calculatePrediction = async function() {
+    const savedRaceId = CalculationSnapshot.race_id;
     resetSnapshot();
+    CalculationSnapshot.race_id = savedRaceId;
     const tenunOutputArea = document.getElementById('tenun-index-output');
     if (tenunOutputArea) {
         tenunOutputArea.innerHTML = ''
