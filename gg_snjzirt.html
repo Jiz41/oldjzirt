@@ -849,12 +849,14 @@ function analyze(rows) {
 
   rows.forEach(row => {
     // Venue Analysis
-    const v = get(row, COL.venue) || '不明';
-    if (!venueMap[v]) venueMap[v] = {total:0, hits:0, seiT:0, koT:0};
-    venueMap[v].total++;
-    if (isHit(row))  venueMap[v].hits++;
-    if (isSeiT(row)) venueMap[v].seiT++;
-    if (isKoT(row))  venueMap[v].koT++;
+    const v = get(row, COL.venue);
+    if (v) {
+      if (!venueMap[v]) venueMap[v] = {total:0, hits:0, seiT:0, koT:0};
+      venueMap[v].total++;
+      if (isHit(row))  venueMap[v].hits++;
+      if (isSeiT(row)) venueMap[v].seiT++;
+      if (isKoT(row))  venueMap[v].koT++;
+    }
 
     // Kyuhan Analysis
     const kyuhanName = get(row, COL.kyuhan) || '不明';
