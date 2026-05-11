@@ -1305,6 +1305,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
 
     App.sendLog(
       {
+        race_id: CalculationSnapshot.race_id,
         bank: document.getElementById('bank-name').value,
         grade: document.getElementById('race-type').value,
         wind: {
