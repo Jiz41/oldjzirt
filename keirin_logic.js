@@ -73,7 +73,7 @@ resetSnapshot();
 
 app.getCurrentCoefficients = () => JSON.parse(JSON.stringify(CalculationSnapshot));
 app.resetSnapshot = resetSnapshot;
-app.setRaceId = function(id) { CalculationSnapshot.race_id = id; };
+app.setRaceId = function(id) { console.log('[DEBUG setRaceId] 受信id:', id, '/ 変更前:', CalculationSnapshot.race_id); CalculationSnapshot.race_id = id; console.log('[DEBUG setRaceId] 変更後 CalculationSnapshot.race_id:', CalculationSnapshot.race_id); };
 // ------------------------------------------
 
 let BANK_DATA = {};
@@ -1008,9 +1008,11 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
 // calculatePrediction
 // ====================================================================================
 app.calculatePrediction = async function() {
+    console.log('[DEBUG calcPrediction] 開始時 CalculationSnapshot.race_id:', CalculationSnapshot.race_id);
     const savedRaceId = CalculationSnapshot.race_id;
     resetSnapshot();
     CalculationSnapshot.race_id = savedRaceId;
+    console.log('[DEBUG calcPrediction] resetSnapshot後 race_id復元:', CalculationSnapshot.race_id);
     const tenunOutputArea = document.getElementById('tenun-index-output');
     if (tenunOutputArea) {
         tenunOutputArea.innerHTML = ''
@@ -1303,6 +1305,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         }
     }
 
+    console.log('[DEBUG sendLog直前] CalculationSnapshot.race_id:', CalculationSnapshot.race_id);
     App.sendLog(
       {
         race_id: CalculationSnapshot.race_id,

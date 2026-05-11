@@ -6,7 +6,9 @@
   }
 
   app.sendLog = function(raceInfo, prediction) {
+    console.log('[DEBUG LogModule.sendLog] raceInfo.race_id:', raceInfo.race_id);
     const snapshot = app.getCurrentCoefficients();
+    console.log('[DEBUG LogModule.sendLog] snapshot.race_id:', snapshot.race_id);
     const payload = {
       log_id: generateLogId(),
       timestamp: new Date().toISOString(),
