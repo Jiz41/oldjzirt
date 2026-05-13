@@ -1170,8 +1170,10 @@ app.calculatePrediction = async function() {
             ? koutenreiResults.allScenarioResults
             : seitenreiResults.allScenarioResults;
 
+        const seitenScoresWithBonus = applyLineCountBonus(seitenreiResults.integratedScores, lines);
+
         const finalTenunData = calculateTenunIndex(
-            seitenreiResults.integratedScores,
+            seitenScoresWithBonus,
             koutenreiResults.integratedScores,
             seitenreiResults.allScenarioResults,
             participatingPlayers
@@ -1363,6 +1365,20 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
 // ====================================================================================
 function formatOrderedBet(bet)  { return bet.join('-'); }
 function formatSanrenpuku(bet)  { return bet.slice().sort((a, b) => a - b).join('='); }
+
+function applyLineCountBonus(integratedScores, lines) {
+  const LINE_BONUS = { 4: 1.08, 3: 1.04 };
+  const bonusMap = {};
+  (lines || []).forEach(line => {
+    const bonus = LINE_BONUS[line.length] || 1.00;
+    line.forEach(id => { bonusMap[id] = bonus; });
+  });
+  const result = {};
+  Object.keys(integratedScores).forEach(id => {
+    result[id] = integratedScores[id] * (bonusMap[Number(id)] || 1.00);
+  });
+  return result;
+}
 
 function generateSeitenreiBets(ranking) {
     if (!ranking || ranking.length < 3) return null;
