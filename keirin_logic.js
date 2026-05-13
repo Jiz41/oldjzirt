@@ -74,6 +74,10 @@ resetSnapshot();
 app.getCurrentCoefficients = () => JSON.parse(JSON.stringify(CalculationSnapshot));
 app.resetSnapshot = resetSnapshot;
 app.setRaceId = function(id) { console.log('[DEBUG setRaceId] 受信id:', id, '/ 変更前:', CalculationSnapshot.race_id); CalculationSnapshot.race_id = id; console.log('[DEBUG setRaceId] 変更後 CalculationSnapshot.race_id:', CalculationSnapshot.race_id); };
+app.applyPhysicalPenalty    = applyPhysicalPenalty;
+app.applyTacticalAdjustments = applyTacticalAdjustments;
+app.getKururuAdjustment     = getKururuAdjustment;
+app.applySeriCorrection     = applySeriCorrection;
 // ------------------------------------------
 
 let BANK_DATA = {};
@@ -187,6 +191,36 @@ function getPlayerPositions(lines) {
     });
 
     return positionMap;
+}
+
+// ====================================================================================
+// 物理層：直線長ペナルティ（V9.0）
+// ====================================================================================
+function applyPhysicalPenalty(players, bankData, lines) {
+    const straight = (bankData && bankData.straight_deviation != null)
+        ? bankData.straight_deviation
+        : (bankData && bankData.straight) || 50;
+
+    const positionMap = getPlayerPositions(lines);
+
+    players.forEach(p => {
+        const pos = positionMap[p.id] ? positionMap[p.id].position : 1;
+
+        if (pos < 4) {
+            p.physicalPenalty = 1.0;
+            return;
+        }
+
+        const depth = pos - 4;
+
+        if (straight < 35) {
+            p.physicalPenalty = Math.max(0.70, 0.80 - depth * 0.033);
+        } else if (straight < 50) {
+            p.physicalPenalty = Math.max(0.87, 0.93 - depth * 0.02);
+        } else {
+            p.physicalPenalty = 1.0;
+        }
+    });
 }
 
 // ====================================================================================
