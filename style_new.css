@@ -83,8 +83,8 @@ body {
   max-width: 600px;
   margin: 15px auto;
   background: var(--panel);
-  box-shadow: 4px 4px 12px rgba(0,0,0,0.08), -2px -2px 8px rgba(255,255,255,0.9);
-  border-radius: 12px;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.08), -1px -1px 4px rgba(255,255,255,0.7);
+  border-radius: 6px;
   padding: 0;
   box-sizing: border-box;
 }
@@ -360,9 +360,9 @@ h4 {
 .input-group {
   margin: 0 14px 18px;
   padding: 14px;
-  border-radius: 10px;
+  border-radius: 6px;
   background: var(--panel);
-  box-shadow: 3px 3px 8px rgba(0,0,0,0.08), -2px -2px 6px rgba(255,255,255,0.85);
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.08), -1px -1px 4px rgba(255,255,255,0.7);
   border: none;
   border-top: 2px solid var(--accent);
   box-sizing: border-box;
@@ -372,9 +372,9 @@ h4 {
 .result-section {
   margin: 0 14px 18px;
   padding: 14px;
-  border-radius: 10px;
+  border-radius: 6px;
   background: var(--panel);
-  box-shadow: 3px 3px 8px rgba(0,0,0,0.08), -2px -2px 6px rgba(255,255,255,0.85);
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.08), -1px -1px 4px rgba(255,255,255,0.7);
   border: none;
   box-sizing: border-box;
 }
@@ -494,9 +494,9 @@ label[for="line-input"] {
 }
 
 .player-row {
-  border-radius: 8px !important;
+  border-radius: 6px !important;
   background: var(--panel) !important;
-  box-shadow: 2px 2px 6px rgba(0,0,0,0.07), -1px -1px 4px rgba(255,255,255,0.8) !important;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.08), -1px -1px 4px rgba(255,255,255,0.7) !important;
   border: none !important;
   border-left: 5px solid #ccc !important;
   overflow: hidden;
@@ -573,6 +573,7 @@ label[for="line-input"] {
   gap: 8px;
   font-size: 0.8em;
   color: var(--muted);
+  flex-basis: 100%;
 }
 
 .sb-group label {
@@ -638,7 +639,7 @@ button[onclick="calculatePrediction()"] {
   background: linear-gradient(180deg, #384e38 0%, #1e2e1e 100%) !important;
   color: #fff !important;
   border: none !important;
-  border-radius: 8px !important;
+  border-radius: 6px !important;
   font-family: var(--sans) !important;
   font-size: 15px !important;
   font-weight: 700 !important;
@@ -713,7 +714,7 @@ button[onclick="calculatePrediction()"]:active {
 #tenun-index-output {
   background: var(--amber-bg) !important;
   border: 1px solid var(--amber-br) !important;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 12px !important;
   margin: 8px 0;
 }
@@ -757,7 +758,7 @@ button[onclick="calculatePrediction()"]:active {
 #scenario-output {
   background: var(--purple-bg) !important;
   border: 1px solid var(--purple-br) !important;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 12px !important;
   margin: 8px 0;
   color: var(--text);
@@ -840,7 +841,7 @@ button[onclick="calculatePrediction()"]:active {
 .btn-share-box {
   width: 36px !important;
   height: 36px !important;
-  border-radius: 8px !important;
+  border-radius: 6px !important;
   border: 1px solid var(--border-2) !important;
   background: var(--panel) !important;
   box-shadow: 2px 2px 5px rgba(0,0,0,0.08) !important;
@@ -879,7 +880,7 @@ button[onclick="calculatePrediction()"]:active {
   text-decoration: none;
   padding: 7px 16px;
   border: 1px solid var(--accent-br);
-  border-radius: 20px;
+  border-radius: 6px;
   display: inline-block;
   transition: background 0.15s;
 }
@@ -900,7 +901,7 @@ button[onclick="calculatePrediction()"]:active {
   color: var(--muted);
   padding: 6px 18px;
   border: 1px solid var(--border-2);
-  border-radius: 20px;
+  border-radius: 6px;
   text-decoration: none;
   transition: border-color 0.15s, color 0.15s;
 }
@@ -949,7 +950,7 @@ footer.copyright-footer {
   display: flex;
   flex-direction: column;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--panel);
   border: 1px solid var(--border);
   text-decoration: none;
@@ -1052,7 +1053,7 @@ footer.copyright-footer {
   .container {
     background: #241e1a !important;
     box-shadow: none !important;
-    border: 0.5px solid rgba(255,255,255,0.07) !important;
+    border: 0.5px solid rgba(255,255,255,0.10) !important;
   }
 
   h2 {
@@ -1111,16 +1112,16 @@ footer.copyright-footer {
   .input-group {
     background: #241e1a !important;
     box-shadow: none !important;
-    border: 0.5px solid rgba(255,255,255,0.12) !important;
+    border: 0.5px solid rgba(255,255,255,0.10) !important;
     border-top: 2px solid #c8392f !important;
   }
 
   select,
   input[type="number"],
   input[type="text"] {
-    background: #241e1a !important;
+    background: #f0e8d8 !important;
     border: 0.5px solid rgba(255,255,255,0.12) !important;
-    color: #f0ecf8 !important;
+    color: #1a1612 !important;
     box-shadow: none !important;
   }
 
@@ -1144,7 +1145,7 @@ footer.copyright-footer {
   .player-row {
     background: #241e1a !important;
     box-shadow: none !important;
-    border: 0.5px solid rgba(255,255,255,0.07) !important;
+    border: 0.5px solid rgba(255,255,255,0.10) !important;
     border-left-width: 5px !important;
   }
 
@@ -1170,7 +1171,7 @@ footer.copyright-footer {
   .result-section {
     background: #241e1a !important;
     box-shadow: none !important;
-    border: 0.5px solid rgba(255,255,255,0.07) !important;
+    border: 0.5px solid rgba(255,255,255,0.10) !important;
   }
 
   #seitenrei-output {
