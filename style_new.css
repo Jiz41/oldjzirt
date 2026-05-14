@@ -1,47 +1,59 @@
 /* ==========================================
-   style_new.css — ダークテーマ（真・自在律）
+   style_new.css — v6 和モダン×デジタルレトロ / マゼンタネオン
    ========================================== */
 
+/* ==========================================
+   ライトモード変数（デフォルト）
+   ========================================== */
 :root {
-  --bg:          #0c0a14;
-  --bg-2:        #15121f;
-  --panel:       #1a1626;
-  --panel-2:     #221d31;
-  --panel-3:     #2a2438;
-  --divider:     rgba(255,255,255,0.07);
-  --divider-2:   rgba(255,255,255,0.12);
+  --bg:        #fafaf8;
+  --bg-2:      #f0ede8;
+  --panel:     #fafaf8;
+  --panel-2:   #f0ede8;
+  --border:    rgba(0,0,0,0.08);
+  --border-2:  rgba(0,0,0,0.12);
 
-  --text:        #f0ecf8;
-  --text-2:      #c8c1d8;
-  --text-muted:  #8a8298;
-  --text-dim:    #5a5470;
+  --text:      #1a1a18;
+  --text-2:    #3a3830;
+  --muted:     #7a7468;
+  --dim:       #a09890;
 
-  --magenta:     #e15bb0;
-  --magenta-d:   #8a2868;
-  --magenta-bg:  rgba(225,91,176,0.08);
-  --magenta-br:  rgba(225,91,176,0.35);
+  /* アクセント：金・琥珀 */
+  --accent:    #b38a00;
+  --accent-bg: rgba(179,138,0,0.07);
+  --accent-br: rgba(179,138,0,0.30);
 
-  --green:       #6db58b;
-  --green-d:     #2e4f3c;
-  --green-bg:    rgba(109,181,139,0.07);
-  --green-br:    rgba(109,181,139,0.35);
+  /* 晴天令：深緑・苔 */
+  --green:     #4a7a4a;
+  --green-bg:  rgba(74,122,74,0.07);
+  --green-br:  rgba(74,122,74,0.30);
 
-  --gold:        #d9a93a;
-  --gold-d:      #5a4318;
-  --gold-bg:     rgba(217,169,58,0.06);
-  --gold-br:     rgba(217,169,58,0.30);
+  /* 荒天令：朱・茜 */
+  --red:       #c07070;
+  --red-bg:    rgba(192,112,112,0.07);
+  --red-br:    rgba(192,112,112,0.30);
 
-  --amber:       #e3a857;
-  --amber-bg:    rgba(227,168,87,0.07);
+  /* 赤口呑縁：深紫・藤 */
+  --purple:    #9b6bb5;
+  --purple-bg: rgba(155,107,181,0.07);
+  --purple-br: rgba(155,107,181,0.30);
 
-  --sans:  "Hiragino Sans","Yu Gothic UI","Noto Sans JP",-apple-system,system-ui,sans-serif;
-  --mono:  "SF Mono","JetBrains Mono","Roboto Mono",ui-monospace,monospace;
+  /* 天雲指数：山吹・金 */
+  --amber:     #d6a300;
+  --amber-bg:  rgba(214,163,0,0.07);
+  --amber-br:  rgba(214,163,0,0.28);
+
+  --sans:  "Hiragino Sans","Yu Gothic UI","Noto Sans JP",-apple-system,sans-serif;
+  --serif: "Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;
+  --mono:  "SF Mono","JetBrains Mono","Roboto Mono",monospace;
 }
 
 /* ==========================================
-   1. ベース
+   ベース
    ========================================== */
-*, *::before, *::after { box-sizing: border-box; }
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
 html {
   overflow-y: scroll;
@@ -54,10 +66,11 @@ body {
   margin: 0;
   padding: 0;
   padding-bottom: 40px;
-  background-color: var(--bg);
+  background: var(--bg);
   color: var(--text);
   -webkit-overflow-scrolling: touch;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   letter-spacing: 0.04em;
 }
 
@@ -65,14 +78,15 @@ body {
   width: calc(100% - 20px);
   max-width: 600px;
   margin: 15px auto;
-  padding: 0;
+  background: var(--panel);
+  box-shadow: 4px 4px 12px rgba(0,0,0,0.08), -2px -2px 8px rgba(255,255,255,0.9);
   border-radius: 12px;
-  background: transparent;
+  padding: 0;
   box-sizing: border-box;
 }
 
 a {
-  color: var(--magenta);
+  color: var(--accent);
   text-decoration: none;
 }
 a:hover {
@@ -83,8 +97,8 @@ a:hover {
 code {
   font-family: var(--mono);
   font-size: 0.88em;
-  background: var(--panel-2);
-  border: 1px solid var(--divider-2);
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
   border-radius: 3px;
   padding: 1px 5px;
   color: var(--text-2);
@@ -92,7 +106,8 @@ code {
 
 small {
   font-size: 0.8em;
-  color: var(--text-muted);
+  color: var(--muted);
+  line-height: 1.6;
 }
 
 b, strong {
@@ -100,19 +115,23 @@ b, strong {
   font-weight: 600;
 }
 
+h1 {
+  display: none;
+}
+
 /* ==========================================
-   2. ヘッダー・タイトル
+   ヘッダー・タイトル
    ========================================== */
 header {
   background: transparent;
   margin-bottom: 20px;
-  padding: 44px 0 0;
+  padding: 30px 0 0;
   text-align: center;
 }
 
 .subtitle {
   font-size: 0.7em;
-  color: var(--text-muted);
+  color: var(--muted);
   letter-spacing: 0.35em;
   margin: 0 auto 10px;
 }
@@ -131,13 +150,11 @@ header {
   border: none;
   box-shadow: none;
   border-radius: 12px;
-  border-bottom: 2px solid var(--magenta-d);
+  border-bottom: 2px solid var(--accent-br);
 }
 
-h1 { display: none; }
-
 /* ==========================================
-   3. 格言
+   格言
    ========================================== */
 #maxim-display-container {
   text-align: center;
@@ -149,36 +166,46 @@ h1 { display: none; }
   margin: 0;
   font-style: italic;
   font-weight: 300;
-  color: var(--text-muted);
+  color: var(--muted);
   line-height: 1.5;
 }
 
 #maxim-display-container .maxim-text    { font-size: 0.88em; }
-#maxim-display-container .maxim-speaker { font-size: 0.72em; color: var(--text-dim); }
+#maxim-display-container .maxim-speaker { font-size: 0.72em; color: var(--dim); }
 
 /* ==========================================
-   4. セクション見出し
+   セクション見出し h2
    ========================================== */
 h2 {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.12em;
-  color: var(--magenta);
-  padding: 14px 15px 10px 22px;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  padding: 16px 16px 8px 24px;
   margin-top: 20px;
   position: relative;
-  border-bottom: 1px solid var(--divider);
+  border-bottom: none;
 }
 
 h2::before {
   content: "";
   position: absolute;
   left: 14px;
-  top: 14px;
-  bottom: 10px;
+  top: 16px;
+  bottom: 8px;
   width: 3px;
-  background: linear-gradient(180deg, var(--magenta) 0%, var(--gold) 100%);
+  background: linear-gradient(180deg, var(--accent) 0%, var(--green) 100%);
   border-radius: 2px;
+}
+
+h2::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 14px;
+  width: 70%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(179,138,0,0.3), transparent);
 }
 
 h3 {
@@ -187,19 +214,19 @@ h3 {
   margin-top: 18px;
   margin-bottom: 8px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
 
 h4 {
   font-size: 0.92em;
-  color: var(--text-muted);
+  color: var(--muted);
   margin-top: 14px;
   margin-bottom: 6px;
   font-weight: 500;
 }
 
 /* ==========================================
-   5. マニュアル
+   マニュアル・デバッグ
    ========================================== */
 .manual-header,
 .debug-log-header {
@@ -210,33 +237,33 @@ h4 {
   cursor: pointer;
   user-select: none;
   font-weight: 600;
-  border-top: 1px solid var(--divider);
-  border-bottom: 1px solid var(--divider);
-  background: var(--panel);
-  border-radius: 6px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   letter-spacing: 0.05em;
   transition: background 0.15s;
 }
 
-.manual-header:hover,
-.debug-log-header:hover {
-  background: var(--panel-2);
+.manual-header:hover {
+  background: var(--bg-2);
 }
 
 .debug-log-header {
   font-size: 0.7em;
-  color: var(--text-muted);
+  color: var(--muted);
   padding: 8px 15px;
   margin-top: 15px;
+}
+
+.debug-log-header:hover {
+  background: var(--bg-2);
 }
 
 .manual-content {
   display: none;
   padding: 15px;
   margin: 0 0 15px;
-  background: var(--panel);
-  border-left: 3px solid var(--magenta-br);
-  border-radius: 0 0 6px 6px;
+  background: #fff;
+  border-left: 3px solid var(--accent-br);
   font-size: 0.88em;
   line-height: 1.65;
   color: var(--text-2);
@@ -244,14 +271,14 @@ h4 {
 
 .manual-content h3 {
   font-size: 1em;
-  color: var(--magenta);
-  border-bottom: 1px solid var(--divider);
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 5px;
   margin-top: 16px;
 }
 
 .manual-content h4 {
-  color: var(--gold);
+  color: var(--green);
 }
 
 .manual-content table {
@@ -262,7 +289,7 @@ h4 {
 
 .manual-content th,
 .manual-content td {
-  border: 1px solid var(--divider-2);
+  border: 1px solid var(--border-2);
   padding: 7px 6px;
   text-align: left;
   vertical-align: top;
@@ -270,8 +297,8 @@ h4 {
 }
 
 .manual-content th {
-  background: var(--panel-2);
-  color: var(--text-muted);
+  background: var(--bg-2);
+  color: var(--muted);
   font-weight: 600;
   letter-spacing: 0.05em;
 }
@@ -290,128 +317,180 @@ h4 {
 .manual-content li {
   margin-bottom: 5px;
   color: var(--text-2);
+  line-height: 1.7;
 }
 
 .manual-note {
   font-size: 0.82em;
-  color: var(--text-muted);
+  color: var(--muted);
   margin-top: 8px;
   padding: 6px 10px;
-  border-left: 2px solid var(--divider-2);
+  border-left: 2px solid var(--border-2);
 }
 
 .manual-disclaimer {
   font-size: 0.8em;
-  color: var(--text-dim);
+  color: var(--dim);
   margin-top: 12px;
   line-height: 1.7;
 }
 
+.debug-log {
+  display: none;
+  background: #384e38;
+  color: #f0fff0;
+  padding: 10px 12px;
+  height: 100px;
+  overflow-y: scroll;
+  font-family: var(--mono);
+  border-radius: 6px;
+  font-size: 0.72em;
+  max-width: 600px;
+  margin: 0 auto 15px;
+  line-height: 1.6;
+}
+
 /* ==========================================
-   6. カードパネル
+   カードパネル（input-group / result-section）
    ========================================== */
 .input-group {
-  margin: 0 0 20px;
-  padding: 18px 15px;
+  margin: 0 14px 18px;
+  padding: 14px;
   border-radius: 10px;
   background: var(--panel);
-  border: 1px solid var(--divider);
-  border-top: 2px solid var(--gold-br);
+  box-shadow: 3px 3px 8px rgba(0,0,0,0.08), -2px -2px 6px rgba(255,255,255,0.85);
+  border: none;
+  border-top: 2px solid var(--accent);
+  box-sizing: border-box;
   position: relative;
 }
 
 .result-section {
-  margin: 0 0 20px;
-  padding: 18px 15px;
+  margin: 0 14px 18px;
+  padding: 14px;
   border-radius: 10px;
   background: var(--panel);
-  border: 1px solid var(--divider);
+  box-shadow: 3px 3px 8px rgba(0,0,0,0.08), -2px -2px 6px rgba(255,255,255,0.85);
+  border: none;
+  box-sizing: border-box;
 }
 
 /* ==========================================
-   7. 入力フィールド
+   入力フィールド
    ========================================== */
 .input-item {
   margin-bottom: 14px;
 }
 
-.input-item label,
 label {
   display: block;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--text-muted);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  color: var(--muted) !important;
+  letter-spacing: 0.06em;
   margin-bottom: 5px;
 }
 
 select,
 input[type="number"],
-input[type="text"],
-textarea {
-  width: 100%;
-  padding: 9px 12px;
-  box-sizing: border-box;
-  border: 1px solid var(--panel-3);
-  border-radius: 6px;
-  font-size: 1em;
-  font-family: var(--sans);
-  background: var(--bg-2);
-  color: var(--text);
-  transition: border-color 0.15s, box-shadow 0.15s;
-  outline: none;
-  -webkit-appearance: none;
+input[type="text"] {
+  width: 100% !important;
+  padding: 9px 11px !important;
+  box-sizing: border-box !important;
+  border: none !important;
+  border-radius: 6px !important;
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.08), inset -1px -1px 4px rgba(255,255,255,0.9) !important;
+  font-family: var(--sans) !important;
+  font-size: 14px !important;
+  font-variant-numeric: tabular-nums;
   appearance: none;
-}
-
-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%238a8298' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 30px;
+  -webkit-appearance: none;
+  transition: box-shadow 0.15s;
+  outline: none;
 }
 
 select:focus,
 input[type="number"]:focus,
-input[type="text"]:focus,
-textarea:focus {
-  border-color: var(--magenta-br);
-  box-shadow: 0 0 0 2px var(--magenta-bg);
+input[type="text"]:focus {
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.08), inset -1px -1px 4px rgba(255,255,255,0.9), 0 0 0 2px rgba(179,138,0,0.25) !important;
 }
 
 .local-switch-group {
   display: flex;
   align-items: center;
+  gap: 8px;
   padding: 8px 0;
   margin-bottom: 8px;
   font-size: 0.92em;
   color: var(--text-2);
-  border-top: 1px dashed var(--divider-2);
-  border-bottom: 1px dashed var(--divider-2);
-  gap: 8px;
+  border-top: 1px dashed var(--border-2);
+  border-bottom: 1px dashed var(--border-2);
 }
 
 .local-switch-group input[type="checkbox"] {
   width: auto;
   transform: scale(1.15);
-  accent-color: var(--magenta);
+  accent-color: var(--accent);
 }
 
 /* ==========================================
-   8. 選手データ行
+   風向き入力（kururu）
+   ========================================== */
+.wind-main-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted) !important;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.wind-row {
+  display: flex;
+  gap: 8px;
+}
+
+.wind-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.wind-col label {
+  font-size: 10px;
+  margin-bottom: 3px;
+  color: var(--dim) !important;
+}
+
+.wind-note {
+  font-size: 0.78em;
+  color: var(--dim);
+  margin-top: 6px;
+  line-height: 1.6;
+}
+
+.wind-link {
+  color: var(--accent);
+}
+
+/* ==========================================
+   選手データ行
    ========================================== */
 .player-input-list {
   margin-top: 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .player-row {
-  border-radius: 8px;
-  background: var(--panel-2);
-  border: 1px solid var(--divider);
+  border-radius: 8px !important;
+  background: var(--panel) !important;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.07), -1px -1px 4px rgba(255,255,255,0.8) !important;
+  border: none !important;
+  border-left: 5px solid #ccc !important;
   overflow: hidden;
 }
 
@@ -419,17 +498,18 @@ textarea:focus {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
-  background: var(--panel-3);
+  padding: 8px 12px !important;
+  color: var(--text) !important;
+  font-weight: 600;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  background: transparent !important;
   flex-wrap: wrap;
-  font-size: 0.88em;
-  color: var(--text-2);
-  border-bottom: 1px solid var(--divider);
 }
 
 .player-header > span:first-child {
   font-size: 0.8em;
-  color: var(--text-muted);
+  color: var(--muted);
   font-weight: 600;
   letter-spacing: 0.08em;
   min-width: 50px;
@@ -448,7 +528,7 @@ textarea:focus {
 
 .crown-switch input[type="checkbox"] {
   width: auto;
-  accent-color: var(--gold);
+  accent-color: var(--amber);
 }
 
 .crown-icon {
@@ -461,7 +541,16 @@ textarea:focus {
   align-items: center;
   gap: 4px;
   font-size: 0.82em;
-  color: var(--text-muted);
+  color: var(--muted);
+}
+
+.local-group label,
+.scratch-group label {
+  font-size: 0.82em;
+  color: var(--muted) !important;
+  margin-bottom: 0;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .local-group input[type="checkbox"],
@@ -475,7 +564,7 @@ textarea:focus {
   align-items: center;
   gap: 8px;
   font-size: 0.8em;
-  color: var(--text-muted);
+  color: var(--muted);
 }
 
 .sb-group label {
@@ -485,13 +574,13 @@ textarea:focus {
   font-size: 1em;
   text-transform: none;
   letter-spacing: normal;
-  color: var(--text-muted);
+  color: var(--muted) !important;
   margin-bottom: 0;
 }
 
 .sb-group input[type="radio"] {
   width: auto;
-  accent-color: var(--magenta);
+  accent-color: var(--accent);
 }
 
 .player-fields {
@@ -507,107 +596,68 @@ textarea:focus {
 }
 
 .player-field label {
-  font-size: 9px;
+  font-size: 9px !important;
   letter-spacing: 0.1em;
   margin-bottom: 3px;
-  color: var(--text-dim);
+  color: var(--dim) !important;
   text-transform: uppercase;
 }
 
 .player-field select,
 .player-field input {
-  padding: 6px 8px;
-  font-size: 0.88em;
-  border-radius: 4px;
+  padding: 6px 8px !important;
+  font-size: 13px !important;
+  border-radius: 4px !important;
 }
 
-/* 車番カラー */
-.player-row.id-1 .player-header { border-left: 3px solid #ffffff; }
-.player-row.id-2 .player-header { border-left: 3px solid #1c63b7; }
-.player-row.id-3 .player-header { border-left: 3px solid #e83838; }
-.player-row.id-4 .player-header { border-left: 3px solid #1aa81a; }
-.player-row.id-5 .player-header { border-left: 3px solid #f6e829; }
-.player-row.id-6 .player-header { border-left: 3px solid #2ae8e8; }
-.player-row.id-7 .player-header { border-left: 3px solid #f59700; }
+/* 競輪車番色（ライトモード） */
+.player-row.id-1 { border-left-color: #c8c8c8 !important; }
+.player-row.id-2 { border-left-color: #333333 !important; }
+.player-row.id-3 { border-left-color: #c04040 !important; }
+.player-row.id-4 { border-left-color: #3a6ab0 !important; }
+.player-row.id-5 { border-left-color: #c8a020 !important; }
+.player-row.id-6 { border-left-color: #4a7a4a !important; }
+.player-row.id-7 { border-left-color: #e07020 !important; }
 
 /* ==========================================
-   9. 風向き入力（kururu）
+   予想実行ボタン
    ========================================== */
-.wind-main-label {
-  display: block;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text-muted);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.wind-row {
-  display: flex;
-  gap: 8px;
-}
-
-.wind-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.wind-col label {
-  font-size: 9px;
-  margin-bottom: 3px;
-  color: var(--text-dim);
-}
-
-.wind-note {
-  font-size: 0.78em;
-  color: var(--text-dim);
-  margin-top: 6px;
-  line-height: 1.6;
-}
-
-.wind-link {
-  color: var(--magenta);
-}
-
-/* ==========================================
-   10. ボタン
-   ========================================== */
-button {
-  display: block;
-  width: 100%;
-  padding: 12px 0;
-  margin-top: 14px;
-  background: var(--magenta);
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-family: var(--sans);
-  font-size: 0.95em;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+button[onclick="calculatePrediction()"] {
+  display: block !important;
+  width: calc(100% - 28px) !important;
+  margin: 0 14px 14px !important;
+  padding: 14px !important;
+  background: linear-gradient(180deg, #384e38 0%, #1e2e1e 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-family: var(--sans) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2em !important;
   cursor: pointer;
-  transition: opacity 0.15s, transform 0.1s;
+  box-shadow: 3px 3px 8px rgba(0,0,0,0.25), -1px -1px 4px rgba(255,255,255,0.1) !important;
+  transition: transform 0.1s ease, opacity 0.1s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-button:active {
-  opacity: 0.85;
-  transform: scale(0.985) translateY(1px);
+button[onclick="calculatePrediction()"]:active {
+  transform: scale(0.98);
+  opacity: 0.9;
 }
 
 /* ==========================================
-   11. ライン強度表示
+   予想結果エリア
    ========================================== */
 #bank-tendency-display {
   font-size: 0.82em;
-  color: var(--text-muted);
+  color: var(--muted);
   padding: 8px 10px;
-  background: var(--panel-2);
+  background: var(--bg-2);
   border-radius: 6px;
   margin-bottom: 12px;
-  border-left: 3px solid var(--divider-2);
+  border-left: 3px solid var(--border-2);
+  line-height: 1.6;
 }
 
 .line-display {
@@ -617,91 +667,84 @@ button:active {
   padding: 10px 12px;
   background: var(--bg-2);
   border-radius: 6px;
-  border: 1px solid var(--divider);
+  border: 1px solid var(--border);
   margin-bottom: 12px;
   line-height: 1.7;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
-/* ==========================================
-   12. 天雲指数
-   ========================================== */
 #tenun-index-output {
-  margin: 14px 0;
-  padding: 10px 14px;
-  background: var(--amber-bg);
-  border: 1px solid rgba(227,168,87,0.2);
+  background: var(--amber-bg) !important;
+  border: 1px solid var(--amber-br) !important;
   border-radius: 8px;
+  padding: 12px !important;
+  margin: 8px 0;
 }
 
 .tenun-title {
-  font-size: 0.78em;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: var(--amber);
+  color: var(--amber) !important;
+  font-weight: 600;
+  font-size: 0.82em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-/* ==========================================
-   13. 予想出力（晴天令・荒天令）
-   ========================================== */
-.recommendation {
-  padding: 12px 14px;
-  background: var(--bg-2);
-  border-radius: 8px;
-  border: 1px solid var(--divider);
-  font-size: 0.9em;
-  color: var(--text-2);
-  line-height: 1.8;
-  margin-bottom: 10px;
+/* たまきちゃん画像サイズ制限 */
+#tenun-index-output img {
+  width: 80px !important;
+  height: 80px !important;
+  object-fit: cover;
+  border-radius: 50%;
+  float: left;
+  margin: 0 12px 8px 0;
 }
 
 #seitenrei-output {
-  border-left: 3px solid var(--green);
-  background: var(--green-bg);
+  background: var(--green-bg) !important;
+  border-left: 4px solid var(--green) !important;
+  border-radius: 6px;
+  padding: 12px !important;
+  color: var(--text) !important;
+  margin: 8px 0;
 }
 
 #koutenrei-output {
-  border-left: 3px solid var(--gold);
-  background: var(--gold-bg);
+  background: var(--red-bg) !important;
+  border-left: 4px solid var(--red) !important;
+  border-radius: 6px;
+  padding: 12px !important;
+  color: var(--text) !important;
+  margin: 8px 0;
 }
 
-h3:has(+ #seitenrei-output) {
-  color: var(--green);
-}
-
-h3:has(+ #koutenrei-output) {
-  color: var(--gold);
-}
-
-/* ==========================================
-   14. シナリオ出力（赤口呑縁）
-   ========================================== */
 #scenario-output {
-  margin-top: 10px;
+  background: var(--purple-bg) !important;
+  border: 1px solid var(--purple-br) !important;
+  border-radius: 8px;
+  padding: 12px !important;
+  margin: 8px 0;
+  color: var(--text);
 }
 
-#shakkou-status-board {
-  font-size: 0.8em;
-  color: var(--text-dim);
-  text-align: center;
-  padding: 6px;
+.recommendation {
+  font-size: 0.9em;
+  line-height: 1.8;
+  color: var(--text-2);
 }
 
 .scenario-detail {
-  background: var(--panel-2);
-  border: 1px solid var(--divider);
-  border-radius: 8px;
-  padding: 12px 14px;
+  background: var(--bg-2);
+  border-radius: 6px;
+  padding: 10px 12px;
   margin-bottom: 8px;
 }
 
 .scenario-detail h4 {
-  color: var(--magenta);
+  color: var(--purple);
   font-size: 0.88em;
   margin-top: 0;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .scenario-detail p {
@@ -711,54 +754,75 @@ h3:has(+ #koutenrei-output) {
   line-height: 1.6;
 }
 
-#copy-button-container {
+#shakkou-status-board {
+  font-size: 0.8em;
+  color: var(--dim);
   text-align: center;
+  padding: 6px;
 }
 
 /* ==========================================
-   15. シェアボタン
+   コピーボタン
    ========================================== */
-#share-area,
-.share-align-fixed {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 10px 0;
-  margin: 10px 0;
+#copy-button-container {
+  text-align: center;
+  margin-top: 8px;
+}
+
+#copy-button-container button {
+  background: linear-gradient(180deg, var(--green) 0%, #2a4a2a 100%) !important;
+  color: #fff !important;
+  letter-spacing: 0.16em !important;
+  width: 100% !important;
+  border-radius: 6px !important;
+  border: none !important;
+  font-size: 13px !important;
+  padding: 10px !important;
+  margin-top: 0 !important;
+  cursor: pointer;
+}
+
+/* ==========================================
+   SNS共有ボタン
+   ========================================== */
+#share-area {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 14px 14px !important;
+  margin: 0 !important;
 }
 
 .share-label {
   font-size: 0.78em;
-  color: var(--text-muted);
+  color: var(--muted);
   letter-spacing: 0.1em;
+  margin-right: auto;
 }
 
 .btn-share-box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: var(--panel-2);
-  border: 1px solid var(--divider-2);
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--border-2) !important;
+  background: var(--panel) !important;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.08) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: box-shadow 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .btn-share-box:hover {
-  background: var(--panel-3);
-  border-color: var(--magenta-br);
+  box-shadow: 3px 3px 8px rgba(0,0,0,0.12) !important;
 }
 
-.btn-share-box svg path {
-  fill: var(--text-2);
-}
-
-.icon-x-fix path {
-  fill: var(--text-2);
+.icon-x-fix path,
+.btn-share-box svg path[fill="#06C755"] {
+  /* SVGのfill属性は属性として付与されているため上書き不要 */
 }
 
 .icon-copy-fix {
@@ -766,93 +830,76 @@ h3:has(+ #koutenrei-output) {
 }
 
 /* ==========================================
-   16. デバッグログ
-   ========================================== */
-.debug-log {
-  display: none;
-  background: #0a0810;
-  color: #6db58b;
-  padding: 10px 12px;
-  height: 120px;
-  overflow-y: scroll;
-  font-family: var(--mono);
-  border-radius: 6px;
-  font-size: 0.72em;
-  max-width: 600px;
-  margin: 0 auto 15px;
-  border: 1px solid var(--panel-3);
-  line-height: 1.6;
-}
-
-/* ==========================================
-   17. フッター・リンク
+   フッター・外部リンク
    ========================================== */
 .manual-link-wrap {
   text-align: center;
-  margin: 16px 0 8px;
+  margin: 16px 14px 8px;
 }
 
 .manual-details-link {
   font-size: 0.82em;
-  color: var(--magenta);
+  color: var(--accent);
   text-decoration: none;
-  padding: 6px 14px;
-  border: 1px solid var(--magenta-br);
+  padding: 7px 16px;
+  border: 1px solid var(--accent-br);
   border-radius: 20px;
   display: inline-block;
   transition: background 0.15s;
 }
 
 .manual-details-link:hover {
-  background: var(--magenta-bg);
+  background: var(--accent-bg);
+  text-decoration: none;
 }
 
 .bug-report-container {
   text-align: center;
-  margin: 10px 0;
+  margin: 10px 14px;
 }
 
 .bug-button {
   display: inline-block;
   font-size: 0.8em;
-  color: var(--text-muted);
+  color: var(--muted);
   padding: 6px 18px;
-  border: 1px solid var(--divider-2);
+  border: 1px solid var(--border-2);
   border-radius: 20px;
   text-decoration: none;
   transition: border-color 0.15s, color 0.15s;
 }
 
 .bug-button:hover {
-  border-color: var(--magenta-br);
-  color: var(--magenta);
+  border-color: var(--accent-br);
+  color: var(--accent);
+  text-decoration: none;
 }
 
 .bug-log-container {
   text-align: center;
-  margin: 6px 0 20px;
+  margin: 6px 14px 20px;
 }
 
 .bug-log-desc {
   font-size: 0.78em;
-  color: var(--text-dim);
+  color: var(--dim);
   margin: 0 0 4px;
 }
 
 .bug-log-link {
   font-size: 0.8em;
-  color: var(--text-muted);
+  color: var(--muted);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
 /* ==========================================
-   18. フッター SNS
+   フッター SNS
    ========================================== */
 footer.copyright-footer {
   margin-top: 30px;
   padding: 20px 15px 10px;
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--border);
 }
 
 .footer-sns-row {
@@ -868,17 +915,18 @@ footer.copyright-footer {
   padding: 10px 12px;
   border-radius: 8px;
   background: var(--panel);
-  border: 1px solid var(--divider);
+  border: 1px solid var(--border);
   text-decoration: none;
-  transition: border-color 0.15s;
+  box-shadow: 1px 1px 4px rgba(0,0,0,0.06);
+  transition: box-shadow 0.15s;
 }
 
 .footer-sns-card:hover {
-  border-color: var(--magenta-br);
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.10);
   text-decoration: none;
 }
 
-.footer-sns-card.note .footer-sns-label { color: #41c9b0; }
+.footer-sns-card.note .footer-sns-label  { color: #41a891; }
 .footer-sns-card.x-card .footer-sns-label { color: var(--text); }
 
 .footer-sns-label {
@@ -890,7 +938,7 @@ footer.copyright-footer {
 
 .footer-sns-desc {
   font-size: 0.72em;
-  color: var(--text-muted);
+  color: var(--muted);
   line-height: 1.5;
 }
 
@@ -900,23 +948,347 @@ footer.copyright-footer {
   justify-content: center;
   gap: 8px;
   font-size: 0.75em;
-  color: var(--text-dim);
+  color: var(--dim);
   flex-wrap: wrap;
+  margin-top: 10px;
 }
 
 .footer-link {
-  color: var(--text-dim);
+  color: var(--dim);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
 .footer-divider {
-  color: var(--divider-2);
+  color: var(--border-2);
 }
 
 /* ==========================================
-   19. 体験モード追加 padding（preview-switcher分）
+   ダークモード（prefers-color-scheme: dark）
+   マゼンタネオン × ネイビーブラック
    ========================================== */
-body {
-  padding-top: 44px;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #0c0a14;
+    --bg-2:      #15121f;
+    --panel:     #1a1626;
+    --panel-2:   #221d31;
+    --border:    rgba(255,255,255,0.07);
+    --border-2:  rgba(255,255,255,0.12);
+
+    --text:      #f0ecf8;
+    --text-2:    #c8c1d8;
+    --muted:     #8a8298;
+    --dim:       #5a5470;
+
+    --accent:    #e15bb0;
+    --accent-bg: rgba(225,91,176,0.08);
+    --accent-br: rgba(225,91,176,0.35);
+
+    --green:     #6db58b;
+    --green-bg:  rgba(109,181,139,0.07);
+    --green-br:  rgba(109,181,139,0.35);
+
+    --red:       #d9a93a;
+    --red-bg:    rgba(217,169,58,0.06);
+    --red-br:    rgba(217,169,58,0.30);
+
+    --purple:    #e15bb0;
+    --purple-bg: rgba(225,91,176,0.08);
+    --purple-br: rgba(225,91,176,0.35);
+
+    --amber:     #e3a857;
+    --amber-bg:  rgba(227,168,87,0.07);
+    --amber-br:  rgba(227,168,87,0.25);
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(225,91,176,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 100%, rgba(109,181,139,0.04) 0%, transparent 50%),
+      #0c0a14 !important;
+    color: #f0ecf8 !important;
+  }
+
+  .container {
+    background: #1a1626 !important;
+    box-shadow: none !important;
+    border: 0.5px solid rgba(255,255,255,0.07) !important;
+  }
+
+  h2 {
+    color: #f0ecf8 !important;
+  }
+
+  h2::before {
+    background: linear-gradient(180deg, #e15bb0, #6db58b) !important;
+  }
+
+  h2::after {
+    background: linear-gradient(90deg, rgba(225,91,176,0.4), transparent) !important;
+  }
+
+  a {
+    color: #e15bb0;
+  }
+
+  .manual-content {
+    background: #1a1626;
+    border-left-color: rgba(225,91,176,0.35);
+    color: #c8c1d8;
+  }
+
+  .manual-content th {
+    background: #221d31;
+    color: #8a8298;
+  }
+
+  .manual-content td {
+    border-color: rgba(255,255,255,0.12);
+  }
+
+  .manual-content th {
+    border-color: rgba(255,255,255,0.12);
+  }
+
+  .manual-header,
+  .debug-log-header {
+    color: #c8c1d8;
+    border-top-color: rgba(255,255,255,0.07);
+    border-bottom-color: rgba(255,255,255,0.07);
+  }
+
+  .manual-header:hover,
+  .debug-log-header:hover {
+    background: #221d31;
+  }
+
+  .debug-log {
+    background: #0c0a14 !important;
+    color: #5a5470 !important;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .input-group {
+    background: #1a1626 !important;
+    box-shadow: none !important;
+    border: 0.5px solid rgba(255,255,255,0.12) !important;
+    border-top: 2px solid #e15bb0 !important;
+  }
+
+  select,
+  input[type="number"],
+  input[type="text"] {
+    background: #15121f !important;
+    border: 0.5px solid rgba(255,255,255,0.12) !important;
+    color: #f0ecf8 !important;
+    box-shadow: none !important;
+  }
+
+  select:focus,
+  input[type="number"]:focus,
+  input[type="text"]:focus {
+    border-color: #e15bb0 !important;
+    box-shadow: 0 0 0 2px rgba(225,91,176,0.2) !important;
+  }
+
+  label {
+    color: #8a8298 !important;
+  }
+
+  .local-switch-group {
+    color: #c8c1d8;
+    border-top-color: rgba(255,255,255,0.12);
+    border-bottom-color: rgba(255,255,255,0.12);
+  }
+
+  .player-row {
+    background: #1a1626 !important;
+    box-shadow: none !important;
+    border: 0.5px solid rgba(255,255,255,0.07) !important;
+    border-left-width: 5px !important;
+  }
+
+  .player-header {
+    color: #f0ecf8 !important;
+    border-bottom-color: rgba(255,255,255,0.07) !important;
+  }
+
+  /* 競輪車番色（ダーク・輝度上げ版） */
+  .player-row.id-1 { border-left-color: #9ca3af !important; }
+  .player-row.id-2 { border-left-color: #666666 !important; }
+  .player-row.id-3 { border-left-color: #d64d55 !important; }
+  .player-row.id-4 { border-left-color: #4a80c0 !important; }
+  .player-row.id-5 { border-left-color: #dab03f !important; }
+  .player-row.id-6 { border-left-color: #5a965a !important; }
+  .player-row.id-7 { border-left-color: #f39c12 !important; }
+
+  button[onclick="calculatePrediction()"] {
+    background: linear-gradient(180deg, #e15bb0 0%, #8a2868 100%) !important;
+    box-shadow: 0 0 24px rgba(225,91,176,0.35), 0 6px 16px rgba(0,0,0,0.4) !important;
+  }
+
+  .result-section {
+    background: #1a1626 !important;
+    box-shadow: none !important;
+    border: 0.5px solid rgba(255,255,255,0.07) !important;
+  }
+
+  #seitenrei-output {
+    background: rgba(109,181,139,0.07) !important;
+    border-left-color: #6db58b !important;
+    color: #f0ecf8 !important;
+  }
+
+  #koutenrei-output {
+    background: rgba(217,169,58,0.06) !important;
+    border-left-color: #d9a93a !important;
+    color: #f0ecf8 !important;
+  }
+
+  #tenun-index-output {
+    background: rgba(227,168,87,0.07) !important;
+    border-color: rgba(227,168,87,0.25) !important;
+    color: #f0ecf8 !important;
+  }
+
+  .tenun-title {
+    color: #e3a857 !important;
+  }
+
+  #scenario-output {
+    background:
+      radial-gradient(circle at 100% 0%, rgba(225,91,176,0.10), transparent 60%),
+      #1a1626 !important;
+    border-color: rgba(225,91,176,0.35) !important;
+    color: #f0ecf8 !important;
+  }
+
+  .scenario-detail {
+    background: #221d31;
+  }
+
+  .scenario-detail h4 {
+    color: #e15bb0;
+  }
+
+  .scenario-detail p {
+    color: #c8c1d8;
+  }
+
+  .line-display {
+    background: #15121f;
+    border-color: rgba(255,255,255,0.07);
+    color: #c8c1d8;
+  }
+
+  #bank-tendency-display {
+    background: #15121f;
+    border-left-color: rgba(255,255,255,0.12);
+    color: #8a8298;
+  }
+
+  #copy-button-container button {
+    background: linear-gradient(180deg, #6db58b 0%, #2e4f3c 100%) !important;
+  }
+
+  .btn-share-box {
+    background: #000 !important;
+    border-color: #444 !important;
+    box-shadow: none !important;
+  }
+
+  .icon-x-fix {
+    fill: #ffffff !important;
+  }
+
+  .icon-copy-fix {
+    stroke: #ffffff !important;
+  }
+
+  #share-area .share-label {
+    color: #5a5470;
+  }
+
+  .manual-link-wrap a,
+  .manual-details-link {
+    color: #e15bb0;
+    border-color: rgba(225,91,176,0.35);
+  }
+
+  .manual-details-link:hover {
+    background: rgba(225,91,176,0.08);
+  }
+
+  .bug-button {
+    color: #8a8298;
+    border-color: rgba(255,255,255,0.12);
+  }
+
+  .bug-button:hover {
+    border-color: rgba(225,91,176,0.35);
+    color: #e15bb0;
+  }
+
+  .bug-log-desc {
+    color: #5a5470;
+  }
+
+  .bug-log-link {
+    color: #8a8298;
+  }
+
+  footer.copyright-footer {
+    border-top-color: rgba(255,255,255,0.07);
+  }
+
+  .footer-sns-card {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(255,255,255,0.07);
+    box-shadow: none;
+  }
+
+  .footer-sns-card.note {
+    background: rgba(65,201,180,0.08) !important;
+    border-color: rgba(65,201,180,0.25) !important;
+  }
+
+  .footer-sns-card.note .footer-sns-label {
+    color: #41c9b4 !important;
+  }
+
+  .footer-sns-card.x-card {
+    background: rgba(200,200,200,0.06) !important;
+    border-color: rgba(200,200,200,0.15) !important;
+  }
+
+  .footer-sns-card.x-card .footer-sns-label {
+    color: #ccc !important;
+  }
+
+  .footer-sns-desc {
+    color: #5a5470;
+  }
+
+  .footer-bottom-row {
+    color: #5a5470;
+  }
+
+  .footer-link {
+    color: #5a5470;
+  }
+
+  .footer-divider {
+    color: rgba(255,255,255,0.12);
+  }
+
+  code {
+    background: #221d31;
+    border-color: rgba(255,255,255,0.12);
+    color: #c8c1d8;
+  }
+
+  small {
+    color: #8a8298;
+  }
 }
