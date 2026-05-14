@@ -421,6 +421,13 @@ async function invokeShakkouDonperi(basePlayers, context) {
 
     app.logMessage(`[赤口] 世界蛇回路:嚥下開始 (${TOTAL_ITERATIONS}世界線)`);
 
+    // ループ前に競り入力の有無を1回だけ判定
+    const seriInfos = context.seriInfos || [];
+    const hasSeri = seriInfos.length > 0;
+    if (!hasSeri) {
+        app.logMessage('[SERI] 競り入力がないため、競り補正はスキップします。');
+    }
+
     const allResults = [];
 
     for (let start = 0; start < TOTAL_ITERATIONS; start += BATCH_SIZE) {
@@ -437,7 +444,7 @@ async function invokeShakkouDonperi(basePlayers, context) {
             }
             // 展開層（カント捲りペナルティ・イン突きブースト）
             if (typeof app.applyTacticalAdjustments === 'function') {
-                app.applyTacticalAdjustments(players, context.BANK_DATA, lines, context.seriInfos || []);
+                app.applyTacticalAdjustments(players, context.BANK_DATA, lines, seriInfos);
             }
 
             players.forEach(p => {
@@ -454,9 +461,9 @@ async function invokeShakkouDonperi(basePlayers, context) {
                 }
             });
 
-            // 競り補正
-            if (typeof app.applySeriCorrection === 'function') {
-                app.applySeriCorrection(players, context.seriInfos || []);
+            // 競り補正（競りあり時のみ・ループ内ログ抑制）
+            if (hasSeri && typeof app.applySeriCorrection === 'function') {
+                app.applySeriCorrection(players, seriInfos, true);
             }
 
             // 荒天令バイアス（W1以降のカオス世界線のみ）

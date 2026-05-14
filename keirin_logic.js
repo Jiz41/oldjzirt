@@ -638,29 +638,31 @@ function calculateLineCoeffs(players, settings) {
 // ====================================================================================
 // applySeriCorrection
 // ====================================================================================
-function applySeriCorrection(scoredPlayers, allSeriInfos) {
+function applySeriCorrection(scoredPlayers, allSeriInfos, silent) {
     if (allSeriInfos.length === 0) {
-        app.logMessage("[SERI] 競り入力がないため、競り補正はスキップします。");
+        if (!silent) app.logMessage("[SERI] 競り入力がないため、競り補正はスキップします。");
         return scoredPlayers;
     }
-    app.logMessage(`[SERI] 競り補正処理（${allSeriInfos.length}件）を開始します。`);
+    if (!silent) app.logMessage(`[SERI] 競り補正処理（${allSeriInfos.length}件）を開始します。`);
 
     allSeriInfos.forEach(seriInfo => {
         const winner = scoredPlayers.find(p => p.id === seriInfo.winner);
         if (winner) {
             winner.final_score = winner.final_score * (1 + SERI_WIN_BONUS) * (1 - SERI_FATIGUE_PENALTY_IN);
-            app.logMessage(`[SERI] 競り勝者 選手${winner.id}: スコア微増/体力減点補正が適用されました。`);
+            if (!silent) app.logMessage(`[SERI] 競り勝者 選手${winner.id}: スコア微増/体力減点補正が適用されました。`);
         }
         const loser = scoredPlayers.find(p => p.id === seriInfo.loser);
         if (loser) {
             loser.final_score *= (1 - SERI_FATIGUE_PENALTY_OUT);
-            app.logMessage(`[SERI] 競り敗者 選手${loser.id}: スコア大幅減点補正が適用されました。`);
+            if (!silent) app.logMessage(`[SERI] 競り敗者 選手${loser.id}: スコア大幅減点補正が適用されました。`);
         }
     });
 
-    scoredPlayers.forEach(p => {
-        app.logMessage(`[SERI] 選手ID ${p.id}: 競り処理後のスコアは ${p.final_score.toFixed(3)} になりました。`);
-    });
+    if (!silent) {
+        scoredPlayers.forEach(p => {
+            app.logMessage(`[SERI] 選手ID ${p.id}: 競り処理後のスコアは ${p.final_score.toFixed(3)} になりました。`);
+        });
+    }
 
     return scoredPlayers;
 }
