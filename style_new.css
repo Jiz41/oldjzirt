@@ -7,42 +7,45 @@
    ライトモード変数（デフォルト）
    ========================================== */
 :root {
-  --bg:        #fafaf8;
-  --bg-2:      #f0ede8;
-  --panel:     #fafaf8;
-  --panel-2:   #f0ede8;
-  --border:    rgba(0,0,0,0.08);
-  --border-2:  rgba(0,0,0,0.12);
+  --bg:        #f6f0e2;
+  --bg-2:      #fcf8ec;
+  --panel:     #fcf8ec;
+  --panel-2:   #f6f0e2;
+  --border:    rgba(197,181,154,0.4);
+  --border-2:  #c5b59a;
 
-  --text:      #1a1a18;
-  --text-2:    #3a3830;
-  --muted:     #7a7468;
-  --dim:       #a09890;
+  --text:      #1a1612;
+  --text-2:    #3a3020;
+  --muted:     #6b5e4a;
+  --dim:       #a09880;
 
-  /* アクセント：金・琥珀 */
-  --accent:    #b38a00;
-  --accent-bg: rgba(179,138,0,0.07);
-  --accent-br: rgba(179,138,0,0.30);
+  /* アクセント：朱印朱 */
+  --accent:    #b8362a;
+  --accent-bg: rgba(184,54,42,0.07);
+  --accent-br: rgba(184,54,42,0.30);
 
-  /* 晴天令：深緑・苔 */
-  --green:     #4a7a4a;
-  --green-bg:  rgba(74,122,74,0.07);
-  --green-br:  rgba(74,122,74,0.30);
+  /* 晴天令：抹茶 */
+  --green:     #5f7a3e;
+  --green-bg:  rgba(95,122,62,0.08);
+  --green-br:  rgba(95,122,62,0.35);
 
-  /* 荒天令：朱・茜 */
-  --red:       #c07070;
-  --red-bg:    rgba(192,112,112,0.07);
-  --red-br:    rgba(192,112,112,0.30);
+  /* 荒天令：金茶（--redエイリアスで参照箇所を維持） */
+  --red:       #a07a2c;
+  --red-bg:    rgba(160,122,44,0.08);
+  --red-br:    rgba(160,122,44,0.32);
+  --gold:      #a07a2c;
+  --gold-bg:   rgba(160,122,44,0.08);
+  --gold-br:   rgba(160,122,44,0.32);
 
-  /* 赤口呑縁：深紫・藤 */
-  --purple:    #9b6bb5;
-  --purple-bg: rgba(155,107,181,0.07);
-  --purple-br: rgba(155,107,181,0.30);
+  /* 赤口呑縁：紺藍 */
+  --purple:    #2a4a7c;
+  --purple-bg: rgba(42,74,124,0.07);
+  --purple-br: rgba(42,74,124,0.30);
 
-  /* 天雲指数：山吹・金 */
-  --amber:     #d6a300;
-  --amber-bg:  rgba(214,163,0,0.07);
-  --amber-br:  rgba(214,163,0,0.28);
+  /* 天雲指数：金茶 */
+  --amber:     #a07a2c;
+  --amber-bg:  rgba(160,122,44,0.07);
+  --amber-br:  rgba(160,122,44,0.30);
 
   --sans:  'Noto Sans JP','Hiragino Sans','Yu Gothic UI',-apple-system,sans-serif;
   --serif: 'Noto Serif JP','Hiragino Mincho ProN','Yu Mincho',serif;
@@ -1002,49 +1005,52 @@ footer.copyright-footer {
    ========================================== */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg:        #0c0a14;
-    --bg-2:      #15121f;
-    --panel:     #1a1626;
-    --panel-2:   #221d31;
-    --border:    rgba(255,255,255,0.07);
-    --border-2:  rgba(255,255,255,0.12);
+    --bg:        #1c1815;
+    --bg-2:      #241e1a;
+    --panel:     #241e1a;
+    --panel-2:   #2e2620;
+    --border:    rgba(58,49,42,0.8);
+    --border-2:  #3a312a;
 
-    --text:      #f0ecf8;
-    --text-2:    #c8c1d8;
-    --muted:     #8a8298;
-    --dim:       #5a5470;
+    --text:      #efe5d2;
+    --text-2:    #d4c4a8;
+    --muted:     #8a7a68;
+    --dim:       #5a4a3a;
 
-    --accent:    #e15bb0;
-    --accent-bg: rgba(225,91,176,0.08);
-    --accent-br: rgba(225,91,176,0.35);
+    --accent:    #c8392f;
+    --accent-bg: rgba(200,57,47,0.10);
+    --accent-br: rgba(200,57,47,0.35);
 
-    --green:     #6db58b;
-    --green-bg:  rgba(109,181,139,0.07);
-    --green-br:  rgba(109,181,139,0.35);
+    --green:     #7a9b85;
+    --green-bg:  rgba(122,155,133,0.08);
+    --green-br:  rgba(122,155,133,0.32);
 
-    --red:       #d9a93a;
-    --red-bg:    rgba(217,169,58,0.06);
-    --red-br:    rgba(217,169,58,0.30);
+    --red:       #d4a13a;
+    --red-bg:    rgba(212,161,58,0.08);
+    --red-br:    rgba(212,161,58,0.30);
+    --gold:      #d4a13a;
+    --gold-bg:   rgba(212,161,58,0.08);
+    --gold-br:   rgba(212,161,58,0.30);
 
-    --purple:    #e15bb0;
-    --purple-bg: rgba(225,91,176,0.08);
-    --purple-br: rgba(225,91,176,0.35);
+    --purple:    #c8392f;
+    --purple-bg: rgba(200,57,47,0.10);
+    --purple-br: rgba(200,57,47,0.35);
 
-    --amber:     #e3a857;
-    --amber-bg:  rgba(227,168,87,0.07);
-    --amber-br:  rgba(227,168,87,0.25);
+    --amber:     #e8d4a8;
+    --amber-bg:  rgba(232,212,168,0.08);
+    --amber-br:  rgba(232,212,168,0.25);
   }
 
   body {
     background:
-      radial-gradient(ellipse at 50% 0%, rgba(225,91,176,0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 100%, rgba(109,181,139,0.04) 0%, transparent 50%),
-      #0c0a14 !important;
+      radial-gradient(ellipse at 50% 0%, rgba(200,57,47,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 100%, rgba(122,155,133,0.04) 0%, transparent 50%),
+      #1c1815 !important;
     color: #f0ecf8 !important;
   }
 
   .container {
-    background: #1a1626 !important;
+    background: #241e1a !important;
     box-shadow: none !important;
     border: 0.5px solid rgba(255,255,255,0.07) !important;
   }
@@ -1054,25 +1060,25 @@ footer.copyright-footer {
   }
 
   h2::before {
-    background: linear-gradient(180deg, #e15bb0, #6db58b) !important;
+    background: linear-gradient(180deg, #c8392f, #7a9b85) !important;
   }
 
   h2::after {
-    background: linear-gradient(90deg, rgba(225,91,176,0.4), transparent) !important;
+    background: linear-gradient(90deg, rgba(200,57,47,0.4), transparent) !important;
   }
 
   a {
-    color: #e15bb0;
+    color: #c8392f;
   }
 
   .manual-content {
-    background: #1a1626;
-    border-left-color: rgba(225,91,176,0.35);
+    background: #241e1a;
+    border-left-color: rgba(200,57,47,0.35);
     color: #c8c1d8;
   }
 
   .manual-content th {
-    background: #221d31;
+    background: #2e2620;
     color: #8a8298;
   }
 
@@ -1093,26 +1099,26 @@ footer.copyright-footer {
 
   .manual-header:hover,
   .debug-log-header:hover {
-    background: #221d31;
+    background: #2e2620;
   }
 
   .debug-log {
-    background: #0c0a14 !important;
+    background: #1c1815 !important;
     color: #5a5470 !important;
     border: 1px solid rgba(255,255,255,0.07);
   }
 
   .input-group {
-    background: #1a1626 !important;
+    background: #241e1a !important;
     box-shadow: none !important;
     border: 0.5px solid rgba(255,255,255,0.12) !important;
-    border-top: 2px solid #e15bb0 !important;
+    border-top: 2px solid #c8392f !important;
   }
 
   select,
   input[type="number"],
   input[type="text"] {
-    background: #15121f !important;
+    background: #241e1a !important;
     border: 0.5px solid rgba(255,255,255,0.12) !important;
     color: #f0ecf8 !important;
     box-shadow: none !important;
@@ -1121,8 +1127,8 @@ footer.copyright-footer {
   select:focus,
   input[type="number"]:focus,
   input[type="text"]:focus {
-    border-color: #e15bb0 !important;
-    box-shadow: 0 0 0 2px rgba(225,91,176,0.2) !important;
+    border-color: #c8392f !important;
+    box-shadow: 0 0 0 2px rgba(200,57,47,0.2) !important;
   }
 
   label {
@@ -1136,7 +1142,7 @@ footer.copyright-footer {
   }
 
   .player-row {
-    background: #1a1626 !important;
+    background: #241e1a !important;
     box-shadow: none !important;
     border: 0.5px solid rgba(255,255,255,0.07) !important;
     border-left-width: 5px !important;
@@ -1157,19 +1163,19 @@ footer.copyright-footer {
   .player-row.id-7 { border-left-color: #f39c12 !important; }
 
   button[onclick="calculatePrediction()"] {
-    background: linear-gradient(180deg, #e15bb0 0%, #8a2868 100%) !important;
-    box-shadow: 0 0 24px rgba(225,91,176,0.35), 0 6px 16px rgba(0,0,0,0.4) !important;
+    background: linear-gradient(180deg, #c8392f 0%, #7a1e18 100%) !important;
+    box-shadow: 0 0 24px rgba(200,57,47,0.35), 0 6px 16px rgba(0,0,0,0.4) !important;
   }
 
   .result-section {
-    background: #1a1626 !important;
+    background: #241e1a !important;
     box-shadow: none !important;
     border: 0.5px solid rgba(255,255,255,0.07) !important;
   }
 
   #seitenrei-output {
-    background: rgba(109,181,139,0.07) !important;
-    border-left-color: #6db58b !important;
+    background: rgba(122,155,133,0.08) !important;
+    border-left-color: #7a9b85 !important;
     color: #f0ecf8 !important;
   }
 
@@ -1191,18 +1197,18 @@ footer.copyright-footer {
 
   #scenario-output {
     background:
-      radial-gradient(circle at 100% 0%, rgba(225,91,176,0.10), transparent 60%),
-      #1a1626 !important;
-    border-color: rgba(225,91,176,0.35) !important;
+      radial-gradient(circle at 100% 0%, rgba(200,57,47,0.10), transparent 60%),
+      #241e1a !important;
+    border-color: rgba(200,57,47,0.35) !important;
     color: #f0ecf8 !important;
   }
 
   .scenario-detail {
-    background: #221d31;
+    background: #2e2620;
   }
 
   .scenario-detail h4 {
-    color: #e15bb0;
+    color: #c8392f;
   }
 
   .scenario-detail p {
@@ -1222,13 +1228,13 @@ footer.copyright-footer {
   }
 
   #bank-tendency-display {
-    background: #15121f;
+    background: #241e1a;
     border-left-color: rgba(255,255,255,0.12);
     color: #8a8298;
   }
 
   #copy-button-container button {
-    background: linear-gradient(180deg, #6db58b 0%, #2e4f3c 100%) !important;
+    background: linear-gradient(180deg, #7a9b85 0%, #2d4a3a 100%) !important;
   }
 
   .btn-share-box {
@@ -1251,12 +1257,12 @@ footer.copyright-footer {
 
   .manual-link-wrap a,
   .manual-details-link {
-    color: #e15bb0;
-    border-color: rgba(225,91,176,0.35);
+    color: #c8392f;
+    border-color: rgba(200,57,47,0.35);
   }
 
   .manual-details-link:hover {
-    background: rgba(225,91,176,0.08);
+    background: rgba(200,57,47,0.10);
   }
 
   .bug-button {
@@ -1265,8 +1271,8 @@ footer.copyright-footer {
   }
 
   .bug-button:hover {
-    border-color: rgba(225,91,176,0.35);
-    color: #e15bb0;
+    border-color: rgba(200,57,47,0.35);
+    color: #c8392f;
   }
 
   .bug-log-desc {
@@ -1322,7 +1328,7 @@ footer.copyright-footer {
   }
 
   code {
-    background: #221d31;
+    background: #2e2620;
     border-color: rgba(255,255,255,0.12);
     color: #c8c1d8;
   }
