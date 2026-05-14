@@ -1,6 +1,7 @@
 /* ==========================================
    style_new.css — v6 和モダン×デジタルレトロ / マゼンタネオン
    ========================================== */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
 
 /* ==========================================
    ライトモード変数（デフォルト）
@@ -43,9 +44,9 @@
   --amber-bg:  rgba(214,163,0,0.07);
   --amber-br:  rgba(214,163,0,0.28);
 
-  --sans:  "Hiragino Sans","Yu Gothic UI","Noto Sans JP",-apple-system,sans-serif;
-  --serif: "Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;
-  --mono:  "SF Mono","JetBrains Mono","Roboto Mono",monospace;
+  --sans:  'Noto Sans JP','Hiragino Sans','Yu Gothic UI',-apple-system,sans-serif;
+  --serif: 'Noto Serif JP','Hiragino Mincho ProN','Yu Mincho',serif;
+  --mono:  'SF Mono','JetBrains Mono','Roboto Mono',monospace;
 }
 
 /* ==========================================
@@ -417,6 +418,10 @@ input[type="text"]:focus {
   box-shadow: inset 2px 2px 5px rgba(0,0,0,0.08), inset -1px -1px 4px rgba(255,255,255,0.9), 0 0 0 2px rgba(179,138,0,0.25) !important;
 }
 
+label[for="line-input"] {
+  margin-top: 16px !important;
+}
+
 .local-switch-group {
   display: flex;
   align-items: center;
@@ -661,17 +666,45 @@ button[onclick="calculatePrediction()"]:active {
 }
 
 .line-display {
-  font-family: var(--mono);
-  font-size: 0.88em;
-  color: var(--text-2);
-  padding: 10px 12px;
-  background: var(--bg-2);
-  border-radius: 6px;
-  border: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
   margin-bottom: 12px;
-  line-height: 1.7;
-  white-space: pre-wrap;
-  word-break: break-word;
+}
+
+.line-box {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1em;
+  transition: all 0.3s ease;
+  line-height: 1.6;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
+}
+
+.line-box:hover {
+  transform: translateY(-2px);
+}
+
+.seri-segment {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.9em;
+  font-weight: bold;
+  border: 1px dashed var(--border-2);
+  border-radius: 4px;
+  padding: 1px 3px;
+  margin-right: 5px;
+}
+
+.seri-arrow {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: var(--red);
+  margin: 0 2px;
 }
 
 #tenun-index-output {
@@ -1176,10 +1209,16 @@ footer.copyright-footer {
     color: #c8c1d8;
   }
 
-  .line-display {
-    background: #15121f;
-    border-color: rgba(255,255,255,0.07);
-    color: #c8c1d8;
+  .line-box {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  .seri-segment {
+    border-color: rgba(255,255,255,0.20);
+  }
+
+  .seri-arrow {
+    color: #d9a93a;
   }
 
   #bank-tendency-display {
