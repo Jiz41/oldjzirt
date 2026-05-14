@@ -1,0 +1,594 @@
+/* ==========================================
+   0. ニューモーフィズム2.0 変数定義
+   ========================================== */
+:root {
+  --nm-bg:          #fafaf8;
+  --nm-raised:      6px 6px 16px #d4d4d1, -6px -6px 16px #ffffff;
+  --nm-raised-sm:   4px 4px 10px #d4d4d1, -4px -4px 10px #ffffff;
+  --nm-inset-sm:    inset 3px 3px 7px #d4d4d1, inset -3px -3px 7px #ffffff;
+}
+
+/* ==========================================
+   1. 基本・システム設定（変更なし）
+   ========================================== */
+html { overflow-y: scroll; }
+body {
+    overflow-x: clip; min-height: 101vh;
+    font-family: 'Noto Sans JP', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0; padding: 0; padding-bottom: 30px;
+    background-color: #fafaf8 !important; 
+    color: #333; -webkit-overflow-scrolling: touch; will-change: transform;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: 0.05em;
+}
+.container {
+    width: calc(100% - 20px);
+    max-width: 600px;
+    margin: 15px auto;
+    background-color: var(--nm-bg);
+    padding: 0;
+    border-radius: 12px;
+    box-shadow: var(--nm-raised) !important;
+    border: none;
+    box-sizing: border-box;
+}
+
+.keep-alive-dot {
+    position: fixed; bottom: 0; right: 0; width: 1px; height: 1px;
+    background-color: transparent; pointer-events: none; z-index: -1;
+    animation: keep-alive 0.1s infinite;
+}
+@keyframes keep-alive { 0% { opacity: 1; } 50% { opacity: 0.99; } 100% { opacity: 1; } }
+
+/* ==========================================
+   2. ヘッダー・タイトル（★ここを一本化・スッキリ修正）
+   ========================================== */
+header {
+    background-color: transparent !important; /* 背景・枠を完全に排除 */
+    margin-bottom: 40px !important;           /* 下との詰まりを解消 */
+    padding: 25px 0 0 0 !important;
+    border: none !important;
+    text-align: center;
+}
+
+.subtitle {
+    font-size: 0.75em !important; 
+    color: #777 !important; 
+    font-style: normal !important; 
+    letter-spacing: 0.3em !important; 
+    margin: 0 auto 10px !important;
+    border: none !important;
+}
+
+.title-image-container {
+    padding: 0 15px;
+}
+
+.title-image {
+    width: 100% !important;
+    max-width: 85% !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 auto !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border-radius: 12px !important; 
+    border-bottom: 3px solid #384e38 !important; 
+}
+
+h1 { display: none; }
+
+/* ==========================================
+   3. 格言・マニュアル・共通パーツ（変更なし）
+   ========================================== */
+#maxim-display-container { text-align: center; padding: 8px 15px; margin: 10px 0 15px 0; }
+#maxim-display-container p { margin: 0; padding: 0; font-style: italic; font-weight: 300; color: #444; line-height: 1.4; }
+#maxim-display-container .maxim-text { font-size: 0.9em; }
+#maxim-display-container .maxim-speaker { font-size: 0.75em; color: #888; }
+
+h2 {
+    font-size: 1.2em;
+    color: #698b69;
+    padding: 15px 15px 8px 22px;
+    margin-top: 25px;
+    border-bottom: none !important;
+    position: relative;
+    letter-spacing: 0.15em;
+}
+
+/* 左側の縦線アクセント */
+h2::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    bottom: 8px;
+    width: 3px;
+    background: linear-gradient(180deg, #b3976d 0%, #698b69 100%);
+    border-radius: 2px;
+}
+
+h2::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 15px;
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(90deg, #b3c7b3 0%, rgba(179, 199, 179, 0) 100%);
+    border-radius: 2px;
+}
+
+/* h3見出し（晴天令・荒天令など） */
+h3 {
+    font-size: 1.1em;
+    color: #2d4a2d;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.input-group {
+    margin: 0 15px 20px 15px;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    background: var(--nm-bg);
+    box-sizing: border-box;
+    box-shadow: var(--nm-raised-sm);
+}
+.result-section { 
+    margin: 0 15px 20px 15px; 
+    padding: 15px; 
+    border: 1px solid #e0e0e0; 
+    border-radius: 8px; 
+    background: 
+        linear-gradient(180deg,
+            #fcfcf0 900px,
+            #d4e3c8 940px,
+            #a8c4a8 980px,
+            #7a9b8e 1010px,
+            #557a6a 1040px,
+            #3d5a6a 1070px,
+            #0a0005 1100px
+        );
+    box-sizing: border-box; 
+}
+
+/* --- ヘッダー：背景親和性を高める透過境界線定義 --- */
+.manual-header, .debug-log-header {
+    font-size: 1.05em;
+    color: #698b69;
+    padding: 12px 15px; /* 余白を広げ、視覚的な圧迫を軽減 */
+    margin-top: 10px;
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
+    /* 背景の白に馴染ませ、境界を空気のように軽く見せる透過1px線 */
+    border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+/* --- コンテンツエリア：マットな質感と最小限の強調 --- */
+.manual-content {
+    display: none;
+    padding: 15px;
+    margin: 0 15px 15px 15px;
+    background-color: #ffffff;
+    /* 左右の強調を抑え、外面のマット感に同期させた淡い境界 */
+    border-left: 3px solid rgba(179, 199, 179, 0.5) !important;
+    border-right: 1px solid rgba(179, 199, 179, 0.2) !important;
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+/* --- 内部の見出し：情報の区切りを示す最小限の線 --- */
+.manual-content h3 {
+    font-size: 1.1em;
+    color: #557755;
+    /* 情報の階層を壊さないよう、極薄の透過線で区切る */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
+    padding-bottom: 5px;
+    margin-top: 15px;
+}
+
+/* --- 内部テーブル：視覚負荷を軽減する構造線 --- */
+.manual-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+}
+
+.manual-content th, .manual-content td {
+    /* セル境界を背景色とほぼ同化させ、文字の可読性を優先 */
+    border: 1px solid rgba(0, 0, 0, 0.03) !important;
+    padding: 8px 5px;
+    text-align: left;
+    vertical-align: top;
+    font-size: 0.85em;
+}
+
+.manual-content th {
+    /* ヘッダー背景を淡いマットグレーに設定し、表の構造を明示 */
+    background-color: #fdfdfb;
+    color: #698b69;
+    width: 30%;
+}
+
+/* --- リスト要素：余白の最適化 --- */
+.manual-content ul {
+    padding-left: 20px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.manual-content li {
+    margin-bottom: 4px; /* 行間のリズムを整え、読みやすさを向上 */
+}
+
+
+/* --- デバッグログ見出し：サイズ縮小と左寄せの極致 --- */
+.debug-log-header {
+    font-size: 0.7em !important; /* 従来の約2/3に縮小 */
+    color: #888;
+    padding: 10px 5px 5px 5px;   /* 左右余白を最小化して左へ寄せる */
+    margin-top: 15px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* ダークモード時の色調整もセットで追記 */
+@media (prefers-color-scheme: dark) {
+    .debug-log-header {
+        color: #666 !important; /* 文字をさらに暗くして存在感を抑える */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+}
+
+.debug-log { display: none; background-color: #384e38; color: #f0fff0; padding: 10px; height: 100px; overflow-y: scroll; font-family: 'Courier New', Courier, monospace; border-radius: 5px; font-size: 0.75em; max-width: 600px; margin: 0 auto 15px auto; }
+
+/* ==========================================
+   4. 入力フィールド・コントロール（変更なし）
+   ========================================== */
+.input-item { margin-bottom: 15px; }
+.input-item label { display: block; font-weight: bold; margin-bottom: 5px; color: #5a5a5a; }
+select, input[type="number"], input[type="text"] { width: 100%; padding: 8px; box-sizing: border-box; border: none; border-radius: 4px; font-size: 1em; background-color: var(--nm-bg); box-shadow: var(--nm-inset-sm); }
+
+.local-switch-group { display: flex; align-items: center; padding: 5px 0; margin-bottom: 5px; font-size: 0.95em; color: #555; border-top: 1px dashed #e0e0e0; border-bottom: 1px dashed #e0e0e0; }
+.local-switch-group input[type="checkbox"] { width: auto; margin-right: 8px; margin-left: 0; transform: scale(1.1); vertical-align: middle; }
+
+/* ==========================================
+   5. 選手データ行・枠色指定（変更なし）
+   ========================================== */
+.player-input-list { margin-top: 10px; }
+.player-row { border: none; padding: 0; margin-bottom: 10px; border-radius: 6px; background-color: var(--nm-bg); overflow: hidden; contain: content; backface-visibility: hidden; border-left: 6px solid #ccc !important; box-shadow: var(--nm-raised-sm); }
+.player-header { font-weight: bold; font-size: 1.0em; color: #333; padding: 8px 10px; margin-bottom: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+
+.id-1 { border-left-color: #d1d5db !important; }
+.id-2 { border-left-color: #333 !important; }
+.id-3 { border-left-color: #b94047 !important; }
+.id-4 { border-left-color: #3e6a9e !important; }
+.id-5 { border-left-color: #c9a032 !important; }
+.id-6 { border-left-color: #4a7a4a !important; }
+.id-7 { border-left-color: #e67e22 !important; }
+
+.local-group { display: flex; align-items: center; font-size: 0.75em; color: #698b69; font-weight: bold; margin-right: 10px; }
+.local-group input[type="checkbox"] { width: auto; margin-left: 4px; margin-right: 2px; transform: scale(1.1); }
+.player-fields { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 10px; }
+.player-field { flex: 1 1 23%; min-width: 50px; box-sizing: border-box; }
+.player-field label { display: block; font-size: 0.7em; color: #666; margin-bottom: 2px; }
+.player-field input, .player-field select { width: 100%; padding: 3px 5px; box-sizing: border-box; font-size: 0.85em; }
+.sb-group { display: flex; gap: 6px; font-size: 0.75em; }
+.sb-group label { display: inline-flex; align-items: center; font-weight: normal; color: #666; }
+.sb-group input[type="radio"] { width: auto; margin-left: 2px; }
+
+/* チェックボックス本体は完全に消す */
+.is-gold-cap {
+    display: none;
+}
+
+/* 👑の基本状態（グレーアウト） */
+.crown-icon {
+    cursor: pointer;
+    font-size: 1.3em;
+    filter: grayscale(100%); /* 完全に白黒にする */
+    opacity: 0.3;            /* 薄くする */
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+/* 👑をタップした時（色がつき、周りが光る） */
+.is-gold-cap:checked + .crown-icon {
+    filter: grayscale(0%);   /* 色を戻す */
+    opacity: 1;              /* 濃さを戻す */
+    text-shadow: 0 0 15px #ffd700, 0 0 25px #ffffff; /* 周りを光らせる */
+    transform: scale(1.2);   /* 少し大きくする */
+}
+
+
+/* ==========================================
+   6. 予想結果・出力・天雲指数（変更なし）
+   ========================================== */
+.line-display { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; align-items: center; }
+.line-box {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    line-height: 1.6;
+    box-shadow: var(--nm-raised-sm);
+}
+.line-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 6px 6px 14px #d4d4d1, -6px -6px 14px #ffffff;
+}
+.seri-segment { display: inline-flex; align-items: center; font-size: 0.9em; font-weight: bold; border: 1px dashed #b3c7b3; border-radius: 4px; padding: 1px 3px; margin-right: 5px; }
+.seri-arrow { font-size: 1.1em; font-weight: bold; color: #c07777; margin: 0 2px; }
+#bank-tendency-display { margin-top: 5px; margin-bottom: 10px; padding: 5px 0; font-size: 0.95em; color: #698b69; font-weight: bold; }
+
+.scenario-detail table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 10px; }
+.scenario-detail th, .scenario-detail td { border: 1px solid #efefef; padding: 6px 3px; text-align: center; font-size: 0.85em; word-break: break-all; }
+.scenario-detail th { background-color: #f7f7f7; color: #555; }
+.recommendation { padding: 12px; border-radius: 6px; font-weight: bold; margin-top: 10px; font-size: 0.95em; line-height: 1.6; }
+#seitenrei-output { 
+    background: 
+        linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.7) 100%),
+        repeating-linear-gradient(90deg, 
+            transparent, 
+            transparent 2px, 
+            rgba(105, 139, 105, 0.03) 2px, 
+            rgba(105, 139, 105, 0.03) 3px
+        ),
+        repeating-linear-gradient(0deg, 
+            transparent, 
+            transparent 2px, 
+            rgba(105, 139, 105, 0.03) 2px, 
+            rgba(105, 139, 105, 0.03) 3px
+        ),
+        rgba(230, 245, 230, 0.85);
+    border-left: 5px solid #698b69; 
+    border-right: 2px solid rgba(105, 139, 105, 0.3);
+    color: #1a2a1a;
+    box-shadow: 
+        0 4px 12px rgba(105, 139, 105, 0.15),
+        0 8px 24px rgba(105, 139, 105, 0.08),
+        inset 0 1px 3px rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+#koutenrei-output { 
+    background: 
+        linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.7) 100%),
+        repeating-linear-gradient(90deg, 
+            transparent, 
+            transparent 2px, 
+            rgba(192, 119, 119, 0.03) 2px, 
+            rgba(192, 119, 119, 0.03) 3px
+        ),
+        repeating-linear-gradient(0deg, 
+            transparent, 
+            transparent 2px, 
+            rgba(192, 119, 119, 0.03) 2px, 
+            rgba(192, 119, 119, 0.03) 3px
+        ),
+        rgba(252, 240, 240, 0.85);
+    border-left: 5px solid #c07777; 
+    border-right: 2px solid rgba(192, 119, 119, 0.3);
+    color: #2a1a1a;
+    box-shadow: 
+        0 4px 12px rgba(192, 119, 119, 0.15),
+        0 8px 24px rgba(192, 119, 119, 0.08),
+        inset 0 1px 3px rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.scenario-detail { border: 1px dashed #dcdcdc; padding: 12px; margin-top: 15px; border-radius: 6px; }
+.scenario-detail h4 { font-size: 1.05em; margin: 0 0 10px 0; border-bottom: 1px solid #e0e0e0; padding-bottom: 5px; color: #698b69; }
+
+#results-container { display: none; opacity: 0; transition: opacity 0.5s; }
+#results-container.visible { display: block; opacity: 1; }
+
+.tenun-index-container { 
+    margin: 20px 0; 
+    padding: 18px; 
+    border-radius: 10px; 
+    text-align: left; 
+    border: 2px dashed #d6a300; 
+    background: 
+        linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.5) 100%),
+        #fff9e6;
+    box-shadow: 
+        0 2px 6px rgba(214, 163, 0, 0.12),
+        0 6px 16px rgba(214, 163, 0, 0.08),
+        0 12px 32px rgba(214, 163, 0, 0.05),
+        inset 0 1px 3px rgba(255, 255, 255, 0.6);
+    color: #5a4500;
+}
+
+.tenun-title { font-weight: bold; font-size: 0.95em; color: #8b6d00; margin-bottom: 10px; display: block; border-bottom: 1px solid rgba(139, 109, 0, 0.2); padding-bottom: 5px; }
+
+/* ==========================================
+   7. ボタン・たまきちゃん・不具合報告（変更なし）
+   ========================================== */
+button { width: 100%; padding: 14px; background-color: #384e38 !important; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; font-size: 1.05em; font-weight: bold; letter-spacing: 0.2em; transition: all 0.2s; box-shadow: 5px 5px 12px rgba(0,0,0,0.28), -2px -2px 8px rgba(255,255,255,0.12); }
+button:active { transform: translateY(1px); box-shadow: inset 3px 3px 8px rgba(0,0,0,0.32), inset -1px -1px 4px rgba(255,255,255,0.08); }
+
+.tamaki-display { display: flex !important; flex-direction: row !important; align-items: flex-start !important; }
+.tamaki-character { width: 75px !important; min-width: 75px !important; max-width: 75px !important; height: auto !important; margin-right: 12px !important; flex-shrink: 0 !important; }
+.tamaki-image { width: 100% !important; height: auto !important; display: block !important; }
+.tamaki-speech-bubble {
+    flex: 1 !important;
+    min-width: 0 !important;
+    background: #fafaf8 !important;
+    border: 2px solid #d6a300;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 0.9em;
+    line-height: 1.5;
+    box-sizing: border-box;
+    position: relative;
+    box-shadow: var(--nm-raised-sm);
+    color: #333;
+}
+@media (max-width: 600px) { .tamaki-character { width: 70px !important; min-width: 70px !important; } }
+
+/* --- 不具合報告：背景に完全同化させ、ノイズを排除（共通設定） --- */
+.bug-report-container {
+    text-align: center;
+    padding: 20px 10px;
+    background-color: transparent !important; /* 常に背景色を透過 */
+    border: none !important;                  /* 枠線も排除 */
+}
+
+.bug-button {
+    display: inline-block;
+    padding: 8px 20px;
+    background-color: #666666;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 6px; /* 少し丸みのある角 */
+    font-size: 13px;
+    border: 1px solid rgba(0,0,0,0.1);
+    transition: 0.2s;
+}
+
+.bug-button:hover { background-color: #d93025; border-color: #a50e0e; }
+
+.copyright-footer { text-align: center; font-size: 0.75em; color: #aaa; margin-top: 20px; width: 100%; padding: 15px; box-sizing: border-box; }
+
+.footer-sns-row { display: flex; justify-content: center; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+.footer-sns-card { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 18px; border-radius: 10px; text-decoration: none; transition: all 0.25s; min-width: 160px; }
+.footer-sns-card.note { background: rgba(65, 201, 180, 0.08); border: 1px solid rgba(65, 201, 180, 0.25); color: #41c9b4; }
+.footer-sns-card.note:hover { background: rgba(65, 201, 180, 0.18); border-color: rgba(65, 201, 180, 0.6); box-shadow: 0 0 12px rgba(65, 201, 180, 0.25); transform: translateY(-2px); }
+.footer-sns-card.x-card { background: rgba(200, 200, 200, 0.06); border: 1px solid rgba(200, 200, 200, 0.15); color: #ccc; }
+.footer-sns-card.x-card:hover { background: rgba(200, 200, 200, 0.12); border-color: rgba(200, 200, 200, 0.4); box-shadow: 0 0 12px rgba(200, 200, 200, 0.15); transform: translateY(-2px); }
+.footer-sns-label { font-size: 1.1em; font-weight: bold; letter-spacing: 0.05em; }
+.footer-sns-desc { font-size: 0.85em; opacity: 0.75; letter-spacing: 0.02em; }
+.footer-bottom-row { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; color: #666; }
+.footer-link { color: #666; text-decoration: none; transition: color 0.2s; }
+.footer-link:hover { color: #aaa; }
+.footer-divider { color: #444; }
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --nm-bg:        #1e1e1e;
+        --nm-raised:    6px 6px 16px #111111, -6px -6px 16px #2b2b2b;
+        --nm-raised-sm: 4px 4px 10px #111111, -4px -4px 10px #2b2b2b;
+        --nm-inset-sm:  inset 3px 3px 7px #111111, inset -3px -3px 7px #2b2b2b;
+    }
+    /* --- 全体空間 --- */
+    body { background-color: #121212 !important; color: #e0e0e0 !important; }
+    .container {
+        background-color: var(--nm-bg);
+        box-shadow: var(--nm-raised) !important;
+        border: none !important;
+    }
+
+    /* --- 選手データ：色分けと夜用調整 --- */
+    .player-row { background-color: var(--nm-bg) !important; border: none !important; box-shadow: var(--nm-raised-sm) !important; }
+    .id-1 { border-left: 6px solid #9ca3af !important; } /* グレー系を少し落とす */
+    .id-2 { border-left: 6px solid #555555 !important; } /* 黒を少し持ち上げる */
+    .id-3 { border-left: 6px solid #d64d55 !important; } /* 赤 */
+    .id-4 { border-left: 6px solid #4a80c0 !important; } /* 青 */
+    .id-5 { border-left: 6px solid #dab03f !important; } /* 黄 */
+    .id-6 { border-left: 6px solid #5a965a !important; } /* 緑 */
+    .id-7 { border-left: 6px solid #f39c12 !important; } /* 橙 */
+
+    /* --- 説明書（マニュアル）：枠線を白っぽく強調 --- */
+    .manual-content { background-color: #2a2a2a !important; }
+    .manual-content th, .manual-content td {
+        /* 枠線を「黒系」から「白系（透過）」へ変更 */
+        border: 1px solid rgba(255, 255, 255, 0.12) !important; 
+    }
+    .manual-content th { background-color: #333333 !important; color: #8fb68f !important; }
+    .manual-content h3 { color: #a3c9a3 !important; border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important; }
+
+    /* --- 入力エリア・共通パーツ --- */
+    .input-group {
+        background-color: var(--nm-bg) !important;
+        border: none !important;
+        box-shadow: var(--nm-raised-sm) !important;
+    }
+    .result-section, .scenario-detail {
+        background-color: rgba(37, 37, 37, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+    label, .input-item label, .player-field label, .subtitle { color: #a0b0a0 !important; }
+    select, input[type="number"], input[type="text"], textarea {
+        background-color: var(--nm-bg) !important;
+        color: #e0e0e0 !important;
+        border: none !important;
+        box-shadow: var(--nm-inset-sm) !important;
+    }
+
+      /* --- 選手データの文字色を明るく反転 --- */
+    .player-header {
+        color: #e0e0e0 !important; /* 溶け込みを防止する明るいグレー */
+        border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    /* 各入力項目のラベルも読みやすく補正 */
+    .player-field label {
+        color: #a0b0a0 !important; /* 柔らかな緑がかった白 */
+    }
+
+    /* 内部のテキスト（ラジオボタン横など） */
+    .sb-group label {
+        color: #cccccc !important;
+    }
+  
+      /* --- 操作説明の見出し（外枠の線）を白系の光に反転 --- */
+    .manual-header, .debug-log-header {
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+}
+
+/* --- 共有ボタン：最終防衛策 --- */
+/* ID（#share-area）を使って、ライト・ダーク問わず右寄せを強制 */
+#share-area {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important; /* 右端へ */
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 15px auto 5px auto !important;
+    padding-right: 15px !important;
+    box-sizing: border-box !important;
+}
+
+/* ボタン本体：ライトモード（デフォルト） */
+.btn-share-box {
+    all: unset !important;
+    cursor: pointer !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    border: 1px solid #ddd !important;
+    background-color: #ffffff !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    top: 5px !important;
+}
+
+/* ダークモード：色の上書き */
+@media (prefers-color-scheme: dark) {
+    .btn-share-box { 
+        background-color: #000000 !important; 
+        border-color: #444444 !important; 
+    }
+    .icon-x-fix { fill: #ffffff !important; }
+    .icon-copy-fix { stroke: #ffffff !important; }
+}
