@@ -438,6 +438,9 @@
     transition: filter 0.1s;
 }
 .proxy-btn-race:active { filter: brightness(0.85); }
+@media (prefers-color-scheme: light) {
+    #proxy-input-content { color: #ffffff; }
+}
     `;
     document.head.appendChild(style);
 
