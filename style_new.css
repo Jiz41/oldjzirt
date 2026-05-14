@@ -924,14 +924,14 @@ button[onclick="calculatePrediction()"]:active {
 }
 
 .bug-log-link {
-  display: inline-block;
+  display: inline-block !important;
   font-size: 0.8em;
   color: var(--accent) !important;
-  padding: 6px 18px;
-  border: 1px solid var(--accent-br);
-  border-radius: 6px;
-  background: transparent;
-  text-decoration: none;
+  padding: 6px 18px !important;
+  border: 1px solid var(--accent-br) !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  text-decoration: none !important;
   transition: border-color 0.15s, color 0.15s;
 }
 
