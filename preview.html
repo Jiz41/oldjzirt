@@ -223,7 +223,7 @@ function switchCSS(file) {
     <table>
         <thead>
             <tr>
-                <th style="width: 30%;">項目</th>
+                <th class="col-30">項目</th>
                 <th>入力内容・例</th>
                 <th>解説：システムへの影響</th>
             </tr>
@@ -246,13 +246,13 @@ function switchCSS(file) {
             </tr>
         </tbody>
     </table>
-    <p style="font-size: 0.85em;">※風情報は <a href="https://tenki.jp/lite/leisure/horse/" target="_blank">tenki.jp</a> や <a href="https://kazekeirin.info/" target="_blank">風競輪.info</a> を参照。無風や屋内時は「無風/屋内」を選択してください。</p>
+    <p class="manual-note">※風情報は <a href="https://tenki.jp/lite/leisure/horse/" target="_blank">tenki.jp</a> や <a href="https://kazekeirin.info/" target="_blank">風競輪.info</a> を参照。無風や屋内時は「無風/屋内」を選択してください。</p>
 
     <h3>2. 選手個別データの入力（精度を高める）</h3>
     <table>
         <thead>
             <tr>
-                <th style="width: 30%;">項目</th>
+                <th class="col-30">項目</th>
                 <th>内容・選択</th>
                 <th>解説：入力の目的</th>
             </tr>
@@ -304,7 +304,7 @@ function switchCSS(file) {
     <table>
         <thead>
             <tr>
-                <th style="width: 30%;">状態・項目</th>
+                <th class="col-30">状態・項目</th>
                 <th>書き方（例）</th>
                 <th>解説：計算への反映</th>
             </tr>
@@ -337,7 +337,7 @@ function switchCSS(file) {
     <table>
         <thead>
             <tr>
-                <th style="width: 30%;">出力項目</th>
+                <th class="col-30">出力項目</th>
                 <th>内容と活用方法</th>
             </tr>
         </thead>
@@ -379,7 +379,7 @@ function switchCSS(file) {
     <table>
         <thead>
             <tr>
-                <th style="width: 30%;">要素</th>
+                <th class="col-30">要素</th>
                 <th>説明</th>
             </tr>
         </thead>
@@ -424,14 +424,14 @@ function switchCSS(file) {
     </table>
 
     <h4>🎯 赤口呑縁の活用方法</h4>
-    <ul style="line-height: 1.8;">
+    <ul class="manual-act-list">
         <li><b>本命固め</b>：出現出目TOP1が晴天令と一致 → 安定した展開</li>
         <li><b>ヒモ選択</b>：生存濃度で2着・3着の入線回数が多い選手を狙う</li>
         <li><b>波乱対策</b>：因果分岐の出目を保険として買う</li>
         <li><b>買い目の絞り込み</b>：頻度が極端に低い決着（10回未満など）を除外</li>
     </ul>
 
-    <p style="font-size: 0.85em; color: #999;">
+    <p class="manual-disclaimer">
         ※赤口呑縁は疑似統計的な傾向を示すものであり、実際のレース結果を保証するものではありません。<br>
         ※計算には数秒かかる場合があります（1,465回のシミュレーション実行のため）。
     </p>
@@ -453,12 +453,12 @@ function switchCSS(file) {
                 <select id="bank-name" onchange="App.displayBankTendency()"></select>
             </div>
 
-<div class="input-item" id="kururu-ui-container" style="margin-bottom: 15px;">
-    <label style="font-weight: bold; display: block; margin-bottom: 5px;">風向き・風速</label>
-    <div style="display: flex; gap: 10px; margin-bottom: 5px;">
-        <div style="flex: 1;">
-            <label for="wind-direction" style="font-size: 0.8em; color: #555;">風向</label>
-            <select id="wind-direction" style="width: 100%; padding: 5px;">
+<div class="input-item" id="kururu-ui-container">
+    <label class="wind-main-label">風向き・風速</label>
+    <div class="wind-row">
+        <div class="wind-col">
+            <label for="wind-direction">風向</label>
+            <select id="wind-direction">
                 <option value="none">🍃 無風/屋内</option>
                 <option value="北">北</option><option value="北東">北東</option>
                 <option value="東">東</option><option value="南東">南東</option>
@@ -466,14 +466,14 @@ function switchCSS(file) {
                 <option value="西">西</option><option value="北西">北西</option>
             </select>
         </div>
-        <div style="flex: 1;">
-            <label for="wind-speed" style="font-size: 0.8em; color: #555;">風速(m)</label>
-            <input type="number" id="wind-speed" value="0" min="0" max="15" step="0.5" style="width: 100%; padding: 5px; box-sizing: border-box;">
+        <div class="wind-col">
+            <label for="wind-speed">風速(m)</label>
+            <input type="number" id="wind-speed" value="0" min="0" max="15" step="0.5">
         </div>
     </div>
-    <div style="font-size: 0.75em; color: #666; line-height: 1.4;">
-        ※<a href="https://tenki.jp/lite/leisure/horse/" target="_blank" style="color: #0066cc; text-decoration: none;">tenki.jp</a> や 
-        <a href="https://kazekeirin.info/" target="_blank" style="color: #0066cc; text-decoration: none;">風競輪.info</a> で競輪場の風向風速を調べて下さい
+    <div class="wind-note">
+        ※<a href="https://tenki.jp/lite/leisure/horse/" target="_blank" class="wind-link">tenki.jp</a> や
+        <a href="https://kazekeirin.info/" target="_blank" class="wind-link">風競輪.info</a> で競輪場の風向風速を調べて下さい
     </div>
 </div>
 
@@ -488,7 +488,7 @@ function switchCSS(file) {
                             <div class="player-header">
     <span>選手ID ${i}</span>
     
-    <div class="gold-cap-group" style="margin-left: auto; margin-right: 12px;">
+    <div class="gold-cap-group">
     <label class="crown-switch">
         <input type="checkbox" id="goldcap-${i}" class="is-gold-cap">
         <span class="crown-icon">👑</span>
@@ -500,7 +500,7 @@ function switchCSS(file) {
         <input type="checkbox" id="local-${i}" class="is-local">
     </div>
 
-    <div class="local-group" style="color: #c07777; margin-left: 10px;">
+    <div class="local-group scratch-group">
         <label for="scratch-${i}">欠場:</label>
         <input type="checkbox" id="scratch-${i}" class="is-scratch">
     </div>
@@ -539,7 +539,7 @@ function switchCSS(file) {
                 <div id="line-display" class="line-display">計算結果待ち...</div>
                 
                 <div id="tenun-index-output">
-                    <span class="tenun-title" style="font-weight: bold; margin-bottom: 8px; display: block;">天雲指数</span>
+                    <span class="tenun-title">天雲指数</span>
                 </div>
 
                 <h3>☀️ 晴天令 (安定推奨)</h3>
@@ -558,10 +558,10 @@ function switchCSS(file) {
     </div>
 
 <div id="share-area" class="share-align-fixed">
-  <span style="font-size: 10px !important; color: #888 !important; font-weight: bold !important; transform: translateY(6px) !important; flex-shrink: 0;">共有</span>
-  
+  <span class="share-label">共有</span>
+
   <div onclick="execShareX()" class="btn-share-box">
-    <svg viewBox="0 0 24 24" width="16" height="16" class="icon-x-fix" style="fill: #000;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
+    <svg viewBox="0 0 24 24" width="16" height="16" class="icon-x-fix"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
   </div>
 
   <div onclick="execShareLine()" class="btn-share-box">
@@ -569,7 +569,7 @@ function switchCSS(file) {
   </div>
 
   <div onclick="execCopy()" class="btn-share-box">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-copy-fix" style="stroke: #000;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-copy-fix"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
   </div>
 </div>
 
@@ -602,8 +602,8 @@ function execCopy() {
         [INFO] bankdata.jsonの読み込みを待機しています...<br>
     </div>
     
-    <div style="text-align: center; margin-bottom: 5px;">
-        <a href="./manual_details.html" target="_blank" style="font-size: 0.85em; color: #a37200; text-decoration: underline;">
+    <div class="manual-link-wrap">
+        <a href="./manual_details.html" target="_blank" class="manual-details-link">
             📖ツール利用ガイド・各項目の解説はこちら
         </a>
     </div>
@@ -614,12 +614,12 @@ function execCopy() {
     </a>
     </div>
 
-    <div class="bug-log-container" style="text-align: center; margin: 20px 0;">
-    <p style="font-size: 0.7em; color: #666; margin-bottom: 8px;">不具合かな？と思ったら確認してみてください</p>
-    <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vR4HnK6A5_WvJYhvFfc-M5HMDRCwiVDwxW49d3bRxOltzLrhaI0C79Sry2xsZsiEIxehLOW4KlCuk5r/pubhtml?gid=237056219&single=true&gridlines=true" 
-       target="_blank" 
-       rel="noopener noreferrer" 
-       style="color: #007bff; text-decoration: underline; font-weight: bold;">
+    <div class="bug-log-container">
+    <p class="bug-log-desc">不具合かな？と思ったら確認してみてください</p>
+    <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vR4HnK6A5_WvJYhvFfc-M5HMDRCwiVDwxW49d3bRxOltzLrhaI0C79Sry2xsZsiEIxehLOW4KlCuk5r/pubhtml?gid=237056219&single=true&gridlines=true"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="bug-log-link">
         皆様からのご報告と回答一覧
     </a>
 </div>
