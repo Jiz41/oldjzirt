@@ -1,7 +1,6 @@
 /* ==========================================
    style_new.css — v6 和モダン×デジタルレトロ / マゼンタネオン
    ========================================== */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
 
 /* ==========================================
    ライトモード変数（デフォルト）
@@ -47,8 +46,8 @@
   --amber-bg:  rgba(160,122,44,0.07);
   --amber-br:  rgba(160,122,44,0.30);
 
-  --sans:  'Noto Sans JP','Hiragino Sans','Yu Gothic UI',-apple-system,sans-serif;
-  --serif: 'Noto Serif JP','Hiragino Mincho ProN','Yu Mincho',serif;
+  --sans:  -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Meiryo", "Noto Sans JP", sans-serif;
+  --serif: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
   --mono:  'SF Mono','JetBrains Mono','Roboto Mono',monospace;
 }
 
@@ -898,9 +897,10 @@ button[onclick="calculatePrediction()"]:active {
 .bug-button {
   display: inline-block;
   font-size: 0.8em;
-  color: var(--muted);
+  color: #c8392f !important;
+  border-color: rgba(200,57,47,0.4) !important;
   padding: 6px 18px;
-  border: 1px solid var(--border-2);
+  border: 1px solid rgba(200,57,47,0.4);
   border-radius: 6px;
   text-decoration: none;
   transition: border-color 0.15s, color 0.15s;
@@ -1267,8 +1267,8 @@ footer.copyright-footer {
   }
 
   .bug-button {
-    color: #8a8298;
-    border-color: rgba(255,255,255,0.12);
+    color: #c8392f !important;
+    border-color: rgba(200,57,47,0.4) !important;
   }
 
   .bug-button:hover {
