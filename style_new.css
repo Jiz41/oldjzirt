@@ -3,6 +3,30 @@
    ========================================== */
 
 /* ==========================================
+   @font-face: Android内蔵NotoSansCJKをNoto Sans JPとして登録
+   Google Fonts不要でもAndroidシステムフォントを確実に参照
+   ========================================== */
+@font-face {
+  font-family: "Noto Sans JP";
+  src: local("Noto Sans CJK JP"),
+       local("NotoSansCJKjp-Regular"),
+       local("NotoSansCJK-Regular"),
+       local("Noto Sans JP"),
+       local("Noto Sans CJK JP Regular");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Noto Sans JP";
+  src: local("Noto Sans CJK JP Bold"),
+       local("NotoSansCJKjp-Bold"),
+       local("NotoSansCJK-Bold"),
+       local("Noto Sans JP Bold");
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* ==========================================
    ライトモード変数（デフォルト）
    ========================================== */
 :root {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jiz41-v1';
+const CACHE_NAME = 'jiz41-v2';
 const ASSETS = [
   './',
   './index.html',
