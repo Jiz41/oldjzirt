@@ -924,10 +924,20 @@ button[onclick="calculatePrediction()"]:active {
 }
 
 .bug-log-link {
+  display: inline-block;
   font-size: 0.8em;
-  color: var(--muted);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  color: var(--accent) !important;
+  padding: 6px 18px;
+  border: 1px solid var(--accent-br);
+  border-radius: 6px;
+  background: transparent;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.bug-log-link:hover {
+  background: var(--accent-bg);
+  text-decoration: none;
 }
 
 /* ==========================================
@@ -1281,7 +1291,8 @@ footer.copyright-footer {
   }
 
   .bug-log-link {
-    color: #8a8298;
+    color: var(--accent) !important;
+    border-color: var(--accent-br);
   }
 
   footer.copyright-footer {
