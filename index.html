@@ -207,11 +207,8 @@
                 const windText = (windDir === 'none' || windDir === '無風') ? "無風 0m" : `${windDir} ${windSpd}m`;
 
                 const raceNoRaw = document.getElementById('race-no-hidden')?.value;
-                const raceNoText = raceNoRaw ? `第${raceNoRaw}レース` : null;
-
                 const tenunEl = document.getElementById('tenun-index-output');
                 const tenunVal = tenunEl?.dataset?.tenunValue;
-                const tenunText = (tenunVal !== undefined && tenunVal !== '') ? `天雲指数: ${tenunVal}` : null;
 
                 const getBet = (id) => {
                     const el = document.getElementById(id);
@@ -235,8 +232,8 @@
                     if (title) scenarioText += `${title} ${bets}\n`;
                 });
 
-                const metaLine = [raceNoText, tenunText].filter(Boolean).join(' / ');
-                const finalText = `${bank} ${raceNoText ? raceNoText + ' ' : ''}R\n${metaLine ? metaLine + '\n' : ''}\n☀️ 晴天令：${sunny}\n⛈️ 荒天令：${rainy}\n\n${scenarioText}\n（${windText}）`;
+                const header = `${bank}${raceNoRaw ? raceNoRaw + 'R' : 'R'}${(tenunVal !== undefined && tenunVal !== '') ? ' 天雲指数: ' + tenunVal : ''}`;
+                const finalText = `${header}\n\n☀️ 晴天令：${sunny}\n⛈️ 荒天令：${rainy}\n\n${scenarioText}\n（${windText}）`;
                 await navigator.clipboard.writeText(finalText);
                 
                 // 成功時の控えめなフィードバック
