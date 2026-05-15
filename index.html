@@ -55,8 +55,11 @@
 
   /* --- 下部固定ナビバー --- */
   var isDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
-  var colorNormal=isDark?'#efe5d2':'#1a1612';
-  var colorActive=isDark?'#c8392f':'#b8362a';
+  var colorNormal =isDark?'#efe5d2':'#1a1612';
+  var bgNormal    =isDark?'rgba(200,57,47,0.10)':'rgba(184,54,42,0.08)';
+  var borderStyle =isDark?'1px solid rgba(200,57,47,0.4)':'1px solid rgba(184,54,42,0.35)';
+  var bgActive    =isDark?'rgba(200,57,47,0.25)':'rgba(184,54,42,0.22)';
+  var shadowNormal='0 2px 6px rgba(0,0,0,0.2)';
 
   var nav=document.createElement('div');
   nav.id='bottom-nav';
@@ -67,26 +70,49 @@
     +(isDark?'background:rgba(28,24,21,0.85);border-top:0.5px solid rgba(200,57,47,0.3);'
             :'background:rgba(246,240,226,0.82);border-top:0.5px solid rgba(197,181,154,0.5);');
 
-  var navItems=[{id:'nav-btn-input',label:'入力',target:'input'},
-                {id:'nav-btn-result',label:'結果',target:'result'},
-                {id:'nav-btn-top',label:'上へ',target:'top'}];
+  var navItems=[{id:'nav-btn-input', label:'入力', target:'input'},
+                {id:'nav-btn-result',label:'結果', target:'result'},
+                {id:'nav-btn-top',  label:'上へ', target:'top'},
+                {id:'nav-btn-misc', label:'その他',target:'misc'}];
 
   navItems.forEach(function(item){
     var btn=document.createElement('button');
     btn.id=item.id;
     btn.textContent=item.label;
-    btn.style.cssText='flex:1;height:56px;background:none;border:none;box-shadow:none;'
+    btn.style.cssText=
+      'background:'+bgNormal+';'
+      +'border:'+borderStyle+';'
+      +'border-radius:999px;'
+      +'padding:6px 20px;'
+      +'box-shadow:'+shadowNormal+';'
+      +'transition:transform 0.1s ease,background 0.1s ease,box-shadow 0.1s ease;'
       +'cursor:pointer;font-size:12px;letter-spacing:0.08em;font-weight:normal;'
-      +'width:auto;margin:0;border-radius:0;outline:none;'
-      +'-webkit-tap-highlight-color:transparent;color:'+colorNormal+';';
+      +'width:auto;margin:0;outline:none;'
+      +'-webkit-tap-highlight-color:transparent;'
+      +'color:'+colorNormal+';';
+
+    function press(){
+      btn.style.background=bgActive;
+      btn.style.transform='scale(0.94)';
+      btn.style.boxShadow='none';
+    }
+    function release(){
+      btn.style.background=bgNormal;
+      btn.style.transform='scale(1)';
+      btn.style.boxShadow=shadowNormal;
+    }
+    btn.addEventListener('mousedown',press);
+    btn.addEventListener('touchstart',press,{passive:true});
+    btn.addEventListener('mouseup',release);
+    btn.addEventListener('mouseleave',release);
+    btn.addEventListener('touchend',release);
+
     btn.onclick=function(){
       var el;
       if(item.target==='top'){ window.scrollTo({top:0,behavior:'smooth'}); }
       else if(item.target==='input'){ el=document.querySelector('.input-group'); if(el) el.scrollIntoView({behavior:'smooth'}); }
       else if(item.target==='result'){ el=document.getElementById('results-container'); if(el) el.scrollIntoView({behavior:'smooth'}); }
-      navItems.forEach(function(t){ var b=document.getElementById(t.id); if(b) b.style.color=colorNormal; });
-      btn.style.color=colorActive;
-      setTimeout(function(){ btn.style.color=colorNormal; },800);
+      else if(item.target==='misc'){ el=document.querySelector('.debug-log-header'); if(el) el.scrollIntoView({behavior:'smooth'}); }
     };
     nav.appendChild(btn);
   });
