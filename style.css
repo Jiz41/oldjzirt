@@ -470,6 +470,9 @@ button:active { transform: translateY(1px); box-shadow: inset 3px 3px 8px rgba(0
 .footer-sns-card.x-card:hover { background: rgba(200, 200, 200, 0.12); border-color: rgba(200, 200, 200, 0.4); box-shadow: 0 0 12px rgba(200, 200, 200, 0.15); transform: translateY(-2px); }
 .footer-sns-label { font-size: 1.1em; font-weight: bold; letter-spacing: 0.05em; }
 .footer-sns-desc { font-size: 0.85em; opacity: 0.75; letter-spacing: 0.02em; }
+.footer-sns-row--wide { margin-top: -4px; }
+.footer-sns-card.kayo-card { background: rgba(212, 161, 58, 0.08); border: 1px solid rgba(212, 161, 58, 0.30); color: #d4a13a; width: 100%; max-width: 480px; flex-direction: row; justify-content: center; gap: 16px; padding: 12px 24px; }
+.footer-sns-card.kayo-card:hover { background: rgba(212, 161, 58, 0.18); border-color: rgba(212, 161, 58, 0.65); box-shadow: 0 0 14px rgba(212, 161, 58, 0.25); transform: translateY(-2px); }
 .footer-bottom-row { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; color: #666; }
 .footer-link { color: #666; text-decoration: none; transition: color 0.2s; }
 .footer-link:hover { color: #aaa; }
