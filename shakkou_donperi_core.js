@@ -455,7 +455,7 @@ async function invokeShakkouDonperi(basePlayers, context) {
                 if (typeof app.getKururuAdjustment === 'function') {
                     const res = app.getKururuAdjustment(
                         p, context.windDirection, context.windSpeed,
-                        context.isGirls, context.lineInput, context.BANK_DATA
+                        context.isGirls, context.lineInput, context.BANK_DATA, true
                     );
                     p.final_score *= res.adj;
                 }
