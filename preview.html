@@ -936,7 +936,57 @@ function execCopy() {
 </script>
 
 <style>
-  body { padding-top: 44px !important; }
+  body { padding-top: 44px !important; padding-bottom: 64px !important; }
+
+  .fixed-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9000;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-around;
+    height: 56px;
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    background: rgba(246,240,226,0.82);
+    border-top: 0.5px solid rgba(197,181,154,0.5);
+  }
+
+  .fixed-nav-btn {
+    flex: 1;
+    background: none !important;
+    border: none !important;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: #1a1612;
+    transition: color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+    box-shadow: none !important;
+    width: auto !important;
+    margin-top: 0 !important;
+    font-weight: normal !important;
+    border-radius: 0 !important;
+  }
+
+  .fixed-nav-btn.active { color: #b8362a !important; }
+
+  @media (prefers-color-scheme: dark) {
+    .fixed-nav {
+      background: rgba(28,24,21,0.85);
+      border-top: 0.5px solid rgba(200,57,47,0.3);
+    }
+    .fixed-nav-btn { color: #efe5d2; }
+    .fixed-nav-btn.active { color: #c8392f !important; }
+  }
 </style>
 
 <nav class="fixed-nav" id="fixed-nav">
