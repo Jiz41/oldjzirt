@@ -938,5 +938,38 @@ function execCopy() {
 <style>
   body { padding-top: 44px !important; }
 </style>
+
+<nav class="fixed-nav" id="fixed-nav">
+  <button class="fixed-nav-btn" id="nav-btn-input" onclick="navScrollTo('input')">入力</button>
+  <button class="fixed-nav-btn" id="nav-btn-result" onclick="navScrollTo('result')">結果</button>
+  <button class="fixed-nav-btn" id="nav-btn-top" onclick="navScrollTo('top')">上へ</button>
+</nav>
+
+<script>
+(function() {
+  function navScrollTo(target) {
+    var el;
+    if (target === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (target === 'input') {
+      el = document.querySelector('.input-group');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    } else if (target === 'result') {
+      el = document.getElementById('results-container');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+    document.querySelectorAll('.fixed-nav-btn').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    var idMap = { top: 'nav-btn-top', input: 'nav-btn-input', result: 'nav-btn-result' };
+    var btn = document.getElementById(idMap[target]);
+    if (btn) {
+      btn.classList.add('active');
+      setTimeout(function() { btn.classList.remove('active'); }, 800);
+    }
+  }
+  window.navScrollTo = navScrollTo;
+})();
+</script>
 </body>
 </html>
