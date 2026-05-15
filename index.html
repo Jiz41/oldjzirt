@@ -637,6 +637,7 @@ function execCopy() {
         <span id="log-toggle-icon">▶</span> 🛠️ デバッグ・処理ログ
     </div>
     <div class="debug-log" id="debug-log">
+        <button id="debug-copy-btn" onclick="copyDebugLog()">📋</button>
         [TOOL START] ツール起動。すべての係数とロジックを読み込みました。<br>
         [INFO] bankdata.jsonの読み込みを待機しています...<br>
     </div>
@@ -700,6 +701,21 @@ function execCopy() {
             const iconElement = document.getElementById('log-toggle-icon');
             if (logElement.style.display === 'block') { logElement.style.display = 'none'; iconElement.textContent = '▶'; }
             else { logElement.style.display = 'block'; iconElement.textContent = '▼'; }
+        }
+        function copyDebugLog() {
+            const log = document.getElementById('debug-log');
+            const text = log.innerText || log.textContent;
+            navigator.clipboard.writeText(text).catch(() => {
+                const a = document.createElement('textarea');
+                a.value = text;
+                document.body.appendChild(a);
+                a.select();
+                document.execCommand('copy');
+                document.body.removeChild(a);
+            });
+            const btn = document.getElementById('debug-copy-btn');
+            btn.textContent = '✅';
+            setTimeout(() => btn.textContent = '📋', 1500);
         }
         function toggleManual() {
             const manualElement = document.getElementById('manual-content');
