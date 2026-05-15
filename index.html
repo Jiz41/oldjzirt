@@ -64,7 +64,7 @@
   var nav=document.createElement('div');
   nav.id='bottom-nav';
   nav.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:99999;'
-    +'display:flex;align-items:center;justify-content:space-around;height:56px;padding:0 8px;'
+    +'display:flex;align-items:center;justify-content:space-evenly;height:56px;padding:0 12px;'
     +'backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);'
     +'font-family:sans-serif;font-size:12px;'
     +(isDark?'background:rgba(28,24,21,0.68);border-top:0.5px solid rgba(200,57,47,0.3);'
@@ -72,14 +72,17 @@
 
   var naviLabel=document.createElement('span');
   naviLabel.textContent='NAVI';
-  naviLabel.style.cssText='font-size:10px;letter-spacing:0.16em;font-weight:normal;'
-    +(isDark?'color:rgba(239,229,210,0.35);':'color:rgba(26,22,18,0.32);');
+  naviLabel.style.cssText='position:absolute;top:4px;left:8px;font-size:8px;letter-spacing:0.16em;'
+    +'font-weight:normal;opacity:0.4;pointer-events:none;'
+    +(isDark?'color:#efe5d2;':'color:#1a1612;');
   nav.appendChild(naviLabel);
 
-  var navItems=[{id:'nav-btn-input', label:'📝 入力',  target:'input'},
-                {id:'nav-btn-result',label:'📊 結果',  target:'result'},
-                {id:'nav-btn-top',  label:'⬆️ トップへ',target:'top'},
-                {id:'nav-btn-misc', label:'⚙️ その他', target:'misc'}];
+  var navItems=[
+    {id:'nav-btn-input', label:'\uD83D\uDCDD\u00A0\u5165\u529B',  target:'input'},
+    {id:'nav-btn-result',label:'\uD83D\uDCCA\u00A0\u7D50\u679C',  target:'result'},
+    {id:'nav-btn-top',  label:'\u2B06\uFE0F\u00A0\u30C8\u30C3\u30D7\u3078',target:'top'},
+    {id:'nav-btn-misc', label:'\u2699\uFE0F\u00A0\u305D\u306E\u4ED6', target:'misc'}
+  ];
 
   navItems.forEach(function(item){
     var btn=document.createElement('button');
@@ -89,11 +92,11 @@
       'background:'+bgNormal+';'
       +'border:'+borderStyle+';'
       +'border-radius:999px;'
-      +'padding:6px 20px;'
+      +'padding:5px 14px;'
       +'box-shadow:'+shadowNormal+';'
       +'transition:transform 0.1s ease,background 0.1s ease,box-shadow 0.1s ease;'
-      +'cursor:pointer;font-size:12px;letter-spacing:0.08em;font-weight:normal;'
-      +'width:auto;margin:0;outline:none;'
+      +'cursor:pointer;font-size:11px;letter-spacing:0.06em;font-weight:normal;'
+      +'white-space:nowrap;width:auto;margin:0;outline:none;'
       +'-webkit-tap-highlight-color:transparent;'
       +'color:'+colorNormal+';';
 
