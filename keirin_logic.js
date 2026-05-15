@@ -85,6 +85,7 @@ let BANK_DATA = {};
 // ====================================================================================
 // kururu（風圧補正）
 // ====================================================================================
+let kururuLogged = false;
 function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA, silent = false) {
     const playerId = p.id;
 
@@ -96,7 +97,10 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA,
     const v = speed * beta;
     const selectedDir = direction;
 
-    if (!silent) app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 風速[${speed}m] → 実効[${v.toFixed(2)}m](β:${beta})`);
+    if (!silent && !kururuLogged) {
+        app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 風速[${speed}m] → 実効[${v.toFixed(2)}m](β:${beta})`);
+        kururuLogged = true;
+    }
 
     const straightBonus = (BANK_DATA.straight || 50) / 50;
     let kp;
@@ -130,7 +134,7 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA,
         }
     }
 
-    if (!silent) app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 位置[${posLabel}] -> 風補正実行`);
+    if (!silent && !kururuLogged) app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 位置[${posLabel}] -> 風補正実行`);
 
     const map = BANK_DATA.wind_direction_map || {};
 
@@ -163,7 +167,7 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA,
 
     const finalAdj = 1.0 + (vector * kp * (BANK_DATA.alpha || 1.0) * positionShield);
 
-    if (!silent) app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 属性[斜め補正済み] 位置[${posLabel}] -> 風補正実行`);
+    if (!silent && !kururuLogged) app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 属性[斜め補正済み] 位置[${posLabel}] -> 風補正実行`);
 
     CalculationSnapshot.wind_physics = { finalAdj: finalAdj, v: v };
     return { adj: finalAdj, v: v };
@@ -1042,6 +1046,7 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
 // calculatePrediction
 // ====================================================================================
 app.calculatePrediction = async function() {
+    kururuLogged = false;
     console.log('[DEBUG calcPrediction] 開始時 CalculationSnapshot.race_id:', CalculationSnapshot.race_id);
     const savedRaceId = CalculationSnapshot.race_id;
     resetSnapshot();
