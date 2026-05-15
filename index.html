@@ -70,12 +70,6 @@
     +(isDark?'background:rgba(28,24,21,0.68);border-top:0.5px solid rgba(200,57,47,0.3);'
             :'background:rgba(246,240,226,0.68);border-top:0.5px solid rgba(197,181,154,0.5);');
 
-  var naviLabel=document.createElement('span');
-  naviLabel.textContent='NAVI';
-  naviLabel.style.cssText='position:absolute;top:4px;left:8px;font-size:8px;letter-spacing:0.16em;'
-    +'font-weight:normal;opacity:0.4;pointer-events:none;'
-    +(isDark?'color:#efe5d2;':'color:#1a1612;');
-  nav.appendChild(naviLabel);
 
   var navItems=[
     {id:'nav-btn-input', label:'\uD83D\uDCDD\u00A0\u5165\u529B',  target:'input'},
