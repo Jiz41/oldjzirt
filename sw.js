@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jiz41-v3';
+const CACHE_NAME = 'jiz41-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -6,9 +6,6 @@ const ASSETS = [
   './kiyone_cyberpunk_addon.css',
   './title.png',
 ];
-
-// キャッシュしない開発用ファイル（常にネットワークから取得）
-const DEV_FILES = ['preview.html', 'style_new.css'];
 
 // インストール時にキャッシュ
 self.addEventListener('install', event => {
@@ -34,12 +31,6 @@ self.addEventListener('fetch', event => {
 
   // HuggingFace上の外部JSはキャッシュしない（常に最新を取得）
   if (url.includes('huggingface.co')) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
-  // 開発用ファイルは常にネットワークから取得、キャッシュ不使用
-  if (DEV_FILES.some(f => url.includes(f))) {
     event.respondWith(fetch(event.request));
     return;
   }

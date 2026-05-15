@@ -4,13 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>華耀天輪 真・自在律</title>
-    <link id="main-css" rel="stylesheet" href="./style.css">
-    <script>
-      (function(){
-        var p = new URLSearchParams(location.search);
-        if(p.get('preview')==='1') document.getElementById('main-css').href='./style_new.css';
-      })();
-    </script>
+    <link rel="stylesheet" href="./style.css">
 
     <!-- 🌌 赤口呑縁：サイバーパンク配色 -->
     <link rel="stylesheet" href="./kiyone_cyberpunk_addon.css">
@@ -38,21 +32,6 @@
 
 <script>
 (function(){
-  if(new URLSearchParams(location.search).get('preview')!=='1') return;
-
-  /* --- 上部 CSS プレビューバー --- */
-  var bar=document.createElement('div');
-  bar.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#1a1626;border-bottom:1px solid rgba(225,91,176,0.4);padding:8px 16px;display:flex;align-items:center;gap:12px;font-family:monospace;font-size:12px;color:#f0ecf8;';
-  bar.innerHTML='<span style="color:#8a8298;letter-spacing:.1em;font-size:12px;">CSS PREVIEW</span>'
-    +'<button onclick="location.href=\'./\'" style="padding:4px 14px;border-radius:4px;border:1px solid #444;background:#000;color:#fff;cursor:pointer;font-family:monospace;font-size:11px;width:auto;margin:0;letter-spacing:normal;font-weight:normal;box-shadow:none;">旧 CSS</button>'
-    +'<span style="color:#e15bb0;font-size:11px;">現在: 新CSS</span>';
-  document.body.prepend(bar);
-
-  /* --- body padding 調整 --- */
-  var s=document.createElement('style');
-  s.textContent='body{padding-top:44px!important;padding-bottom:64px!important;}';
-  document.head.appendChild(s);
-
   /* --- 下部固定ナビバー --- */
   var isDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
   var colorNormal =isDark?'#efe5d2':'#1a1612';
