@@ -1305,7 +1305,10 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
 
     // 天雲指数
     const tenunOutput = document.getElementById('tenun-index-output');
-    if (tenunOutput && tenunIndexData) tenunOutput.innerHTML = tenunIndexData.message;
+    if (tenunOutput && tenunIndexData) {
+        tenunOutput.innerHTML = tenunIndexData.message;
+        tenunOutput.dataset.tenunValue = tenunIndexData.tenunIndex;
+    }
 
     // 晴天令買い目
     const seitenreiBox  = document.getElementById('seitenrei-output');
