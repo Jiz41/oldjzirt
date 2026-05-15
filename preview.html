@@ -937,66 +937,72 @@ function execCopy() {
 
 <style>
   body { padding-top: 44px !important; padding-bottom: 64px !important; }
-
-  .fixed-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 9000;
-    display: flex !important;
-    align-items: center;
-    justify-content: space-around;
-    height: 56px;
-    backdrop-filter: blur(16px) saturate(160%);
-    -webkit-backdrop-filter: blur(16px) saturate(160%);
-    background: rgba(246,240,226,0.82);
-    border-top: 0.5px solid rgba(197,181,154,0.5);
-  }
-
-  .fixed-nav-btn {
-    flex: 1;
-    background: none !important;
-    border: none !important;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 0;
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    color: #1a1612;
-    transition: color 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    outline: none;
-    box-shadow: none !important;
-    width: auto !important;
-    margin-top: 0 !important;
-    font-weight: normal !important;
-    border-radius: 0 !important;
-  }
-
-  .fixed-nav-btn.active { color: #b8362a !important; }
-
-  @media (prefers-color-scheme: dark) {
-    .fixed-nav {
-      background: rgba(28,24,21,0.85);
-      border-top: 0.5px solid rgba(200,57,47,0.3);
-    }
-    .fixed-nav-btn { color: #efe5d2; }
-    .fixed-nav-btn.active { color: #c8392f !important; }
-  }
 </style>
 
-<nav class="fixed-nav" id="fixed-nav">
-  <button class="fixed-nav-btn" id="nav-btn-input" onclick="navScrollTo('input')">入力</button>
-  <button class="fixed-nav-btn" id="nav-btn-result" onclick="navScrollTo('result')">結果</button>
-  <button class="fixed-nav-btn" id="nav-btn-top" onclick="navScrollTo('top')">上へ</button>
+<nav id="fixed-nav" style="
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 99990;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 56px;
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  background: rgba(246,240,226,0.82);
+  border-top: 0.5px solid rgba(197,181,154,0.5);
+">
+  <button id="nav-btn-input" onclick="navScrollTo('input')" style="
+    flex: 1; background: none; border: none; box-shadow: none;
+    cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 8px 0; width: auto; margin: 0;
+    font-size: 12px; letter-spacing: 0.08em; font-weight: normal;
+    color: #1a1612; border-radius: 0;
+    -webkit-tap-highlight-color: transparent; outline: none;
+    transition: color 0.15s;
+  ">入力</button>
+  <button id="nav-btn-result" onclick="navScrollTo('result')" style="
+    flex: 1; background: none; border: none; box-shadow: none;
+    cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 8px 0; width: auto; margin: 0;
+    font-size: 12px; letter-spacing: 0.08em; font-weight: normal;
+    color: #1a1612; border-radius: 0;
+    -webkit-tap-highlight-color: transparent; outline: none;
+    transition: color 0.15s;
+  ">結果</button>
+  <button id="nav-btn-top" onclick="navScrollTo('top')" style="
+    flex: 1; background: none; border: none; box-shadow: none;
+    cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 8px 0; width: auto; margin: 0;
+    font-size: 12px; letter-spacing: 0.08em; font-weight: normal;
+    color: #1a1612; border-radius: 0;
+    -webkit-tap-highlight-color: transparent; outline: none;
+    transition: color 0.15s;
+  ">上へ</button>
 </nav>
 
 <script>
 (function() {
+  var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var nav = document.getElementById('fixed-nav');
+  var btns = [
+    document.getElementById('nav-btn-input'),
+    document.getElementById('nav-btn-result'),
+    document.getElementById('nav-btn-top')
+  ];
+  var colorNormal = isDark ? '#efe5d2' : '#1a1612';
+  var colorActive = isDark ? '#c8392f' : '#b8362a';
+  if (isDark) {
+    nav.style.background = 'rgba(28,24,21,0.85)';
+    nav.style.borderTop = '0.5px solid rgba(200,57,47,0.3)';
+  }
+  btns.forEach(function(b) { if (b) b.style.color = colorNormal; });
+
   function navScrollTo(target) {
     var el;
     if (target === 'top') {
@@ -1008,14 +1014,12 @@ function execCopy() {
       el = document.getElementById('results-container');
       if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
-    document.querySelectorAll('.fixed-nav-btn').forEach(function(b) {
-      b.classList.remove('active');
-    });
+    btns.forEach(function(b) { if (b) b.style.color = colorNormal; });
     var idMap = { top: 'nav-btn-top', input: 'nav-btn-input', result: 'nav-btn-result' };
     var btn = document.getElementById(idMap[target]);
     if (btn) {
-      btn.classList.add('active');
-      setTimeout(function() { btn.classList.remove('active'); }, 800);
+      btn.style.color = colorActive;
+      setTimeout(function() { btn.style.color = colorNormal; }, 800);
     }
   }
   window.navScrollTo = navScrollTo;
