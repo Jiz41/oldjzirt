@@ -1110,6 +1110,7 @@ app.calculatePrediction = async function() {
     app.logMessage(`[CALC START] ${raceType} / バンク: ${bankName} / モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`);
 
     const { players: participatingPlayers, allSeriInfos, finalOrderedPlayerIds, displayLineSegments, lines } = calculateLineCoeffs(players, settings);
+    CalculationSnapshot.lines = lines;
 
     if (participatingPlayers.length === 0) {
         alert("出走選手がいないため、計算を中止しました。");
