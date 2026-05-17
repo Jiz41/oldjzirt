@@ -1,3 +1,4 @@
+// VERSION: 1.1
 (function() {
 
   const BASE_URL = 'https://keirin-proxy.onrender.com';

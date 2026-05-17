@@ -1,3 +1,4 @@
+// VERSION: 1.3
 (function(app) {
   if (app && typeof app.logMessage === 'function') {
     app.logMessage('[DEBUG] shakkou_donperi_core.js 開始');
