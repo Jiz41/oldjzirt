@@ -437,9 +437,8 @@ app.displayShinganHakke = function(data) {
         if (c_l >= 1.01) return 'ライン連携あり、';
         return '単騎同然、';
     }
-    function localLabel(p, rank) {
+    function localLabel(p) {
         if (p.isLocal) return '地の利も重なる。';
-        if (rank === 1) return '地の利はないが、';
         return '';
     }
     function kiryokuLabel(score) {
@@ -472,7 +471,7 @@ app.displayShinganHakke = function(data) {
     top3Sorted.forEach(p => {
         const rank = rankMap[p.id];
         const wm = wmarkLabel(p.wmark);
-        const line1 = clLabel(p.c_l) + localLabel(p, rank);
+        const line1 = clLabel(p.c_l) + localLabel(p);
         const line2 = kiryokuLabel(p.score) + recentLabel(p) + (wm || '') + shimeLabel(rank);
         commentsHtml += '<div class="sg-comment">'
             + '<div class="sg-comment-hd"><strong>' + p.id + '番</strong></div>'
@@ -484,8 +483,7 @@ app.displayShinganHakke = function(data) {
     out.innerHTML = '<div class="sg-container">'
         + '<div class="sg-title">&#x2696;&#xFE0F; 審眼八卦</div>'
         + '<div class="sg-bets">'
-        + '<div>&#x2600;&#xFE0F; 晴天令 三連単：' + sanrentan(seitenRanked) + '</div>'
-        + '<div>&#x26C8;&#xFE0F; 荒天令 三連単：' + sanrentan(koutenRanked) + '</div>'
+        + '<div>三連単：' + sanrentan(seitenRanked) + '、' + sanrentan(koutenRanked) + '</div>'
         + '</div>'
         + '<div class="sg-comments">' + commentsHtml + '</div>'
         + '</div>';
