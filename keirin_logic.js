@@ -1263,30 +1263,30 @@ function applyShinganHakke(basePlayers, seitenScores, koutenScores) {
     const tenkaiLabel  = { senkou: '先行有利', makuri: '捲り有利', sashi: '差し有利' }[tenkaiType] || '';
 
     // 発動ログ（ONのスイッチのみ・実車番で出力）
-    app.logMessage('[審眼八卦] 発動');
+    app.logMessage('[SNGN] 発動');
     if (sw.line) {
         const ids = basePlayers.filter(p => (CalculationSnapshot.line_coop[p.id] || 1.0) > 1.0).map(p => p.id);
-        app.logMessage(`[審眼] ライン強度: 選手${ids.join('・')} に×1.05`);
+        app.logMessage(`[SNGN] ライン強度: 選手${ids.join('・')} に×1.05`);
     }
     if (sw.score) {
         const ids = basePlayers.filter(p => p.c_score_adj > 1.0).map(p => p.id);
-        app.logMessage(`[審眼] 競走得点: 選手${ids.join('・')} に×1.05`);
+        app.logMessage(`[SNGN] 競走得点: 選手${ids.join('・')} に×1.05`);
     }
     if (sw.recent) {
         const ids = basePlayers.filter(p => p.c_recent > 1.0).map(p => p.id);
-        app.logMessage(`[審眼] 近況: 選手${ids.join('・')} に×1.05`);
+        app.logMessage(`[SNGN] 近況: 選手${ids.join('・')} に×1.05`);
     }
     if (sw.wmark) {
         const ids = basePlayers.filter(p => p.wmark === '◎' || p.wmark === '〇').map(p => p.id);
-        app.logMessage(`[審眼] 印: 選手${ids.join('・')} に×1.05`);
+        app.logMessage(`[SNGN] 印: 選手${ids.join('・')} に×1.05`);
     }
     if (sw.tenkai) {
         const ids = basePlayers.filter(p => tenkaiStyles.includes(p.style)).map(p => p.id);
-        app.logMessage(`[審眼] 展開(${tenkaiLabel}): 選手${ids.join('・')} に×1.05`);
+        app.logMessage(`[SNGN] 展開(${tenkaiLabel}): 選手${ids.join('・')} に×1.05`);
     }
     if (hasLocal) {
         const ids = basePlayers.filter(p => p.isLocal).map(p => p.id);
-        app.logMessage(`[審眼] 地元(自動): 選手${ids.join('・')} に×1.05`);
+        app.logMessage(`[SNGN] 地元(自動): 選手${ids.join('・')} に×1.05`);
     }
 
     function calcCorrected(baseScores) {
