@@ -1,8 +1,6 @@
 const CACHE_NAME = 'jiz41-v4';
 const ASSETS = [
   './',
-  './index.html',
-  './style.css',
   './kiyone_cyberpunk_addon.css',
   './title.png',
 ];
