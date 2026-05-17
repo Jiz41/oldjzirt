@@ -417,6 +417,97 @@ app.startShakkouCalculation = function(grade) {
     showShakkouProgress(grade);
 }
 
+// ----------------------------------------------------------------------------
+// ⚖️ 審眼八卦 表示
+// ----------------------------------------------------------------------------
+app.displayShinganHakke = function(data) {
+    const { seitenRanked, koutenRanked, scoreMin, scoreThird, sw, hasLocal } = data;
+    const out = document.getElementById('shingan-hakke-output');
+    if (!out) return;
+
+    injectShinganStyles();
+
+    function sanrentan(ranked) {
+        if (ranked.length < 3) return '—';
+        return ranked[0].id + '-' + ranked[1].id + '-' + ranked[2].id;
+    }
+
+    function clLabel(c_l) {
+        if (c_l >= 1.05) return 'ライン連携厚く、';
+        if (c_l >= 1.01) return 'ライン連携あり、';
+        return '単騎同然、';
+    }
+    function localLabel(p, rank) {
+        if (p.isLocal) return '地の利も重なる。';
+        if (rank === 1) return '地の利はないが、';
+        return '';
+    }
+    function kiryokuLabel(score) {
+        if (score >= scoreMin + scoreThird * 2) return '機力上位、';
+        if (score >= scoreMin + scoreThird)     return '機力は中程度、';
+        return '機力に不安を残す、';
+    }
+    function recentLabel(p) {
+        return p.trendLabel === '上昇' ? '調子右肩上がり、'
+             : p.trendLabel === '下降' ? '近況に陰りあり、'
+             : '近況安定、';
+    }
+    function wmarkLabel(wmark) {
+        if (wmark === '◎') return '紙面の評価も高い。';
+        if (wmark === '〇') return '紙面の支持あり。';
+        return '';
+    }
+    function shimeLabel(rank) {
+        if (rank === 1) return '軸に推す。';
+        if (rank === 2) return 'ヒモに加えたい。';
+        return '抑えに加えたい。';
+    }
+
+    const top3 = seitenRanked.slice(0, 3);
+    const rankMap = {};
+    top3.forEach((p, i) => { rankMap[p.id] = i + 1; });
+    const top3Sorted = [...top3].sort((a, b) => a.id - b.id);
+
+    let commentsHtml = '';
+    top3Sorted.forEach(p => {
+        const rank = rankMap[p.id];
+        const wm = wmarkLabel(p.wmark);
+        const line1 = clLabel(p.c_l) + localLabel(p, rank);
+        const line2 = kiryokuLabel(p.score) + recentLabel(p) + (wm || '') + shimeLabel(rank);
+        commentsHtml += '<div class="sg-comment">'
+            + '<div class="sg-comment-hd"><strong>' + p.id + '番</strong></div>'
+            + '<div class="sg-comment-ln">' + line1 + '</div>'
+            + '<div class="sg-comment-ln sg-indent">' + line2 + '</div>'
+            + '</div>';
+    });
+
+    out.innerHTML = '<div class="sg-container">'
+        + '<div class="sg-title">&#x2696;&#xFE0F; 審眼八卦</div>'
+        + '<div class="sg-bets">'
+        + '<div>&#x2600;&#xFE0F; 晴天令 三連単：' + sanrentan(seitenRanked) + '</div>'
+        + '<div>&#x26C8;&#xFE0F; 荒天令 三連単：' + sanrentan(koutenRanked) + '</div>'
+        + '</div>'
+        + '<div class="sg-comments">' + commentsHtml + '</div>'
+        + '</div>';
+};
+
+function injectShinganStyles() {
+    if (document.getElementById('shingan-hakke-styles')) return;
+    const s = document.createElement('style');
+    s.id = 'shingan-hakke-styles';
+    s.textContent = `
+.sg-container{margin:14px 0;padding:14px 16px;border:1px solid rgba(218,165,32,0.3);border-radius:8px;background:rgba(218,165,32,0.05)}
+.sg-title{font-size:13px;font-weight:bold;color:#c8a030;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(218,165,32,0.2)}
+.sg-bets{font-size:12px;color:#ddd;margin-bottom:12px;display:flex;flex-direction:column;gap:4px;padding:8px 10px;background:rgba(0,0,0,0.15);border-radius:6px}
+.sg-comment{margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.05)}
+.sg-comment:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.sg-comment-hd{font-size:12px;color:#c8a030;margin-bottom:2px}
+.sg-comment-ln{font-size:11px;color:#ccc;line-height:1.6}
+.sg-indent{padding-left:1em}
+    `;
+    document.head.appendChild(s);
+}
+
 app.completeShakkouCalculation = function(cosmosResult, grade) {
     try {
         displayShakkouResults(cosmosResult, grade);

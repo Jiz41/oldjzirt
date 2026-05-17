@@ -1132,6 +1132,7 @@ app.calculatePrediction = async function() {
     if (d1 > 0 && d2 > 0) trendBonus = +0.03;
     if (d1 < 0 && d2 < 0) trendBonus = -0.03;
     }
+    p.trendLabel = trendBonus > 0 ? '上昇' : trendBonus < 0 ? '下降' : '安定';
     p.c_recent = (1.0 + (4 - avgRank) * 0.05 + trendBonus) * settings.RECENT_WEIGHT;
 
         if      (p.wmark === '◎') p.c_wmark = 1.04;
@@ -1202,6 +1203,8 @@ app.calculatePrediction = async function() {
             finalTenunData
         );
 
+        applyShinganHakke(basePlayers, seitenreiResults.integratedScores, koutenreiResults.integratedScores);
+
         const resultsContainer = document.getElementById('results-container');
         if (resultsContainer) resultsContainer.classList.add('visible');
 
@@ -1237,6 +1240,70 @@ app.calculatePrediction = async function() {
 }
 
 // ====================================================================================
+// ====================================================================================
+// applyShinganHakke — 審眼八卦後処理
+// ====================================================================================
+function applyShinganHakke(basePlayers, seitenScores, koutenScores) {
+    const sw = {
+        line:   document.getElementById('sg-line')?.checked   || false,
+        score:  document.getElementById('sg-score')?.checked  || false,
+        recent: document.getElementById('sg-recent')?.checked || false,
+        wmark:  document.getElementById('sg-wmark')?.checked  || false,
+        tenkai: document.getElementById('sg-tenkai')?.checked || false,
+    };
+    const tenkaiType = document.querySelector('input[name="sg-tenkai-type"]:checked')?.value || 'senkou';
+    const hasLocal = basePlayers.some(p => p.isLocal);
+    const anyOn = sw.line || sw.score || sw.recent || sw.wmark || sw.tenkai || hasLocal;
+
+    const out = document.getElementById('shingan-hakke-output');
+    if (!anyOn) { if (out) out.innerHTML = ''; return; }
+
+    const tenkaiStyleMap = { senkou: ['逃', '自'], makuri: ['両'], sashi: ['追'] };
+    const tenkaiStyles = tenkaiStyleMap[tenkaiType] || [];
+
+    function calcCorrected(baseScores) {
+        const result = {};
+        basePlayers.forEach(p => {
+            const c_l = CalculationSnapshot.line_coop[p.id] || p.c_l || 1.0;
+            let mult = 1.0;
+            if (sw.line   && c_l > 1.0)                                    mult *= 1.05;
+            if (sw.score  && p.c_score_adj > 1.0)                          mult *= 1.05;
+            if (sw.recent && p.c_recent > 1.0)                             mult *= 1.05;
+            if (sw.wmark  && (p.wmark === '◎' || p.wmark === '〇'))        mult *= 1.05;
+            if (sw.tenkai && tenkaiStyles.includes(p.style))               mult *= 1.05;
+            if (hasLocal  && p.isLocal)                                    mult *= 1.05;
+            result[p.id] = (baseScores[p.id] || 0) * mult;
+        });
+        return result;
+    }
+
+    const correctedSeiten = calcCorrected(seitenScores);
+    const correctedKouten = calcCorrected(koutenScores);
+
+    const allRawScores = basePlayers.map(p => p.score);
+    const scoreMin   = Math.min(...allRawScores);
+    const scoreMax   = Math.max(...allRawScores);
+    const scoreThird = (scoreMax - scoreMin) / 3;
+
+    function rankPlayers(corrMap) {
+        return basePlayers
+            .map(p => ({ ...p, c_l: CalculationSnapshot.line_coop[p.id] || p.c_l || 1.0, correctedScore: corrMap[p.id] || 0 }))
+            .sort((a, b) => b.correctedScore - a.correctedScore);
+    }
+
+    if (typeof app.displayShinganHakke === 'function') {
+        app.displayShinganHakke({
+            seitenRanked: rankPlayers(correctedSeiten),
+            koutenRanked: rankPlayers(correctedKouten),
+            scoreMin,
+            scoreThird,
+            sw,
+            hasLocal,
+            tenkaiType,
+        });
+    }
+}
+
 // displayResults
 // ====================================================================================
 function getStrengthColor(score, minScore, maxScore) {

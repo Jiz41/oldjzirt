@@ -573,7 +573,44 @@
                 <input type="checkbox" id="local-switch">
                 <label for="local-switch">🎌 **地元スイッチ ON**</label>
             </div>
-            <button onclick="calculatePrediction()">🚀 予想を計算 (実行)</button>
+            <style>
+#shingan-panel{margin:10px 0 8px;border:1px solid rgba(218,165,32,0.28);border-radius:8px;background:rgba(218,165,32,0.04);overflow:hidden}
+.shingan-hdr{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;cursor:pointer;font-size:13px;color:#c8a030;letter-spacing:.05em;user-select:none}
+.shingan-hdr:active{background:rgba(218,165,32,0.08)}
+#shingan-body{padding:0 12px 10px}
+.shingan-desc{font-size:11px;color:#888;margin:4px 0 10px;line-height:1.5}
+.shingan-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px;color:#ccc;border-bottom:1px solid rgba(255,255,255,0.04)}
+.shingan-toggle{position:relative;display:inline-block;width:38px;height:20px;flex-shrink:0}
+.shingan-toggle input{opacity:0;width:0;height:0}
+.shingan-slider{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,0.12);border-radius:20px;transition:.2s}
+.shingan-toggle input:checked+.shingan-slider{background:rgba(218,165,32,0.65)}
+.shingan-slider::before{content:'';position:absolute;width:14px;height:14px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+.shingan-toggle input:checked+.shingan-slider::before{transform:translateX(18px)}
+#sg-tenkai-opts{margin:6px 0 0;padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:6px;font-size:11px;color:#bbb;display:flex;gap:14px;flex-wrap:wrap}
+</style>
+<div id="shingan-panel">
+  <div class="shingan-hdr" onclick="toggleShingan()">
+    <span>&#x2696;&#xFE0F; 審眼八卦</span><span id="shingan-arrow" style="font-size:10px">&#x25BC;</span>
+  </div>
+  <div id="shingan-body" style="display:none">
+    <p class="shingan-desc">重視したい項目をONにすると、自在律の計算があなたの色に変わります。</p>
+    <div class="shingan-row"><span>ライン強度</span><label class="shingan-toggle"><input type="checkbox" id="sg-line"><span class="shingan-slider"></span></label></div>
+    <div class="shingan-row"><span>競走得点</span><label class="shingan-toggle"><input type="checkbox" id="sg-score"><span class="shingan-slider"></span></label></div>
+    <div class="shingan-row"><span>近況</span><label class="shingan-toggle"><input type="checkbox" id="sg-recent"><span class="shingan-slider"></span></label></div>
+    <div class="shingan-row"><span>印</span><label class="shingan-toggle"><input type="checkbox" id="sg-wmark"><span class="shingan-slider"></span></label></div>
+    <div class="shingan-row" style="border-bottom:none"><span>展開</span><label class="shingan-toggle"><input type="checkbox" id="sg-tenkai" onchange="toggleShinganTenkai(this)"><span class="shingan-slider"></span></label></div>
+    <div id="sg-tenkai-opts" style="display:none">
+      <label><input type="radio" name="sg-tenkai-type" value="senkou" checked> 先行有利</label>
+      <label><input type="radio" name="sg-tenkai-type" value="makuri"> 捲り有利</label>
+      <label><input type="radio" name="sg-tenkai-type" value="sashi"> 差し有利</label>
+    </div>
+  </div>
+</div>
+<script>
+function toggleShingan(){var b=document.getElementById('shingan-body'),a=document.getElementById('shingan-arrow'),o=b.style.display==='none';b.style.display=o?'block':'none';a.textContent=o?'\u25B2':'\u25BC';}
+function toggleShinganTenkai(cb){document.getElementById('sg-tenkai-opts').style.display=cb.checked?'flex':'none';}
+</script>
+            <button onclick="calculatePrediction()">&#x1F680; 予想を計算 (実行)</button>
         </div>
 
         <div id="results-container">
@@ -591,6 +628,7 @@
                 <div class="recommendation" id="seitenrei-output">計算結果待ち...</div>
                 <h3>⛈️ 荒天令 (波乱推奨)</h3>
                 <div class="recommendation" id="koutenrei-output">計算結果待ち...</div>
+                <div id="shingan-hakke-output"></div>
                 <div id="scenario-output">
     <div id="shakkou-status-board" style="display:none;">
         <span id="span_0">0</span> / 1465
