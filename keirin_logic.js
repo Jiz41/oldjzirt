@@ -1,7 +1,9 @@
 (function(app) {
 
-// 真自在律 Ver9.7
-// LOGIC VERSION: 9.7
+// 真自在律 Ver9.8
+// LOGIC VERSION: 9.8
+// 【V9.8】keirin_logic.js コメント整備
+//          - 全係数・計算式に説明コメント追加。脚質バイアスキー対応表、c_recent式の意味を明記。
 // 【V9.7】審眼八卦（SNGN）実装 ＆ c_l係数調整
 //          - 審眼八卦：ユーザー選択係数への後乗せ補正レイヤー（×1.05）を追加。
 //          - c_l係数：先頭 0.03→0.05、2番手 0.05→0.04（番手過大評価を解消）。
@@ -38,6 +40,10 @@
 // 【V7.3】消耗ペナルティ適用拡大 ＆ 複数競り表示修正。
 // ------------------------------------------------------------------------------------
 
+// R_BIAS       : 競走得点の影響度スケール（S級は得点差が直結、チャレンジは薄める）
+// RECENT_WEIGHT: 近況着順の重み（チャレンジは調子ムラが大きいので上げる）
+// COOP_WEIGHT  : ライン結束力係数のスケール（S級は連携が機能しやすい）
+// SUICIDE_LIMIT: C_suicide発動時の最大減点下限（ガールズは共倒れリスクを考慮しない）
 const COEFFICIENT_SETTINGS = {
     's-kyu':  { R_BIAS: 1.15, RECENT_WEIGHT: 0.90, COOP_WEIGHT: 1.20, IS_GIRLS: false, SUICIDE_LIMIT: 0.97 },
     'a-kyu':  { R_BIAS: 1.00, RECENT_WEIGHT: 1.00, COOP_WEIGHT: 1.00, IS_GIRLS: false, SUICIDE_LIMIT: 0.93 },
@@ -45,12 +51,14 @@ const COEFFICIENT_SETTINGS = {
     'girls':  { R_BIAS: 1.00, RECENT_WEIGHT: 1.10, COOP_WEIGHT: 1.00, IS_GIRLS: true,  SUICIDE_LIMIT: 1.00 },
 };
 
+// ガールズ競輪専用：先頭選手のエースマーク（◎〇）が番手へ与える恩恵係数
 const C_MARK_VALUES = {
-    HIGH:   1.12,
-    MEDIUM: 1.08,
-    LOW:    1.03
+    HIGH:   1.12,  // ◎ エース → 番手に最大恩恵
+    MEDIUM: 1.08,  // 〇
+    LOW:    1.03   // マークなし
 };
 
+// 競り予測の脚質別有利係数。逃・追は競り上等、自在は消耗を嫌う傾向から設定
 const SERI_STYLE_BONUS = {
     '逃': 1.08,
     '追': 1.05,
@@ -597,7 +605,6 @@ function calculateLineCoeffs(players, settings) {
             }
         });
     } else {
-        // ★★★ START: C_l 改修ロジック ★★★
         app.logMessage(`[C_L] 一般競輪モード: COOP_WEIGHT=${coop}`);
 
         // ① 各ラインの競走得点合計を算出
@@ -642,7 +649,6 @@ function calculateLineCoeffs(players, settings) {
                 CalculationSnapshot.line_coop[p.id] = p.c_l;
             }
         });
-        // ★★★ END: C_l 改修ロジック ★★★
     }
 
     return { players: participatingPlayers, allSeriInfos: parsedAllSeriInfos, finalOrderedPlayerIds, displayLineSegments, lines };
@@ -776,7 +782,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
 
     tempPlayers.forEach(p => {
 
-        // 2. C_risk
+        // 2. C_risk：得点が平均を大きく下回りかつ近況も低調な選手を減点
         const avgScore  = allScores.reduce((a, b) => a + b, 0) / allScores.length;
         const recentAvg = p.recent.split('').map(Number).reduce((a, b) => a + b, 0) / p.recent.length || 4.0;
         if (p.score < avgScore - 2.0 && recentAvg >= 4.0) {
@@ -784,7 +790,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
             appliedCoeffs.push('C_risk');
         }
 
-        // 3. C_mental
+        // 3. C_mental：S級または得点最高選手が直近1着続きの場合、プレッシャーで風に弱くなる
         const raceGrade = document.getElementById('race-type').value;
         const participatingMaxScore = Math.max(...tempPlayers.map(pp => pp.score));
         const isHighPressure = ['s-kyu'].includes(raceGrade) || (p.score === participatingMaxScore);
@@ -794,7 +800,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
             appliedCoeffs.push('C_mental');
         }
 
-// 4. C_recovery
+        // 4. C_recovery：差し・捲り系の上位スコア選手は乱戦で伸びしろがある
         if (p.style === '両' || p.style === '追') {
             const scoreDiffRatio = (p.score - scoreMin) / scoreRange;
             if (scoreDiffRatio > 0.6) {
@@ -805,7 +811,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
         }
     });
 
-    // 5. C_target
+    // 5. C_target：最高得点選手は他ラインにマークされやすく、強風時ほど崩れやすい
     const targetPlayer = tempPlayers.find(pp => pp.score === scoreMax);
     if (targetPlayer) {
         let rivalAutos = 0;
@@ -817,7 +823,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
         }
     }
 
-    // 6. C_split
+    // 6. C_split：ライン内で先頭と2番手の得点差が大きいほど番手が連れ込めない
     lines.forEach(line => {
         const p1 = tempPlayers.find(pp => pp.id === line[0]);
         const p2 = tempPlayers.find(pp => pp.id === line[1]);
@@ -831,14 +837,14 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
         }
     });
 
-    // 7. C_pace
+    // 7. C_pace：超高得点の逃げ選手は競合他ラインに追いつかれやすい
     const leaderPlayer = tempPlayers.find(pp => pp.style === '逃' || pp.style === '自' || pp.style === '両');
     if (leaderPlayer && leaderPlayer.score >= 105.0 && lines.length - 1 >= 2) {
         leaderPlayer.final_score *= 0.96;
         appliedCoeffs.push('C_pace');
     }
 
-    // 8. C_timing
+    // 8. C_timing：捲り系が番手に入ると仕掛けどころを失いやすい
     tempPlayers.forEach(pp => {
         if (pp.style === '両') {
             const line = lines.find(l => l.includes(pp.id));
@@ -849,7 +855,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
         }
     });
 
-    // 9. C_guard
+    // 9. C_guard：番手選手が低得点＋周囲に先行型が多いと連れ込みが怪しくなる
     lines.forEach(line => {
         const p2 = tempPlayers.find(pp => pp.id === line[1]);
         if (p2) {
@@ -963,10 +969,11 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
         applyTacticalAdjustments(scenarioPlayers, BANK_DATA, lines, allSeriInfos);
 
         scenarioPlayers.forEach(p => {
+            // 基本スコア × 得点補正 × 印 × 近況 × S1/B1位置 × ライン結束 × バンク脚質適性
             p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e;
-            p.final_score *= (p.physicalPenalty     || 1.0);
-            p.final_score /= (p.cantoMakuriPenalty  || 1.0);
-            p.final_score *= (p.warpBoost           || 1.0);
+            p.final_score *= (p.physicalPenalty     || 1.0);  // 物理層：直線短ペナルティ
+            p.final_score /= (p.cantoMakuriPenalty  || 1.0);  // 展開層：高カント捲りコスト
+            p.final_score *= (p.warpBoost           || 1.0);  // 展開層：イン突きブースト
             const res = getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA);
             p.final_score *= res.adj;
             p.v_for_wager  = res.v;
@@ -1145,6 +1152,7 @@ app.calculatePrediction = async function() {
     if (d1 < 0 && d2 < 0) trendBonus = -0.03;
     }
     p.trendLabel = trendBonus > 0 ? '上昇' : trendBonus < 0 ? '下降' : '安定';
+    // 4 - avgRank: 平均着順が良いほど正値（1着=+0.15）。trendBonus: 直近3走の方向性で±0.03
     p.c_recent = (1.0 + (4 - avgRank) * 0.05 + trendBonus) * settings.RECENT_WEIGHT;
 
         if      (p.wmark === '◎') p.c_wmark = 1.04;
@@ -1159,6 +1167,7 @@ app.calculatePrediction = async function() {
         p.c_s1 = p.is_s1 ? 1.005 : 1.0;
         p.c_b1 = p.is_b1 ? 1.015 : 1.0;
 
+        // 脚質→バンクバイアスキーの対応。自在・逃げは先行系、捲りは捲り系、追い込みは差し系
         let biasKey = '';
         if      (p.style === '自') biasKey = '先行';
         else if (p.style === '逃') biasKey = '先行';
