@@ -1,7 +1,12 @@
 (function(app) {
 
-// 真自在律 Ver9.8
-// LOGIC VERSION: 9.8
+// 真自在律 Ver10.0
+// LOGIC VERSION: 10.0
+// 【V10.0】展開モード補正 + 特異点選出ロジック修正
+//           - 展開モード自動判定（逃/差/捲/中）：得点差から脚質有利を動的決定。
+//           - tenkaiBonus を final_score に後乗せ（×1.15/×1.10）。
+//           - 特異点（L）選出をラインTOP優先ロジックに刷新、フォールバック付き。
+//           - displayResults / generateKoutenreiBets に lines を引き渡す経路を整備。
 // 【V9.8】keirin_logic.js コメント整備
 //          - 全係数・計算式に説明コメント追加。脚質バイアスキー対応表、c_recent式の意味を明記。
 // 【V9.7】審眼八卦（SNGN）実装 ＆ c_l係数調整
@@ -947,6 +952,33 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
 // runScenarioSimulation
 // ====================================================================================
 function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, applyKoutenrei, lineInput, windSpeed, windDirection, lines) {
+    // ── 展開モード判定 ──────────────────────────────
+    const TENKAI_MODE_ENABLED = true; // falseで現行に戻せる
+
+    const _escapePls = basePlayers.filter(p => p.style === '逃' && !p.is_scratch);
+    const _chasePls  = basePlayers.filter(p => p.style === '追' && !p.is_scratch);
+    const _makuriPls = basePlayers.filter(p => ['自','両'].includes(p.style) && !p.is_scratch);
+    const _escapeMax = _escapePls.length > 0 ? Math.max(..._escapePls.map(p => p.score)) : 0;
+    const _chaseMax  = _chasePls.length  > 0 ? Math.max(..._chasePls.map(p => p.score))  : 0;
+    const _makuriMax = _makuriPls.length > 0 ? Math.max(..._makuriPls.map(p => p.score)) : 0;
+    const _scoreGap     = _chaseMax  - _escapeMax;
+    const _makuriVsNige = _makuriMax - _escapeMax;
+
+    let _tenkaiMode;
+    if (_makuriVsNige >= 5 && _makuriVsNige <= 15)          _tenkaiMode = '捲';
+    else if (_scoreGap > 0  && _makuriVsNige <= 0)           _tenkaiMode = '差';
+    else if (_scoreGap <= 0 && _makuriVsNige <= 0)           _tenkaiMode = '逃';
+    else                                                      _tenkaiMode = '中';
+
+    const _tenkaiTable = {
+        '差': {},
+        '捲': { '自': 1.15, '両': 1.15 },
+        '逃': { '逃': 1.15, '自': 1.10 },
+        '中': {},
+    };
+    const tenkaiBonus = _tenkaiTable[_tenkaiMode];
+    app.logMessage(`[TENKAI] mode=${_tenkaiMode} scoreGap=${_scoreGap.toFixed(1)} makuriVsNige=${_makuriVsNige.toFixed(1)}`);
+
     const scenarios = ['先行有利', '捲り有利', '差し有利'];
     const allScenarioResults = [];
     const integratedScores   = {};
@@ -990,6 +1022,10 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
         scenarioPlayers.forEach(p => {
             const cD = cDCoeffs[p.style] || 1.0;
             p.final_score *= cD;
+            // ── 展開モード補正（V10.0）──────────────────────
+            if (typeof TENKAI_MODE_ENABLED !== 'undefined' && TENKAI_MODE_ENABLED) {
+                p.final_score *= (tenkaiBonus[p.style] || 1.0);
+            }
             integratedScores[p.id] += p.final_score;
         });
 
@@ -1221,7 +1257,8 @@ app.calculatePrediction = async function() {
             seitenreiResults.allScenarioResults,
             participatingPlayers,
             displayLineSegments,
-            finalTenunData
+            finalTenunData,
+            lines
         );
 
         applyShinganHakke(basePlayers, seitenreiResults.integratedScores, koutenreiResults.integratedScores);
@@ -1371,7 +1408,7 @@ function getTextColor(rgbColor) {
     return luminance > 0.5 ? '#333' : '#fff';
 }
 
-function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers, displayLineSegments, tenunIndexData) {
+function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers, displayLineSegments, tenunIndexData, lines = []) {
     displayBankTendency();
 
     const finalScores = Object.keys(seitenreiIntegratedScores).map(id => ({
@@ -1441,8 +1478,15 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
 
     // 荒天令買い目
     const koutenreiBox  = document.getElementById('koutenrei-output');
-    const seitenTop3Ids = new Set(tenunIndexData.rankingWithData.slice(0, 3).map(p => p.id));
-    const koutenreiBets = generateKoutenreiBets(tenunIndexData.rankingWithData, seitenTop3Ids);
+    // 特異点選出は補正前の元ランキングTOP3を参照する
+    const originalSeitenTop3Ids = new Set(
+        tenunIndexData.rankingWithData.slice(0, 3).map(p => p.id)
+    );
+    const koutenreiBets = generateKoutenreiBets(
+        tenunIndexData.rankingWithData,
+        originalSeitenTop3Ids,
+        lines
+    );
     if (koutenreiBox && koutenreiBets) {
         const L = koutenreiBets.targetL;
         let html = `<h4>⛈️ 荒天令</h4>`;
@@ -1519,22 +1563,53 @@ function generateSeitenreiBets(ranking) {
     };
 }
 
-function generateKoutenreiBets(ranking, seitenTop3Ids = new Set()) {
+function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = []) {
     if (!ranking || ranking.length < 4) return null;
     const A = ranking[0], B = ranking[1], C = ranking[2];
     const koutenTop3Ids = new Set([A.id, B.id, C.id]);
-    const lCandidates = ranking
-        .slice(3)
-        .filter(p => !koutenTop3Ids.has(p.id) && !seitenTop3Ids.has(p.id))
-        .map(p => {
+    const top3Ids = new Set([A.id, B.id, C.id]);
+
+    // ラインTOP選手（逃げ・自在・両）を優先して特異点選出
+    const lineTops = new Set(
+        lines
+            .filter(line => line.length > 0)
+            .map(line => line[0])
+            .filter(id => {
+                const p = ranking.find(p => p.id === id);
+                return p && ['逃','自','両'].includes(p.style);
+            })
+    );
+
+    let lCandidates = [];
+
+    // ①ラインTOP候補
+    if (lineTops.size > 0) {
+        lCandidates = [...lineTops]
+            .filter(id => !seitenTop3Ids.has(id) && !top3Ids.has(id))
+            .map(id => {
+                const p = ranking.find(p => p.id === id) || {};
+                let s = (p.final_score || 0) / 10;
+                if (p.is_b1) s += 10;
+                if (p.is_s1) s += 5;
+                return { ...p, lScore: s };
+            });
+    }
+
+    // ②フォールバック：逃げ・自在に+3ボーナス
+    if (lCandidates.length === 0) {
+        lCandidates = ranking.slice(3).filter(p =>
+            !seitenTop3Ids.has(p.id) && !top3Ids.has(p.id)
+        ).map(p => {
             let s = p.final_score / 10;
             if (p.is_b1) s += 10;
             if (p.is_s1) s += 5;
-            if (p.style === '追' || p.style === '両') s += 3;
+            if (['逃','自'].includes(p.style)) s += 3;
             return { ...p, lScore: s };
         });
+    }
+
     lCandidates.sort((a, b) => b.lScore - a.lScore);
-    const targetL = lCandidates[0];
+    const targetL = lCandidates[0] || null;
     return {
         targetL,
         sanrenpuku: [[A.id, B.id, targetL.id], [A.id, C.id, targetL.id]],
