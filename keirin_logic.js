@@ -1,7 +1,9 @@
 (function(app) {
 
-// 真自在律 Ver10.1
-// LOGIC VERSION: 10.1
+// 真自在律 Ver10.2
+// LOGIC VERSION: 10.2
+// 【V10.2】審眼八卦ON時 sendLog スキップ
+//           SNGN スイッチが1つでもONなら App.sendLog をスキップしてログ出力。
 // 【V10.1】generateSeitenreiBets r[2]選出ロジック変更
 //           追×(△か◎) → 追 → スコア3位 の優先順で選出。r[0]/r[1]除外処理付き。
 // 【V10.0】展開モード補正 + 特異点選出ロジック修正
@@ -1513,6 +1515,12 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     }
 
     console.log('[DEBUG sendLog直前] CalculationSnapshot.race_id:', CalculationSnapshot.race_id);
+    // 審眼八卦がONの場合はハズレ解析シートへの送信をスキップ
+    const _sgAnySwitchOn = ['sg-line','sg-score','sg-recent','sg-wmark','sg-tenkai']
+        .some(id => document.getElementById(id)?.checked);
+    if (_sgAnySwitchOn) {
+        app.logMessage('[SNGN] 審眼八卦オンのためsendLogをスキップします。');
+    } else {
     App.sendLog(
       {
         race_id: CalculationSnapshot.race_id,
@@ -1529,6 +1537,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         kouten: document.getElementById('koutenrei-output').innerHTML
       }
     );
+    } // _sgAnySwitchOn
 }
 
 // ====================================================================================
