@@ -1,7 +1,9 @@
 (function(app) {
 
-// 真自在律 Ver10.0
-// LOGIC VERSION: 10.0
+// 真自在律 Ver10.1
+// LOGIC VERSION: 10.1
+// 【V10.1】generateSeitenreiBets r[2]選出ロジック変更
+//           追×(△か◎) → 追 → スコア3位 の優先順で選出。r[0]/r[1]除外処理付き。
 // 【V10.0】展開モード補正 + 特異点選出ロジック修正
 //           - 展開モード自動判定（逃/差/捲/中）：得点差から脚質有利を動的決定。
 //           - tenkaiBonus を final_score に後乗せ（×1.15/×1.10）。
@@ -1551,7 +1553,15 @@ function applyLineCountBonus(integratedScores, lines) {
 
 function generateSeitenreiBets(ranking) {
     if (!ranking || ranking.length < 3) return null;
-    const r = ranking.map(p => p.id);
+    const top2Ids = new Set([ranking[0].id, ranking[1].id]);
+
+    // r[2]: ① 追 × (△か◎) → ② 追 → ③ スコア3位
+    const rest = ranking.slice(2).filter(p => !top2Ids.has(p.id));
+    const cand1 = rest.filter(p => p.style === '追' && ['△','◎'].includes(p.wmark));
+    const cand2 = rest.filter(p => p.style === '追');
+    const r2 = (cand1[0] || cand2[0] || rest[0]);
+
+    const r = [ranking[0].id, ranking[1].id, r2.id];
     return {
         sanrentan: [
             [r[0], r[1], r[2]],
