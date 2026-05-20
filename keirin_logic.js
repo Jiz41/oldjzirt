@@ -1,7 +1,10 @@
 (function(app) {
 
-// 真自在律 Ver10.3
-// LOGIC VERSION: 10.3
+// 真自在律 Ver10.4
+// LOGIC VERSION: 10.4
+// 【V10.4】特異点L選出を荒天令スコア基準に刷新（案Z実装）
+//           koutenRankingWithDataを第4引数として受け取り、
+//           ①荒天令上位×ラインTOP → ②荒天令上位先頭 → ③フォールバック の優先順で選出。
 // 【V10.3】generateKoutenreiBets のA/B/Cを晴天令選出r[0]/r[1]/r[2]に統一
 //           seitenreiBets.sanrenpuku[0] からIDを取り出しランキングを組み替えて渡す。
 //           荒天令買い目への晴天令外選手混入バグを修正。
@@ -1498,7 +1501,8 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     const koutenreiBets = generateKoutenreiBets(
         koutenreiRanking,
         originalSeitenTop3Ids,
-        lines
+        lines,
+        tenunIndexData.koutenRankingWithData || []
     );
     if (koutenreiBox && koutenreiBets) {
         const L = koutenreiBets.targetL;
@@ -1591,13 +1595,12 @@ function generateSeitenreiBets(ranking) {
     };
 }
 
-function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = []) {
+function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = [], koutenRanking = []) {
     if (!ranking || ranking.length < 4) return null;
     const A = ranking[0], B = ranking[1], C = ranking[2];
-    const koutenTop3Ids = new Set([A.id, B.id, C.id]);
     const top3Ids = new Set([A.id, B.id, C.id]);
 
-    // ラインTOP選手（逃げ・自在・両）を優先して特異点選出
+    // ラインTOP（逃/自/両）のID集合
     const lineTops = new Set(
         lines
             .filter(line => line.length > 0)
@@ -1608,36 +1611,45 @@ function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = []) {
             })
     );
 
-    let lCandidates = [];
+    // 荒天令スコア順から晴天令TOP3・top3を除いた候補リスト
+    const koutenCandidates = koutenRanking.filter(p =>
+        !seitenTop3Ids.has(p.id) && !top3Ids.has(p.id)
+    );
 
-    // ①ラインTOP候補
-    if (lineTops.size > 0) {
-        lCandidates = [...lineTops]
-            .filter(id => !seitenTop3Ids.has(id) && !top3Ids.has(id))
-            .map(id => {
-                const p = ranking.find(p => p.id === id) || {};
-                let s = (p.final_score || 0) / 10;
+    // ① 荒天令上位 かつ ラインTOP（逃/自/両）
+    let targetL = koutenCandidates.find(p => lineTops.has(p.id)) || null;
+
+    // ② 荒天令上位の先頭（脚質不問）
+    if (!targetL) targetL = koutenCandidates[0] || null;
+
+    // ③ フォールバック：現行ラインTOP優先 → 逃/自+3ボーナス
+    if (!targetL) {
+        let lCandidates = [];
+        if (lineTops.size > 0) {
+            lCandidates = [...lineTops]
+                .filter(id => !seitenTop3Ids.has(id) && !top3Ids.has(id))
+                .map(id => {
+                    const p = ranking.find(p => p.id === id) || {};
+                    let s = (p.final_score || 0) / 10;
+                    if (p.is_b1) s += 10;
+                    if (p.is_s1) s += 5;
+                    return { ...p, lScore: s };
+                });
+        }
+        if (lCandidates.length === 0) {
+            lCandidates = ranking.slice(3).filter(p =>
+                !seitenTop3Ids.has(p.id) && !top3Ids.has(p.id)
+            ).map(p => {
+                let s = p.final_score / 10;
                 if (p.is_b1) s += 10;
                 if (p.is_s1) s += 5;
+                if (['逃','自'].includes(p.style)) s += 3;
                 return { ...p, lScore: s };
             });
+        }
+        lCandidates.sort((a, b) => b.lScore - a.lScore);
+        targetL = lCandidates[0] || null;
     }
-
-    // ②フォールバック：逃げ・自在に+3ボーナス
-    if (lCandidates.length === 0) {
-        lCandidates = ranking.slice(3).filter(p =>
-            !seitenTop3Ids.has(p.id) && !top3Ids.has(p.id)
-        ).map(p => {
-            let s = p.final_score / 10;
-            if (p.is_b1) s += 10;
-            if (p.is_s1) s += 5;
-            if (['逃','自'].includes(p.style)) s += 3;
-            return { ...p, lScore: s };
-        });
-    }
-
-    lCandidates.sort((a, b) => b.lScore - a.lScore);
-    const targetL = lCandidates[0] || null;
     return {
         targetL,
         sanrenpuku: [[A.id, B.id, targetL.id], [A.id, C.id, targetL.id]],
