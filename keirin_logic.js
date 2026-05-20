@@ -1,7 +1,10 @@
 (function(app) {
 
-// 真自在律 Ver10.2
-// LOGIC VERSION: 10.2
+// 真自在律 Ver10.3
+// LOGIC VERSION: 10.3
+// 【V10.3】generateKoutenreiBets のA/B/Cを晴天令選出r[0]/r[1]/r[2]に統一
+//           seitenreiBets.sanrenpuku[0] からIDを取り出しランキングを組み替えて渡す。
+//           荒天令買い目への晴天令外選手混入バグを修正。
 // 【V10.2】審眼八卦ON時 sendLog スキップ
 //           SNGN スイッチが1つでもONなら App.sendLog をスキップしてログ出力。
 // 【V10.1】generateSeitenreiBets r[2]選出ロジック変更
@@ -1482,12 +1485,18 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
 
     // 荒天令買い目
     const koutenreiBox  = document.getElementById('koutenrei-output');
-    // 特異点選出は補正前の元ランキングTOP3を参照する
-    const originalSeitenTop3Ids = new Set(
-        tenunIndexData.rankingWithData.slice(0, 3).map(p => p.id)
-    );
+    // 荒天令のA/B/Cを晴天令で選出したr[0]/r[1]/r[2]に揃えるためランキングを組み替える
+    const seitenSelectedIds = seitenreiBets ? seitenreiBets.sanrenpuku[0] : null;
+    const seitenSelectedSet = new Set(seitenSelectedIds || []);
+    const koutenreiRanking = seitenSelectedIds
+        ? [
+            ...seitenSelectedIds.map(id => tenunIndexData.rankingWithData.find(p => p.id === id)),
+            ...tenunIndexData.rankingWithData.filter(p => !seitenSelectedSet.has(p.id))
+          ].filter(Boolean)
+        : tenunIndexData.rankingWithData;
+    const originalSeitenTop3Ids = new Set(seitenSelectedIds || []);
     const koutenreiBets = generateKoutenreiBets(
-        tenunIndexData.rankingWithData,
+        koutenreiRanking,
         originalSeitenTop3Ids,
         lines
     );
