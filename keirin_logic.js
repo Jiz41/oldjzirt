@@ -2,9 +2,9 @@
 
 // 真自在律 Ver10.5
 // LOGIC VERSION: 10.5
-// 【V10.5】generateSeitenreiBets r2から競り敗者を除外（V10.1実装漏れ修正）
-//           seriLoserIds を第2引数として受け取り、rest の filter に追加。
-//           if (!r2) return null の安全ガードも追加。
+// 【V10.5】generateSeitenreiBets r2選出窓を3〜5位に限定（スコア権威を尊重）
+//           rest.slice(0,3) で style/wmark フィルターの到達範囲を制限。
+//           seriLoserIds 引数は不要（ranking が既に補正済みスコア順のため）。
 // 【V10.4】特異点L選出を荒天令スコア基準に刷新（案Z実装）
 //           koutenRankingWithDataを第4引数として受け取り、
 //           ①荒天令上位×ラインTOP → ②荒天令上位先頭 → ③フォールバック の優先順で選出。
@@ -1479,8 +1479,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
 
     // 晴天令買い目
     const seitenreiBox  = document.getElementById('seitenrei-output');
-    const seriLoserIdSet = new Set((allSeriInfos || []).map(s => s.loser));
-    const seitenreiBets = generateSeitenreiBets(tenunIndexData.rankingWithData, seriLoserIdSet);
+    const seitenreiBets = generateSeitenreiBets(tenunIndexData.rankingWithData);
     if (seitenreiBox && seitenreiBets) {
         let html = '<h4>☀️ 晴天令</h4><strong>三連単</strong><ul>';
         seitenreiBets.sanrentan.forEach(b => html += `<li>${formatOrderedBet(b)}</li>`);
@@ -1577,15 +1576,16 @@ function applyLineCountBonus(integratedScores, lines) {
   return result;
 }
 
-function generateSeitenreiBets(ranking, seriLoserIds = new Set()) {
+function generateSeitenreiBets(ranking) {
     if (!ranking || ranking.length < 3) return null;
     const top2Ids = new Set([ranking[0].id, ranking[1].id]);
 
-    // r[2]: ① 追 × (△か◎) → ② 追 → ③ スコア3位（競り敗者は除外）
-    const rest = ranking.slice(2).filter(p => !top2Ids.has(p.id) && !seriLoserIds.has(p.id));
-    const cand1 = rest.filter(p => p.style === '追' && ['△','◎'].includes(p.wmark));
-    const cand2 = rest.filter(p => p.style === '追');
-    const r2 = (cand1[0] || cand2[0] || rest[0]);
+    // r[2]: 3〜5位の中から ① 追×(△か◎) → ② 追 → ③ スコア順先頭
+    const rest    = ranking.slice(2).filter(p => !top2Ids.has(p.id));
+    const topRest = rest.slice(0, 3);
+    const cand1   = topRest.filter(p => p.style === '追' && ['△','◎'].includes(p.wmark));
+    const cand2   = topRest.filter(p => p.style === '追');
+    const r2      = cand1[0] || cand2[0] || topRest[0];
     if (!r2) return null;
 
     const r = [ranking[0].id, ranking[1].id, r2.id];
