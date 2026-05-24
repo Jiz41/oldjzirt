@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="app-version" content="2.1.0">
+    <meta name="app-version" content="2.1.1">
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="./style.css">
 
@@ -255,7 +255,8 @@
         <div class="title-image-container">
             <img src="./title.png" alt="華耀天輪 真・自在律" class="title-image">
         </div>
-    </header>    
+    </header>
+        <div id="logic-version-display" style="text-align:right;font-size:0.65rem;opacity:0.4;color:#e8872a;padding-right:0.6rem;margin-top:-0.2rem;letter-spacing:0.04em;"></div>
         <div id="maxim-display-container"></div>
 
         <div class="manual-header" onclick="toggleManual()">
@@ -782,6 +783,14 @@ function execCopy() {
 <script src="LogModule.js" defer></script>
 <script src="./meigen.js" defer></script>
 <script src="./paste-input.js" defer></script>
+<script defer>
+document.addEventListener('DOMContentLoaded', function() {
+    var el = document.getElementById('logic-version-display');
+    if (el && window.App && App.LOGIC_VERSION) {
+        el.textContent = 'v' + App.LOGIC_VERSION;
+    }
+});
+</script>
 
 <!-- ============================================================================
      🐾 エイプリルフール専用ブロック：競コーギー予想システム
