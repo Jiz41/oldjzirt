@@ -1,7 +1,10 @@
 (function(app) {
 
-// 真自在律 Ver10.12
-// LOGIC VERSION: 10.12
+// 真自在律 Ver10.13
+// LOGIC VERSION: 10.13
+// 【V10.13】InputGuard 方針A実装：collectAndValidate()の浄化済みデータをcalculatePrediction()に接続。
+//           getModeSelector()追加、ラッパーにresult.data受け渡し、calculatePrediction引数化。
+//           getStyle() JSDocの残存"両"を"逃"に修正。
 // 【V10.12】LOCAL_BONUSをforEachループ内からグローバル定数セクションに移動。
 // 【V10.11】getPlayerData()（死にコード）を削除。calculatePrediction()と重複かつ劣化版。
 // 【V10.10】壱耀晴乾ノ象の死にコードブロックを削除。
@@ -1079,7 +1082,7 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
 // ====================================================================================
 // calculatePrediction
 // ====================================================================================
-app.calculatePrediction = async function() {
+app.calculatePrediction = async function(guardedData) {
     kururuLogged = false;
     console.log('[DEBUG calcPrediction] 開始時 CalculationSnapshot.race_id:', CalculationSnapshot.race_id);
     const savedRaceId = CalculationSnapshot.race_id;
@@ -1092,45 +1095,33 @@ app.calculatePrediction = async function() {
     }
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    const players    = [];
-    const playerRows = document.querySelectorAll('.player-row');
-    const s1Id = document.querySelector('input[name="s-leader"]:checked')?.getAttribute('data-id');
-    const b1Id = document.querySelector('input[name="b-leader"]:checked')?.getAttribute('data-id');
-
-    playerRows.forEach(row => {
-        const id     = parseInt(row.getAttribute('data-id'));
-        if (isNaN(id)) return;
-
-        let score    = parseFloat(row.querySelector('.score').value) || 0;
-        const style  = row.querySelector('.style').value;
-        const wmark  = row.querySelector('.wmark').value.trim();
-        const isScratch = row.querySelector('.is-scratch')?.checked || false;
-
-        const isGoldCap = document.getElementById(`goldcap-${id}`)?.checked || false;
+    // InputGuard が浄化・検証済みの値を使用する
+    const { s1Id, b1Id } = guardedData.radio;
+    const players = guardedData.players.map(p => {
+        let score = p.score;
         // goldcap：データ不足新人の地力再定義装置
         // A級平均スコア≒95.0 を下限として設定
         // 実績データが少ないことによる過小評価を補正する措置
-        if (isGoldCap && score < 95.0) {
+        if (p.isGoldCap && score < 95.0) {
             score = 95.0;
-            app.logMessage(`[ROYAL] 選手${id}: 👑 戴冠（地力再定義)`);
+            app.logMessage(`[ROYAL] 選手${p.id}: 👑 戴冠（地力再定義)`);
         }
-
-        players.push({
-            id, score, style, wmark,
-            recent: row.querySelector('.recent').value.trim(),
-            is_s1: id == s1Id, is_b1: id == b1Id, is_scratch: isScratch,
-            isLocal: row.querySelector('.is-local')?.checked || false,
+        return {
+            id: p.id, score, style: p.style, wmark: p.wmark,
+            recent: p.recent,
+            is_s1: p.id === s1Id, is_b1: p.id === b1Id, is_scratch: p.isScratch,
+            isLocal: p.isLocal,
             c_score_adj: 1.0, c_recent: 1.0, c_wmark: 1.0,
             c_s1: 1.0, c_b1: 1.0, c_l: 1.0, c_e: 1.0, c_local: 1.0, final_score: 0,
-            seri_coef: score * (SERI_STYLE_BONUS[style] || 1.00) * (wmark === '◎' ? 1.04 : 1.0)
-        });
+            seri_coef: score * (SERI_STYLE_BONUS[p.style] || 1.00) * (p.wmark === '◎' ? 1.04 : 1.0)
+        };
     });
 
     if (Object.keys(BANK_DATA).length === 0) await loadBANK_DATA();
 
-    const raceType  = document.getElementById('race-type').value;
+    const raceType  = guardedData.raceType;
     const settings  = COEFFICIENT_SETTINGS[raceType];
-    const bankName  = document.getElementById('bank-name').value;
+    const bankName  = guardedData.bankName;
     CalculationSnapshot.bank = BANK_DATA[bankName] ? {
       straight: BANK_DATA[bankName].straight,
       canto: BANK_DATA[bankName].canto,
@@ -1139,8 +1130,7 @@ app.calculatePrediction = async function() {
       keirin_bias: BANK_DATA[bankName].keirin_bias
     } : {};
     const selectedBank = BANK_DATA[bankName];
-    const modeSelector = document.getElementById('mode-selector');
-    const koutenreiModeSelected = modeSelector ? modeSelector.value === 'koutenrei' : false;
+    const koutenreiModeSelected = guardedData.modeSelector === 'koutenrei';
 
     app.logMessage(`[CALC START] ${raceType} / バンク: ${bankName} / モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`);
 
@@ -1773,7 +1763,7 @@ const InputGuard = (() => {
      * .style (脚質): 未選択時のガード
      * @param {Element} card
      * @param {number}  idx
-     * @returns {string} "自" | "追" | "両"
+     * @returns {string} "逃" | "自" | "追"
      */
     function getStyle(card, idx) {
         const el  = card.querySelector('.style');
@@ -1934,12 +1924,26 @@ const InputGuard = (() => {
             data: {
                 raceType,
                 bankName: getBankName(),
+                modeSelector: getModeSelector(),
                 wind,
                 players,
                 radio,
                 lineInput,
             }
         };
+    }
+
+    // ──────────────────────────────────────────────────────
+    // § 6b. モードセレクタ取得
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * mode-selector: 荒天令 / 晴天令 モード値を取得
+     * @returns {string} "koutenrei" | "seitenrei"
+     */
+    function getModeSelector() {
+        const el = document.getElementById('mode-selector');
+        return el ? el.value : 'seitenrei';
     }
 
     // ──────────────────────────────────────────────────────
@@ -1994,7 +1998,7 @@ function initInputGuardWrapper() {
                 return;
             }
             InputGuard.lockAllInputs();
-            return _original.call(window.App).finally(() => InputGuard.unlockAllInputs());
+            return _original.call(window.App, result.data).finally(() => InputGuard.unlockAllInputs());
         };
 
         InputGuard.log('ラッパー設置完了 — グローバルな calculatePrediction から App.calculatePrediction を呼び出します。');
