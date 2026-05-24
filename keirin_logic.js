@@ -1,7 +1,11 @@
 (function(app) {
 
-// 真自在律 Ver10.9
-// LOGIC VERSION: 10.9
+// 真自在律 Ver11.0
+// LOGIC VERSION: 11.0
+// 【V11.0】壱耀晴乾ノ象の死にコードブロック（327〜347行目）を削除。
+//           SUPERIORITY_THRESHOLD_RATE / RAW_COMPOSITE_STATS /
+//           calculateSuperiorityList() / SUPERIOR_PATTERNS_FINAL_LIST の4変数。
+//           実動ロジックはcalculateTenunIndex()等にハードコード済みのため影響なし。
 // 【V10.9】'両'を全18箇所から削除・置換。cantoMakuriPenalty/C_timing/tenkaiStyleMap捲りを
 //           '自'（捲り）に修正し、UIと内部値を完全一致させた。
 // 【V10.8】地元補正（c_local）を本計算に接続。LOCAL_BONUS=1.03固定・脚質差なし。
@@ -322,29 +326,6 @@ function applyTacticalAdjustments(players, bankData, lines, seriInfos) {
     return players;
 }
 
-// ====================================================================================
-// 壱耀晴乾ノ象
-// ====================================================================================
-const SUPERIORITY_THRESHOLD_RATE = 0.0206;
-const RAW_COMPOSITE_STATS = [
-    { pattern_key: "33_差し", hit_rate: 0.0309 },
-    { pattern_key: "33_逃げ", hit_rate: 0.0206 },
-];
-
-function calculateSuperiorityList() {
-    const superiorPatterns = [];
-    // 壱耀晴乾ノ象：実測統計に基づく優位パターン採用
-    // 天雲指数33 × 差しスタイル が最も的中率が高いと統計的に確認済み
-    // hit_rate: 0.0309 > 閾値0.0206（33_逃げは閾値同値のため除外）
-    const targetPatterns = ["33_差し"];
-    for (const data of RAW_COMPOSITE_STATS) {
-        if (targetPatterns.includes(data.pattern_key) && data.hit_rate >= SUPERIORITY_THRESHOLD_RATE) {
-            superiorPatterns.push(data.pattern_key);
-        }
-    }
-    return superiorPatterns;
-}
-const SUPERIOR_PATTERNS_FINAL_LIST = calculateSuperiorityList();
 
 // ====================================================================================
 // ロギング
