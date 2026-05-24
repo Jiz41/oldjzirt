@@ -1,7 +1,9 @@
 (function(app) {
 
-// 真自在律 Ver10.8
-// LOGIC VERSION: 10.8
+// 真自在律 Ver10.9
+// LOGIC VERSION: 10.9
+// 【V10.9】'両'を全18箇所から削除・置換。cantoMakuriPenalty/C_timing/tenkaiStyleMap捲りを
+//           '自'（捲り）に修正し、UIと内部値を完全一致させた。
 // 【V10.8】地元補正（c_local）を本計算に接続。LOCAL_BONUS=1.03固定・脚質差なし。
 //           getLocalSwitch()・localSwitch変数を削除（地元スイッチ廃止）。
 // 【V10.7】展開モード判定を4分岐→3分岐に整理
@@ -86,7 +88,6 @@ const C_MARK_VALUES = {
 const SERI_STYLE_BONUS = {
     '逃': 1.08,
     '追': 1.05,
-    '両': 1.00,
     '自': 0.95
 };
 
@@ -304,7 +305,7 @@ function applyTacticalAdjustments(players, bankData, lines, seriInfos) {
 
     players.forEach(p => {
         const pos = positionMap[p.id];
-        p.cantoMakuriPenalty = (p.style === '両') ? makuriPenalty : 1.0;
+        p.cantoMakuriPenalty = (p.style === '自') ? makuriPenalty : 1.0;
 
         if (warpBoostTargets.includes(p.id)) {
             // イン突き（ワープ）ブースト ×1.35
@@ -715,10 +716,10 @@ function applySeriCorrection(scoredPlayers, allSeriInfos, silent) {
 // getScenarioCoeffs
 // ====================================================================================
 function getScenarioCoeffs(scenario) {
-    if (scenario === '先行有利') return { '自': 1.05, '追': 1.02, '両': 1.03 };
-    if (scenario === '捲り有利') return { '自': 1.00, '追': 1.05, '両': 1.04 };
-    if (scenario === '差し有利') return { '自': 0.90, '追': 1.08, '両': 1.05 };
-    return { '自': 1.0, '追': 1.0, '両': 1.0 };
+    if (scenario === '先行有利') return { '自': 1.05, '追': 1.02 };
+    if (scenario === '捲り有利') return { '自': 1.00, '追': 1.05 };
+    if (scenario === '差し有利') return { '自': 0.90, '追': 1.08 };
+    return { '自': 1.0, '追': 1.0 };
 }
 
 // ====================================================================================
@@ -825,7 +826,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
         }
 
         // 4. C_recovery：差し・捲り系の上位スコア選手は乱戦で伸びしろがある
-        if (p.style === '両' || p.style === '追') {
+        if (p.style === '追') {
             const scoreDiffRatio = (p.score - scoreMin) / scoreRange;
             if (scoreDiffRatio > 0.6) {
                 const recoveryFactor = 1.04 + (scoreDiffRatio - 0.6) * 0.1;
@@ -839,7 +840,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
     const targetPlayer = tempPlayers.find(pp => pp.score === scoreMax);
     if (targetPlayer) {
         let rivalAutos = 0;
-        tempPlayers.forEach(pp => { if (pp.id !== targetPlayer.id && (pp.style === '逃' || pp.style === '自' || pp.style === '両')) rivalAutos++; });
+        tempPlayers.forEach(pp => { if (pp.id !== targetPlayer.id && (pp.style === '逃' || pp.style === '自')) rivalAutos++; });
         if (rivalAutos >= 2) {
             const targetAdj = 1.0 - (v * 0.007);
             targetPlayer.final_score *= targetAdj;
@@ -862,7 +863,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
     });
 
     // 7. C_pace：超高得点の逃げ選手は競合他ラインに追いつかれやすい
-    const leaderPlayer = tempPlayers.find(pp => pp.style === '逃' || pp.style === '自' || pp.style === '両');
+    const leaderPlayer = tempPlayers.find(pp => pp.style === '逃' || pp.style === '自');
     if (leaderPlayer && leaderPlayer.score >= 105.0 && lines.length - 1 >= 2) {
         leaderPlayer.final_score *= 0.96;
         appliedCoeffs.push('C_pace');
@@ -870,7 +871,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
 
     // 8. C_timing：捲り系が番手に入ると仕掛けどころを失いやすい
     tempPlayers.forEach(pp => {
-        if (pp.style === '両') {
+        if (pp.style === '自') {
             const line = lines.find(l => l.includes(pp.id));
             if (line && line.indexOf(pp.id) >= 1) {
                 pp.final_score *= 0.97;
@@ -886,7 +887,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
             const lowScoreThreshold = scoreMin + scoreRange * 0.4;
             let baseRisk = 1.0;
             if (p2.score < lowScoreThreshold) baseRisk = 0.95;
-            const attackers = tempPlayers.filter(pp => pp.id !== p2.id && (pp.style === '逃' || pp.style === '自' || pp.style === '両')).length;
+            const attackers = tempPlayers.filter(pp => pp.id !== p2.id && (pp.style === '逃' || pp.style === '自')).length;
             if (attackers >= 2) baseRisk *= 0.95;
             p2.final_score *= baseRisk;
             appliedCoeffs.push('C_guard');
@@ -915,7 +916,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
             const player = tempPlayers.find(p => p.id === id);
             if (player) {
                 if (['◎', '〇', '△'].includes(player.wmark)) totalWeightScore += 1;
-                if (player.style === '逃' || player.style === '自' || player.style === '両') hasSelfStarter = true;
+                if (player.style === '逃' || player.style === '自') hasSelfStarter = true;
             }
         });
 
@@ -986,7 +987,7 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
 
     // まくり候補：逃げ扱いになった選手は除外する
     const _escapeIds = new Set(_escapePls.map(p => p.id));
-    const _makuriPls = basePlayers.filter(p => ['自','両'].includes(p.style) && !p.is_scratch && !_escapeIds.has(p.id));
+    const _makuriPls = basePlayers.filter(p => p.style === '自' && !p.is_scratch && !_escapeIds.has(p.id));
 
     const _escapeMax = _escapePls.length > 0 ? Math.max(..._escapePls.map(p => p.score)) : 0;
     const _chaseMax  = _chasePls.length  > 0 ? Math.max(..._chasePls.map(p => p.score))  : 0;
@@ -1001,7 +1002,7 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
 
     const _tenkaiTable = {
         '差': {},
-        '捲': { '自': 1.15, '両': 1.15 },
+        '捲': { '自': 1.15 },
         '逃': { '逃': 1.15, '自': 1.10 },
     };
     const tenkaiBonus = _tenkaiTable[_tenkaiMode];
@@ -1103,7 +1104,7 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
     if (tIndex === 33 && windSpeed <= 2.0) {
         const firstPlayer = seitenreiRanking[0];
         if (firstPlayer) {
-            const isSashiMa  = (firstPlayer.style === '追' || firstPlayer.style === '両');
+            const isSashiMa  = (firstPlayer.style === '追');
             const isWeightTop = (firstPlayer.wmark === '◎');
             if (isSashiMa && isWeightTop) {
                 targetPlayerId = firstPlayer.id;
@@ -1236,7 +1237,6 @@ app.calculatePrediction = async function() {
         let biasKey = '';
         if      (p.style === '自') biasKey = '先行';
         else if (p.style === '逃') biasKey = '先行';
-        else if (p.style === '両') biasKey = '捲り';
         else if (p.style === '追') biasKey = '差し';
         p.c_e = selectedBank.keirin_bias[biasKey] || 1.0;
         const LOCAL_BONUS = 1.03;
@@ -1347,7 +1347,7 @@ function applyShinganHakke(basePlayers, seitenScores, koutenScores) {
     const out = document.getElementById('shingan-hakke-output');
     if (!anyOn) { if (out) out.innerHTML = ''; return; }
 
-    const tenkaiStyleMap = { senkou: ['逃', '自'], makuri: ['両'], sashi: ['追'] };
+    const tenkaiStyleMap = { senkou: ['逃', '自'], makuri: ['自'], sashi: ['追'] };
     const tenkaiStyles = tenkaiStyleMap[tenkaiType] || [];
     const tenkaiLabel  = { senkou: '先行有利', makuri: '捲り有利', sashi: '差し有利' }[tenkaiType] || '';
 
@@ -1630,7 +1630,7 @@ function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = [], k
             .map(line => line[0])
             .filter(id => {
                 const p = ranking.find(p => p.id === id);
-                return p && ['逃','自','両'].includes(p.style);
+                return p && ['逃','自'].includes(p.style);
             })
     );
 
@@ -1829,7 +1829,7 @@ const InputGuard = (() => {
     function getStyle(card, idx) {
         const el  = card.querySelector('.style');
         const val = el ? el.value : '';
-        if (!val || !['逃', '自', '追', '両'].includes(val)) {
+        if (!val || !['逃', '自', '追'].includes(val)) {
         log(`WARN: 選手${idx}の脚質が未選択 → "逃" をデフォルト適用`);
         return '逃';
         }
