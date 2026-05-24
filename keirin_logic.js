@@ -1,7 +1,9 @@
 (function(app) {
 
-// 真自在律 Ver10.5
-// LOGIC VERSION: 10.5
+// 真自在律 Ver10.6
+// LOGIC VERSION: 10.6
+// 【V10.6】展開補正：逃げタイプ0人時にlines[0][0]を実質逃げ役として使用
+//           脚質入力に依存せず並び予想の物理的先頭を展開判定に適用。
 // 【V10.5】generateSeitenreiBets r2選出窓を3〜5位に限定（スコア権威を尊重）
 //           rest.slice(0,3) で style/wmark フィルターの到達範囲を制限。
 //           seriLoserIds 引数は不要（ranking が既に補正済みスコア順のため）。
@@ -968,9 +970,20 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
     // ── 展開モード判定 ──────────────────────────────
     const TENKAI_MODE_ENABLED = true; // falseで現行に戻せる
 
-    const _escapePls = basePlayers.filter(p => p.style === '逃' && !p.is_scratch);
-    const _chasePls  = basePlayers.filter(p => p.style === '追' && !p.is_scratch);
-    const _makuriPls = basePlayers.filter(p => ['自','両'].includes(p.style) && !p.is_scratch);
+    const _escapePlsRaw = basePlayers.filter(p => p.style === '逃' && !p.is_scratch);
+    const _chasePls     = basePlayers.filter(p => p.style === '追' && !p.is_scratch);
+
+    // 逃げタイプ0人の場合、lines[0][0]（並び予想の物理的先頭）を逃げ扱いとする
+    const _escapePls = _escapePlsRaw.length > 0
+        ? _escapePlsRaw
+        : (lines && lines.length > 0 && lines[0].length > 0)
+            ? [basePlayers.find(p => p.id === lines[0][0])].filter(Boolean)
+            : [];
+
+    // まくり候補：逃げ扱いになった選手は除外する
+    const _escapeIds = new Set(_escapePls.map(p => p.id));
+    const _makuriPls = basePlayers.filter(p => ['自','両'].includes(p.style) && !p.is_scratch && !_escapeIds.has(p.id));
+
     const _escapeMax = _escapePls.length > 0 ? Math.max(..._escapePls.map(p => p.score)) : 0;
     const _chaseMax  = _chasePls.length  > 0 ? Math.max(..._chasePls.map(p => p.score))  : 0;
     const _makuriMax = _makuriPls.length > 0 ? Math.max(..._makuriPls.map(p => p.score)) : 0;
