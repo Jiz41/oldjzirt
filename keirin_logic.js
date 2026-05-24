@@ -1,7 +1,8 @@
 (function(app) {
 
-// 真自在律 Ver11.0
-// LOGIC VERSION: 11.0
+// 真自在律 Ver11.1
+// LOGIC VERSION: 11.1
+// 【V11.1】getPlayerData()（死にコード）を削除。calculatePrediction()と重複かつ劣化版。
 // 【V11.0】壱耀晴乾ノ象の死にコードブロック（327〜347行目）を削除。
 //           SUPERIORITY_THRESHOLD_RATE / RAW_COMPOSITE_STATS /
 //           calculateSuperiorityList() / SUPERIOR_PATTERNS_FINAL_LIST の4変数。
@@ -341,40 +342,6 @@ app.logMessage = function(message) {
 }
 
 // ====================================================================================
-// getPlayerData
-// ====================================================================================
-function getPlayerData() {
-    const players = [];
-    const playerRows = document.querySelectorAll('.player-row');
-    const s1Leader = document.querySelector('input[name="s-leader"]:checked');
-    const b1Leader = document.querySelector('input[name="b-leader"]:checked');
-    const s1Id = s1Leader ? parseInt(s1Leader.getAttribute('data-id')) : null;
-    const b1Id = b1Leader ? parseInt(b1Leader.getAttribute('data-id')) : null;
-
-    playerRows.forEach(row => {
-        const id = parseInt(row.getAttribute('data-id'));
-        if (isNaN(id)) return;
-
-        const score  = parseFloat(row.querySelector('.score').value) || 0;
-        const style  = row.querySelector('.style').value;
-        const wmark  = row.querySelector('.wmark').value.trim();
-        const isScratchCheckbox = row.querySelector('.is-scratch');
-        const is_scratch = isScratchCheckbox ? isScratchCheckbox.checked : false;
-
-        players.push({
-            id, score, style, wmark,
-            recent: row.querySelector('.recent').value.trim(),
-            is_s1: id === s1Id,
-            is_b1: id === b1Id,
-            is_scratch,
-            c_score_adj: 1.0, c_recent: 1.0, c_wmark: 1.0,
-            c_s1: 1.0, c_b1: 1.0, c_l: 1.0, c_e: 1.0,
-            final_score: 0,
-            seri_coef: score * (SERI_STYLE_BONUS[style] || 1.00) * (wmark === '◎' ? 1.04 : 1.0)
-        });
-    });
-    return players;
-}
 
 // ====================================================================================
 // loadBANK_DATA
