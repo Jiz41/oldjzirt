@@ -1,10 +1,10 @@
 (function(app) {
 
-// 真自在律 Ver11.2
-// LOGIC VERSION: 11.2
-// 【V11.2】LOCAL_BONUSをforEachループ内からグローバル定数セクションに移動。
-// 【V11.1】getPlayerData()（死にコード）を削除。calculatePrediction()と重複かつ劣化版。
-// 【V11.0】壱耀晴乾ノ象の死にコードブロック（327〜347行目）を削除。
+// 真自在律 Ver10.12
+// LOGIC VERSION: 10.12
+// 【V10.12】LOCAL_BONUSをforEachループ内からグローバル定数セクションに移動。
+// 【V10.11】getPlayerData()（死にコード）を削除。calculatePrediction()と重複かつ劣化版。
+// 【V10.10】壱耀晴乾ノ象の死にコードブロックを削除。
 //           SUPERIORITY_THRESHOLD_RATE / RAW_COMPOSITE_STATS /
 //           calculateSuperiorityList() / SUPERIOR_PATTERNS_FINAL_LIST の4変数。
 //           実動ロジックはcalculateTenunIndex()等にハードコード済みのため影響なし。
