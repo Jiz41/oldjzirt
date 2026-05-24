@@ -1,7 +1,9 @@
 (function(app) {
 
-// 真自在律 Ver10.7
-// LOGIC VERSION: 10.7
+// 真自在律 Ver10.8
+// LOGIC VERSION: 10.8
+// 【V10.8】地元補正（c_local）を本計算に接続。LOCAL_BONUS=1.03固定・脚質差なし。
+//           getLocalSwitch()・localSwitch変数を削除（地元スイッチ廃止）。
 // 【V10.7】展開モード判定を4分岐→3分岐に整理
 //           捲り上限撤廃（>= 5のみ）、中モード廃止・差しデフォルト統合。
 // 【V10.6】展開補正：逃げタイプ0人時にlines[0][0]を実質逃げ役として使用
@@ -1027,8 +1029,8 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
         applyTacticalAdjustments(scenarioPlayers, BANK_DATA, lines, allSeriInfos);
 
         scenarioPlayers.forEach(p => {
-            // 基本スコア × 得点補正 × 印 × 近況 × S1/B1位置 × ライン結束 × バンク脚質適性
-            p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e;
+            // 基本スコア × 得点補正 × 印 × 近況 × S1/B1位置 × ライン結束 × バンク脚質適性 × 地元補正
+            p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e * p.c_local;
             p.final_score *= (p.physicalPenalty     || 1.0);  // 物理層：直線短ペナルティ
             p.final_score /= (p.cantoMakuriPenalty  || 1.0);  // 展開層：高カント捲りコスト
             p.final_score *= (p.warpBoost           || 1.0);  // 展開層：イン突きブースト
@@ -1166,8 +1168,9 @@ app.calculatePrediction = async function() {
             id, score, style, wmark,
             recent: row.querySelector('.recent').value.trim(),
             is_s1: id == s1Id, is_b1: id == b1Id, is_scratch: isScratch,
+            isLocal: row.querySelector('.is-local')?.checked || false,
             c_score_adj: 1.0, c_recent: 1.0, c_wmark: 1.0,
-            c_s1: 1.0, c_b1: 1.0, c_l: 1.0, c_e: 1.0, final_score: 0,
+            c_s1: 1.0, c_b1: 1.0, c_l: 1.0, c_e: 1.0, c_local: 1.0, final_score: 0,
             seri_coef: score * (SERI_STYLE_BONUS[style] || 1.00) * (wmark === '◎' ? 1.04 : 1.0)
         });
     });
@@ -1236,6 +1239,8 @@ app.calculatePrediction = async function() {
         else if (p.style === '両') biasKey = '捲り';
         else if (p.style === '追') biasKey = '差し';
         p.c_e = selectedBank.keirin_bias[biasKey] || 1.0;
+        const LOCAL_BONUS = 1.03;
+        p.c_local = p.isLocal ? LOCAL_BONUS : 1.0;
     });
 
     try {
@@ -1914,15 +1919,6 @@ const InputGuard = (() => {
         return clean;
     }
 
-    /**
-     * local-switch: Boolean型として確実に抽出
-     * @returns {boolean}
-     */
-    function getLocalSwitch() {
-        const el = document.getElementById('local-switch');
-        return el ? Boolean(el.checked) : false;
-    }
-
     // ──────────────────────────────────────────────────────
     // § 5. システム基盤: ReadOnly ロック / アンロック
     // ──────────────────────────────────────────────────────
@@ -1978,8 +1974,7 @@ const InputGuard = (() => {
         if (!radio.valid) errors.push('S1位またはB1位のラジオボタンが正しく設定されていません。');
 
         // 5) 展開入力
-        const lineInput   = getLineInput();
-        const localSwitch = getLocalSwitch();
+        const lineInput = getLineInput();
 
         if (errors.length > 0) {
             return { valid: false, errors };
@@ -1989,12 +1984,11 @@ const InputGuard = (() => {
             valid: true,
             data: {
                 raceType,
-                bankName   : getBankName(),
+                bankName: getBankName(),
                 wind,
                 players,
                 radio,
                 lineInput,
-                localSwitch,
             }
         };
     }
@@ -2020,7 +2014,6 @@ const InputGuard = (() => {
         unlockAllInputs,
         getWindInfo,
         getLineInput,
-        getLocalSwitch,
         getAllPlayersData,
         initWindDirectionWatcher,
         log,
