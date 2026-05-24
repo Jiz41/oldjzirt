@@ -1,7 +1,9 @@
 (function(app) {
 
-// 真自在律 Ver10.6
-// LOGIC VERSION: 10.6
+// 真自在律 Ver10.7
+// LOGIC VERSION: 10.7
+// 【V10.7】展開モード判定を4分岐→3分岐に整理
+//           捲り上限撤廃（>= 5のみ）、中モード廃止・差しデフォルト統合。
 // 【V10.6】展開補正：逃げタイプ0人時にlines[0][0]を実質逃げ役として使用
 //           脚質入力に依存せず並び予想の物理的先頭を展開判定に適用。
 // 【V10.5】generateSeitenreiBets r2選出窓を3〜5位に限定（スコア権威を尊重）
@@ -991,16 +993,14 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
     const _makuriVsNige = _makuriMax - _escapeMax;
 
     let _tenkaiMode;
-    if (_makuriVsNige >= 5 && _makuriVsNige <= 15)          _tenkaiMode = '捲';
-    else if (_scoreGap > 0  && _makuriVsNige <= 0)           _tenkaiMode = '差';
-    else if (_scoreGap <= 0 && _makuriVsNige <= 0)           _tenkaiMode = '逃';
-    else                                                      _tenkaiMode = '中';
+    if (_makuriVsNige >= 5)                                   _tenkaiMode = '捲';
+    else if (_scoreGap <= 0 && _makuriVsNige <= 0)            _tenkaiMode = '逃';
+    else                                                       _tenkaiMode = '差';
 
     const _tenkaiTable = {
         '差': {},
         '捲': { '自': 1.15, '両': 1.15 },
         '逃': { '逃': 1.15, '自': 1.10 },
-        '中': {},
     };
     const tenkaiBonus = _tenkaiTable[_tenkaiMode];
     app.logMessage(`[TENKAI] mode=${_tenkaiMode} scoreGap=${_scoreGap.toFixed(1)} makuriVsNige=${_makuriVsNige.toFixed(1)}`);
