@@ -1,7 +1,8 @@
 (function(app) {
 
-// 真自在律 Ver11.1
-// LOGIC VERSION: 11.1
+// 真自在律 Ver11.2
+// LOGIC VERSION: 11.2
+// 【V11.2】LOCAL_BONUSをforEachループ内からグローバル定数セクションに移動。
 // 【V11.1】getPlayerData()（死にコード）を削除。calculatePrediction()と重複かつ劣化版。
 // 【V11.0】壱耀晴乾ノ象の死にコードブロック（327〜347行目）を削除。
 //           SUPERIORITY_THRESHOLD_RATE / RAW_COMPOSITE_STATS /
@@ -102,6 +103,7 @@ const SERI_STYLE_BONUS = {
 const SERI_FATIGUE_PENALTY_IN  = 0.15;
 const SERI_FATIGUE_PENALTY_OUT = 0.25;
 const SERI_WIN_BONUS           = 0.05;
+const LOCAL_BONUS              = 1.03;
 
 // --- 外れ解剖：係数スナップショット領域 ---
 let CalculationSnapshot = {};
@@ -1187,7 +1189,6 @@ app.calculatePrediction = async function() {
         else if (p.style === '逃') biasKey = '先行';
         else if (p.style === '追') biasKey = '差し';
         p.c_e = selectedBank.keirin_bias[biasKey] || 1.0;
-        const LOCAL_BONUS = 1.03;
         p.c_local = p.isLocal ? LOCAL_BONUS : 1.0;
     });
 
