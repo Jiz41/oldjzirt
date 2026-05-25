@@ -1,7 +1,9 @@
 (function(app) {
 
-// 真自在律 Ver10.13
-// LOGIC VERSION: 10.13
+// 真自在律 Ver10.14
+// LOGIC VERSION: 10.14
+// 【V10.14】捲り選手(style='自')のkeirin_biasキー参照を'先行'→'捲り'に修正（実装漏れ解消）。
+//           42場中28場で捲りbiasが1.0以外に設定されており未適用だった。
 // 【V10.13】InputGuard 方針A実装：collectAndValidate()の浄化済みデータをcalculatePrediction()に接続。
 //           getModeSelector()追加、ラッパーにresult.data受け渡し、calculatePrediction引数化。
 //           getStyle() JSDocの残存"両"を"逃"に修正。
@@ -75,7 +77,7 @@
 // 【V7.3】消耗ペナルティ適用拡大 ＆ 複数競り表示修正。
 // ------------------------------------------------------------------------------------
 
-app.LOGIC_VERSION = '10.13';
+app.LOGIC_VERSION = '10.14';
 
 // R_BIAS       : 競走得点の影響度スケール（S級は得点差が直結、チャレンジは薄める）
 // RECENT_WEIGHT: 近況着順の重み（チャレンジは調子ムラが大きいので上げる）
@@ -1175,9 +1177,9 @@ app.calculatePrediction = async function(guardedData) {
         p.c_s1 = p.is_s1 ? 1.005 : 1.0;
         p.c_b1 = p.is_b1 ? 1.015 : 1.0;
 
-        // 脚質→バンクバイアスキーの対応。自在・逃げは先行系、捲りは捲り系、追い込みは差し系
+        // 脚質→バンクバイアスキーの対応。逃げは先行系、捲りは捲り系、追い込みは差し系
         let biasKey = '';
-        if      (p.style === '自') biasKey = '先行';
+        if      (p.style === '自') biasKey = '捲り';
         else if (p.style === '逃') biasKey = '先行';
         else if (p.style === '追') biasKey = '差し';
         p.c_e = selectedBank.keirin_bias[biasKey] || 1.0;
