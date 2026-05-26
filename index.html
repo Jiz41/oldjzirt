@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="app-version" content="2.1.4">
+    <meta name="app-version" content="2.1.5">
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="./style.css">
 
@@ -262,8 +262,39 @@
             <span id="manual-toggle-icon">▶</span> 📖 操作説明書・マニュアル
         </div>
 <div class="manual-content" id="manual-content">
+
+    <h2>🚀 はじめての方へ：予想を出すまでの流れ</h2>
+    <p><b>事前に用意するもの：</b>出走表（脚質・得点・直近3走・並び）、競輪場の風向き・風速</p>
+    <table>
+        <thead>
+            <tr><th style="width:25%;">STEP</th><th>やること</th><th>結果</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><b>STEP 1</b></td><td>レース情報を入力<br><small>「🔗 レース情報自動取得」か手入力</small></td><td>級班・バンク・風・選手データが揃う</td></tr>
+            <tr><td><b>STEP 2</b></td><td>7名の選手データを入力<br><small>脚質・得点・W印・直近3走・地元/欠場</small></td><td>各選手の機力が確定する</td></tr>
+            <tr><td><b>STEP 3</b></td><td>全体並びを入力<br><small>例: <code>123,45,67</code></small></td><td>ライン構成が確定する</td></tr>
+            <tr><td><b>STEP 4</b></td><td>🚀 予想を計算 を押す</td><td>演算開始</td></tr>
+            <tr><td><b>STEP 5</b></td><td>結果を読む</td><td>☀️晴天令＝安定の本命目<br>⛈️荒天令＝波乱時の保険目<br>🌌赤口呑縁＝1465世界線の収束傾向</td></tr>
+        </tbody>
+    </table>
+
     <h2>⚙️ ツールの全体構成と基本操作</h2>
     <p>このツールは、入力されたレース情報と選手データに基づき、複数の展開パターンをシミュレーションし、独自ロジックで評価した予想結果を提供するモバイル向け競輪予想支援ツールです。</p>
+
+    <h3>0. 🔗 レース情報自動取得（オプション）</h3>
+    <p>レース情報入力欄の上部にある <b>「🔗 レース情報自動取得」</b> パネルを使うと、開催場・日付・レース番号を選ぶだけで選手データが自動入力されます。風向き・風速も競輪場の位置情報から自動取得します。</p>
+    <table>
+        <thead>
+            <tr><th style="width:30%;">操作ステップ</th><th>内容</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><b>① 開催場を選ぶ</b></td><td>本日開催中の競輪場がボタン一覧で表示される。</td></tr>
+            <tr><td><b>② 日程を選ぶ</b></td><td>開催日（初日・2日目など）を選択。</td></tr>
+            <tr><td><b>③ レース番号を選ぶ</b></td><td>該当レースを選択すると選手データが自動入力される。</td></tr>
+            <tr><td><b>④ 手動補完</b></td><td>脚質が同数で判定できなかった選手は手動で設定する。<br><small>※ 9車立てのレースには非対応（自動入力は中断されます）。</small></td></tr>
+        </tbody>
+    </table>
+    <p style="font-size:0.85em;">※ 自動取得後も、各項目を必ず目視で確認してから予想を実行してください。</p>
 
     <h3>1. レース基本情報の入力（土台を作る）</h3>
     <table>
@@ -379,6 +410,22 @@
         </tbody>
     </table>
 
+    <h3>3.5 ⚖️ 審眼八卦（計算の色づけ）</h3>
+    <p><b>審眼八卦</b>パネルで「重視したい要素」をONにすると、自在律の計算がその方向に傾きます。感覚や情報に合わせてカスタマイズできます。</p>
+    <table>
+        <thead>
+            <tr><th style="width:30%;">項目</th><th>ONにしたときの効果</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><b>ライン強度</b></td><td>ライン協調係数を強調して評価。</td></tr>
+            <tr><td><b>競走得点</b></td><td>選手の機力（得点）を重視する方向に補正。</td></tr>
+            <tr><td><b>近況</b></td><td>直近3走の成績リズムを強調。</td></tr>
+            <tr><td><b>印</b></td><td>専門紙のW印評価を重視する方向に補正。</td></tr>
+            <tr><td><b>展開</b></td><td>展開傾向を指定（先行有利・捲り有利・差し有利）して補正。</td></tr>
+        </tbody>
+    </table>
+    <p style="font-size:0.85em;">※ 何もONにしない状態が自在律の標準計算です。</p>
+
     <h3>4. 予想の実行とアウトプット</h3>
     <table>
         <thead>
@@ -441,7 +488,7 @@
                 <td><b>”ゆらぎ”の詳細</b></td>
                 <td>
                     ライン微崩壊・早駆け・風煽り・競り乱れ・落車・ダークホース・新人暴走・捲り自滅など、<br>
-                    展開を変動させる8種のイベントをランダム発生させる。
+                    展開を変動させる複数のイベント（級班ごとに7〜11種）をランダム発生させる。
                 </td>
             </tr>
             <tr>
@@ -684,12 +731,6 @@ function execCopy() {
         [INFO] bankdata.jsonの読み込みを待機しています...<br>
     </div>
     
-    <div style="text-align: center; margin-bottom: 5px;">
-        <a href="./manual_details.html" target="_blank" style="font-size: 0.85em; color: #a37200; text-decoration: underline;">
-            📖ツール利用ガイド・各項目の解説はこちら
-        </a>
-    </div>
-
     <div class="bug-report-container">
         <a href="https://forms.gle/f2uW4UxpGpeT9n8g6" target="_blank" rel="noopener noreferrer" class="bug-button">
         不具合を報告する
