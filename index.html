@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="app-version" content="2.1.5">
+    <meta name="app-version" content="2.1.6">
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="./style.css">
 
@@ -1094,6 +1094,117 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('c-results').scrollIntoView({ behavior: 'smooth' });
     }
 
+})();
+</script>
+
+
+<!-- ── まなこバルーンボタン ── -->
+<style>
+  #manakoBalloon {
+    position: fixed;
+    bottom: 24px;
+    right: 16px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: manakoFloat 3s ease-in-out infinite;
+  }
+  @keyframes manakoFloat {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-8px); }
+  }
+  #manakoSpeech {
+    background: #fffaf5;
+    color: #3a2a1a;
+    font-size: 12px;
+    line-height: 1.6;
+    padding: 10px 13px;
+    border-radius: 12px;
+    max-width: 160px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.22);
+    position: relative;
+    opacity: 1;
+    transition: opacity 0.6s ease;
+  }
+  #manakoSpeech.hidden { opacity: 0; pointer-events: none; }
+  #manakoSpeech::after {
+    content: '';
+    position: absolute;
+    right: -7px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 7px solid transparent;
+    border-left-color: #fffaf5;
+    border-right-width: 0;
+  }
+  .manako-icon-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+  #manakoBtn {
+    display: block;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #c4845a;
+    box-shadow: 0 4px 16px rgba(196,132,90,0.45);
+    transition: transform 0.2s;
+    cursor: pointer;
+  }
+  #manakoBtn:hover  { transform: scale(1.12); }
+  #manakoBtn:active { transform: scale(0.95); }
+  #manakoBtn img { width: 100%; height: 100%; object-fit: cover; }
+  #manakoClose {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(30,20,14,0.88);
+    border: 1px solid rgba(196,132,90,0.55);
+    color: #e0c8b0;
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    z-index: 1;
+  }
+</style>
+
+<div id="manakoBalloon">
+  <div id="manakoSpeech">自在律のことでわからないことがあったらおいらに聞いてね！</div>
+  <div class="manako-icon-wrap">
+    <button id="manakoClose" aria-label="閉じる">✕</button>
+    <a id="manakoBtn" href="./manako/manako.html" target="_blank" rel="noopener">
+      <img src="./manako/manako.jpg" alt="まなこ">
+    </a>
+  </div>
+</div>
+
+<script>
+(function () {
+  var balloon = document.getElementById('manakoBalloon');
+  var speech  = document.getElementById('manakoSpeech');
+  var closeBtn = document.getElementById('manakoClose');
+
+  if (sessionStorage.getItem('manakoHidden')) {
+    balloon.style.display = 'none';
+    return;
+  }
+
+  setTimeout(function () { speech.classList.add('hidden'); }, 5000);
+
+  closeBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    balloon.style.display = 'none';
+    sessionStorage.setItem('manakoHidden', '1');
+  });
 })();
 </script>
 
