@@ -265,6 +265,11 @@
   .typing-dots span:nth-child(2) { animation-delay: 0.25s; }
   .typing-dots span:nth-child(3) { animation-delay: 0.50s; }
 
+  .message.typing .msg-bubble {
+    min-width: 80px;
+    padding: 10px 18px;
+  }
+
   @keyframes dot-blink {
     0%, 60%, 100% { opacity: 0.15; }
     30%           { opacity: 1;    }
