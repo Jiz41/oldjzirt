@@ -1,7 +1,8 @@
 (function(app) {
 
-// 真自在律 Ver10.14
-// LOGIC VERSION: 10.14
+// 真自在律 Ver10.15
+// LOGIC VERSION: 10.15
+// 【V10.15】sendLogのsnapshot.scores.baseに c_e / c_local / physicalPenalty / warpBoost / cantoMakuriPenalty を追加。
 // 【V10.14】捲り選手(style='自')のkeirin_biasキー参照を'先行'→'捲り'に修正（実装漏れ解消）。
 //           42場中28場で捲りbiasが1.0以外に設定されており未適用だった。
 // 【V10.13】InputGuard 方針A実装：collectAndValidate()の浄化済みデータをcalculatePrediction()に接続。
@@ -77,7 +78,7 @@
 // 【V7.3】消耗ペナルティ適用拡大 ＆ 複数競り表示修正。
 // ------------------------------------------------------------------------------------
 
-app.LOGIC_VERSION = '10.14';
+app.LOGIC_VERSION = '10.15';
 
 // R_BIAS       : 競走得点の影響度スケール（S級は得点差が直結、チャレンジは薄める）
 // RECENT_WEIGHT: 近況着順の重み（チャレンジは調子ムラが大きいので上げる）
@@ -120,7 +121,7 @@ function resetSnapshot() {
     race_id: "",
     bank: { straight: 0, canto: 0, alpha: 0, beta: 0, keirin_bias: {} },
     line_coop: {},
-    tactical: { warpBoost: {}, cantoPenalty: 1.0 },
+    tactical: { warpBoost: {}, cantoPenalty: 1.0, cantoMakuriPenalty: {} },
     wind_physics: { finalAdj: {}, v: 0 },
     physical: { physicalPenalty: {} },
     seri: { seri_coef: {}, seri_bonuses: [], seri_info: [] },
@@ -283,6 +284,7 @@ function applyPhysicalPenalty(players, bankData, lines) {
         } else {
             p.physicalPenalty = 1.0;
         }
+        CalculationSnapshot.physical.physicalPenalty[p.id] = p.physicalPenalty;
     });
 }
 
@@ -320,6 +322,7 @@ function applyTacticalAdjustments(players, bankData, lines, seriInfos) {
     players.forEach(p => {
         const pos = positionMap[p.id];
         p.cantoMakuriPenalty = (p.style === '自') ? makuriPenalty : 1.0;
+        CalculationSnapshot.tactical.cantoMakuriPenalty[p.id] = p.cantoMakuriPenalty;
 
         if (warpBoostTargets.includes(p.id)) {
             // イン突き（ワープ）ブースト ×1.35
@@ -1186,6 +1189,12 @@ app.calculatePrediction = async function(guardedData) {
         p.c_local = p.isLocal ? LOCAL_BONUS : 1.0;
     });
 
+    // c_e / c_local をスナップショットに反映（forEach後に値が確定するため）
+    basePlayers.forEach(p => {
+        const snap = CalculationSnapshot.scores.base.find(b => b.id === p.id);
+        if (snap) { snap.c_e = p.c_e; snap.c_local = p.c_local; }
+    });
+
     try {
         const currentLineInputForCalc = document.getElementById('line-input').value;
         app.logMessage(`[DEBUG] シミュレーション開始: ラインデータ "${currentLineInputForCalc}"`);
@@ -1203,6 +1212,13 @@ app.calculatePrediction = async function(guardedData) {
             seiten: seitenreiResults.integratedScores,
             kouten: koutenreiResults.integratedScores
         };
+
+        // physicalPenalty / warpBoost / cantoMakuriPenalty をscores.baseに反映
+        CalculationSnapshot.scores.base.forEach(p => {
+            p.physicalPenalty    = CalculationSnapshot.physical.physicalPenalty[p.id]          || 1.0;
+            p.warpBoost          = CalculationSnapshot.tactical.warpBoost[p.id]                || 1.0;
+            p.cantoMakuriPenalty = CalculationSnapshot.tactical.cantoMakuriPenalty[p.id]       || 1.0;
+        });
 
         const detailedScenarioResults = koutenreiModeSelected
             ? koutenreiResults.allScenarioResults
