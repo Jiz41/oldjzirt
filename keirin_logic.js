@@ -1603,8 +1603,8 @@ function classifyTenkai(mv, sg, nNige, nMakuri) {
 function generateSeitenreiBets(ranking, basePlayers, tenkaiPattern) {
     if (!ranking || ranking.length < 3) return null;
     if (!ranking || ranking.length < 3) return null;
-    const ids = ranking.map(p => String(p.id));
-    const baseMap = Object.fromEntries((basePlayers || []).map(p => [String(p.id), p]));
+    const ids = ranking.map(p => p.id);  // 数値型を保持（downstream の p.id === id 比較のため）
+    const baseMap = Object.fromEntries((basePlayers || []).map(p => [p.id, p]));
     const styleOf = id => {
         const s = baseMap[id]?.style || '';
         return s === '両' ? '自' : s;
@@ -1657,7 +1657,7 @@ function generateSeitenreiBets(ranking, basePlayers, tenkaiPattern) {
 
     // 重複除去して最大4点
     const sanrentan = [...new Map(bets.map(b => [b.join('-'), b])).values()].slice(0, 4);
-    const sanrenpuku = [sanrentan[0].slice().sort((a, b) => Number(a) - Number(b))];
+    const sanrenpuku = [sanrentan[0].slice().sort((a, b) => a - b)];
     return { sanrentan, sanrenpuku };
 }
 
