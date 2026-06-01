@@ -1,7 +1,8 @@
 (function(app) {
 
-// 真自在律 Ver10.16
-// LOGIC VERSION: 10.16
+// 真自在律 Ver10.17
+// LOGIC VERSION: 10.17
+// 【V10.17】C-1: TENKAI_MODE_ENABLED typeof除去 / C-2: console.log→app.logMessage / C-4: ADJACENT_MAP モジュールスコープ化。
 // 【V10.16】classifyTenkai()追加・generateSeitenreiBets()を展開パターン分岐買い目生成に刷新。
 // 【V10.15】sendLogのsnapshot.scores.baseに c_e / c_local / physicalPenalty / warpBoost / cantoMakuriPenalty を追加。
 // 【V10.14】捲り選手(style='自')のkeirin_biasキー参照を'先行'→'捲り'に修正（実装漏れ解消）。
@@ -134,7 +135,7 @@ resetSnapshot();
 
 app.getCurrentCoefficients = () => JSON.parse(JSON.stringify(CalculationSnapshot));
 app.resetSnapshot = resetSnapshot;
-app.setRaceId = function(id) { console.log('[DEBUG setRaceId] 受信id:', id, '/ 変更前:', CalculationSnapshot.race_id); CalculationSnapshot.race_id = id; console.log('[DEBUG setRaceId] 変更後 CalculationSnapshot.race_id:', CalculationSnapshot.race_id); };
+app.setRaceId = function(id) { app.logMessage(`[DEBUG setRaceId] 受信id: ${id} / 変更前: ${CalculationSnapshot.race_id}`); CalculationSnapshot.race_id = id; app.logMessage(`[DEBUG setRaceId] 変更後 CalculationSnapshot.race_id: ${CalculationSnapshot.race_id}`); };
 app.applyPhysicalPenalty    = applyPhysicalPenalty;
 app.applyTacticalAdjustments = applyTacticalAdjustments;
 app.getKururuAdjustment     = getKururuAdjustment;
@@ -147,6 +148,12 @@ let BANK_DATA = {};
 // kururu（風圧補正）
 // ====================================================================================
 let kururuLogged = false;
+const ADJACENT_MAP = {
+    "北東": ["北", "東"], "南東": ["南", "東"],
+    "南西": ["南", "西"], "北西": ["北", "西"],
+    "北":   ["北西", "北東"], "東": ["北東", "南東"],
+    "南":   ["南東", "南西"], "西": ["南西", "北西"]
+};
 function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA, silent = false) {
     const playerId = p.id;
 
@@ -207,13 +214,6 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA,
         if (dirType === "B→H横風")     vec -= 0.2;
         return vec;
     }
-
-    const ADJACENT_MAP = {
-        "北東": ["北", "東"], "南東": ["南", "東"],
-        "南西": ["南", "西"], "北西": ["北", "西"],
-        "北":   ["北西", "北東"], "東": ["北東", "南東"],
-        "南":   ["南東", "南西"], "西": ["南西", "北西"]
-    };
 
     let vector = 0.0;
 
@@ -1013,7 +1013,7 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
             const cD = cDCoeffs[p.style] || 1.0;
             p.final_score *= cD;
             // ── 展開モード補正（V10.0）──────────────────────
-            if (typeof TENKAI_MODE_ENABLED !== 'undefined' && TENKAI_MODE_ENABLED) {
+            if (TENKAI_MODE_ENABLED) {
                 p.final_score *= (tenkaiBonus[p.style] || 1.0);
             }
             integratedScores[p.id] += p.final_score;
@@ -1092,11 +1092,11 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
 // ====================================================================================
 app.calculatePrediction = async function(guardedData) {
     kururuLogged = false;
-    console.log('[DEBUG calcPrediction] 開始時 CalculationSnapshot.race_id:', CalculationSnapshot.race_id);
+    app.logMessage(`[DEBUG calcPrediction] 開始時 CalculationSnapshot.race_id: ${CalculationSnapshot.race_id}`);
     const savedRaceId = CalculationSnapshot.race_id;
     resetSnapshot();
     CalculationSnapshot.race_id = savedRaceId;
-    console.log('[DEBUG calcPrediction] resetSnapshot後 race_id復元:', CalculationSnapshot.race_id);
+    app.logMessage(`[DEBUG calcPrediction] resetSnapshot後 race_id復元: ${CalculationSnapshot.race_id}`);
     const tenunOutputArea = document.getElementById('tenun-index-output');
     if (tenunOutputArea) {
         tenunOutputArea.innerHTML = ''
@@ -1527,7 +1527,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         }
     }
 
-    console.log('[DEBUG sendLog直前] CalculationSnapshot.race_id:', CalculationSnapshot.race_id);
+    app.logMessage(`[DEBUG sendLog直前] CalculationSnapshot.race_id: ${CalculationSnapshot.race_id}`);
     // 審眼八卦がONの場合はハズレ解析シートへの送信をスキップ
     const _sgAnySwitchOn = ['sg-line','sg-score','sg-recent','sg-wmark','sg-tenkai']
         .some(id => document.getElementById(id)?.checked);
@@ -1753,7 +1753,7 @@ const InputGuard = (() => {
     function log(msg) {
         const el = document.getElementById('debug-log');
         if (el) el.innerHTML += `[InputGuard] ${msg}<br>`;
-        console.log('[InputGuard]', msg);
+        app.logMessage(`[InputGuard] ${msg}`);
     }
 
     // ──────────────────────────────────────────────────────
