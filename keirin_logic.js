@@ -1,7 +1,8 @@
 (function(app) {
 
-// 真自在律 Ver10.15
-// LOGIC VERSION: 10.15
+// 真自在律 Ver10.16
+// LOGIC VERSION: 10.16
+// 【V10.16】classifyTenkai()追加・generateSeitenreiBets()を展開パターン分岐買い目生成に刷新。
 // 【V10.15】sendLogのsnapshot.scores.baseに c_e / c_local / physicalPenalty / warpBoost / cantoMakuriPenalty を追加。
 // 【V10.14】捲り選手(style='自')のkeirin_biasキー参照を'先行'→'捲り'に修正（実装漏れ解消）。
 //           42場中28場で捲りbiasが1.0以外に設定されており未適用だった。
@@ -78,7 +79,7 @@
 // 【V7.3】消耗ペナルティ適用拡大 ＆ 複数競り表示修正。
 // ------------------------------------------------------------------------------------
 
-app.LOGIC_VERSION = '10.15';
+app.LOGIC_VERSION = '10.16';
 
 // R_BIAS       : 競走得点の影響度スケール（S級は得点差が直結、チャレンジは薄める）
 // RECENT_WEIGHT: 近況着順の重み（チャレンジは調子ムラが大きいので上げる）
@@ -1237,6 +1238,22 @@ app.calculatePrediction = async function(guardedData) {
         const gradeKey = Object.keys(COEFFICIENT_SETTINGS).find(key =>
             COEFFICIENT_SETTINGS[key] === settings) || 'a-kyu';
 
+        // 展開パターン判別
+        const styleScores = { '逃': [], '追': [], '自': [] };
+        for (const p of basePlayers) {
+            const s = p.style === '両' ? '自' : p.style;
+            if (styleScores[s]) styleScores[s].push(p.score);
+        }
+        const maxNige   = Math.max(...(styleScores['逃'].length ? styleScores['逃'] : [0]));
+        const maxMakuri = Math.max(...(styleScores['自'].length ? styleScores['自'] : [0]));
+        const maxSashi  = Math.max(...(styleScores['追'].length ? styleScores['追'] : [0]));
+        const nNige   = styleScores['逃'].length;
+        const nMakuri = styleScores['自'].length;
+        const mv = maxMakuri - maxNige;
+        const sg = maxSashi  - maxNige;
+        const tenkaiPattern = classifyTenkai(mv, sg, nNige, nMakuri);
+        app.logMessage(`[TENKAI_PATTERN] mv=${mv.toFixed(1)} sg=${sg.toFixed(1)} nNige=${nNige} nMakuri=${nMakuri} → ${tenkaiPattern}`);
+
         displayResults(
             detailedScenarioResults,
             seitenreiResults.integratedScores,
@@ -1248,7 +1265,9 @@ app.calculatePrediction = async function(guardedData) {
             participatingPlayers,
             displayLineSegments,
             finalTenunData,
-            lines
+            lines,
+            tenkaiPattern,
+            basePlayers
         );
 
         applyShinganHakke(basePlayers, seitenreiResults.integratedScores, koutenreiResults.integratedScores);
@@ -1398,7 +1417,7 @@ function getTextColor(rgbColor) {
     return luminance > 0.5 ? '#333' : '#fff';
 }
 
-function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers, displayLineSegments, tenunIndexData, lines = []) {
+function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers, displayLineSegments, tenunIndexData, lines = [], tenkaiPattern = '現状', basePlayers = []) {
     displayBankTendency();
 
     const finalScores = Object.keys(seitenreiIntegratedScores).map(id => ({
@@ -1456,7 +1475,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
 
     // 晴天令買い目
     const seitenreiBox  = document.getElementById('seitenrei-output');
-    const seitenreiBets = generateSeitenreiBets(tenunIndexData.rankingWithData);
+    const seitenreiBets = generateSeitenreiBets(tenunIndexData.rankingWithData, basePlayers, tenkaiPattern);
     if (seitenreiBox && seitenreiBets) {
         let html = '<h4>☀️ 晴天令</h4><strong>三連単</strong><ul>';
         seitenreiBets.sanrentan.forEach(b => html += `<li>${formatOrderedBet(b)}</li>`);
@@ -1553,28 +1572,93 @@ function applyLineCountBonus(integratedScores, lines) {
   return result;
 }
 
-function generateSeitenreiBets(ranking) {
+function classifyTenkai(mv, sg, nNige, nMakuri) {
+  const oc = (lo, v, hi) => lo < v && v <= hi;  // (lo, hi]
+  const co = (lo, v, hi) => lo <= v && v < hi;  // [lo, hi)
+
+  const rules = [
+    [() => sg <= -5,                                                          '逃げ圧勝'],
+    [() => oc(-5,sg,0) && nNige >= 2,                                         'ちょい差し'],
+    [() => sg >= 10,                                                          '別線差し'],
+    [() => mv >= 5,                                                           '捲り'],
+    [() => mv<0  && oc(5,sg,10)  && nNige===1 && nMakuri===0,                '別線差し'],
+    [() => mv<0  && oc(0,sg,5)   && nNige===1 && nMakuri===0,                '別線差し'],
+    [() => mv<0  && oc(-5,sg,0)  && nNige===1 && nMakuri===1,                '逃げ圧勝'],
+    [() => co(0,mv,5) && oc(0,sg,5)  && nNige>=2  && nMakuri===1,            '捲り'],
+    [() => co(0,mv,5) && oc(5,sg,10) && nNige===1 && nMakuri===1,            '別線差し'],
+    [() => mv<0  && oc(-5,sg,0)  && nNige===1 && nMakuri===2,                '逃げ圧勝'],
+    [() => mv<0  && oc(0,sg,5)   && nNige===2 && nMakuri===0,                '別線差し'],
+    [() => mv<0  && oc(-5,sg,0)  && nNige===1 && nMakuri===0,                '逃げ圧勝'],
+    [() => mv<0  && oc(0,sg,5)   && nNige>=3  && nMakuri===0,                '逃げ圧勝'],
+    [() => co(0,mv,5) && oc(0,sg,5)  && nNige===1 && nMakuri===2,            '別線差し'],
+    [() => mv<0  && oc(0,sg,5)   && nNige===1 && nMakuri===1,                '別線差し'],
+    [() => mv<0  && oc(0,sg,5)   && nNige===2 && nMakuri===1,                '別線差し'],
+    [() => co(0,mv,5) && oc(0,sg,5)  && nNige===1 && nMakuri===1,            '捲り'],
+    [() => co(0,mv,5) && oc(5,sg,10) && nNige===1 && nMakuri===2,            '捲り'],
+  ];
+
+  return rules.find(([cond]) => cond())?.[1] ?? '現状';
+}
+
+function generateSeitenreiBets(ranking, basePlayers, tenkaiPattern) {
     if (!ranking || ranking.length < 3) return null;
-    const top2Ids = new Set([ranking[0].id, ranking[1].id]);
-
-    // r[2]: 3〜5位の中から ① 追×(△か◎) → ② 追 → ③ スコア順先頭
-    const rest    = ranking.slice(2).filter(p => !top2Ids.has(p.id));
-    const topRest = rest.slice(0, 3);
-    const cand1   = topRest.filter(p => p.style === '追' && ['△','◎'].includes(p.wmark));
-    const cand2   = topRest.filter(p => p.style === '追');
-    const r2      = cand1[0] || cand2[0] || topRest[0];
-    if (!r2) return null;
-
-    const r = [ranking[0].id, ranking[1].id, r2.id];
-    return {
-        sanrentan: [
-            [r[0], r[1], r[2]],
-            [r[0], r[2], r[1]],
-            [r[1], r[0], r[2]],
-            [r[1], r[2], r[0]]
-        ],
-        sanrenpuku: [[r[0], r[1], r[2]]]
+    if (!ranking || ranking.length < 3) return null;
+    const ids = ranking.map(p => String(p.id));
+    const baseMap = Object.fromEntries((basePlayers || []).map(p => [String(p.id), p]));
+    const styleOf = id => {
+        const s = baseMap[id]?.style || '';
+        return s === '両' ? '自' : s;
     };
+
+    let bets = [];
+
+    if (tenkaiPattern === '逃げ圧勝') {
+        const nigeIds = ids.filter(i => styleOf(i) === '逃');
+        if (nigeIds.length) {
+            const r0 = nigeIds[0];
+            const others = ids.filter(i => i !== r0).slice(0, 3);
+            bets = [[r0,others[0],others[1]],[r0,others[1],others[0]],
+                    [r0,others[0],others[2]||others[1]],[r0,others[2]||others[1],others[0]]];
+        }
+
+    } else if (tenkaiPattern === 'ちょい差し') {
+        const nigeIds  = ids.filter(i => styleOf(i) === '逃');
+        const sashiIds = ids.filter(i => styleOf(i) === '追' && (baseMap[i]?.c_l || 1.0) > 1.0);
+        if (nigeIds.length && sashiIds.length) {
+            const r0n = nigeIds[0], r0s = sashiIds[0];
+            const others = ids.filter(i => i !== r0n && i !== r0s).slice(0, 2);
+            const o0 = others[0] || ids[2], o1 = others[1] || o0;
+            bets = [[r0n,r0s,o0],[r0s,r0n,o0],[r0n,r0s,o1],[r0s,r0n,o1]];
+        }
+
+    } else if (tenkaiPattern === '別線差し') {
+        const r0 = ids[0];
+        const sashiIds = ids.slice(1).filter(i => styleOf(i) === '追');
+        const r1 = sashiIds[0] || ids[1];
+        const others = ids.filter(i => i !== r0 && i !== r1).slice(0, 2);
+        const o0 = others[0] || ids[2], o1 = others[1] || o0;
+        bets = [[r0,r1,o0],[r0,r1,o1],[r0,o0,r1],[r1,r0,o0]];
+
+    } else if (tenkaiPattern === '捲り') {
+        const makuriIds = ids.filter(i => styleOf(i) === '自');
+        if (makuriIds.length) {
+            const r0 = makuriIds[0];
+            const others = ids.filter(i => i !== r0).slice(0, 3);
+            bets = [[r0,others[0],others[1]],[r0,others[1],others[0]],
+                    [r0,others[0],others[2]||others[1]],[r0,others[2]||others[1],others[0]]];
+        }
+    }
+
+    // フォールバック（現状・判別不能）
+    if (!bets.length) {
+        bets = [[ids[0],ids[1],ids[2]],[ids[0],ids[2],ids[1]],
+                [ids[1],ids[0],ids[2]],[ids[1],ids[2],ids[0]]];
+    }
+
+    // 重複除去して最大4点
+    const sanrentan = [...new Map(bets.map(b => [b.join('-'), b])).values()].slice(0, 4);
+    const sanrenpuku = [sanrentan[0].slice().sort((a, b) => Number(a) - Number(b))];
+    return { sanrentan, sanrenpuku };
 }
 
 function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = [], koutenRanking = []) {
