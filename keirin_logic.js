@@ -1241,6 +1241,7 @@ app.calculatePrediction = async function(guardedData) {
         // 展開パターン判別
         const styleScores = { '逃': [], '追': [], '自': [] };
         for (const p of basePlayers) {
+            if (p.is_scratch) continue;
             const s = p.style === '両' ? '自' : p.style;
             if (styleScores[s]) styleScores[s].push(p.score);
         }
@@ -1601,7 +1602,6 @@ function classifyTenkai(mv, sg, nNige, nMakuri) {
 }
 
 function generateSeitenreiBets(ranking, basePlayers, tenkaiPattern) {
-    if (!ranking || ranking.length < 3) return null;
     if (!ranking || ranking.length < 3) return null;
     const ids = ranking.map(p => p.id);  // 数値型を保持（downstream の p.id === id 比較のため）
     const baseMap = Object.fromEntries((basePlayers || []).map(p => [p.id, p]));
