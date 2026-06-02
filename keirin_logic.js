@@ -1021,6 +1021,46 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
             if (TENKAI_MODE_ENABLED) {
                 p.final_score *= (tenkaiBonus[p.style] || 1.0);
             }
+        });
+
+        // ── 別ライン3番手ペナルティ（subLineTailPenalty）──
+        // 思想：別ライン3番手の前には平均4車が存在する。
+        //       直線距離に占める障害車体(n=2.0m × k=4車)の割合を物理的根拠とする。
+        //       k=4は最大5・最低3の中間値。車間≈0・縦並びを前提とする。
+        //       メインライン＝2人以上のラインで得点合計最高（単騎除外、同値はlines先頭優先）
+        //       フォールバック50m＝競輪施設基準の最短直線距離
+        //       TODO: 4人以上ラインの4番手以降は現行スコープ外（将来拡張余地）
+        const SUB_LINE_TAIL_ENABLED = true;
+        const N_BIKE = 2.0;
+        const K_CARS = 4;
+
+        if (SUB_LINE_TAIL_ENABLED && lines && lines.length >= 2) {
+            const longLines = lines.filter(line => line.length >= 3);
+            if (longLines.length >= 2) {
+                const baseMap = Object.fromEntries(basePlayers.map(p => [p.id, p]));
+                const validLines = lines.filter(line => line.length >= 2);
+                const mainLine = validLines.reduce((best, line) => {
+                    const sum = line.reduce((s, id) => s + (baseMap[id]?.score || 0), 0);
+                    const bestSum = best.reduce((s, id) => s + (baseMap[id]?.score || 0), 0);
+                    return sum > bestSum ? line : best;
+                }, validLines[0]);
+                const mainLineSet = new Set(mainLine);
+                const subLineTailIds = new Set(
+                    lines
+                        .filter(line => line.length >= 3 && !mainLineSet.has(line[0]))
+                        .map(line => line[2])
+                );
+                const penalty = Math.max(0, 1 - (N_BIKE * K_CARS) / (BANK_DATA?.straight || 50));
+                scenarioPlayers.forEach(p => {
+                    if (subLineTailIds.has(p.id)) {
+                        p.final_score *= penalty;
+                        app.logMessage(`[SUB_TAIL] 選手${p.id} ×${penalty.toFixed(3)}`);
+                    }
+                });
+            }
+        }
+
+        scenarioPlayers.forEach(p => {
             integratedScores[p.id] += p.final_score;
         });
 
