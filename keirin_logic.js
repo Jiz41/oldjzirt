@@ -2,7 +2,8 @@
 
 // 真自在律 Ver10.19
 // LOGIC VERSION: 10.19
-// 【V10.19】generateSeitenreiBets ids をslice(0,3)封鎖・generateKoutenreiBets excludeIds一元管理でL混入経路を遮断。
+// 【V10.19】generateSeitenreiBets() r配列を ranking.slice(0, 3).map(p => p.id) でtop3に封鎖。
+// 【V10.18】generateKoutenreiBets() L候補除外を new Set([A.id, B.id, C.id, ...seitenTop3Ids]) で一元管理。
 // 【V10.17】C-1: TENKAI_MODE_ENABLED typeof除去 / C-2: console.log→app.logMessage / C-4: ADJACENT_MAP モジュールスコープ化。
 // 【V10.16】classifyTenkai()追加・generateSeitenreiBets()を展開パターン分岐買い目生成に刷新。
 // 【V10.15】sendLogのsnapshot.scores.baseに c_e / c_local / physicalPenalty / warpBoost / cantoMakuriPenalty を追加。
