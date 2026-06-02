@@ -422,7 +422,7 @@
 | 行番号 | 関数名 | 概要 |
 |--------|--------|------|
 | 125 | `resetSnapshot()` | CalculationSnapshot を初期化 |
-| 161 | `getKururuAdjustment()` | 久留米バンク特殊補正を返す |
+| 161 | `getKururuAdjustment()` | 風速・風向・ライン位置から風圧補正係数を返す（全バンク共通） |
 | 242 | `getPlayerPositions()` | ライン入力から選手ポジションマップを生成 |
 | 268 | `applyPhysicalPenalty()` | 落車・失格履歴による物理ペナルティを付与 |
 | 299 | `applyTacticalAdjustments()` | 展開・捲りペナルティ・ワープブーストを付与 |
