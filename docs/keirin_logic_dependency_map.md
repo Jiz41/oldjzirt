@@ -410,3 +410,41 @@
 | 5 | `generateKoutenreiBets` の `lScore` 計算変更 | 特異点L選出結果 → 荒天令三連複・二車単全点変更 |
 | 6 | `COEFFICIENT_SETTINGS` 係数変更 | `calculateLineCoeffs` C_L / `runScenarioSimulation` シナリオ係数 両方に波及 |
 | 7 | `calculate_koutenrei_bias` デバフ上限（0.85キャップ）変更 | 荒天令スコア全体 → 荒天令ランキング順序変化 |
+
+---
+
+## 改修時の読み込み手順
+- 全体読み込み禁止。必ず関数名を指定してピンポイントで読むこと
+- 関数名が不明な場合は本ファイルの主要関数インデックスで確認
+
+## 主要関数インデックス（keirin_logic.js Ver10.20）
+
+| 行番号 | 関数名 | 概要 |
+|--------|--------|------|
+| 125 | `resetSnapshot()` | CalculationSnapshot を初期化 |
+| 161 | `getKururuAdjustment()` | 久留米バンク特殊補正を返す |
+| 242 | `getPlayerPositions()` | ライン入力から選手ポジションマップを生成 |
+| 268 | `applyPhysicalPenalty()` | 落車・失格履歴による物理ペナルティを付与 |
+| 299 | `applyTacticalAdjustments()` | 展開・捲りペナルティ・ワープブーストを付与 |
+| 398 | `displayBankTendency()` | バンク傾向をUI表示 |
+| 453 | `parseLineInput()` | テキスト入力をライン配列に変換 |
+| 537 | `calculateLineCoeffs()` | C_L係数（ライン連携補正）を計算・付与 |
+| 651 | `applySeriCorrection()` | 競り補正をスコアに適用 |
+| 683 | `getScenarioCoeffs()` | シナリオ別係数セットを返す |
+| 693 | `generateScenarioWagers()` | シナリオ別スコアを計算 |
+| 726 | `assignFinalGrades()` | 最終グレード（A/B/C/D）を付与 |
+| 756 | `calculate_koutenrei_bias()` | 荒天令バイアスを計算 |
+| 939 | `runScenarioSimulation()` | シナリオシミュレーションを実行（晴天令/荒天令） |
+| 1040 | `calculateTenunIndex()` | 天雲指数を算出・ランキングを生成 |
+| 1318 | `applyShinganHakke()` | 審眼八卦（SNGN）補正を適用 |
+| 1409 | `getStrengthColor()` | スコアに応じた強さカラーを返す |
+| 1418 | `getTextColor()` | 背景色に応じた文字色を返す |
+| 1425 | `displayResults()` | 全結果をUIに描画するメイン出力関数 |
+| 1574 | `formatOrderedBet()` | 三連単買い目を「X-Y-Z」形式に整形 |
+| 1575 | `formatSanrenpuku()` | 三連複買い目を「X=Y=Z」形式に整形 |
+| 1577 | `applyLineCountBonus()` | ライン人数ボーナスを統合スコアに適用 |
+| 1591 | `classifyTenkai()` | mv/sg/nNige/nMakuri から展開パターンを判定 |
+| 1619 | `selectR2()` | 展開パターン別にr2を選出（excludeIds除外） |
+| 1640 | `generateSeitenreiBets()` | 晴天令買い目（三連単4点・三連複1点）を生成 |
+| 1655 | `generateKoutenreiBets()` | 荒天令買い目（特異点L・三連複・二車単）を生成 |
+| 2081 | `initInputGuardWrapper()` | 入力ガードラッパーを初期化 |
