@@ -1,7 +1,9 @@
 (function(app) {
 
-// 真自在律 Ver10.19
-// LOGIC VERSION: 10.19
+// 真自在律 Ver10.20
+// LOGIC VERSION: 10.20
+// 【V10.20】generateSeitenreiBets() を selectR2() 分離構造に刷新。展開パターンはr2選出基準のみに影響。
+//           買い目形式は r0-r1-r2/r0-r2-r1/r1-r0-r2/r1-r2-r0 の4点固定。excludeL でL被り防止。
 // 【V10.19】generateSeitenreiBets() r配列を ranking.slice(0, 3).map(p => p.id) でtop3に封鎖。
 // 【V10.18】generateKoutenreiBets() L候補除外を new Set([A.id, B.id, C.id, ...seitenTop3Ids]) で一元管理。
 // 【V10.17】C-1: TENKAI_MODE_ENABLED typeof除去 / C-2: console.log→app.logMessage / C-4: ADJACENT_MAP モジュールスコープ化。
@@ -1476,9 +1478,20 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
         tenunOutput.dataset.tenunValue = tenunIndexData.tenunIndex;
     }
 
-    // 晴天令買い目
+    // 晴天令買い目 — r2がLと被らないよう事前にL仮算出して excludeL として渡す
+    const prelimSeitenIds = new Set(tenunIndexData.rankingWithData.slice(0, 3).map(p => p.id));
+    const prelimKoutenRanking = [
+        ...tenunIndexData.rankingWithData.slice(0, 3),
+        ...tenunIndexData.rankingWithData.filter(p => !prelimSeitenIds.has(p.id))
+    ];
+    const prelimKouten = generateKoutenreiBets(
+        prelimKoutenRanking, prelimSeitenIds, lines,
+        tenunIndexData.koutenRankingWithData || []
+    );
+    const excludeL = prelimKouten?.targetL?.id ?? null;
+
     const seitenreiBox  = document.getElementById('seitenrei-output');
-    const seitenreiBets = generateSeitenreiBets(tenunIndexData.rankingWithData, basePlayers, tenkaiPattern);
+    const seitenreiBets = generateSeitenreiBets(tenunIndexData.rankingWithData, basePlayers, tenkaiPattern, excludeL);
     if (seitenreiBox && seitenreiBets) {
         let html = '<h4>☀️ 晴天令</h4><strong>三連単</strong><ul>';
         seitenreiBets.sanrentan.forEach(b => html += `<li>${formatOrderedBet(b)}</li>`);
@@ -1603,63 +1616,39 @@ function classifyTenkai(mv, sg, nNige, nMakuri) {
   return rules.find(([cond]) => cond())?.[1] ?? '現状';
 }
 
-function generateSeitenreiBets(ranking, basePlayers, tenkaiPattern) {
-    if (!ranking || ranking.length < 3) return null;
-    const ids = ranking.slice(0, 3).map(p => p.id);  // top3に封鎖（r[3]以降のL混入を防止）
+function selectR2(ranking, basePlayers, tenkaiPattern, excludeIds) {
     const baseMap = Object.fromEntries((basePlayers || []).map(p => [p.id, p]));
-    const styleOf = id => {
-        const s = baseMap[id]?.style || '';
-        return s === '両' ? '自' : s;
-    };
+    const styleOf = id => { const s = baseMap[id]?.style || ''; return s === '両' ? '自' : s; };
+    const clOf    = p  => p.c_l || baseMap[p.id]?.c_l || 1.0;
+    const candidates = ranking.filter(p => !excludeIds.has(p.id));
 
-    let bets = [];
-
+    let r2 = null;
     if (tenkaiPattern === '逃げ圧勝') {
-        const nigeIds = ids.filter(i => styleOf(i) === '逃');
-        if (nigeIds.length) {
-            const r0 = nigeIds[0];
-            const others = ids.filter(i => i !== r0).slice(0, 3);
-            bets = [[r0,others[0],others[1]],[r0,others[1],others[0]],
-                    [r0,others[0],others[2]||others[1]],[r0,others[2]||others[1],others[0]]];
-        }
-
+        r2 = candidates.find(p => styleOf(p.id) === '追' && clOf(p) > 1.0) || null;
     } else if (tenkaiPattern === 'ちょい差し') {
-        const nigeIds  = ids.filter(i => styleOf(i) === '逃');
-        const sashiIds = ids.filter(i => styleOf(i) === '追' && (baseMap[i]?.c_l || 1.0) > 1.0);
-        if (nigeIds.length && sashiIds.length) {
-            const r0n = nigeIds[0], r0s = sashiIds[0];
-            const others = ids.filter(i => i !== r0n && i !== r0s).slice(0, 2);
-            const o0 = others[0] || ids[2], o1 = others[1] || o0;
-            bets = [[r0n,r0s,o0],[r0s,r0n,o0],[r0n,r0s,o1],[r0s,r0n,o1]];
-        }
-
+        const sashi = candidates.filter(p => styleOf(p.id) === '追')
+            .sort((a, b) => clOf(b) - clOf(a));
+        r2 = sashi[0] || null;
     } else if (tenkaiPattern === '別線差し') {
-        const r0 = ids[0];
-        const sashiIds = ids.slice(1).filter(i => styleOf(i) === '追');
-        const r1 = sashiIds[0] || ids[1];
-        const others = ids.filter(i => i !== r0 && i !== r1).slice(0, 2);
-        const o0 = others[0] || ids[2], o1 = others[1] || o0;
-        bets = [[r0,r1,o0],[r0,r1,o1],[r0,o0,r1],[r1,r0,o0]];
-
+        r2 = candidates.find(p => ['追', '自'].includes(styleOf(p.id))) || null;
     } else if (tenkaiPattern === '捲り') {
-        const makuriIds = ids.filter(i => styleOf(i) === '自');
-        if (makuriIds.length) {
-            const r0 = makuriIds[0];
-            const others = ids.filter(i => i !== r0).slice(0, 3);
-            bets = [[r0,others[0],others[1]],[r0,others[1],others[0]],
-                    [r0,others[0],others[2]||others[1]],[r0,others[2]||others[1],others[0]]];
-        }
+        r2 = candidates.find(p => styleOf(p.id) === '自') || null;
     }
+    return r2 || candidates[0] || null;
+}
 
-    // フォールバック（現状・判別不能）
-    if (!bets.length) {
-        bets = [[ids[0],ids[1],ids[2]],[ids[0],ids[2],ids[1]],
-                [ids[1],ids[0],ids[2]],[ids[1],ids[2],ids[0]]];
-    }
-
-    // 重複除去して最大4点
-    const sanrentan = [...new Map(bets.map(b => [b.join('-'), b])).values()].slice(0, 4);
-    const sanrenpuku = [sanrentan[0].slice().sort((a, b) => a - b)];
+function generateSeitenreiBets(ranking, basePlayers, tenkaiPattern, excludeL = null) {
+    if (!ranking || ranking.length < 3) return null;
+    const r0 = ranking[0], r1 = ranking[1];
+    const excludeIds = new Set([r0.id, r1.id, ...(excludeL != null ? [excludeL] : [])]);
+    const r2obj = selectR2(ranking, basePlayers, tenkaiPattern, excludeIds);
+    if (!r2obj) return null;
+    const [a, b, c] = [r0.id, r1.id, r2obj.id];
+    const sanrentan = [
+        [a, b, c], [a, c, b],
+        [b, a, c], [b, c, a]
+    ];
+    const sanrenpuku = [[a, b, c].sort((x, y) => x - y)];
     return { sanrentan, sanrenpuku };
 }
 
