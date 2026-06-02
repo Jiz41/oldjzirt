@@ -1,7 +1,8 @@
 (function(app) {
 
-// 真自在律 Ver10.20
-// LOGIC VERSION: 10.20
+// 真自在律 Ver10.21
+// LOGIC VERSION: 10.21
+// 【V10.21】荒天令A/B/C順序バグ修正: seitenSelectedIds を sanrenpuku[0](車番ソート)→sanrentan[0](スコア順)に変更。
 // 【V10.20】generateSeitenreiBets() を selectR2() 分離構造に刷新。展開パターンはr2選出基準のみに影響。
 //           買い目形式は r0-r1-r2/r0-r2-r1/r1-r0-r2/r1-r2-r0 の4点固定。excludeL でL被り防止。
 // 【V10.19】generateSeitenreiBets() r配列を ranking.slice(0, 3).map(p => p.id) でtop3に封鎖。
@@ -1504,7 +1505,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     // 荒天令買い目
     const koutenreiBox  = document.getElementById('koutenrei-output');
     // 荒天令のA/B/Cを晴天令で選出したr[0]/r[1]/r[2]に揃えるためランキングを組み替える
-    const seitenSelectedIds = seitenreiBets ? seitenreiBets.sanrenpuku[0] : null;
+    const seitenSelectedIds = seitenreiBets ? seitenreiBets.sanrentan[0] : null;  // スコア順(r0/r1/r2)でA/B/Cを確定
     const seitenSelectedSet = new Set(seitenSelectedIds || []);
     const koutenreiRanking = seitenSelectedIds
         ? [
