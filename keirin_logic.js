@@ -1,7 +1,8 @@
 (function(app) {
 
-// 真自在律 Ver10.21
-// LOGIC VERSION: 10.21
+// 真自在律 Ver10.22
+// LOGIC VERSION: 10.22
+// 【V10.22】displayResults()にwindSpeed/windDirection引数を追加し、relationsデータをreturnに追加。
 // 【V10.21】荒天令A/B/C順序バグ修正: seitenSelectedIds を sanrenpuku[0](車番ソート)→sanrentan[0](スコア順)に変更。
 // 【V10.20】generateSeitenreiBets() を selectR2() 分離構造に刷新。展開パターンはr2選出基準のみに影響。
 //           買い目形式は r0-r1-r2/r0-r2-r1/r1-r0-r2/r1-r2-r0 の4点固定。excludeL でL被り防止。
@@ -1313,7 +1314,9 @@ app.calculatePrediction = async function(guardedData) {
             finalTenunData,
             lines,
             tenkaiPattern,
-            basePlayers
+            basePlayers,
+            windSpeed,
+            windDirection
         );
 
         applyShinganHakke(basePlayers, seitenreiResults.integratedScores, koutenreiResults.integratedScores);
@@ -1463,7 +1466,7 @@ function getTextColor(rgbColor) {
     return luminance > 0.5 ? '#333' : '#fff';
 }
 
-function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers, displayLineSegments, tenunIndexData, lines = [], tenkaiPattern = '現状', basePlayers = []) {
+function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers, displayLineSegments, tenunIndexData, lines = [], tenkaiPattern = '現状', basePlayers = [], windSpeed = 0, windDirection = '無風') {
     displayBankTendency();
 
     const finalScores = Object.keys(seitenreiIntegratedScores).map(id => ({
@@ -1607,6 +1610,32 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
       }
     );
     } // _sgAnySwitchOn
+
+    // ── relations データ出口（相関図用） ──────────────────────────────
+    const _bankInfo   = BANK_DATA[bankName] || {};
+    const _seitenRank = tenunIndexData.rankingWithData || [];
+    const _seitenTop3 = seitenreiBets
+        ? seitenreiBets.sanrentan[0].map(id => _seitenRank.find(p => p.id === id)).filter(Boolean)
+        : _seitenRank.slice(0, 3);
+    return {
+        relations: {
+            seiten: {
+                r0: _seitenTop3[0] ?? null,
+                r1: _seitenTop3[1] ?? null,
+                r2: _seitenTop3[2] ?? null,
+            },
+            kouten: {
+                A: _seitenTop3[0] ?? null,
+                B: _seitenTop3[1] ?? null,
+                C: _seitenTop3[2] ?? null,
+                L: koutenreiBets ? (koutenreiBets.targetL ?? null) : null,
+            },
+            lines:  displayLineSegments,
+            seri:   allSeriInfos.map((info, i) => ({ index: i, follower: info.follower, contender: info.contender, winner: info.winner })),
+            wind:   { speed: windSpeed, direction: windDirection },
+            bank:   { straight: _bankInfo.straight ?? 50, canto: _bankInfo.canto ?? 30, name: bankName },
+        }
+    };
 }
 
 // ====================================================================================
