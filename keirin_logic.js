@@ -1161,7 +1161,7 @@ app.calculatePrediction = async function(guardedData) {
             app.logMessage(`[ROYAL] 選手${p.id}: 👑 戴冠（地力再定義)`);
         }
         return {
-            id: p.id, score, style: p.style, wmark: p.wmark,
+            id: p.id, name: p.name, score, style: p.style, wmark: p.wmark,
             recent: p.recent,
             is_s1: p.id === s1Id, is_b1: p.id === b1Id, is_scratch: p.isScratch,
             isLocal: p.isLocal,
