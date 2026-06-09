@@ -59,8 +59,8 @@
         const r1 = relations.seiten?.r1 || {};
         const r2 = relations.seiten?.r2 || {};
         const L  = relations.kouten?.L  || {};
-        const sameLine = (relations.lines || []).some(line =>
-            line.includes(r0.id) && line.includes(r1.id)
+        const sameLine = (relations.lineArrays || []).some(line =>
+            Array.isArray(line) && line.includes(r0.id) && line.includes(r1.id)
         );
         const r1_rel = sameLine ? 'が続く' : 'は別線から';
         return text
