@@ -1593,22 +1593,23 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     if (_sgAnySwitchOn) {
         app.logMessage('[SNGN] 審眼八卦オンのためsendLogをスキップします。');
     } else {
-    App.sendLog(
-      {
-        race_id: CalculationSnapshot.race_id,
-        bank: document.getElementById('bank-name').value,
-        grade: document.getElementById('race-type').value,
-        wind: {
-          speed: parseFloat(document.getElementById('wind-speed').value) || 0,
-          direction: document.getElementById('wind-direction').value
-        },
-        tenun: tenunIndexData.tenunIndex
-      },
-      {
-        seiten: document.getElementById('seitenrei-output').innerHTML,
-        kouten: document.getElementById('koutenrei-output').innerHTML
-      }
-    );
+    // [TEST ENV] ハズレ解析GAS送信無効化
+    // App.sendLog(
+    //   {
+    //     race_id: CalculationSnapshot.race_id,
+    //     bank: document.getElementById('bank-name').value,
+    //     grade: document.getElementById('race-type').value,
+    //     wind: {
+    //       speed: parseFloat(document.getElementById('wind-speed').value) || 0,
+    //       direction: document.getElementById('wind-direction').value
+    //     },
+    //     tenun: tenunIndexData.tenunIndex
+    //   },
+    //   {
+    //     seiten: document.getElementById('seitenrei-output').innerHTML,
+    //     kouten: document.getElementById('koutenrei-output').innerHTML
+    //   }
+    // );
     } // _sgAnySwitchOn
 
     // ── relations データ出口（相関図用） ──────────────────────────────
