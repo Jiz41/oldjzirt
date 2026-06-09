@@ -1322,6 +1322,9 @@ app.calculatePrediction = async function(guardedData) {
         if (typeof app.displayKeppan === 'function' && _calcResult?.relations) {
             app.displayKeppan(_calcResult.relations);
         }
+        if (typeof app.generateRitsuText === 'function' && _calcResult?.relations) {
+            app.generateRitsuText(_calcResult.relations);
+        }
 
         applyShinganHakke(basePlayers, seitenreiResults.integratedScores, koutenreiResults.integratedScores);
 
@@ -1652,6 +1655,9 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
                 });
                 return out;
             })(),
+            tenkaiPattern: tenkaiPattern,
+            raceId:        CalculationSnapshot.race_id || '',
+            tenunIndex:    tenunIndexData?.tenunIndex ?? 50,
         }
     };
 }
