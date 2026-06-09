@@ -675,10 +675,14 @@ function toggleShinganTenkai(cb){document.getElementById('sg-tenkai-opts').style
                     <span class="tenun-title" style="font-weight: bold; margin-bottom: 8px; display: block;">天雲指数</span>
                 </div>
 
+                <!-- [TEST ENV] 晴天令・荒天令 買い目表示を無効化（DOM要素はJS参照のため非表示で残す）
                 <h3>☀️ 晴天令 (安定推奨)</h3>
                 <div class="recommendation" id="seitenrei-output">計算結果待ち...</div>
                 <h3>⛈️ 荒天令 (波乱推奨)</h3>
                 <div class="recommendation" id="koutenrei-output">計算結果待ち...</div>
+                -->
+                <div id="seitenrei-output" style="display:none;"></div>
+                <div id="koutenrei-output" style="display:none;"></div>
                 <div id="shingan-hakke-output"></div>
                 <div id="scenario-output">
     <div id="shakkou-status-board" style="display:none;">
