@@ -1640,6 +1640,18 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             seri:       allSeriInfos.map((info, i) => ({ index: i, follower: info.follower, contender: info.contender, winner: info.winner })),
             wind:   { speed: windSpeed, direction: windDirection },
             bank:   { straight: _bankInfo.straight ?? 50, canto: _bankInfo.canto ?? 30, name: bankName },
+            allPlayers:     basePlayers,
+            seitenScores:   seitenreiIntegratedScores,
+            scenarioScores: (function() {
+                const MAP = { '先行有利': '逃', '差し有利': '差', '捲り有利': '捲' };
+                const out = {};
+                (allScenarioResults || []).forEach(({ scenario, results }) => {
+                    const key = MAP[scenario] || scenario;
+                    out[key] = {};
+                    (results || []).forEach(p => { out[key][p.id] = p.final_score; });
+                });
+                return out;
+            })(),
         }
     };
 }
@@ -1993,6 +2005,7 @@ const InputGuard = (() => {
             const isScratch = card.querySelector('.is-scratch')?.checked ?? false;
             result.push({
                 id       : idx,
+                name     : card.dataset.name || '',
                 isScratch,
                 score    : getScore(card, idx),
                 recent   : getRecent(card, idx),

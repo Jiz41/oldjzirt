@@ -279,6 +279,8 @@
       const row = document.querySelector(`.player-row[data-id="${rider.number}"]`);
       if (!row) return;
 
+      if (rider.name) row.dataset.name = rider.name;
+
       const scratchEl = row.querySelector('.is-scratch');
       if (scratchEl) scratchEl.checked = rider.isScratched;
       if (rider.isScratched) return;
