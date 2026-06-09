@@ -1301,7 +1301,7 @@ app.calculatePrediction = async function(guardedData) {
         const tenkaiPattern = classifyTenkai(mv, sg, nNige, nMakuri);
         app.logMessage(`[TENKAI_PATTERN] mv=${mv.toFixed(1)} sg=${sg.toFixed(1)} nNige=${nNige} nMakuri=${nMakuri} → ${tenkaiPattern}`);
 
-        displayResults(
+        const _calcResult = displayResults(
             detailedScenarioResults,
             seitenreiResults.integratedScores,
             koutenreiResults.integratedScores,
@@ -1318,6 +1318,10 @@ app.calculatePrediction = async function(guardedData) {
             windSpeed,
             windDirection
         );
+
+        if (typeof app.displayKeppan === 'function' && _calcResult?.relations) {
+            app.displayKeppan(_calcResult.relations);
+        }
 
         applyShinganHakke(basePlayers, seitenreiResults.integratedScores, koutenreiResults.integratedScores);
 
@@ -1631,8 +1635,9 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
                 C: _seitenTop3[2] ?? null,
                 L: koutenreiBets ? (koutenreiBets.targetL ?? null) : null,
             },
-            lines:  displayLineSegments,
-            seri:   allSeriInfos.map((info, i) => ({ index: i, follower: info.follower, contender: info.contender, winner: info.winner })),
+            lines:      displayLineSegments,
+            lineArrays: lines,
+            seri:       allSeriInfos.map((info, i) => ({ index: i, follower: info.follower, contender: info.contender, winner: info.winner })),
             wind:   { speed: windSpeed, direction: windDirection },
             bank:   { straight: _bankInfo.straight ?? 50, canto: _bankInfo.canto ?? 30, name: bankName },
         }

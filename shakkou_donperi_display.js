@@ -515,6 +515,215 @@ app.completeShakkouCalculation = function(cosmosResult, grade) {
     }
 }
 
+// ----------------------------------------------------------------------------
+// 🩸 血判状図
+// ----------------------------------------------------------------------------
+
+let _kData = null, _kScenario = '逃', _kActiveLine = -1;
+const _kBubbles = {}, _kPositions = {};
+let _kLineEls = [];
+const _KSZ  = { 1:64, 2:48, 3:34, 4:22 };
+const _KST  = {
+    1: { bg:'#1a1710', bdr:'rgba(200,169,110,0.95)', num:'#c8a96e',              name:'rgba(200,169,110,0.75)' },
+    2: { bg:'#111118', bdr:'rgba(224,216,200,0.70)', num:'#e0d8c8',              name:'rgba(180,172,160,0.70)' },
+    3: { bg:'#0e0e14', bdr:'rgba(120,120,140,0.50)', num:'rgba(160,160,180,0.8)',name:'rgba(100,100,120,0.60)' },
+    4: { bg:'#0a0a0f', bdr:'rgba(50,50,65,0.60)',    num:'rgba(70,70,85,0.80)',  name:'rgba(50,50,65,0.50)'    },
+};
+
+function buildKeppanData(relations) {
+    const { seiten, kouten } = relations;
+    const arrLines = relations.lineArrays || [];
+
+    const sources = [
+        { p: seiten.r0, role: 'r0' },
+        { p: seiten.r1, role: 'r1' },
+        { p: seiten.r2, role: 'r2' },
+        { p: kouten.L,  role: 'L'  },
+    ].filter(s => s.p != null);
+    const seen = new Set();
+    const uniq = sources.filter(({ p }) => { if (seen.has(p.id)) return false; seen.add(p.id); return true; });
+
+    const players = uniq.map(({ p, role }) => {
+        const lineIdx = arrLines.findIndex(line => line.includes(p.id));
+        return { id: p.id, wmark: p.wmark || '', style: p.style || '', role, lineIdx: lineIdx < 0 ? 0 : lineIdx, _ref: p };
+    });
+
+    const ss = {}, ks = {};
+    if (seiten.r0) ss[seiten.r0.id] = seiten.r0.final_score;
+    if (seiten.r1) ss[seiten.r1.id] = seiten.r1.final_score;
+    if (seiten.r2) ss[seiten.r2.id] = seiten.r2.final_score;
+    if (kouten.A)  ks[kouten.A.id]  = kouten.A.final_score;
+    if (kouten.B)  ks[kouten.B.id]  = kouten.B.final_score;
+    if (kouten.C)  ks[kouten.C.id]  = kouten.C.final_score;
+    if (kouten.L)  ks[kouten.L.id]  = kouten.L.final_score;
+
+    const ids = players.map(p => p.id);
+    function rankBy(fn) {
+        const s = [...ids].sort((a, b) => (fn(b) || 0) - (fn(a) || 0));
+        const r = {}; s.forEach((id, i) => r[id] = i + 1); return r;
+    }
+    const scenarioRank = {
+        '逃': rankBy(id => ss[id] ?? ks[id] ?? 0),
+        '差': rankBy(id => ks[id] ?? ss[id] ?? 0),
+        '捲': rankBy(id => ((ss[id] ?? 0) + (ks[id] ?? 0)) / 2),
+    };
+
+    function pct(c) { return Math.round(((c ?? 1) - 1) * 100); }
+    const factors = {}, totals = {};
+    players.forEach(({ id, _ref: p }) => {
+        factors[id] = [
+            { label: 'ライン先頭の引力 / 番手の恩恵', sub: 'c_l = '      + (p.c_l      ?? 1).toFixed(3), val: pct(p.c_l),      max: 10 },
+            { label: '直近の調子',                    sub: 'c_recent = ' + (p.c_recent ?? 1).toFixed(3), val: pct(p.c_recent), max: 10 },
+            { label: '地元の力',                       sub: 'c_local = '  + (p.c_local  ?? 1).toFixed(3), val: pct(p.c_local),  max: 10 },
+            { label: '紙面の期待',                     sub: 'c_wmark = '  + (p.c_wmark  ?? 1).toFixed(3), val: pct(p.c_wmark),  max: 10 },
+            { label: 'S1の重み',                       sub: 'c_s1 = '     + (p.c_s1     ?? 1).toFixed(3), val: pct(p.c_s1),     max: 10 },
+        ];
+        totals[id] = p.final_score ? p.final_score.toFixed(1) + 'pt' : '—';
+    });
+
+    const narabi = arrLines.map(line => line.join('-')).join(' / ');
+    return { players, lines: arrLines, scenarioRank, factors, totals, narabi };
+}
+
+function renderKeppan(data) {
+    _kData = data; _kScenario = '逃'; _kActiveLine = -1;
+    Object.keys(_kBubbles).forEach(k => delete _kBubbles[k]);
+    Object.keys(_kPositions).forEach(k => delete _kPositions[k]);
+    _kLineEls = [];
+
+    const stage = document.getElementById('keppan_stage');
+    if (!stage) return;
+    stage.querySelectorAll('.keppan_bubble').forEach(el => el.remove());
+
+    const CX = 150, CY = 150, R = 118, n = data.players.length;
+    [...data.players].sort((a, b) => a.id - b.id).forEach((p, i) => {
+        const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+        _kPositions[p.id] = { x: CX + Math.cos(angle) * R, y: CY + Math.sin(angle) * R };
+        const el = document.createElement('div');
+        el.className = 'keppan_bubble';
+        el.innerHTML = `<div class="keppan_bubble_num"></div><div class="keppan_bubble_name"></div><div class="keppan_bubble_wmark"></div>`;
+        el.addEventListener('click', () => _kOnClick(p.id));
+        stage.appendChild(el);
+        _kBubbles[p.id] = el;
+    });
+
+    document.querySelectorAll('.keppan_tab').forEach(t => t.classList.toggle('active', t.dataset.sc === '逃'));
+    const narabiEl = document.getElementById('keppan_narabi');
+    if (narabiEl) narabiEl.textContent = data.narabi;
+    const container = document.getElementById('keppan_container');
+    if (container) container.classList.add('visible');
+
+    _kRender();
+}
+
+function _kDrawLines(hlIdx) {
+    const svg = document.getElementById('keppan_lineSvg');
+    if (!svg || !_kData) return;
+    _kLineEls.forEach(el => el.remove()); _kLineEls = [];
+    const ranks = _kData.scenarioRank[_kScenario];
+    _kData.lines.forEach((line, li) => {
+        const isHL  = li === hlIdx;
+        const stroke = isHL ? 'rgba(255,255,255,0.90)' : 'rgba(255,255,255,0.25)';
+        const width  = isHL ? 2.2 : 1.2;
+        const mId    = `keppan_arr${Math.min(li, 2)}${isHL ? 'h' : ''}`;
+        for (let i = 0; i < line.length - 1; i++) {
+            const a = _kPositions[line[i]], b = _kPositions[line[i + 1]];
+            if (!a || !b) continue;
+            const dx = b.x - a.x, dy = b.y - a.y, dist = Math.sqrt(dx*dx + dy*dy);
+            const ux = dx/dist, uy = dy/dist;
+            const sA = _KSZ[Math.min(ranks[line[i]]     || 4, 4)] / 2;
+            const sB = _KSZ[Math.min(ranks[line[i + 1]] || 4, 4)] / 2;
+            const el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            el.setAttribute('x1', a.x + ux*(sA+2)); el.setAttribute('y1', a.y + uy*(sA+2));
+            el.setAttribute('x2', b.x - ux*(sB+6)); el.setAttribute('y2', b.y - uy*(sB+6));
+            el.setAttribute('stroke', stroke); el.setAttribute('stroke-width', width);
+            el.setAttribute('marker-end', `url(#${mId})`);
+            svg.appendChild(el); _kLineEls.push(el);
+        }
+    });
+}
+
+function _kRender() {
+    if (!_kData) return;
+    const ranks = _kData.scenarioRank[_kScenario];
+    _kData.players.forEach(p => {
+        const el = _kBubbles[p.id]; if (!el) return;
+        const rank = Math.min(ranks[p.id] || 4, 4);
+        const size = _KSZ[rank], st = _KST[rank];
+        el.style.left   = _kPositions[p.id].x + 'px';
+        el.style.top    = _kPositions[p.id].y + 'px';
+        el.style.width  = size + 'px'; el.style.height = size + 'px';
+        el.style.background = st.bg; el.style.opacity = '1';
+        el.style.border = `${p.role==='L' ? '1.5px dashed' : rank<=2 ? '2px solid' : '1px solid'} ${st.bdr}`;
+        const numEl = el.querySelector('.keppan_bubble_num');
+        const nmEl  = el.querySelector('.keppan_bubble_name');
+        const wmEl  = el.querySelector('.keppan_bubble_wmark');
+        numEl.textContent = p.id;
+        nmEl.textContent  = rank <= 2 ? (p.wmark && p.wmark !== '無' ? p.wmark : '') : '';
+        wmEl.textContent  = rank <= 2 ? p.style : '';
+        numEl.style.fontSize = Math.max(8, size*0.30) + 'px'; numEl.style.color = st.num;
+        nmEl.style.fontSize  = Math.max(6, size*0.155) + 'px'; nmEl.style.color = '#c8a96e';
+        wmEl.style.fontSize  = Math.max(6, size*0.155) + 'px'; wmEl.style.color = st.name;
+    });
+    _kDrawLines(_kActiveLine);
+}
+
+function _kOnClick(id) {
+    const p = _kData.players.find(pl => pl.id === id); if (!p) return;
+    _kActiveLine = p.lineIdx; _kDrawLines(_kActiveLine); _kOpenPop(id);
+}
+
+function _kOpenPop(id) {
+    if (!_kData) return;
+    const p = _kData.players.find(pl => pl.id === id); if (!p) return;
+    document.getElementById('keppan_popNum').textContent   = p.id;
+    document.getElementById('keppan_popName').textContent  = p.id + '番';
+    document.getElementById('keppan_popWmark').textContent = (p.wmark && p.wmark !== '無') ? p.wmark : '';
+    document.getElementById('keppan_popTotal').textContent = _kData.totals[id] || '—';
+    document.getElementById('keppan_popFactors').innerHTML = (_kData.factors[id] || []).map(f => {
+        const pct = Math.min(100, Math.round(Math.abs(f.val) / f.max * 100));
+        const cls = f.val > 0 ? 'plus' : f.val < 0 ? 'minus' : 'zero';
+        return `<div class="keppan_factor_row">
+            <div class="keppan_factor_label">${f.label}<span class="sub">${f.sub}</span></div>
+            <div class="keppan_factor_bar_wrap">
+                <div class="keppan_factor_val ${cls}">${f.val > 0 ? '+' : ''}${f.val}%</div>
+                <div class="keppan_bar_bg"><div class="keppan_bar_fill ${cls}" style="width:${pct}%"></div></div>
+            </div>
+        </div>`;
+    }).join('');
+    document.getElementById('keppan_popover').classList.add('open');
+    document.getElementById('keppan_overlay').classList.add('open');
+}
+
+window.keppanSetScenario = function(s) {
+    if (!_kData || s === _kScenario) return;
+    _kScenario = s; _kActiveLine = -1;
+    document.querySelectorAll('.keppan_tab').forEach(t => t.classList.toggle('active', t.dataset.sc === s));
+    _kData.players.forEach(p => {
+        const el = _kBubbles[p.id]; if (!el) return;
+        el.style.width = '28px'; el.style.height = '28px';
+        el.style.background = 'rgba(255,255,255,0.04)';
+        el.style.border = '1px solid rgba(255,255,255,0.15)';
+        el.style.opacity = '0.5';
+    });
+    _kDrawLines(-1);
+    setTimeout(_kRender, 320);
+};
+
+window.keppanClosePop = function() {
+    document.getElementById('keppan_popover').classList.remove('open');
+    document.getElementById('keppan_overlay').classList.remove('open');
+    _kActiveLine = -1; _kDrawLines(-1);
+};
+
+app.displayKeppan = function(relations) {
+    try {
+        renderKeppan(buildKeppanData(relations));
+    } catch (e) {
+        app.logMessage('[ERROR] displayKeppan: ' + e.message);
+    }
+};
+
 // 🚀 初期化
 if (typeof document !== 'undefined') {
     console.log('[赤口呑縁] 表示システム初期化完了');
