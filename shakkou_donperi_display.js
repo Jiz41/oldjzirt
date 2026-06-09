@@ -531,43 +531,46 @@ const _KST  = {
 };
 
 function buildKeppanData(relations) {
-    const { seiten, kouten } = relations;
-    const arrLines = relations.lineArrays || [];
+    const arrLines       = relations.lineArrays     || [];
+    const allPlayers     = relations.allPlayers     || [];
+    const seitenScores   = relations.seitenScores   || {};
+    const scenarioScores = relations.scenarioScores || {};
 
-    const sources = [
-        { p: seiten.r0, role: 'r0' },
-        { p: seiten.r1, role: 'r1' },
-        { p: seiten.r2, role: 'r2' },
-        { p: kouten.L,  role: 'L'  },
-    ].filter(s => s.p != null);
-    const seen = new Set();
-    const uniq = sources.filter(({ p }) => { if (seen.has(p.id)) return false; seen.add(p.id); return true; });
-
-    const players = uniq.map(({ p, role }) => {
-        const lineIdx = arrLines.findIndex(line => line.includes(p.id));
-        return { id: p.id, wmark: p.wmark || '', style: p.style || '', role, lineIdx: lineIdx < 0 ? 0 : lineIdx, _ref: p };
-    });
-
-    const ss = {}, ks = {};
-    if (seiten.r0) ss[seiten.r0.id] = seiten.r0.final_score;
-    if (seiten.r1) ss[seiten.r1.id] = seiten.r1.final_score;
-    if (seiten.r2) ss[seiten.r2.id] = seiten.r2.final_score;
-    if (kouten.A)  ks[kouten.A.id]  = kouten.A.final_score;
-    if (kouten.B)  ks[kouten.B.id]  = kouten.B.final_score;
-    if (kouten.C)  ks[kouten.C.id]  = kouten.C.final_score;
-    if (kouten.L)  ks[kouten.L.id]  = kouten.L.final_score;
+    // 1. players配列（欠場除外・全出走選手）
+    const players = allPlayers
+        .filter(p => !p.isScratch)
+        .map(p => {
+            const lineIdx = arrLines.findIndex(line => line.includes(p.id));
+            return {
+                id:      p.id,
+                name:    p.name  || '',
+                wmark:   p.wmark || '',
+                style:   p.style || '',
+                lineIdx: lineIdx < 0 ? 0 : lineIdx,
+                _ref:    p,
+            };
+        });
 
     const ids = players.map(p => p.id);
-    function rankBy(fn) {
-        const s = [...ids].sort((a, b) => (fn(b) || 0) - (fn(a) || 0));
-        const r = {}; s.forEach((id, i) => r[id] = i + 1); return r;
+
+    // 2. scenarioRank（同スコアは同ランク）
+    function rankBy(scoreMap) {
+        const sorted = [...ids].sort((a, b) => (scoreMap[b] || 0) - (scoreMap[a] || 0));
+        const rank = {};
+        sorted.forEach((id, i) => {
+            if (i === 0) { rank[id] = 1; return; }
+            const prev = sorted[i - 1];
+            rank[id] = (scoreMap[id] === scoreMap[prev]) ? rank[prev] : i + 1;
+        });
+        return rank;
     }
     const scenarioRank = {
-        '逃': rankBy(id => ss[id] ?? ks[id] ?? 0),
-        '差': rankBy(id => ks[id] ?? ss[id] ?? 0),
-        '捲': rankBy(id => ((ss[id] ?? 0) + (ks[id] ?? 0)) / 2),
+        '逃': rankBy(scenarioScores['逃'] || {}),
+        '差': rankBy(scenarioScores['差'] || {}),
+        '捲': rankBy(scenarioScores['捲'] || {}),
     };
 
+    // 3. factors・totals
     function pct(c) { return Math.round(((c ?? 1) - 1) * 100); }
     const factors = {}, totals = {};
     players.forEach(({ id, _ref: p }) => {
@@ -578,11 +581,14 @@ function buildKeppanData(relations) {
             { label: '紙面の期待',                     sub: 'c_wmark = '  + (p.c_wmark  ?? 1).toFixed(3), val: pct(p.c_wmark),  max: 10 },
             { label: 'S1の重み',                       sub: 'c_s1 = '     + (p.c_s1     ?? 1).toFixed(3), val: pct(p.c_s1),     max: 10 },
         ];
-        totals[id] = p.final_score ? p.final_score.toFixed(1) + 'pt' : '—';
+        const raw = seitenScores[id];
+        totals[id] = raw != null ? (raw / 3).toFixed(1) + 'pt' : '—';
     });
 
+    // 4. 並び表示テキスト
     const narabi = arrLines.map(line => line.join('-')).join(' / ');
-    return { players, lines: arrLines, scenarioRank, factors, totals, narabi };
+
+    return { players, lines: arrLines, scenarioRank, scenarioScores, factors, totals, narabi };
 }
 
 function renderKeppan(data) {
@@ -679,7 +685,9 @@ function _kOpenPop(id) {
     document.getElementById('keppan_popNum').textContent   = p.id;
     document.getElementById('keppan_popName').textContent  = p.id + '番';
     document.getElementById('keppan_popWmark').textContent = (p.wmark && p.wmark !== '無') ? p.wmark : '';
-    document.getElementById('keppan_popTotal').textContent = _kData.totals[id] || '—';
+    const scScore = _kData.scenarioScores?.[_kScenario]?.[id];
+    document.getElementById('keppan_popTotal').textContent =
+        scScore != null ? scScore.toFixed(1) + 'pt' : (_kData.totals[id] || '—');
     document.getElementById('keppan_popFactors').innerHTML = (_kData.factors[id] || []).map(f => {
         const pct = Math.min(100, Math.round(Math.abs(f.val) / f.max * 100));
         const cls = f.val > 0 ? 'plus' : f.val < 0 ? 'minus' : 'zero';
