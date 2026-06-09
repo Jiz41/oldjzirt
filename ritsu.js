@@ -53,6 +53,12 @@
         return last % len;
     }
 
+    function nameOrId(p) {
+        const n = p.name;
+        if (!n || n === '無') return p.id != null ? p.id + '番' : '';
+        return n;
+    }
+
     function interpolate(text, relations) {
         if (!text) return '';
         const r0 = relations.seiten?.r0 || {};
@@ -64,13 +70,13 @@
         );
         const r1_rel = sameLine ? 'が続く' : 'は別線から';
         return text
-            .replace(/\{r0\}/g,     r0.name  || '')
-            .replace(/\{r1\}/g,     r1.name  || '')
-            .replace(/\{r2\}/g,     r2.name  || '')
+            .replace(/\{r0\}/g,     nameOrId(r0))
+            .replace(/\{r1\}/g,     nameOrId(r1))
+            .replace(/\{r2\}/g,     nameOrId(r2))
             .replace(/\{r0mark\}/g, r0.wmark || '')
             .replace(/\{r1mark\}/g, r1.wmark || '')
             .replace(/\{r1_rel\}/g, r1_rel)
-            .replace(/\{L\}/g,      L.name   || '')
+            .replace(/\{L\}/g,      nameOrId(L))
             .replace(/\{Lmark\}/g,  L.wmark  || '');
     }
 
