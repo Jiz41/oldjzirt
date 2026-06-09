@@ -1,5 +1,5 @@
 (function(app) {
-    const TEMPLATE_DIR = './templates/';
+    const TEMPLATE_DIR = '/templates/';
     const TEMPLATES = {
         env:    'ritsu_templates_env_v6.json',
         seiten: 'ritsu_templates_seiten_v1.json',
@@ -11,7 +11,9 @@
 
     async function loadTemplate(name) {
         if (_cache[name]) return _cache[name];
-        const res = await fetch(TEMPLATE_DIR + TEMPLATES[name]);
+        const url = TEMPLATE_DIR + TEMPLATES[name];
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`fetch失敗 ${res.status} ${url}`);
         _cache[name] = await res.json();
         return _cache[name];
     }
@@ -117,7 +119,9 @@
             render('ritsu-soukai', interpolate(pick(soukaiArr, raceId), relations));
 
         } catch (e) {
-            app.logMessage('[ritsu.js] テンプレート読み込みエラー: ' + e.message);
+            const msg = '[ritsu.js] エラー: ' + e.message;
+            app.logMessage(msg);
+            render('ritsu-env', msg);
         }
     };
 
