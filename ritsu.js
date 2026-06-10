@@ -5,6 +5,7 @@
         seiten: 'ritsu_templates_seiten_v1.json',
         kouten: 'ritsu_templates_kouten_v1.json',
         soukai: 'ritsu_templates_soukai_v1.json',
+        midashi: 'ritsu_templates_midashi_v1.json',
     };
 
     const _cache = {};
@@ -92,11 +93,12 @@
 
     app.generateRitsuText = async function(relations) {
         try {
-            const [envT, seitenT, koutenT, soukaiT] = await Promise.all([
+            const [envT, seitenT, koutenT, soukaiT, midashiT] = await Promise.all([
                 loadTemplate('env'),
                 loadTemplate('seiten'),
                 loadTemplate('kouten'),
                 loadTemplate('soukai'),
+                loadTemplate('midashi'),
             ]);
 
             const raceId = relations.raceId || '';
@@ -106,11 +108,13 @@
             const envArr = envT[envKey] || envT['横_穏やか_標準'] || [''];
             render('ritsu-env', interpolate(pick(envArr, raceId), relations));
 
-            // 晴天令読み
+            // 見出し＋晴天令読み
             let tenkai = relations.tenkaiPattern || 'ちょい差し';
             if (tenkai === '別線差し') tenkai = 'ちょい差し';
             const r0style = styleLabel(relations.seiten?.r0?.style);
             const seitenKey = `${tenkai}_${r0style}`;
+            const midashiArr = midashiT[seitenKey] || midashiT['ちょい差し_差マ'] || [''];
+            render('ritsu-midashi', pick(midashiArr, raceId));
             const seitenArr = seitenT[seitenKey] || seitenT['ちょい差し_差マ'] || [''];
             render('ritsu-seiten', interpolate(pick(seitenArr, raceId), relations));
 
