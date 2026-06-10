@@ -73,7 +73,7 @@
         const sameLine = (relations.lineArrays || []).some(line =>
             Array.isArray(line) && line.includes(r0.id) && line.includes(r1.id)
         );
-        const r1_rel = sameLine ? 'が続く' : 'は別線から';
+        const r1_rel = sameLine ? 'が続き' : 'は別線から';
         return text
             .replace(/\{r0\}/g,     nameOrCircle(r0))
             .replace(/\{r1\}/g,     nameOrCircle(r1))
