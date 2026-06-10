@@ -54,6 +54,11 @@
         return last % len;
     }
 
+    const CIRCLED = ['', '①', '②', '③', '④', '⑤', '⑥', '⑦'];
+    function nameOrCircle(p) {
+        return p.name || CIRCLED[p.id] || '';
+    }
+
     function wmark(p) {
         const w = p.wmark;
         return (!w || w === '無') ? '' : w;
@@ -70,13 +75,13 @@
         );
         const r1_rel = sameLine ? 'が続く' : 'は別線から';
         return text
-            .replace(/\{r0\}/g,     r0.name  || '')
-            .replace(/\{r1\}/g,     r1.name  || '')
-            .replace(/\{r2\}/g,     r2.name  || '')
+            .replace(/\{r0\}/g,     nameOrCircle(r0))
+            .replace(/\{r1\}/g,     nameOrCircle(r1))
+            .replace(/\{r2\}/g,     nameOrCircle(r2))
             .replace(/\{r0mark\}/g, wmark(r0))
             .replace(/\{r1mark\}/g, wmark(r1))
             .replace(/\{r1_rel\}/g, r1_rel)
-            .replace(/\{L\}/g,      L.name   || '')
+            .replace(/\{L\}/g,      nameOrCircle(L))
             .replace(/\{Lmark\}/g,  wmark(L));
     }
 
