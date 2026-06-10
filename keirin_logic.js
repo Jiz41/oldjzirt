@@ -1319,12 +1319,16 @@ app.calculatePrediction = async function(guardedData) {
             windDirection
         );
 
-        if (typeof app.displayKeppan === 'function' && _calcResult?.relations) {
-            app.displayKeppan(_calcResult.relations);
-        }
-        if (typeof app.generateRitsuText === 'function' && _calcResult?.relations) {
-            app.generateRitsuText(_calcResult.relations);
-        }
+        try {
+            if (typeof app.displayKeppan === 'function' && _calcResult?.relations) {
+                app.displayKeppan(_calcResult.relations);
+            }
+        } catch (e) { app.logMessage('[ERROR] displayKeppan呼び出し: ' + e.message); }
+        try {
+            if (typeof app.generateRitsuText === 'function' && _calcResult?.relations) {
+                app.generateRitsuText(_calcResult.relations);
+            }
+        } catch (e) { app.logMessage('[ERROR] generateRitsuText呼び出し: ' + e.message); }
 
         applyShinganHakke(basePlayers, seitenreiResults.integratedScores, koutenreiResults.integratedScores);
 

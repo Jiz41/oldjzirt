@@ -135,6 +135,7 @@
         } catch (e) {
             const msg = '[ritsu.js] エラー: ' + e.message;
             app.logMessage(msg);
+            render('ritsu-midashi', '令読みエラー');
             render('ritsu-env', msg);
         }
     };
