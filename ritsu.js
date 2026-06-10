@@ -108,7 +108,7 @@
             const raceId = relations.raceId || '';
 
             // 環境・バンク文
-            const envKey = `${windDir(relations.wind?.direction)}_${windSpeed(relations.wind?.speed)}_${straightLen(relations.bank?.straight)}`;
+            const envKey = `${windDir(relations.wind?.effective || relations.wind?.direction)}_${windSpeed(relations.wind?.speed)}_${straightLen(relations.bank?.straight)}`;
             const envArr = envT[envKey] || envT['横_穏やか_標準'] || [''];
             render('ritsu-env', interpolate(pick(envArr, raceId), relations));
 

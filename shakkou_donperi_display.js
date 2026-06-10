@@ -595,7 +595,10 @@ function renderKeppan(data) {
     _kData = data; _kScenario = '逃'; _kActiveLine = -1;
     Object.keys(_kBubbles).forEach(k => delete _kBubbles[k]);
     Object.keys(_kPositions).forEach(k => delete _kPositions[k]);
+    _kLineEls.forEach(el => el.remove());
     _kLineEls = [];
+    const _svgPre = document.getElementById('keppan_lineSvg');
+    if (_svgPre) _svgPre.querySelectorAll('line').forEach(el => el.remove());
 
     const stage = document.getElementById('keppan_stage');
     if (!stage) return;
