@@ -1160,8 +1160,39 @@ footer.copyright-footer {
   }
 }
 
+/* ==========================================
+   令読みコラム
+   ========================================== */
+#ritsu-column {
+  margin: 16px 12px;
+  padding: 14px 16px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+/* 令読み未生成時はコラムごと非表示 */
+#ritsu-column:has(#ritsu-midashi:empty) {
+  display: none;
+}
 
 .ritsu-midashi {
+  font-family: var(--serif);
   font-weight: bold;
   font-size: 1.2em;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ritsu-block {
+  line-height: 1.8;
+  font-size: 0.95em;
+  color: var(--text-2);
+}
+
+.ritsu-block + .ritsu-block {
+  margin-top: 10px;
 }
