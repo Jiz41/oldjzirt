@@ -48,24 +48,29 @@ function updateShakkouProgress(current, total) {
  * @param {string} grade - 階級
  */
 function displayShakkouResults(cosmosResult, grade) {
-    const kiyoneMessage = app.generateKiyoneMessage(cosmosResult, grade);
+    // キャラ凍結による口上分離：generateKiyoneMessage（口上込み）から
+    // generateShakkouDataSection（データ部のみ）へ差し替え。キャラ復活時は下行を元に戻す。
+    // const kiyoneMessage = app.generateKiyoneMessage(cosmosResult, grade);
+    const kiyoneMessage = app.generateShakkouDataSection(cosmosResult);
     const scenarioOutput = document.getElementById('scenario-output');
-    
+
     if (scenarioOutput) {
         const existing = scenarioOutput.querySelector('.shakkou-results-container');
         if (existing) existing.remove();
-        
+
+        // キャラ凍結による口上分離：カットイン画像とキャラ名入りサブタイトルを退場。
+        // キャラ復活時は以下2ブロックを resultHTML のヘッダ直後に戻す。
+        //   <div class="shakkou-subtitle">五更斎アメンティア清音による、1465の並行世界</div>
+        //   <div class="kiyone-cutin-wrapper">
+        //       <img src="kiyone_01.png" alt="清音" class="kiyone-cutin-image glitch-effect">
+        //   </div>
         const resultHTML = `
 <div class="shakkou-results-container">
     <div class="shakkou-header">
         <h3 class="shakkou-title">偽典『赤口呑縁』──</h3>
-        <div class="shakkou-subtitle">五更斎アメンティア清音による、1465の並行世界</div>
+        <div class="shakkou-subtitle">1465の並行世界</div>
     </div>
-    
-    <div class="kiyone-cutin-wrapper">
-        <img src="kiyone_01.png" alt="清音" class="kiyone-cutin-image glitch-effect">
-    </div>
-    
+
     ${kiyoneMessage}
 </div>
         `;

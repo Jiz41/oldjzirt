@@ -148,7 +148,7 @@ function generateResultPresentation() {
 /**
  * 3. 出現出目セクション
  */
-function generateDemeSection(cosmosResult) {
+function generateDemeSection(cosmosResult, omitComment = false) {
     const topPatterns = cosmosResult.topPatterns || [];
     
     let html = `
@@ -168,24 +168,32 @@ function generateDemeSection(cosmosResult) {
     
     html += `
     </div>
-    <div class="kiyone-comment">${KIYONE_COMMON_MESSAGES.deme_comment}</div>
-</div>
 `;
-    
+    if (!omitComment) {  // キャラ凍結による口上分離：データ部のみ生成時はきよねコメントを省く
+        html += `    <div class="kiyone-comment">${KIYONE_COMMON_MESSAGES.deme_comment}</div>
+`;
+    }
+    html += `</div>
+`;
+
     return html;
 }
 
 /**
  * 4. 因果分岐セクション
  */
-function generateChaosSection(cosmosResult) {
+function generateChaosSection(cosmosResult, omitComment = false) {
     const eventStats = cosmosResult.eventStats || [];
-    
+
     let html = `
 <div class="kiyone-section chaos">
     <h4 class="section-title">🌀 因果分岐</h4>
-    <div class="kiyone-comment">${KIYONE_COMMON_MESSAGES.chaos_comment}</div>
-    <div class="chaos-list">
+`;
+    if (!omitComment) {  // キャラ凍結による口上分離：データ部のみ生成時はきよねコメントを省く
+        html += `    <div class="kiyone-comment">${KIYONE_COMMON_MESSAGES.chaos_comment}</div>
+`;
+    }
+    html += `    <div class="chaos-list">
 `;
     
     eventStats.forEach(event => {
@@ -224,14 +232,18 @@ function generateChaosSection(cosmosResult) {
 /**
  * 5. 生存濃度セクション
  */
-function generateSurvivalSection(cosmosResult) {
+function generateSurvivalSection(cosmosResult, omitComment = false) {
     const statistics = cosmosResult.statistics || [];
-    
+
     let html = `
 <div class="kiyone-section survival">
     <h4 class="section-title">🎨 選手の入着濃度</h4>
-    <div class="kiyone-comment">${KIYONE_COMMON_MESSAGES.survival_comment}</div>
-    <table class="survival-table">
+`;
+    if (!omitComment) {  // キャラ凍結による口上分離：データ部のみ生成時はきよねコメントを省く
+        html += `    <div class="kiyone-comment">${KIYONE_COMMON_MESSAGES.survival_comment}</div>
+`;
+    }
+    html += `    <table class="survival-table">
         <thead>
             <tr>
                 <th>車番</th>
@@ -277,6 +289,26 @@ function generateClosingMessage() {
     <div class="kiyone-voice">${KIYONE_COMMON_MESSAGES.closing}</div>
 </div>
 `;
+}
+
+// ----------------------------------------------------------------------------
+// ✂️ キャラ凍結による口上分離：赤口呑縁データ部のみを生成する
+// ----------------------------------------------------------------------------
+// 口上（opening / 結果提示 / closing / 各セクション内の kiyone-comment）を除き、
+// 出現出目・因果分岐・生存濃度テーブルを generateKiyoneMessage と同一マークアップで出力する。
+// generateKiyoneMessage 本体はキャラ復活用に温存している（呼び出しゼロでも削除しないこと）。
+
+/**
+ * 赤口呑縁のデータ部のみを生成（口上なし）
+ * @param {object} cosmosResult - 赤口呑縁の計算結果
+ * @returns {string} HTML形式のデータセクション
+ */
+function generateShakkouDataSection(cosmosResult) {
+    let html = '';
+    html += generateDemeSection(cosmosResult, true);
+    html += generateChaosSection(cosmosResult, true);
+    html += generateSurvivalSection(cosmosResult, true);
+    return html;
 }
 
 // ----------------------------------------------------------------------------
@@ -557,5 +589,6 @@ if (typeof document !== 'undefined') {
 
 app.generateKiyoneMessage = generateKiyoneMessage;
 app.generateCalculationStartMessage = generateCalculationStartMessage;
+app.generateShakkouDataSection = generateShakkouDataSection;  // キャラ凍結による口上分離
 
 })(App);
