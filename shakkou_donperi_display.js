@@ -479,14 +479,6 @@ function buildKeppanData(relations) {
             };
         });
 
-    // 圏外（最弱・関係線なし）のrole付与：単騎（関係線が描かれない）かつ晴天スコア最弱
-    const _minSeiten = Math.min(...players.map(pl => seitenScores[pl.id] ?? 0));
-    players.forEach(pl => {
-        if (pl.role) return;
-        const ln = arrLines[pl.lineIdx] || [];
-        if (ln.length <= 1 && (seitenScores[pl.id] ?? 0) === _minSeiten) pl.role = 'X';
-    });
-
     const ids = players.map(p => p.id);
 
     // 2. scenarioRank（同スコアは同ランク）
@@ -598,9 +590,10 @@ function _kRender() {
         el.style.left   = _kPositions[p.id].x + 'px';
         el.style.top    = _kPositions[p.id].y + 'px';
         el.style.width  = size + 'px'; el.style.height = size + 'px';
-        el.style.background = st.bg; el.style.opacity = p.role === 'X' ? '0.45' : '1';
+        // 三階層振り分け：特異点role最優先、それ以外は描画サイズ（最下段=極小のみ静止）
+        const tier = p.role === 'L' ? 'keppan_tier_tokuiten' : size === _KSZ[4] ? 'keppan_tier_kengai' : 'keppan_tier_float';
+        el.style.background = st.bg; el.style.opacity = tier === 'keppan_tier_kengai' ? '0.45' : '1';
         el.style.border = `${p.role==='L' ? '1.5px dashed' : rank<=2 ? '2px solid' : '1px solid'} ${st.bdr}`;
-        const tier = p.role === 'L' ? 'keppan_tier_tokuiten' : p.role === 'X' ? 'keppan_tier_kengai' : 'keppan_tier_float';
         el.classList.remove('keppan_tier_tokuiten', 'keppan_tier_kengai', 'keppan_tier_float');
         el.classList.add(tier);
         el.style.animationDelay = tier === 'keppan_tier_float' ? (-(p.id - 1) * (8 / 7)).toFixed(2) + 's' : '';
