@@ -140,8 +140,13 @@
     }
 
     const CIRCLED = ['', '①', '②', '③', '④', '⑤', '⑥', '⑦'];
+    // 名前欠損（空・null・空白のみ・「無」単独）は車番の丸数字へフォールバック。
+    // 先頭が「無」でも2文字以上は実名（無二藤等）としてそのまま表示する——
+    // 名前への接頭辞除去は行わない（「無」の除去はwmark()の印判定＝完全一致のみ）。
     function nameOrCircle(p) {
-        return p.name || CIRCLED[p.id] || '';
+        const n = String(p.name ?? '').trim();
+        if (!n || n === '無') return CIRCLED[p.id] || '';
+        return n;
     }
 
     function wmark(p) {

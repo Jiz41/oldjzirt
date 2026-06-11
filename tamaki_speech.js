@@ -141,54 +141,8 @@
         </div>`;
   }
 
-  const TAMAKI_CSS = `
-<style>
-/* タイトルのスタイル修正 */
-.tenun-title {
-    border-bottom: 2px solid rgba(139, 109, 0, 0.2);
-    padding-bottom: 6px;
-    letter-spacing: 0.05em;
-}
-
-.tenun-index-container {
-    margin: 5px 0 25px 0; padding: 20px; border-radius: 12px; border: 3px solid;
-    background: linear-gradient(135deg, #ffffff 0%, #fffdf7 100%);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: all 0.3s ease;
-}
-.tenun-stable { border-color: #557755; background: #f0fff0; }
-.tenun-mild { border-color: #698b69; background: #f7fff7; }
-.tenun-alert { border-color: #d6a300; background: #fff9e6; }
-.tenun-severe { border-color: #c07777; background: #fff0f0; }
-.tenun-ichiyo { border-color: #ffd700; background: #fffef0; box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-
-.tamaki-display { display: flex; gap: 15px; align-items: flex-start; }
-.tamaki-character { flex-shrink: 0; width: 90px; height: auto; }
-.tamaki-image { width: 100%; height: auto; border-radius: 10px; }
-.tamaki-speech-bubble {
-    flex: 1; background: #fafaf8; border: 2px solid #d6a300; border-radius: 15px;
-    padding: 12px; position: relative; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-.tamaki-speech-bubble::before {
-    content: ''; position: absolute; left: -10px; top: 15px;
-    border-style: solid; border-width: 8px 10px 8px 0; border-color: transparent #d6a300 transparent transparent;
-}
-.tamaki-speech-bubble::after {
-    content: ''; position: absolute; left: -6px; top: 17px;
-    border-style: solid; border-width: 6px 8px 6px 0; border-color: transparent #fafaf8 transparent transparent;
-}
-.tamaki-name { font-size: 0.85em; font-weight: bold; color: #8b2222; margin-bottom: 5px; }
-.tamaki-speech-text { line-height: 1.6; color: #333; font-size: 0.9em; }
-.tamaki-speech-text strong { color: #c07777; font-weight: bold; }
-
-@media (max-width: 600px) {
-    .tenun-title { font-size: 1.05em !important; margin-top: 20px !important; }
-    .tenun-index-container { margin: 5px 0 15px 0; padding: 12px; }
-    .tamaki-character { width: 75px; }
-    .tamaki-speech-bubble { padding: 10px; }
-    .tamaki-speech-text { font-size: 0.85em; line-height: 1.5; }
-}
-</style>`;
+  // TAMAKI_CSS（参照ゼロの死にコード）は削除済み（2026-06-11）。
+  // 表示スタイルの実体は style.css の #tenun-index-output / .tenun-title が担当。
 
   app.generateTamakiTenunHTML = generateTamakiTenunHTML;
-  app.TAMAKI_CSS = TAMAKI_CSS;
 })(App);

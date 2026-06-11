@@ -312,28 +312,8 @@ function generateShakkouDataSection(cosmosResult) {
 }
 
 // ----------------------------------------------------------------------------
-// 🎬 進捗表示メッセージ
-// ----------------------------------------------------------------------------
-
-/**
- * 計算開始時のメッセージ
- */
-function generateCalculationStartMessage(grade) {
-    const opening = KIYONE_GRADE_OPENINGS[grade] || KIYONE_GRADE_OPENINGS['a-kyu'];
-    
-    return `
-<div class="kiyone-calculation-start">
-    <div class="kiyone-voice">${opening.opening}</div>
-    <div class="progress-container">
-        <div class="progress-bar-wrapper">
-            <div id="shakkou-progress-bar" class="progress-bar"></div>
-        </div>
-        <div id="shakkou-progress-text" class="progress-text">0 / 1465</div>
-    </div>
-</div>
-`;
-}
-
+// generateCalculationStartMessage（進捗表示・参照ゼロの死にコード）は削除済み（2026-06-11）。
+// 進捗表示自体が showShakkouProgress のスキップ実装により廃止されているため。
 // ----------------------------------------------------------------------------
 // 🎨 スタイル定義（CSSとして出力）
 // ----------------------------------------------------------------------------
@@ -588,7 +568,6 @@ if (typeof document !== 'undefined') {
 }
 
 app.generateKiyoneMessage = generateKiyoneMessage;
-app.generateCalculationStartMessage = generateCalculationStartMessage;
 app.generateShakkouDataSection = generateShakkouDataSection;  // キャラ凍結による口上分離
 
 })(App);
