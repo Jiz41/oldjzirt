@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="app-version" content="2.1.13">
+    <meta name="app-version" content="2.1.14">
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="./style.css">
 
@@ -1354,6 +1354,35 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   .keppan_total_label { font-size: 12px; color: rgba(255,255,255,0.4); letter-spacing: 0.08em; }
   .keppan_total_val   { font-size: 20px; font-weight: 800; color: #c8a96e; }
+  /* 三階層アニメーション（通常=微細浮遊／特異点=心拍様拍動／圏外=完全静止＋減彩）
+     注: .keppan_bubble は translate(-50%,-50%) で中心合わせしているため、
+     keyframes内のtransformには必ず translate(-50%,-50%) を併記すること */
+  .keppan_bubble.keppan_tier_float {
+    animation: keppan_float 8s ease-in-out infinite;
+  }
+  @keyframes keppan_float {
+    0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+    50%      { transform: translate(-50%, -50%) translateY(-2px); }
+  }
+  .keppan_bubble.keppan_tier_tokuiten {
+    animation: keppan_pulse 2.5s ease-out infinite;
+  }
+  @keyframes keppan_pulse {
+    0%        { transform: translate(-50%, -50%) scale(1); }
+    8%        { transform: translate(-50%, -50%) scale(1.20); }
+    16%       { transform: translate(-50%, -50%) scale(1.02); }
+    24%       { transform: translate(-50%, -50%) scale(1.12); }
+    34%, 100% { transform: translate(-50%, -50%) scale(1); }
+  }
+  .keppan_bubble.keppan_tier_kengai { filter: grayscale(0.5); }
+  @media (prefers-reduced-motion: reduce) {
+    .keppan_bubble.keppan_tier_float,
+    .keppan_bubble.keppan_tier_tokuiten { animation: none; }
+    .keppan_bubble.keppan_tier_tokuiten {
+      border-width: 3px !important;
+      box-shadow: 0 0 12px rgba(200,169,110,0.65);
+    }
+  }
   /* === /血判状図 === */
 </style>
 
