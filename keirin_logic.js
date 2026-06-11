@@ -1447,17 +1447,8 @@ function applyShinganHakke(basePlayers, seitenScores, koutenScores) {
             .sort((a, b) => b.correctedScore - a.correctedScore);
     }
 
-    if (typeof app.displayShinganHakke === 'function') {
-        app.displayShinganHakke({
-            seitenRanked: rankPlayers(correctedSeiten),
-            koutenRanked: rankPlayers(correctedKouten),
-            scoreMin,
-            scoreThird,
-            sw,
-            hasLocal,
-            tenkaiType,
-        });
-    }
+    // 寸評カード表示（displayShinganHakke）は発注根拠のない独断実装のため
+    // 呼び出しごと除去（2026-06-11）。×1.05オーバーレイ計算とSNGNログは正規機能として上記に存置。
 }
 
 // displayResults
