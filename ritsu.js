@@ -26,6 +26,53 @@
         return '横';
     }
 
+    // ── 実効風向解決 ──────────────────────────────────────
+    // ADJACENT_MAP / dirToVector / 合成係数0.707 は keirin_logic.js の
+    // kururu処理（getKururuAdjustment）と同期必須。値を変える場合は両方同時に変えること。
+    const ADJACENT_MAP = {
+        "北東": ["北", "東"], "南東": ["南", "東"],
+        "南西": ["南", "西"], "北西": ["北", "西"],
+        "北":   ["北西", "北東"], "東": ["北東", "南東"],
+        "南":   ["南東", "南西"], "西": ["南西", "北西"]
+    };
+
+    function dirToVector(dirType) {
+        let vec = 0.0;
+        if (dirType.includes("追い"))   vec += 1.0;
+        if (dirType.includes("向かい")) vec -= 1.0;
+        if (dirType === "H→B横風")     vec += 0.2;
+        if (dirType === "B→H横風")     vec -= 0.2;
+        return vec;
+    }
+
+    // 風種別を判定して返す: 'ドーム' | '微風' | '追い' | '向かい' | '横'
+    // ドーム判定は「wind_direction_mapが未定義（null含む）」のみを条件とする。バンク名ハードコード禁止。
+    // ドーム＞微風の優先順: 屋内では入力風速に関わらず風という変数が存在しないため。
+    function resolveWindKind(wind, bank) {
+        const map = bank?.wind_direction_map;
+        if (!map) return 'ドーム';
+
+        const speed = Number(wind?.speed) || 0;
+        const dir   = wind?.direction;
+        if (!dir || dir === 'none' || dir === '無風' || speed <= 1.0) return '微風';
+
+        // マップ直接マッチ（wind.effective は keirin_logic.js が map[direction] で算出済み）
+        const eff = wind?.effective || map[dir];
+        if (eff) return windDir(eff);
+
+        // 隣接2方角のベクトル合成（kururu処理と同一ロジック）
+        if (ADJACENT_MAP[dir]) {
+            const [adj1, adj2] = ADJACENT_MAP[dir];
+            const v1 = map[adj1] ? dirToVector(map[adj1]) : 0.0;
+            const v2 = map[adj2] ? dirToVector(map[adj2]) : 0.0;
+            const vec = (v1 + v2) * 0.707;
+            if (vec >= 0.55)  return '追い';
+            if (vec <= -0.55) return '向かい';
+            return '横';
+        }
+        return '横';
+    }
+
     function windSpeed(speed) {
         const v = Number(speed) || 0;
         if (v <= 2.0) return '穏やか';
@@ -107,8 +154,11 @@
 
             const raceId = relations.raceId || '';
 
-            // 環境・バンク文
-            const envKey = `${windDir(relations.wind?.effective || relations.wind?.direction)}_${windSpeed(relations.wind?.speed)}_${straightLen(relations.bank?.straight)}`;
+            // 環境・バンク文（風判定3層: ドーム → 微風 → 追い/向かい/横）
+            const windKind = resolveWindKind(relations.wind, relations.bank);
+            const envKey = (windKind === 'ドーム' || windKind === '微風')
+                ? windKind
+                : `${windKind}_${windSpeed(relations.wind?.speed)}_${straightLen(relations.bank?.straight)}`;
             const envArr = envT[envKey] || envT['横_穏やか_標準'] || [''];
             render('ritsu-env', interpolate(pick(envArr, raceId), relations));
 

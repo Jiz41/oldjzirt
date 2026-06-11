@@ -1646,7 +1646,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             lineArrays: lines,
             seri:       allSeriInfos.map((info, i) => ({ index: i, follower: info.follower, contender: info.contender, winner: info.winner })),
             wind:   { speed: windSpeed, direction: windDirection, effective: (BANK_DATA[bankName]?.wind_direction_map?.[windDirection]) || '' },
-            bank:   { straight: _bankInfo.straight ?? 50, canto: _bankInfo.canto ?? 30, name: bankName },
+            bank:   { straight: _bankInfo.straight ?? 50, canto: _bankInfo.canto ?? 30, name: bankName, wind_direction_map: _bankInfo.wind_direction_map ?? null },
             allPlayers:     basePlayers,
             seitenScores:   seitenreiIntegratedScores,
             scenarioScores: (function() {
