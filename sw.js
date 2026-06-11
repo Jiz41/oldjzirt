@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jiz41-20260611-5';
+const CACHE_NAME = 'jiz41-20260611-6';
 const ASSETS = [
   './',
   './kiyone_cyberpunk_addon.css',
