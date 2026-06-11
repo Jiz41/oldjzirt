@@ -672,6 +672,14 @@ button[onclick="calculatePrediction()"]:active {
   margin: 0 2px;
 }
 
+/* ════════════════════════════════════════════════════════════
+   キャラ凍結による一時非表示（たまき退場・天雲指数の語りは総評の根拠行へ一本化）
+   JS側（tamaki_speech.js / generateTamakiTenunHTML呼び出し / calculateTenunIndexの
+   message生成 / dataset.tenunValue書き込み）はすべて温存している。
+   復活時はこの display:none の1行を削除するだけでよい。
+   ════════════════════════════════════════════════════════════ */
+#tenun-index-output { display: none !important; }
+
 #tenun-index-output {
   background: var(--amber-bg) !important;
   border: 1px solid var(--amber-br) !important;

@@ -87,6 +87,44 @@
         return '長い';
     }
 
+    // ── 総評根拠行（テンプレJSONは変更せず動的生成） ──────────────
+    // 一致文言は4値固定。matchCount（calculateTenunIndex算出値）を正とし、
+    // 未受領時は天雲指数からの逆引き（指数とは1対1対応）でフォールバックする。
+    const TENUN_MATCH_TEXT = {
+        3: '晴天・荒天の上位三名が完全一致',
+        2: '上位三名のうち二者が一致',
+        1: '上位三名のうち一者のみ一致',
+        0: '晴天・荒天の上位が不一致'
+    };
+    const INDEX_TO_MATCH = { 0: 3, 33: 2, 67: 1, 100: 0 };
+
+    // 直線分類（keirin_logic.js 物理層と同基準: 35未満/35〜50/50超）
+    function straightClass(straight) {
+        const v = Number(straight) || 50;
+        if (v < 35)  return '短め';
+        if (v <= 50) return '標準';
+        return '長め';
+    }
+
+    function appendSoukaiEvidence(relations) {
+        const el = document.getElementById('ritsu-soukai');
+        if (!el) return;
+        const idx = relations.tenunIndex;
+        if (idx === undefined || idx === null) return;
+        const mc = (relations.tenunMatchCount ?? INDEX_TO_MATCH[idx]);
+        const matchText = TENUN_MATCH_TEXT[mc];
+        if (!matchText) return;  // 指数50（データ不足）等は根拠行を出さない
+        const bank = relations.bank || {};
+        const bankPart = bank.name
+            ? `｜${bank.name}（${bank.length ?? '?'}バンク・直線${straightClass(bank.straight)}）`
+            : '';
+        const line = document.createElement('div');
+        line.className = 'ritsu-evidence';
+        line.style.cssText = 'font-size:0.78em; opacity:0.65; margin-top:6px;';
+        line.textContent = `——天雲指数 ${idx}｜${matchText}${bankPart}`;
+        el.appendChild(line);
+    }
+
     function styleLabel(style) {
         if (style === '逃' || style === '自') return '逃先';
         if (style === '追' || style === '差') return '差マ';
@@ -181,6 +219,7 @@
             const soukaiKey = String(relations.tenunIndex ?? 50);
             const soukaiArr = soukaiT[soukaiKey] || soukaiT['33'] || [''];
             render('ritsu-soukai', interpolate(pick(soukaiArr, raceId), relations));
+            appendSoukaiEvidence(relations);  // 根拠行を末尾に付加（renderのtextContent代入が先、appendが後の順序固定）
 
         } catch (e) {
             const msg = '[ritsu.js] エラー: ' + e.message;

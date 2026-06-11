@@ -1091,7 +1091,7 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
     }).sort((a, b) => b.final_score - a.final_score);
 
     if (seitenreiRanking.length < 3 || koutenreiRanking.length < 3) {
-        return { tenunIndex: 50, message: 'データ不足のため指数算出不可', rankingWithData: [], koutenRankingWithData: [] };
+        return { tenunIndex: 50, matchCount: null, message: 'データ不足のため指数算出不可', rankingWithData: [], koutenRankingWithData: [] };
     }
 
     const seitenTop3 = new Set(seitenreiRanking.slice(0, 3).map(p => p.id));
@@ -1127,6 +1127,7 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
 
     return {
         tenunIndex: tIndex,
+        matchCount: matchCount,  // Top3一致数（総評根拠行用。計算には不使用）
         message: finalHtml,
         rankingWithData: seitenreiRanking,
         koutenRankingWithData: koutenreiRanking
@@ -1646,7 +1647,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             lineArrays: lines,
             seri:       allSeriInfos.map((info, i) => ({ index: i, follower: info.follower, contender: info.contender, winner: info.winner })),
             wind:   { speed: windSpeed, direction: windDirection, effective: (BANK_DATA[bankName]?.wind_direction_map?.[windDirection]) || '' },
-            bank:   { straight: _bankInfo.straight ?? 50, canto: _bankInfo.canto ?? 30, name: bankName, wind_direction_map: _bankInfo.wind_direction_map ?? null },
+            bank:   { straight: _bankInfo.straight ?? 50, canto: _bankInfo.canto ?? 30, name: bankName, length: _bankInfo.length ?? null, wind_direction_map: _bankInfo.wind_direction_map ?? null },
             allPlayers:     basePlayers,
             seitenScores:   seitenreiIntegratedScores,
             scenarioScores: (function() {
@@ -1662,6 +1663,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             tenkaiPattern: tenkaiPattern,
             raceId:        CalculationSnapshot.race_id || '',
             tenunIndex:    tenunIndexData?.tenunIndex ?? 50,
+            tenunMatchCount: tenunIndexData?.matchCount ?? null,
         }
     };
 }
