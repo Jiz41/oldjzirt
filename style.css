@@ -1246,36 +1246,55 @@ body.bgw-shinya { --scrim-opacity: 0.74; }
 #bgw-yoru   { background-image: url('bg/bg03_yoru.webp'); }
 #bgw-shinya { background-image: url('bg/bg04_shinya.webp'); }
 
-/* 大窓：「予想結果」セクション開始〜赤口表示の終わりまでの領域のみ透過し、
-   背面のバンクを素通しで見せる（領域自体にスクリムは敷かない。2026-06-12裁定）。
-   .container の窓化は解除＝不透明の和紙に復帰。
-   !important はダークモード側の background/box-shadow !important に勝つために必要 */
-#results-container,
-.result-section {
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-/* 大窓内の個別カード：内部にのみスクリムを纏う */
-#bank-tendency-display {
-  background: rgba(var(--scrim-rgb), var(--scrim-opacity));
+/* 窓カード（確定構図 2026-06-12）：ページは全域不透明の和紙とし、
+   バンクが覗くのは以下3カードの枠内のみ。
+   background-attachment: fixed はiOSで動作しないため、
+   fixed配置の擬似要素をカード自身のclip-pathで切り抜く方式。
+   clip-pathがスタッキングコンテキストを作るため、負のz-indexの
+   擬似要素はカード内に閉じ、内容文字の下に収まる */
+#bank-tendency-display,
+.line-display,
+#ritsu-column {
+  position: relative;
+  background: transparent;
+  overflow: hidden;
+  clip-path: inset(0 round 6px);
+  border-radius: 6px;
 }
 .line-display,
 #ritsu-column {
-  background: rgba(var(--scrim-rgb), var(--scrim-opacity));
-  border-radius: 6px;
   padding: 10px 12px;
 }
 
-/* 大窓内でカード外に直置きされた見出し・ラベルの可読性手当て：
-   和紙色の淡いハロー（文字色そのものは不変更） */
-#results-container h2,
-.result-section h3,
-#shakkou-status-board {
-  text-shadow:
-    0 0 4px rgba(var(--scrim-rgb), 0.95),
-    0 0 10px rgba(var(--scrim-rgb), 0.85),
-    0 0 18px rgba(var(--scrim-rgb), 0.70);
+/* 窓の景色：時間帯クラスに応じた現行画像（viewport基準・cover＝背景世界と同じ見え方） */
+body.bgw-asa    { --bgw-image: url('bg/bg01_asa.webp'); }
+body.bgw-hiru   { --bgw-image: url('bg/bg02_hiru.webp'); }
+body.bgw-yoru   { --bgw-image: url('bg/bg03_yoru.webp'); }
+body.bgw-shinya { --bgw-image: url('bg/bg04_shinya.webp'); }
+
+#bank-tendency-display::before,
+.line-display::before,
+#ritsu-column::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: var(--bgw-image);
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* スクリム：窓カード内の可読性担保（--scrim-opacityで一元管理） */
+#bank-tendency-display::after,
+.line-display::after,
+#ritsu-column::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--scrim-rgb), var(--scrim-opacity));
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* ダークモード時のスクリム初期値（和紙ではなく現行ダークパネル色 #241e1a） */
