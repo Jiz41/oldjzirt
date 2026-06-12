@@ -1246,50 +1246,36 @@ body.bgw-shinya { --scrim-opacity: 0.74; }
 #bgw-yoru   { background-image: url('bg/bg03_yoru.webp'); }
 #bgw-shinya { background-image: url('bg/bg04_shinya.webp'); }
 
-/* 窓カード：外殻と結果カード。
-   配下にfixed要素（血判状図ポップ・暗幕）があり、clip-pathはfixed子孫ごと
-   切り抜いてしまうため不使用＝角丸+overflowで同一の窓効果（2026-06-12裁定）。
-   !important はダークモード側の background !important に勝つために必要 */
-.container,
+/* 大窓：「予想結果」セクション開始〜赤口表示の終わりまでの領域のみ透過し、
+   背面のバンクを素通しで見せる（領域自体にスクリムは敷かない。2026-06-12裁定）。
+   .container の窓化は解除＝不透明の和紙に復帰。
+   !important はダークモード側の background/box-shadow !important に勝つために必要 */
+#results-container,
 .result-section {
-  position: relative;
   background: transparent !important;
-  overflow: hidden;
-}
-.container::before,
-.result-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(var(--scrim-rgb), var(--scrim-opacity));
-  pointer-events: none;
-  z-index: -1;
+  box-shadow: none !important;
 }
 
-/* 窓カード：赤口呑縁（fixed配下なし→発注どおりclip-path併用）。
-   JS注入styleの background に勝つためID込みセレクタ */
-#results-container .shakkou-results-container {
-  position: relative;
-  background: transparent;
-  overflow: hidden;
-  clip-path: inset(0 round 12px);
-}
-#results-container .shakkou-results-container::before {
-  content: '';
-  position: absolute;
-  inset: 0;
+/* 大窓内の個別カード：内部にのみスクリムを纏う */
+#bank-tendency-display {
   background: rgba(var(--scrim-rgb), var(--scrim-opacity));
-  pointer-events: none;
-  z-index: -1;
 }
-/* 元の暗色グラデーションを半透明化しスクリムの上へ重ね、カードの暗色の面影を保持 */
-#results-container .shakkou-results-container::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(10,5,5,0.80), rgba(26,15,10,0.80));
-  pointer-events: none;
-  z-index: -1;
+.line-display,
+#ritsu-column {
+  background: rgba(var(--scrim-rgb), var(--scrim-opacity));
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+/* 大窓内でカード外に直置きされた見出し・ラベルの可読性手当て：
+   和紙色の淡いハロー（文字色そのものは不変更） */
+#results-container h2,
+.result-section h3,
+#shakkou-status-board {
+  text-shadow:
+    0 0 4px rgba(var(--scrim-rgb), 0.95),
+    0 0 10px rgba(var(--scrim-rgb), 0.85),
+    0 0 18px rgba(var(--scrim-rgb), 0.70);
 }
 
 /* ダークモード時のスクリム初期値（和紙ではなく現行ダークパネル色 #241e1a） */
