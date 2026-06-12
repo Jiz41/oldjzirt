@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="app-version" content="2.1.19">
+    <meta name="app-version" content="2.1.20">
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="./style.css">
 
@@ -30,14 +30,6 @@
     async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
-
-<!-- === 窓の中の競輪場：背景世界レイヤー（最背面・fixed配置。iOS対策でbackground-attachment不使用） === -->
-<div id="bg-world" aria-hidden="true">
-  <div class="bgw-layer" id="bgw-asa"></div>
-  <div class="bgw-layer" id="bgw-hiru"></div>
-  <div class="bgw-layer" id="bgw-yoru"></div>
-  <div class="bgw-layer" id="bgw-shinya"></div>
-</div>
 
 <script>
 (function(){
@@ -675,6 +667,13 @@ function toggleShinganTenkai(cb){document.getElementById('sg-tenkai-opts').style
         <div id="results-container">
             <h2>📊 予想結果・推奨買い目</h2>
             <div class="result-section">
+                <!-- バンク背景レイヤー（最背面・時刻区分でクロスフェード） -->
+                <div class="rs-bg" aria-hidden="true">
+                  <div class="rs-bg-layer" id="rsbg-asa"></div>
+                  <div class="rs-bg-layer" id="rsbg-hiru"></div>
+                  <div class="rs-bg-layer" id="rsbg-yoru"></div>
+                  <div class="rs-bg-layer" id="rsbg-shinya"></div>
+                </div>
                 <div id="bank-tendency-display"></div>
                 <h3>🔗 ライン強度（強弱グラデーション）</h3>
                 <div id="line-display" class="line-display">計算結果待ち...</div>

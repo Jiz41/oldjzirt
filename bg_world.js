@@ -1,8 +1,8 @@
-// VERSION: 1.0
+// VERSION: 2.0
 // ============================================================================
-// 窓の中の競輪場 — 背景世界レイヤー制御（時刻連動v1：端末時刻）
+// 窓の中の競輪場 — バンク背景制御（時刻連動v1：端末時刻）
 // ============================================================================
-// #bg-world 内の4レイヤーの .active と body の時間帯クラス（bgw-*）を切り替える。
+// .result-section 内の .rs-bg 4レイヤーの .active を切り替える（すりガラス方式）。
 // グローバルへは何も公開しない。
 // ============================================================================
 (function() {
@@ -25,9 +25,8 @@
         if (period === currentPeriod) return;
         currentPeriod = period;
         PERIODS.forEach(p => {
-            const layer = document.getElementById('bgw-' + p);
+            const layer = document.getElementById('rsbg-' + p);
             if (layer) layer.classList.toggle('active', p === period);
-            document.body.classList.toggle('bgw-' + p, p === period);
         });
     }
 
