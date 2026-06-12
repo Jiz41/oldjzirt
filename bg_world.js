@@ -19,7 +19,36 @@
     }
 
     const PERIODS = ['asa', 'hiru', 'yoru', 'shinya'];
+    const IMAGES = {
+        asa:    'bg/bg01_asa.webp',
+        hiru:   'bg/bg02_hiru.webp',
+        yoru:   'bg/bg03_yoru.webp',
+        shinya: 'bg/bg04_shinya.webp',
+    };
     let currentPeriod = null;
+
+    // プリロード：.result-section は計算実行まで display:none のため
+    // ブラウザが背景画像を取得せず、初回出現時に一拍空白になるのを防ぐ。
+    // 当該時間帯の1枚のみ・load完了後のアイドル時に取得（初期表示速度に不干渉）
+    const preloadedPeriods = {};
+    function preloadPeriodImage(period) {
+        if (preloadedPeriods[period]) return;
+        preloadedPeriods[period] = true;
+        const img = new Image();
+        img.src = IMAGES[period];
+    }
+
+    function schedulePreload(period) {
+        const onIdle = () => {
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(() => preloadPeriodImage(period), { timeout: 10000 });
+            } else {
+                setTimeout(() => preloadPeriodImage(period), 2000);
+            }
+        };
+        if (document.readyState === 'complete') onIdle();
+        else window.addEventListener('load', onIdle, { once: true });
+    }
 
     function applyPeriod(period) {
         if (period === currentPeriod) return;
@@ -28,6 +57,7 @@
             const layer = document.getElementById('rsbg-' + p);
             if (layer) layer.classList.toggle('active', p === period);
         });
+        schedulePreload(period);
     }
 
     function tick() {
