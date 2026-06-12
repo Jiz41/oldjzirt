@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jiz41-20260612-13';
+const CACHE_NAME = 'jiz41-20260612-14';
 const ASSETS = [
   './',
   './kiyone_cyberpunk_addon.css',
@@ -36,9 +36,14 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        return response;
+        // 正常レスポンスのみキャッシュ（503等の腐敗レスポンス流入を阻止）
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          return response;
+        }
+        // 異常レスポンス時は良品キャッシュがあればそちらを優先
+        return caches.match(event.request).then(cached => cached || response);
       })
       .catch(() => caches.match(event.request))
   );
