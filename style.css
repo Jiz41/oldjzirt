@@ -1231,16 +1231,26 @@ footer.copyright-footer {
   position: relative;
   overflow: hidden;
 }
-.rs-bg {
+/* クリップラッパー：viewport固定のバンクをセクション枠内に切り抜く。
+   clip-pathはfixed子孫も切り抜くため、中に入れるのは背景層のみ
+   （ポップオーバー・暗幕は従来DOM位置のまま）。
+   負のz-indexは禁止：.result-section/.containerはスタッキングコンテキストを
+   作らないため、ルート文脈の負のz層に沈み和紙背景の下敷きになる（2026-06-12不具合） */
+.rs-bg-clip {
   position: absolute;
   inset: 0;
+  clip-path: inset(0);
   pointer-events: none;
-  /* 負のz-indexは禁止：.result-section/.containerはスタッキングコンテキストを
-     作らないため、ルート文脈の負のz層に沈み和紙背景の下敷きになる（2026-06-12不具合） */
+}
+/* バンク世界：viewport固定・等倍（スクロールしても不動、セクションが窓として滑る） */
+.rs-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
 }
 /* バンクの上に内容を出す（position:relative＋z-index autoは
    スタッキングコンテキストを作らず、血判状図ポップ等の重なり関係を変えない） */
-.result-section > :not(.rs-bg) {
+.result-section > :not(.rs-bg-clip) {
   position: relative;
 }
 .rs-bg .rs-bg-layer {

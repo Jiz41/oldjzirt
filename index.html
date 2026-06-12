@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="app-version" content="2.1.22">
+    <meta name="app-version" content="2.1.23">
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="./style.css">
 
@@ -667,12 +667,16 @@ function toggleShinganTenkai(cb){document.getElementById('sg-tenkai-opts').style
         <div id="results-container">
             <h2>📊 予想結果・推奨買い目</h2>
             <div class="result-section">
-                <!-- バンク背景レイヤー（最背面・時刻区分でクロスフェード） -->
-                <div class="rs-bg" aria-hidden="true">
-                  <div class="rs-bg-layer" id="rsbg-asa"></div>
-                  <div class="rs-bg-layer" id="rsbg-hiru"></div>
-                  <div class="rs-bg-layer" id="rsbg-yoru"></div>
-                  <div class="rs-bg-layer" id="rsbg-shinya"></div>
+                <!-- バンク背景：viewport固定の世界をセクション枠でクリップ（窓方式）。
+                     ラッパーに入れるのは背景層のみ。ポップオーバー・暗幕を入れると
+                     clip-pathで切り抜かれるため厳禁 -->
+                <div class="rs-bg-clip" aria-hidden="true">
+                  <div class="rs-bg">
+                    <div class="rs-bg-layer" id="rsbg-asa"></div>
+                    <div class="rs-bg-layer" id="rsbg-hiru"></div>
+                    <div class="rs-bg-layer" id="rsbg-yoru"></div>
+                    <div class="rs-bg-layer" id="rsbg-shinya"></div>
+                  </div>
                 </div>
                 <div id="bank-tendency-display"></div>
                 <h3>🔗 ライン強度（強弱グラデーション）</h3>
