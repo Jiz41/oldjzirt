@@ -1484,28 +1484,8 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     const playerIdToScore = {};
     finalScores.forEach(p => { playerIdToScore[p.id] = p.score; });
 
-    // ライン強度グラデーション
-    const lineDisplay = document.getElementById('line-display');
-    let displayHtml = '';
-
-    displayLineSegments.forEach(segment => {
-        if (segment.type === 'single') {
-            const score = playerIdToScore[segment.id];
-            if (score === undefined) return;
-            const rgb  = getStrengthColor(score, minScore, maxScore);
-            const text = getTextColor(rgb);
-            displayHtml += `<span class="line-box strength-color" style="background-color: ${rgb}; color: ${text};">${segment.id}</span>`;
-        } else if (segment.type === 'seri') {
-            const scoreF = playerIdToScore[segment.follower];
-            const scoreC = playerIdToScore[segment.contender];
-            if (scoreF === undefined || scoreC === undefined) return;
-            const rgbF = getStrengthColor(scoreF, minScore, maxScore); const textF = getTextColor(rgbF);
-            const rgbC = getStrengthColor(scoreC, minScore, maxScore); const textC = getTextColor(rgbC);
-            displayHtml += `<span class="seri-segment">(<span class="line-box strength-color" style="background-color: ${rgbF}; color: ${textF};">${segment.follower}</span><span class="seri-arrow">←</span><span class="line-box strength-color" style="background-color: ${rgbC}; color: ${textC};">${segment.contender}</span>)</span>`;
-        }
-    });
-
-    if (lineDisplay) lineDisplay.innerHTML = displayHtml;
+    // ライン強度グラデーション7箱は血判状図の強度ティントへ統合のため撤去（2026-06-12）。
+    // getStrengthColor / getTextColor は将来の解説カード等での再利用余地のため存置。
 
     // 競りサマリー
     let seriSummaryHtml = '';

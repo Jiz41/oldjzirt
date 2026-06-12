@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="app-version" content="2.1.24">
+    <meta name="app-version" content="2.1.25">
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="./style.css">
 
@@ -679,9 +679,6 @@ function toggleShinganTenkai(cb){document.getElementById('sg-tenkai-opts').style
                   </div>
                 </div>
                 <div id="bank-tendency-display"></div>
-                <h3>🔗 ライン強度（強弱グラデーション）</h3>
-                <div id="line-display" class="line-display">計算結果待ち...</div>
-                
                 <div id="tenun-index-output">
                     <span class="tenun-title" style="font-weight: bold; margin-bottom: 8px; display: block;">天雲指数</span>
                 </div>
@@ -1386,7 +1383,7 @@ document.addEventListener('DOMContentLoaded', function() {
     24%       { transform: translate(-50%, -50%) scale(1.12); }
     34%, 100% { transform: translate(-50%, -50%) scale(1); }
   }
-  .keppan_bubble.keppan_tier_kengai { filter: grayscale(0.5); }
+  .keppan_bubble.keppan_tier_kengai { filter: grayscale(0.6) brightness(0.85); }
   @media (prefers-reduced-motion: reduce) {
     .keppan_bubble.keppan_tier_float,
     .keppan_bubble.keppan_tier_tokuiten { animation: none; }

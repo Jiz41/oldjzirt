@@ -446,6 +446,7 @@ let _kData = null, _kScenario = '逃', _kActiveLine = -1;
 const _kBubbles = {}, _kPositions = {};
 let _kLineEls = [];
 const _KSZ  = { 1:64, 2:48, 3:34, 4:22 };
+const _KTINT_ALPHA = 0.20; // 強度ティント不透明度（晴天スコア色を墨地に重ねる）
 const _KST  = {
     1: { bg:'#1a1710', bdr:'rgba(200,169,110,0.95)', num:'#c8a96e',              name:'rgba(200,169,110,0.75)' },
     2: { bg:'#111118', bdr:'rgba(224,216,200,0.70)', num:'#e0d8c8',              name:'rgba(180,172,160,0.70)' },
@@ -513,10 +514,17 @@ function buildKeppanData(relations) {
         totals[id] = raw != null ? (raw / 3).toFixed(1) + 'pt' : '—';
     });
 
+    // 強度ティント用：晴天スコア（/3正規化）。raw==nullの選手は除外
+    const seiten = {};
+    players.forEach(({ id }) => {
+        const raw = seitenScores[id];
+        if (raw != null) seiten[id] = raw / 3;
+    });
+
     // 4. 並び表示テキスト
     const narabi = arrLines.map(line => line.join('-')).join(' / ');
 
-    return { players, lines: arrLines, scenarioRank, scenarioScores, factors, totals, narabi };
+    return { players, lines: arrLines, scenarioRank, scenarioScores, factors, totals, seiten, narabi };
 }
 
 function renderKeppan(data) {
@@ -580,9 +588,24 @@ function _kDrawLines(hlIdx) {
     });
 }
 
+// keirin_logic.js の getStrengthColor と同一の補間（青52,152,219→赤231,76,60、
+// min==max時はグレー）。グローバル関数への依存を作らないための自己完結コピー
+function _kStrengthColor(score, minScore, maxScore) {
+    if (maxScore === minScore) return 'rgb(142, 142, 142)';
+    const n = (score - minScore) / (maxScore - minScore);
+    const r = Math.round(52  + (231 - 52)  * n);
+    const g = Math.round(152 + (76  - 152) * n);
+    const b = Math.round(219 + (60  - 219) * n);
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
 function _kRender() {
     if (!_kData) return;
     const ranks = _kData.scenarioRank[_kScenario];
+    // 強度ティントの基準は晴天スコア固定（シナリオタブ切替で色は変わらない）
+    const seitenVals = Object.values(_kData.seiten || {});
+    const sMin = seitenVals.length ? Math.min(...seitenVals) : 0;
+    const sMax = seitenVals.length ? Math.max(...seitenVals) : 0;
     _kData.players.forEach(p => {
         const el = _kBubbles[p.id]; if (!el) return;
         const rank = Math.min(ranks[p.id] || 4, 4);
@@ -592,7 +615,18 @@ function _kRender() {
         el.style.width  = size + 'px'; el.style.height = size + 'px';
         // 三階層振り分け：特異点role最優先、それ以外は描画サイズ（最下段=極小のみ静止）
         const tier = p.role === 'L' ? 'keppan_tier_tokuiten' : size === _KSZ[4] ? 'keppan_tier_kengai' : 'keppan_tier_float';
-        el.style.background = st.bg; el.style.opacity = tier === 'keppan_tier_kengai' ? '0.45' : '1';
+        // 強度ティント：晴天スコア色（不透明度 _KTINT_ALPHA）を墨地に重ねる
+        const sc = (_kData.seiten || {})[p.id];
+        if (sc != null && seitenVals.length) {
+            const tint = _kStrengthColor(sc, sMin, sMax)
+                .replace('rgb(', 'rgba(').replace(')', `, ${_KTINT_ALPHA})`);
+            el.style.background = `linear-gradient(${tint}, ${tint}), ${st.bg}`;
+        } else {
+            el.style.background = st.bg;
+        }
+        // 円の塗りは常に不透明（opacity減彩は背後の関係線が透けるため廃止。
+        // 圏外の減彩はCSSクラス側の filter で表現）
+        el.style.opacity = '1';
         el.style.border = `${p.role==='L' ? '1.5px dashed' : rank<=2 ? '2px solid' : '1px solid'} ${st.bdr}`;
         el.classList.remove('keppan_tier_tokuiten', 'keppan_tier_kengai', 'keppan_tier_float');
         el.classList.add(tier);
