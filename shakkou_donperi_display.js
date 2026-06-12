@@ -446,7 +446,7 @@ let _kData = null, _kScenario = '逃', _kActiveLine = -1;
 const _kBubbles = {}, _kPositions = {};
 let _kLineEls = [];
 const _KSZ  = { 1:64, 2:48, 3:34, 4:22 };
-const _KTINT_ALPHA = 0.20; // 強度ティント不透明度（晴天スコア色を墨地に重ねる）
+const _KTINT_ALPHA = 0.90; // 強度ティント不透明度（晴天スコア色を墨地に重ねる）
 const _KST  = {
     1: { bg:'#1a1710', bdr:'rgba(200,169,110,0.95)', num:'#c8a96e',              name:'rgba(200,169,110,0.75)' },
     2: { bg:'#111118', bdr:'rgba(224,216,200,0.70)', num:'#e0d8c8',              name:'rgba(180,172,160,0.70)' },
@@ -617,10 +617,17 @@ function _kRender() {
         const tier = p.role === 'L' ? 'keppan_tier_tokuiten' : size === _KSZ[4] ? 'keppan_tier_kengai' : 'keppan_tier_float';
         // 強度ティント：晴天スコア色（不透明度 _KTINT_ALPHA）を墨地に重ねる
         const sc = (_kData.seiten || {})[p.id];
+        let numColor = st.num;
         if (sc != null && seitenVals.length) {
-            const tint = _kStrengthColor(sc, sMin, sMax)
-                .replace('rgb(', 'rgba(').replace(')', `, ${_KTINT_ALPHA})`);
+            const tintRgb = _kStrengthColor(sc, sMin, sMax);
+            const tint = tintRgb.replace('rgb(', 'rgba(').replace(')', `, ${_KTINT_ALPHA})`);
             el.style.background = `linear-gradient(${tint}, ${tint}), ${st.bg}`;
+            const tm = tintRgb.match(/\d+/g);
+            const bgH = st.bg.replace('#', '');
+            const bR = _KTINT_ALPHA * parseInt(tm[0]) + (1 - _KTINT_ALPHA) * parseInt(bgH.slice(0, 2), 16);
+            const bG = _KTINT_ALPHA * parseInt(tm[1]) + (1 - _KTINT_ALPHA) * parseInt(bgH.slice(2, 4), 16);
+            const bB = _KTINT_ALPHA * parseInt(tm[2]) + (1 - _KTINT_ALPHA) * parseInt(bgH.slice(4, 6), 16);
+            numColor = (0.2126 * bR + 0.7152 * bG + 0.0722 * bB) / 255 > 0.5 ? '#333' : '#fff';
         } else {
             el.style.background = st.bg;
         }
@@ -637,7 +644,7 @@ function _kRender() {
         numEl.textContent = p.id;
         nmEl.textContent  = rank <= 2 ? (p.wmark && p.wmark !== '無' ? p.wmark : '') : '';
         wmEl.textContent  = rank <= 2 ? p.style : '';
-        numEl.style.fontSize = Math.max(8, size*0.30) + 'px'; numEl.style.color = st.num;
+        numEl.style.fontSize = Math.max(8, size*0.30) + 'px'; numEl.style.color = numColor;
         nmEl.style.fontSize  = Math.max(6, size*0.155) + 'px'; nmEl.style.color = '#c8a96e';
         wmEl.style.fontSize  = Math.max(6, size*0.155) + 'px'; wmEl.style.color = st.name;
     });
