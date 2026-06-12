@@ -1234,8 +1234,14 @@ footer.copyright-footer {
 .rs-bg {
   position: absolute;
   inset: 0;
-  z-index: -1;
   pointer-events: none;
+  /* 負のz-indexは禁止：.result-section/.containerはスタッキングコンテキストを
+     作らないため、ルート文脈の負のz層に沈み和紙背景の下敷きになる（2026-06-12不具合） */
+}
+/* バンクの上に内容を出す（position:relative＋z-index autoは
+   スタッキングコンテキストを作らず、血判状図ポップ等の重なり関係を変えない） */
+.result-section > :not(.rs-bg) {
+  position: relative;
 }
 .rs-bg .rs-bg-layer {
   position: absolute;
