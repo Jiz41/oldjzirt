@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="app-version" content="2.1.16">
+    <meta name="app-version" content="2.1.17">
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="./style.css">
 
@@ -30,6 +30,14 @@
     async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
+
+<!-- === 窓の中の競輪場：背景世界レイヤー（最背面・fixed配置。iOS対策でbackground-attachment不使用） === -->
+<div id="bg-world" aria-hidden="true">
+  <div class="bgw-layer" id="bgw-asa"></div>
+  <div class="bgw-layer" id="bgw-hiru"></div>
+  <div class="bgw-layer" id="bgw-yoru"></div>
+  <div class="bgw-layer" id="bgw-shinya"></div>
+</div>
 
 <script>
 (function(){
@@ -911,6 +919,7 @@ function execCopy() {
 <script src="LogModule.js" defer></script>
 <script src="./meigen.js" defer></script>
 <script src="./paste-input.js" defer></script>
+<script src="./bg_world.js" defer></script>
 <script defer>
 document.addEventListener('DOMContentLoaded', function() {
     var el = document.getElementById('logic-version-display');
@@ -1267,7 +1276,7 @@ document.addEventListener('DOMContentLoaded', function() {
     padding: 20px 12px 24px;
     gap: 16px;
     margin: 12px 0;
-    background: #12121a;
+    background: transparent; /* 窓化裁定（2026-06-12）：外殻の窓とスクリムを透過させる。clip-path・独自スクリムは付与しない */
     border-radius: 12px;
     border: 1px solid rgba(200,169,110,0.12);
   }

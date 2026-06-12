@@ -1209,3 +1209,95 @@ footer.copyright-footer {
 .ritsu-block + .ritsu-block {
   margin-top: 10px;
 }
+
+/* ==========================================
+   窓の中の競輪場 — 背景世界レイヤーと窓カード
+   ========================================== */
+
+/* スクリム一元管理（和紙色・不透明度は時間帯クラスごとに初期値を持つ） */
+:root {
+  --scrim-rgb: 252, 248, 236;
+  --scrim-opacity: 0.60;
+}
+body.bgw-asa    { --scrim-opacity: 0.52; }
+body.bgw-hiru   { --scrim-opacity: 0.52; }
+body.bgw-yoru   { --scrim-opacity: 0.68; }
+body.bgw-shinya { --scrim-opacity: 0.74; }
+
+/* 背景世界レイヤー：viewport全面固定・最背面。
+   background-attachment: fixed はiOSで動作しないため、fixed配置レイヤー方式 */
+#bg-world {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+#bg-world .bgw-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+#bg-world .bgw-layer.active { opacity: 1; }
+#bgw-asa    { background-image: url('bg/bg01_asa.webp'); }
+#bgw-hiru   { background-image: url('bg/bg02_hiru.webp'); }
+#bgw-yoru   { background-image: url('bg/bg03_yoru.webp'); }
+#bgw-shinya { background-image: url('bg/bg04_shinya.webp'); }
+
+/* 窓カード：外殻と結果カード。
+   配下にfixed要素（血判状図ポップ・暗幕）があり、clip-pathはfixed子孫ごと
+   切り抜いてしまうため不使用＝角丸+overflowで同一の窓効果（2026-06-12裁定）。
+   !important はダークモード側の background !important に勝つために必要 */
+.container,
+.result-section {
+  position: relative;
+  background: transparent !important;
+  overflow: hidden;
+}
+.container::before,
+.result-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--scrim-rgb), var(--scrim-opacity));
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* 窓カード：赤口呑縁（fixed配下なし→発注どおりclip-path併用）。
+   JS注入styleの background に勝つためID込みセレクタ */
+#results-container .shakkou-results-container {
+  position: relative;
+  background: transparent;
+  overflow: hidden;
+  clip-path: inset(0 round 12px);
+}
+#results-container .shakkou-results-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--scrim-rgb), var(--scrim-opacity));
+  pointer-events: none;
+  z-index: -1;
+}
+/* 元の暗色グラデーションを半透明化しスクリムの上へ重ね、カードの暗色の面影を保持 */
+#results-container .shakkou-results-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(10,5,5,0.80), rgba(26,15,10,0.80));
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ダークモード時のスクリム初期値（和紙ではなく現行ダークパネル色 #241e1a） */
+@media (prefers-color-scheme: dark) {
+  :root { --scrim-rgb: 36, 30, 26; }
+}
+
+/* reduced-motion：クロスフェード無効＝即時切替 */
+@media (prefers-reduced-motion: reduce) {
+  #bg-world .bgw-layer { transition: none; }
+}
