@@ -1279,9 +1279,30 @@ footer.copyright-footer {
   backdrop-filter: blur(var(--glass-blur));
   border-radius: 6px;
 }
-#bank-tendency-display { --glass-blur: 8px; --glass-tint: 0.62; }
-#ritsu-column          { --glass-blur: 8px; --glass-tint: 0.62; padding: 10px 12px; margin: 12px 0; }
+#bank-tendency-display { --glass-blur: 8px; --glass-tint: 0.58; }
+#ritsu-column          { --glass-blur: 8px; --glass-tint: 0.58; padding: 10px 12px; margin: 12px 0; }
 .line-display          { --glass-blur: 3px; --glass-tint: 0.30; padding: 10px 12px; }
+
+/* 赤口カードの外周すりガラス（2026-06-12裁定）。
+   外周＝最外殻（.shakkou-results-container）＋薄赤のカード地（.kiyone-section）。
+   内側のネオンデータ面（.deme-item/.chaos-item/.survival-table/.kiyone-voice/
+   .shakkou-header）は不透過のまま不触。
+   色相は元のグラデを引き継いだ暗色ティント。!importantはaddon側のbackground
+   !importantに勝つため、IDセレクタは注入styleに勝つために必要 */
+#results-container .shakkou-results-container {
+  --glass-blur: 6px;
+  --glass-tint: 0.55;
+  background: rgba(16, 2, 12, var(--glass-tint)) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+}
+#results-container .kiyone-section {
+  --glass-blur: 6px;
+  --glass-tint: 0.45;
+  background: rgba(36, 18, 12, var(--glass-tint));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+}
 
 /* backdrop-filter非対応環境：濃いめの不透明寄りティントへ退避 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -1289,6 +1310,12 @@ footer.copyright-footer {
   .line-display,
   #ritsu-column {
     background: rgba(var(--scrim-rgb), 0.92);
+  }
+  #results-container .shakkou-results-container {
+    background: rgba(16, 2, 12, 0.92) !important;
+  }
+  #results-container .kiyone-section {
+    background: rgba(36, 18, 12, 0.92);
   }
 }
 
