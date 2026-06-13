@@ -142,103 +142,6 @@
     })();
 </script>
 
-<script>
-(function() {
-    function addCopyButton() {
-        const target = document.getElementById('copy-button-container');
-        if (!target || document.getElementById('easy-copy-btn')) return;
-        const scenarioOutput = document.getElementById('scenario-output');
-        if (!scenarioOutput || scenarioOutput.innerHTML.trim() === "") return;
-
-        const btn = document.createElement('button');
-        btn.id = 'easy-copy-btn';
-        btn.innerHTML = '予想結果をコピー';
-        
-        // --- ソリッド & メカニカル・フィードバック定義 ---
-        btn.style = `
-            display: block;
-            width: 160px;
-            margin: 25px auto;
-            padding: 10px 0;
-            background: #000;
-            color: #fff;
-            border: 1px solid #444;
-            border-radius: 1px;         /* 鋭い角 */
-            font-family: 'Helvetica', sans-serif;
-            font-size: 10px;
-            font-weight: 400;
-            letter-spacing: 0.25em;
-            cursor: pointer;
-            transition: transform 0.05s, background 0.05s; /* 応答速度を極限まで速く */
-            text-transform: uppercase;
-            outline: none;
-            -webkit-tap-highlight-color: transparent; /* スマホ特有の青枠を消す */
-        `;
-        
-        // 「カチッ」とした押し心地の再現（スペースキーの挙動）
-        btn.onmousedown = () => {
-            btn.style.transform = "scale(0.96) translateY(2px)"; // 物理的な沈み込み
-            btn.style.background = "#fff";                       // 反転（発光）
-            btn.style.color = "#000";
-        };
-        btn.onmouseup = () => {
-            btn.style.transform = "scale(1) translateY(0)";      // 即座に復帰
-            btn.style.background = "#000";
-            btn.style.color = "#fff";
-        };
-        // 指を離した時やスマホでのタッチ対応
-        btn.ontouchstart = btn.onmousedown;
-        btn.ontouchend = btn.onmouseup;
-
-        target.appendChild(btn);
-
-        btn.onclick = async () => {
-            try {
-                const bank = document.getElementById('bank-name').value;
-                const windDir = document.getElementById('wind-direction').value;
-                const windSpd = document.getElementById('wind-speed').value;
-                const windText = (windDir === 'none' || windDir === '無風') ? "無風 0m" : `${windDir} ${windSpd}m`;
-
-                const raceNoRaw = document.getElementById('race-no-hidden')?.value;
-                const tenunEl = document.getElementById('tenun-index-output');
-                const tenunVal = tenunEl?.dataset?.tenunValue;
-
-                const getBet = (id) => {
-                    const el = document.getElementById(id);
-                    if (!el) return "---";
-                    return Array.from(el.querySelectorAll('li')).map(li => li.innerText.trim()).join(', ');
-                };
-                const sunny = getBet('seitenrei-output');
-                const rainy = getBet('koutenrei-output');
-
-                let scenarioText = "";
-                document.querySelectorAll('.scenario-detail').forEach(div => {
-                    const title = div.querySelector('h4')?.innerText.replace('シミュレーション', '').trim() || "";
-                    const pTags = div.querySelectorAll('p');
-                    let bets = "";
-                    pTags.forEach(p => {
-                        if (p.innerText.includes('三連')) {
-                            const val = p.innerText.split(':')[1]?.trim();
-                            if (val) bets += (bets ? ", " : "") + val;
-                        }
-                    });
-                    if (title) scenarioText += `${title} ${bets}\n`;
-                });
-
-                const header = `${bank}${raceNoRaw ? raceNoRaw + 'R' : 'R'}${(tenunVal !== undefined && tenunVal !== '') ? ' 天雲指数: ' + tenunVal : ''}`;
-                const finalText = `${header}\n\n☀️ 晴天令：${sunny}\n⛈️ 荒天令：${rainy}\n\n${scenarioText}\n（${windText}）`;
-                await navigator.clipboard.writeText(finalText);
-                
-                // 成功時の控えめなフィードバック
-                const originalText = btn.innerHTML;
-                btn.innerHTML = 'コピー完了';
-                setTimeout(() => { btn.innerHTML = originalText; }, 1200);
-            } catch (err) { console.error(err); }
-        };
-    }
-    setInterval(addCopyButton, 500);
-})();
-</script>
 <input id="race-no-hidden" type="hidden" value="">
 
 <div class="container">
@@ -262,7 +165,7 @@
         </thead>
         <tbody>
             <tr><td><b>STEP 1</b></td><td>レース情報・選手データを入力</td><td>計算の土台が揃う</td></tr>
-            <tr><td><b>STEP 2</b></td><td>🚀 予想を計算 を押す</td><td>演算開始</td></tr>
+            <tr><td><b>STEP 2</b></td><td>🚀 計算開始 を押す</td><td>演算開始</td></tr>
             <tr><td><b>STEP 3</b></td><td>血判状図と赤口呑縁を読む</td><td>世界の序列と揺らぎが可視化される</td></tr>
         </tbody>
     </table>
@@ -506,11 +409,11 @@
 function toggleShingan(){var b=document.getElementById('shingan-body'),a=document.getElementById('shingan-arrow'),o=b.style.display==='none';b.style.display=o?'block':'none';a.textContent=o?'\u25B2':'\u25BC';}
 function toggleShinganTenkai(cb){document.getElementById('sg-tenkai-opts').style.display=cb.checked?'flex':'none';}
 </script>
-            <button onclick="calculatePrediction()">&#x1F680; 予想を計算 (実行)</button>
+            <button onclick="calculatePrediction()">&#x1F680; 計算開始</button>
         </div>
 
         <div id="results-container">
-            <h2>📊 予想結果・推奨買い目</h2>
+            <h2>📊 計算結果</h2>
             <div class="result-section">
                 <!-- バンク背景：viewport固定の世界をセクション枠でクリップ（窓方式）。
                      ラッパーに入れるのは背景層のみ。ポップオーバー・暗幕を入れると
@@ -619,7 +522,6 @@ function toggleShinganTenkai(cb){document.getElementById('sg-tenkai-opts').style
         <span id="span_0">0</span> / 1465
     </div>
 </div>
-                <div id="copy-button-container"></div>
 
             </div>
         </div>
@@ -642,7 +544,7 @@ function toggleShinganTenkai(cb){document.getElementById('sg-tenkai-opts').style
 </div>
 
 <script>
-const S_TXT = "【華耀天輪 真自在律】\nデータで有利な買い目を提案📊\n無料の予想アシストツールはこちら👇";
+const S_TXT = "【華耀天輪 真自在律】\nデータで競輪予想を深める📊\n無料の予想アシストツールはこちら👇";
 const S_URL = "https://huggingface.co/spaces/Jiz41/Jiz41r1t5u";
 
 function execShareX() {
