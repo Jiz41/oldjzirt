@@ -53,7 +53,7 @@ html {
   --amber-bg:  rgba(160,122,44,0.07);
   --amber-br:  rgba(160,122,44,0.30);
 
-  --sans:  "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+  --sans:  "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
   --serif: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
   --mono:  'SF Mono','JetBrains Mono','Roboto Mono',monospace;
 }
