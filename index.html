@@ -2,6 +2,56 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <style>
+html { -webkit-text-size-adjust:100%; text-size-adjust:100%; font-size:16px; }
+body { font-size:16px; opacity:1; }
+
+#jiz-splash {
+  position:fixed; inset:0; z-index:9999;
+  background:#1a1510;
+  display:flex; align-items:center; justify-content:center;
+  opacity:1;
+  transition:opacity 0.6s ease;
+}
+#jiz-splash.out { opacity:0; pointer-events:none; }
+
+#jiz-splash-inner {
+  display:flex; flex-direction:column;
+  align-items:center; gap:24px;
+  text-align:center;
+}
+
+#jiz-splash-subtitle {
+  font-family:serif;
+  font-size:11px;
+  letter-spacing:0.3em;
+  color:rgba(200,176,130,0.6);
+  margin:0;
+}
+
+#jiz-splash-logo {
+  width:280px; max-width:80vw;
+  opacity:0;
+  transition:opacity 0.8s ease;
+}
+#jiz-splash-logo.visible { opacity:1; }
+
+#jiz-loader-wrap {
+  width:200px; height:1px;
+  background:rgba(200,160,96,0.15);
+  overflow:hidden;
+}
+#jiz-loader-bar {
+  height:100%; width:0%;
+  background:#c8a060;
+}
+
+#jiz-main-content {
+  opacity:0;
+  transition:opacity 0.5s ease;
+}
+#jiz-main-content.visible { opacity:1; }
+    </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="app-version" content="2.1.25">
     <title>華耀天輪 真・自在律</title>
@@ -22,8 +72,17 @@
     <script data-goatcounter="https://jiz41.goatcounter.com/count"
     data-goatcounter-settings='{"allow_frame": true}'
     async src="//gc.zgo.at/count.js"></script>
+    <script src="./splash.js"></script>
 </head>
 <body>
+<div id="jiz-splash">
+  <div id="jiz-splash-inner">
+    <p id="jiz-splash-subtitle">演算制御多重交響体</p>
+    <img id="jiz-splash-logo" src="./title.png" alt="真自在律">
+    <div id="jiz-loader-wrap"><div id="jiz-loader-bar"></div></div>
+  </div>
+</div>
+<div id="jiz-main-content">
 
 <script>
 (function(){
@@ -1182,5 +1241,6 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 </script>
 
+</div>
 </body>
 </html>
