@@ -107,7 +107,7 @@ a:hover {
 
 code {
   font-family: var(--mono);
-  font-size: 0.88em;
+  font-size: 14px;
   background: var(--bg-2);
   border: 1px solid var(--border-2);
   border-radius: 3px;
@@ -116,7 +116,7 @@ code {
 }
 
 small {
-  font-size: 0.8em;
+  font-size: 13px;
   color: var(--muted);
   line-height: 1.6;
 }
@@ -141,7 +141,7 @@ header {
 }
 
 .subtitle {
-  font-size: 0.7em;
+  font-size: 11px;
   font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
   color: var(--muted);
   letter-spacing: 0.35em;
@@ -182,8 +182,8 @@ header {
   line-height: 1.5;
 }
 
-#maxim-display-container .maxim-text    { font-size: 0.88em; }
-#maxim-display-container .maxim-speaker { font-size: 0.72em; color: var(--dim); }
+#maxim-display-container .maxim-text    { font-size: 14px; }
+#maxim-display-container .maxim-speaker { font-size: 12px; color: var(--dim); }
 
 /* ==========================================
    セクション見出し h2
@@ -221,7 +221,7 @@ h2::after {
 }
 
 h3 {
-  font-size: 1em;
+  font-size: 16px;
   color: var(--text-2);
   margin-top: 18px;
   margin-bottom: 8px;
@@ -230,7 +230,7 @@ h3 {
 }
 
 h4 {
-  font-size: 0.92em;
+  font-size: 15px;
   color: var(--muted);
   margin-top: 14px;
   margin-bottom: 6px;
@@ -242,7 +242,7 @@ h4 {
    ========================================== */
 .manual-header,
 .debug-log-header {
-  font-size: 1em;
+  font-size: 16px;
   color: var(--text-2);
   padding: 12px 15px;
   margin-top: 10px;
@@ -260,7 +260,7 @@ h4 {
 }
 
 .debug-log-header {
-  font-size: 0.7em;
+  font-size: 11px;
   color: var(--muted);
   padding: 8px 15px;
   margin-top: 15px;
@@ -276,13 +276,13 @@ h4 {
   margin: 0 0 15px;
   background: #fff;
   border-left: 3px solid var(--accent-br);
-  font-size: 0.88em;
+  font-size: 14px;
   line-height: 1.65;
   color: var(--text-2);
 }
 
 .manual-content h3 {
-  font-size: 1em;
+  font-size: 16px;
   color: var(--accent);
   border-bottom: 1px solid var(--border);
   padding-bottom: 5px;
@@ -305,7 +305,7 @@ h4 {
   padding: 7px 6px;
   text-align: left;
   vertical-align: top;
-  font-size: 0.85em;
+  font-size: 14px;
 }
 
 .manual-content th {
@@ -339,7 +339,7 @@ h4 {
   overflow-y: scroll;
   font-family: var(--mono);
   border-radius: 6px;
-  font-size: 0.72em;
+  font-size: 12px;
   max-width: 600px;
   margin: 0 auto 15px;
   line-height: 1.6;
@@ -351,7 +351,7 @@ h4 {
   float: right !important;
   width: auto !important;
   padding: 2px 6px !important;
-  font-size: 0.8em !important;
+  font-size: 13px !important;
   background: rgba(255,255,255,0.15) !important;
   border: 1px solid rgba(255,255,255,0.3) !important;
   border-radius: 4px !important;
@@ -444,7 +444,7 @@ label[for="line-input"] {
 }
 
 .wind-note {
-  font-size: 0.78em;
+  font-size: 12px;
   color: var(--dim);
   margin-top: 6px;
   line-height: 1.6;
@@ -487,7 +487,7 @@ label[for="line-input"] {
 }
 
 .player-header > span:first-child {
-  font-size: 0.8em;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -511,19 +511,19 @@ label[for="line-input"] {
 }
 
 .crown-icon {
-  font-size: 1em;
+  font-size: 16px;
 }
 
 .local-group {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.82em;
+  font-size: 13px;
   color: var(--muted);
 }
 
 .local-group label {
-  font-size: 0.82em;
+  font-size: 13px;
   color: var(--muted) !important;
   margin-bottom: 0;
   letter-spacing: normal;
@@ -539,7 +539,7 @@ label[for="line-input"] {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.8em;
+  font-size: 13px;
   color: var(--muted);
   flex-basis: 100%;
 }
@@ -548,7 +548,7 @@ label[for="line-input"] {
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 1em;
+  font-size: 16px;
   text-transform: none;
   letter-spacing: normal;
   color: var(--muted) !important;
@@ -627,7 +627,7 @@ button[onclick="calculatePrediction()"]:active {
    予想結果エリア
    ========================================== */
 #bank-tendency-display {
-  font-size: 0.82em;
+  font-size: 13px;
   color: var(--muted);
   padding: 8px 10px;
   background: var(--bg-2);
@@ -642,7 +642,7 @@ button[onclick="calculatePrediction()"]:active {
   padding: 4px 10px;
   border-radius: 6px;
   font-weight: bold;
-  font-size: 1em;
+  font-size: 16px;
   transition: all 0.3s ease;
   line-height: 1.6;
   box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
@@ -655,7 +655,7 @@ button[onclick="calculatePrediction()"]:active {
 .seri-segment {
   display: inline-flex;
   align-items: center;
-  font-size: 0.9em;
+  font-size: 14px;
   font-weight: bold;
   border: 1px dashed var(--border-2);
   border-radius: 4px;
@@ -664,7 +664,7 @@ button[onclick="calculatePrediction()"]:active {
 }
 
 .seri-arrow {
-  font-size: 1.1em;
+  font-size: 18px;
   font-weight: bold;
   color: var(--red);
   margin: 0 2px;
@@ -689,7 +689,7 @@ button[onclick="calculatePrediction()"]:active {
 .tenun-title {
   color: var(--amber) !important;
   font-weight: 600;
-  font-size: 0.82em;
+  font-size: 13px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -732,13 +732,13 @@ button[onclick="calculatePrediction()"]:active {
 }
 
 .recommendation {
-  font-size: 0.9em;
+  font-size: 14px;
   line-height: 1.8;
   color: var(--text-2);
 }
 
 #shakkou-status-board {
-  font-size: 0.8em;
+  font-size: 13px;
   color: var(--dim);
   text-align: center;
   padding: 6px;
@@ -812,7 +812,7 @@ button[onclick="calculatePrediction()"]:active {
 
 .bug-button {
   display: inline-block;
-  font-size: 0.8em;
+  font-size: 13px;
   color: #c8392f !important;
   border-color: rgba(200,57,47,0.4) !important;
   padding: 6px 18px;
@@ -834,14 +834,14 @@ button[onclick="calculatePrediction()"]:active {
 }
 
 .bug-log-desc {
-  font-size: 0.78em;
+  font-size: 12px;
   color: var(--dim);
   margin: 0 0 4px;
 }
 
 .bug-log-link {
   display: inline-block !important;
-  font-size: 0.8em;
+  font-size: 13px;
   color: var(--accent) !important;
   padding: 6px 18px !important;
   border: 1px solid var(--accent-br) !important;
@@ -870,7 +870,7 @@ footer.copyright-footer {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 0.75em;
+  font-size: 12px;
   color: var(--dim);
   flex-wrap: wrap;
   margin-top: 10px;
@@ -1185,7 +1185,7 @@ footer.copyright-footer {
 .ritsu-midashi {
   font-family: var(--serif);
   font-weight: bold;
-  font-size: 1.2em;
+  font-size: 19px;
   letter-spacing: 0.08em;
   color: var(--text);
   padding-bottom: 8px;
@@ -1195,7 +1195,7 @@ footer.copyright-footer {
 
 .ritsu-block {
   line-height: 1.8;
-  font-size: 0.95em;
+  font-size: 15px;
   color: var(--text-2);
 }
 
@@ -1214,7 +1214,7 @@ footer.copyright-footer {
 #ensan-kekka-section h3 {
   font-family: var(--serif);
   font-weight: bold;
-  font-size: 1.2em;
+  font-size: 19px;
   letter-spacing: 0.08em;
   color: var(--text);
   padding-bottom: 8px;
@@ -1224,7 +1224,7 @@ footer.copyright-footer {
 
 #ensan-kekka-output {
   line-height: 1.8;
-  font-size: 0.95em;
+  font-size: 15px;
   color: var(--text);
   font-family: var(--mono);
   letter-spacing: 0.05em;
@@ -1233,7 +1233,7 @@ footer.copyright-footer {
 .ensan-bet {
   color: var(--text);
   font-family: var(--mono);
-  font-size: 1.05em;
+  font-size: 17px;
   letter-spacing: 0.15em;
   padding: 2px 0;
 }

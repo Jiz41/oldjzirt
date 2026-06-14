@@ -120,7 +120,7 @@
             : '';
         const line = document.createElement('div');
         line.className = 'ritsu-evidence';
-        line.style.cssText = 'font-size:0.78em; opacity:0.65; margin-top:6px;';
+        line.style.cssText = 'font-size:12px; opacity:0.65; margin-top:6px;';
         line.textContent = `——天雲指数 ${idx}｜${matchText}${bankPart}`;
         el.appendChild(line);
     }
