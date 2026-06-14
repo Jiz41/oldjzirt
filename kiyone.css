@@ -9,7 +9,6 @@
 
 /* 清音の声（口上） */
 .kiyone-voice {
-    font-family: 'Noto Serif JP', 'Yu Mincho', 'YuMincho', serif;
     font-size: 16px;
     line-height: 1.8;
     color: #d4af37;
@@ -23,7 +22,6 @@
 
 /* 清音のコメント */
 .kiyone-comment {
-    font-family: 'Noto Serif JP', 'Yu Mincho', 'YuMincho', serif;
     color: #c9a55b;
     font-style: italic;
     margin: 15px 0;
@@ -66,13 +64,11 @@
 .deme-pattern {
     color: #d4af37;
     font-weight: bold;
-    font-family: monospace;
     font-size: 18px;
 }
 
 .deme-count {
     color: #8b6914;
-    font-family: monospace;
     font-size: 16px;
 }
 
@@ -106,7 +102,6 @@
 
 .chaos-count {
     color: #8b6914;
-    font-family: monospace;
 }
 
 .chaos-pattern {
@@ -118,13 +113,11 @@
 
 .pattern-text {
     color: #d4af37;
-    font-family: monospace;
     font-weight: bold;
 }
 
 .pattern-count {
     color: #8b6914;
-    font-family: monospace;
     margin-left: 10px;
 }
 
@@ -206,7 +199,6 @@
 .progress-text {
     text-align: center;
     color: #d4af37;
-    font-family: monospace;
     font-size: 16px;
     margin-top: 10px;
 }

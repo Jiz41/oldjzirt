@@ -64,7 +64,6 @@
     box.style.cssText = [
       'position:fixed', 'top:0', 'left:0', 'right:0', 'z-index:2147483647',
       'background:rgba(0,0,0,0.93)', 'color:#00ff88',
-      'font-family:monospace', 'font-size:11px', 'line-height:1.5',
       'padding:12px', 'max-height:60vh', 'overflow-y:auto',
       'white-space:pre', 'word-break:break-all'
     ].join(';');

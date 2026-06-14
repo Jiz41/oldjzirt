@@ -53,9 +53,6 @@ html {
   --amber-bg:  rgba(160,122,44,0.07);
   --amber-br:  rgba(160,122,44,0.30);
 
-  --sans:  "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
-  --serif: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
-  --mono:  'SF Mono','JetBrains Mono','Roboto Mono',monospace;
 }
 
 /* ==========================================
@@ -73,7 +70,6 @@ body {
   font-size: 16px;
   overflow-x: clip;
   min-height: 101vh;
-  font-family: var(--sans);
   margin: 0;
   padding: 0;
   padding-bottom: 64px !important;
@@ -106,7 +102,6 @@ a:hover {
 }
 
 code {
-  font-family: var(--mono);
   font-size: 14px;
   background: var(--bg-2);
   border: 1px solid var(--border-2);
@@ -142,7 +137,6 @@ header {
 
 .subtitle {
   font-size: 11px;
-  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
   color: var(--muted);
   letter-spacing: 0.35em;
   margin: 0 auto 10px;
@@ -337,7 +331,6 @@ h4 {
   padding: 10px 12px;
   height: 100px;
   overflow-y: scroll;
-  font-family: var(--mono);
   border-radius: 6px;
   font-size: 12px;
   max-width: 600px;
@@ -412,7 +405,6 @@ input[type="text"] {
   background: var(--bg) !important;
   color: var(--text) !important;
   box-shadow: inset 2px 2px 5px rgba(0,0,0,0.08), inset -1px -1px 4px rgba(255,255,255,0.9) !important;
-  font-family: var(--sans) !important;
   font-size: 16px !important;
   font-variant-numeric: tabular-nums;
   appearance: none;
@@ -608,7 +600,6 @@ button[onclick="calculatePrediction()"] {
   color: #fff !important;
   border: none !important;
   border-radius: 6px !important;
-  font-family: var(--sans) !important;
   font-size: 15px !important;
   font-weight: 700 !important;
   letter-spacing: 0.2em !important;
@@ -1183,7 +1174,6 @@ footer.copyright-footer {
 }
 
 .ritsu-midashi {
-  font-family: var(--serif);
   font-weight: bold;
   font-size: 19px;
   letter-spacing: 0.08em;
@@ -1212,7 +1202,6 @@ footer.copyright-footer {
 }
 
 #ensan-kekka-section h3 {
-  font-family: var(--serif);
   font-weight: bold;
   font-size: 19px;
   letter-spacing: 0.08em;
@@ -1226,13 +1215,11 @@ footer.copyright-footer {
   line-height: 1.8;
   font-size: 15px;
   color: var(--text);
-  font-family: var(--mono);
   letter-spacing: 0.05em;
 }
 
 .ensan-bet {
   color: var(--text);
-  font-family: var(--mono);
   font-size: 17px;
   letter-spacing: 0.15em;
   padding: 2px 0;

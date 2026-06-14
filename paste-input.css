@@ -39,7 +39,6 @@
     color: rgba(255, 255, 255, 0.7);
     letter-spacing: 0.05em;
     margin-top: 10px;
-    font-family: monospace;
     white-space: pre-wrap;
     max-height: 160px;
     overflow-y: auto;

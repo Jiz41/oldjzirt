@@ -45,7 +45,6 @@
 }
 
 .kiyone-voice {
-    font-family: 'Noto Serif JP', 'Yu Mincho', 'YuMincho', serif;
     font-size: 16px;
     line-height: 1.8;
     color: #c8b89a;
@@ -59,7 +58,6 @@
 }
 
 .kiyone-comment {
-    font-family: 'Noto Serif JP', 'Yu Mincho', 'YuMincho', serif;
     color: #b8a88a;
     font-style: italic;
     margin: 15px 0;
@@ -105,14 +103,12 @@
 .deme-pattern {
     color: #c8b89a;
     font-weight: bold;
-    font-family: 'Courier New', monospace;
     font-size: 20px;
     letter-spacing: 0.2em;
 }
 
 .deme-count {
     color: #9a8870;
-    font-family: 'Courier New', monospace;
     font-size: 16px;
 }
 
@@ -154,7 +150,6 @@
 
 .chaos-count {
     color: #9a8870;
-    font-family: 'Courier New', monospace;
     font-size: 14px;
 }
 
@@ -167,14 +162,12 @@
 
 .pattern-text {
     color: #c8b89a;
-    font-family: 'Courier New', monospace;
     font-weight: bold;
     letter-spacing: 0.15em;
 }
 
 .pattern-count {
     color: #9a8870;
-    font-family: 'Courier New', monospace;
     margin-left: 10px;
 }
 
@@ -204,7 +197,6 @@
     padding: 10px;
     text-align: center;
     border-bottom: 1px solid rgba(200, 184, 154, 0.15);
-    font-family: 'Courier New', monospace;
     font-size: 12px;
     white-space: nowrap;
 }
@@ -270,7 +262,6 @@
 .progress-text {
     text-align: center;
     color: #c8b89a;
-    font-family: 'Courier New', monospace;
     font-size: 18px;
     margin-top: 12px;
     font-weight: bold;
