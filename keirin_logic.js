@@ -1330,6 +1330,24 @@ app.calculatePrediction = async function(guardedData) {
                 app.generateRitsuText(_calcResult.relations);
             }
         } catch (e) { app.logMessage('[ERROR] generateRitsuText呼び出し: ' + e.message); }
+        try {
+            const ensanBets = generateEnsanKekka(
+                finalTenunData.rankingWithData,
+                finalTenunData.koutenRankingWithData,
+                _calcResult?.relations?.kouten?.L,
+                finalTenunData.tenunIndex
+            );
+            const ensanSection = document.getElementById('ensan-kekka-section');
+            const ensanOutput  = document.getElementById('ensan-kekka-output');
+            if (ensanSection && ensanOutput) {
+                if (ensanBets.length > 0) {
+                    ensanOutput.innerHTML = ensanBets.map(b => `<div class="ensan-bet">${b}</div>`).join('');
+                    ensanSection.style.display = '';
+                } else {
+                    ensanSection.style.display = 'none';
+                }
+            }
+        } catch (e) { app.logMessage('[ERROR] generateEnsanKekka呼び出し: ' + e.message); }
 
         applyShinganHakke(basePlayers, seitenreiResults.integratedScores, koutenreiResults.integratedScores);
 
@@ -1782,6 +1800,50 @@ function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = [], k
         sanrenpuku: [[A.id, B.id, targetL.id], [A.id, C.id, targetL.id]],
         nirentan:   [[A.id, targetL.id], [targetL.id, A.id], [C.id, A.id]]
     };
+}
+
+function generateEnsanKekka(seitenRanking, koutenRanking, targetL, tenun) {
+    if (!seitenRanking || seitenRanking.length < 3) return [];
+
+    const r0 = seitenRanking[0].id;
+    const r1 = seitenRanking[1].id;
+    const r2 = seitenRanking[2].id;
+    const A  = koutenRanking?.[0]?.id ?? r0;
+    const B  = koutenRanking?.[1]?.id ?? r1;
+    const C  = koutenRanking?.[2]?.id ?? r2;
+    const L  = targetL?.id ?? null;
+
+    let X, Y, Z;
+    if (tenun === 0) {
+        X = [r0]; Y = [r1]; Z = [r2];
+    } else if (tenun === 33) {
+        X = [r0]; Y = [...new Set([r1, B])]; Z = [r2];
+    } else if (tenun === 67) {
+        X = [...new Set([r0, A])]; Y = [...new Set([r1, B])]; Z = [r2];
+    } else {
+        X = [...new Set([r0, A])]; Y = [...new Set([r1, B])]; Z = [...new Set([r2, C])];
+    }
+
+    const combos = new Set();
+    for (const x of X) {
+        for (const y of Y) {
+            for (const z of Z) {
+                const ids = [x, y, z];
+                if (new Set(ids).size < 3) continue;
+                combos.add(ids.slice().sort((a, b) => a - b).join('='));
+            }
+        }
+    }
+    if (L !== null) {
+        for (const x of X) {
+            for (const y of Y) {
+                const ids = [x, y, L];
+                if (new Set(ids).size < 3) continue;
+                combos.add(ids.slice().sort((a, b) => a - b).join('='));
+            }
+        }
+    }
+    return [...combos];
 }
 
 // UIイベント設定
