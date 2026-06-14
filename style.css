@@ -69,6 +69,7 @@ html {
 }
 
 body {
+  font-size: 16px;
   overflow-x: clip;
   min-height: 101vh;
   font-family: var(--sans);
@@ -1223,9 +1224,17 @@ footer.copyright-footer {
 #ensan-kekka-output {
   line-height: 1.8;
   font-size: 0.95em;
-  color: var(--text) !important;
+  color: var(--text);
   font-family: var(--mono);
   letter-spacing: 0.05em;
+}
+
+.ensan-bet {
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 1.05em;
+  letter-spacing: 0.15em;
+  padding: 2px 0;
 }
 
 /* ==========================================
@@ -1288,8 +1297,7 @@ footer.copyright-footer {
 /* すりガラスカード：ぼかし・ティントはCSS変数でカード単位に調整可能。
    文字が密なカード（警告・総評）は紗を強め、装飾的なカード（ライン強度）は薄め */
 #bank-tendency-display,
-#ritsu-column,
-#ensan-kekka-section {
+#ritsu-column {
   --glass-blur: 6px;
   --glass-tint: 0.55;
   background: rgba(var(--scrim-rgb), var(--glass-tint));
@@ -1299,7 +1307,6 @@ footer.copyright-footer {
 }
 #bank-tendency-display { --glass-blur: 8px; --glass-tint: 0.58; }
 #ritsu-column          { --glass-blur: 8px; --glass-tint: 0.58; padding: 10px 12px; margin: 12px 0; }
-#ensan-kekka-section   { --glass-blur: 8px; --glass-tint: 0.58; }
 
 /* 赤口カードの外周すりガラス（2026-06-12裁定）。
    外周＝最外殻（.shakkou-results-container）＋薄赤のカード地（.kiyone-section）。
@@ -1323,8 +1330,7 @@ footer.copyright-footer {
 /* backdrop-filter非対応環境：濃いめの不透明寄りティントへ退避 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   #bank-tendency-display,
-  #ritsu-column,
-  #ensan-kekka-section {
+  #ritsu-column {
     background: rgba(var(--scrim-rgb), 0.92);
   }
   #results-container .shakkou-results-container {
