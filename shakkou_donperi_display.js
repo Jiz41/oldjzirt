@@ -105,12 +105,12 @@ function injectShakkouStyles() {
    ============================================================================ */
 
 .shakkou-results-container {
-    background: linear-gradient(135deg, #1a1710, #1e1b13);
-    border: 3px solid rgba(200, 184, 154, 0.25);
+    background: transparent;
+    border: none;
     border-radius: 12px;
     padding: 0;
     margin: 20px 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: none;
 }
 
 .shakkou-header {

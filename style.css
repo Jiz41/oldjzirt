@@ -1223,7 +1223,7 @@ footer.copyright-footer {
 #ensan-kekka-output {
   line-height: 1.8;
   font-size: 0.95em;
-  color: var(--text-2);
+  color: var(--text);
 }
 
 /* ==========================================
@@ -1306,16 +1306,14 @@ footer.copyright-footer {
    色相は元のグラデを引き継いだ暗色ティント。!importantはaddon側のbackground
    !importantに勝つため、IDセレクタは注入styleに勝つために必要 */
 #results-container .shakkou-results-container {
-  --glass-blur: 6px;
-  --glass-tint: 0.55;
-  background: rgba(16, 2, 12, var(--glass-tint)) !important;
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  backdrop-filter: blur(var(--glass-blur));
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 #results-container .kiyone-section {
-  --glass-blur: 6px;
-  --glass-tint: 0.45;
-  background: rgba(36, 18, 12, var(--glass-tint));
+  --glass-blur: 8px;
+  --glass-tint: 0.72;
+  background: rgba(16, 12, 8, var(--glass-tint));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   backdrop-filter: blur(var(--glass-blur));
 }
@@ -1328,10 +1326,10 @@ footer.copyright-footer {
     background: rgba(var(--scrim-rgb), 0.92);
   }
   #results-container .shakkou-results-container {
-    background: rgba(16, 2, 12, 0.92) !important;
+    background: transparent !important;
   }
   #results-container .kiyone-section {
-    background: rgba(36, 18, 12, 0.92);
+    background: rgba(16, 12, 8, 0.95);
   }
 }
 

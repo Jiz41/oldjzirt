@@ -3,9 +3,9 @@
    ============================================================================ */
 
 .shakkou-results-container {
-    background: linear-gradient(135deg, #1a1710, #1e1b13) !important;
-    border: 3px solid rgba(200, 184, 154, 0.25) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .shakkou-header {
