@@ -105,31 +105,30 @@ function injectShakkouStyles() {
    ============================================================================ */
 
 .shakkou-results-container {
-    background: linear-gradient(135deg, #0a0505, #1a0f0a);
-    border: 3px solid #8b4513;
+    background: linear-gradient(135deg, #1a1710, #1e1b13);
+    border: 3px solid rgba(200, 184, 154, 0.25);
     border-radius: 12px;
     padding: 0;
     margin: 20px 0;
-    box-shadow: 0 8px 20px rgba(139, 69, 19, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .shakkou-header {
-    background: linear-gradient(135deg, #2a1810, #1a0f0a);
+    background: linear-gradient(135deg, #252015, #1e1b13);
     padding: 20px;
-    border-bottom: 2px solid #8b4513;
+    border-bottom: 2px solid rgba(200, 184, 154, 0.25);
     text-align: center;
 }
 
 .shakkou-title {
-    color: #d4af37;
+    color: #c8b89a;
     font-size: 24px;
     margin: 0 0 10px 0;
-    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
     letter-spacing: 0.1em;
 }
 
 .shakkou-subtitle {
-    color: #c9a55b;
+    color: #b8a88a;
     font-size: 14px;
     font-style: italic;
 }
@@ -140,7 +139,7 @@ function injectShakkouStyles() {
     background: transparent;
     border-left: none;
     border-radius: 0;
-    border-bottom: 1px solid #3a2810;
+    border-bottom: 1px solid rgba(200, 184, 154, 0.15);
 }
 
 .kiyone-section:last-child {
@@ -151,34 +150,34 @@ function injectShakkouStyles() {
     font-family: 'Noto Serif JP', 'Yu Mincho', 'YuMincho', serif;
     font-size: 16px;
     line-height: 1.8;
-    color: #d4af37;
+    color: #c8b89a;
     font-style: italic;
     white-space: pre-line;
     margin: 15px 0;
     padding: 15px 20px;
-    background: rgba(42, 24, 16, 0.3);
-    border-left: 3px solid #d4af37;
+    background: rgba(30, 27, 19, 0.3);
+    border-left: 3px solid #c8b89a;
     border-radius: 5px;
 }
 
 .kiyone-comment {
     font-family: 'Noto Serif JP', 'Yu Mincho', 'YuMincho', serif;
-    color: #c9a55b;
+    color: #b8a88a;
     font-style: italic;
     margin: 15px 0;
     padding: 12px 20px;
-    border-left: 3px solid #8b6914;
+    border-left: 3px solid #9a8870;
     line-height: 1.6;
-    background: rgba(42, 24, 16, 0.2);
+    background: rgba(30, 27, 19, 0.3);
     border-radius: 5px;
 }
 
 .section-title {
-    color: #d4af37;
+    color: #c8b89a;
     font-size: 20px;
     margin: 0 0 20px 0;
     padding-bottom: 10px;
-    border-bottom: 2px solid #8b4513;
+    border-bottom: 2px solid rgba(200, 184, 154, 0.25);
 }
 
 .deme-list {
@@ -193,20 +192,20 @@ function injectShakkouStyles() {
     justify-content: space-between;
     align-items: center;
     padding: 12px 20px;
-    background: rgba(26, 15, 10, 0.5);
+    background: rgba(30, 27, 19, 0.5);
     border-radius: 5px;
-    border: 1px solid #3a2810;
+    border: 1px solid rgba(200, 184, 154, 0.15);
     transition: all 0.3s;
 }
 
 .deme-item:hover {
-    background: rgba(42, 24, 16, 0.7);
-    border-color: #8b4513;
+    background: rgba(30, 27, 19, 0.6);
+    border-color: rgba(200, 184, 154, 0.25);
     transform: translateX(5px);
 }
 
 .deme-pattern {
-    color: #d4af37;
+    color: #c8b89a;
     font-weight: bold;
     font-family: 'Courier New', monospace;
     font-size: 20px;
@@ -214,7 +213,7 @@ function injectShakkouStyles() {
 }
 
 .deme-count {
-    color: #8b6914;
+    color: #9a8870;
     font-family: 'Courier New', monospace;
     font-size: 16px;
 }
@@ -227,17 +226,17 @@ function injectShakkouStyles() {
 }
 
 .chaos-item {
-    background: rgba(26, 15, 10, 0.5);
+    background: rgba(30, 27, 19, 0.5);
     padding: 15px;
-    border-left: 4px solid #8b4513;
+    border-left: 4px solid rgba(200, 184, 154, 0.25);
     border-radius: 5px;
-    border: 1px solid #3a2810;
+    border: 1px solid rgba(200, 184, 154, 0.15);
     transition: all 0.3s;
 }
 
 .chaos-item:hover {
-    background: rgba(42, 24, 16, 0.7);
-    border-left-color: #d4af37;
+    background: rgba(30, 27, 19, 0.6);
+    border-left-color: #c8b89a;
     transform: translateX(5px);
 }
 
@@ -250,33 +249,33 @@ function injectShakkouStyles() {
 }
 
 .chaos-name {
-    color: #d4af37;
+    color: #c8b89a;
     font-weight: bold;
     font-size: 16px;
 }
 
 .chaos-count {
-    color: #8b6914;
+    color: #9a8870;
     font-family: 'Courier New', monospace;
     font-size: 14px;
 }
 
 .chaos-pattern {
-    color: #c9a55b;
+    color: #b8a88a;
     font-size: 14px;
     padding-left: 15px;
     margin-top: 8px;
 }
 
 .pattern-text {
-    color: #d4af37;
+    color: #c8b89a;
     font-family: 'Courier New', monospace;
     font-weight: bold;
     letter-spacing: 0.15em;
 }
 
 .pattern-count {
-    color: #8b6914;
+    color: #9a8870;
     font-family: 'Courier New', monospace;
     margin-left: 10px;
 }
@@ -285,28 +284,28 @@ function injectShakkouStyles() {
     width: 100%;
     border-collapse: collapse;
     margin-top: 15px;
-    background: rgba(26, 15, 10, 0.5);
-    border: 1px solid #3a2810;
+    background: rgba(30, 27, 19, 0.5);
+    border: 1px solid rgba(200, 184, 154, 0.15);
     border-radius: 5px;
     overflow: hidden;
     table-layout: auto;
 }
 
 .survival-table thead th {
-    background: rgba(42, 24, 16, 0.8);
-    color: #d4af37;
+    background: rgba(30, 27, 19, 0.7);
+    color: #c8b89a;
     padding: 12px;
     text-align: center;
-    border-bottom: 2px solid #8b4513;
+    border-bottom: 2px solid rgba(200, 184, 154, 0.25);
     font-weight: bold;
     font-size: 14px;
 }
 
 .survival-table tbody td {
-    color: #c9a55b;
+    color: #b8a88a;
     padding: 10px;
     text-align: center;
-    border-bottom: 1px solid #3a2810;
+    border-bottom: 1px solid rgba(200, 184, 154, 0.15);
     font-family: 'Courier New', monospace;
     font-size: 12px;
     white-space: nowrap;
@@ -322,7 +321,7 @@ function injectShakkouStyles() {
 
 .car-number {
     font-weight: bold;
-    color: #d4af37 !important;
+    color: #c8b89a !important;
     font-size: 16px;
 }
 
@@ -331,11 +330,11 @@ function injectShakkouStyles() {
 .rank-3 { color: #2ecc71 !important; }
 .outside { color: #7f8c8d !important; }
 
-.kiyone-section.opening { border-bottom: 2px solid #8b4513; }
-.kiyone-section.opening .kiyone-voice { border-left-color: #d4af37; background: rgba(42, 24, 16, 0.4); }
+.kiyone-section.opening { border-bottom: 2px solid rgba(200, 184, 154, 0.25); }
+.kiyone-section.opening .kiyone-voice { border-left-color: #c8b89a; background: rgba(30, 27, 19, 0.4); }
 
 .kiyone-section.closing { margin-top: 20px; border-bottom: none; }
-.kiyone-section.closing .kiyone-voice { border-left-color: #d4af37; background: rgba(42, 24, 16, 0.4); text-align: center; }
+.kiyone-section.closing .kiyone-voice { border-left-color: #c8b89a; background: rgba(30, 27, 19, 0.4); text-align: center; }
 
 .kiyone-calculation-start {
     padding: 30px 20px;
@@ -350,7 +349,7 @@ function injectShakkouStyles() {
     width: 100%;
     height: 30px;
     background: #0a0505;
-    border: 2px solid #8b4513;
+    border: 2px solid rgba(200, 184, 154, 0.25);
     border-radius: 5px;
     overflow: hidden;
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
@@ -359,7 +358,7 @@ function injectShakkouStyles() {
 .progress-bar {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, #d4af37, #8b4513, #d4af37);
+    background: linear-gradient(90deg, #c8b89a, rgba(200, 184, 154, 0.25), #c8b89a);
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
     transition: width 0.3s ease;
@@ -372,7 +371,7 @@ function injectShakkouStyles() {
 
 .progress-text {
     text-align: center;
-    color: #d4af37;
+    color: #c8b89a;
     font-family: 'Courier New', monospace;
     font-size: 18px;
     margin-top: 12px;

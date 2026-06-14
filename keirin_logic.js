@@ -1334,8 +1334,7 @@ app.calculatePrediction = async function(guardedData) {
             const ensanBets = generateEnsanKekka(
                 finalTenunData.rankingWithData,
                 finalTenunData.koutenRankingWithData,
-                _calcResult?.relations?.kouten?.L,
-                finalTenunData.tenunIndex
+                _calcResult?.relations?.kouten?.L
             );
             const ensanSection = document.getElementById('ensan-kekka-section');
             const ensanOutput  = document.getElementById('ensan-kekka-output');
@@ -1802,27 +1801,15 @@ function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = [], k
     };
 }
 
-function generateEnsanKekka(seitenRanking, koutenRanking, targetL, tenun) {
+function generateEnsanKekka(seitenRanking, koutenRanking, targetL) {
     if (!seitenRanking || seitenRanking.length < 3) return [];
+    if (!koutenRanking || koutenRanking.length < 3) return [];
+    if (!targetL) return [];
 
-    const r0 = seitenRanking[0].id;
-    const r1 = seitenRanking[1].id;
-    const r2 = seitenRanking[2].id;
-    const A  = koutenRanking?.[0]?.id ?? r0;
-    const B  = koutenRanking?.[1]?.id ?? r1;
-    const C  = koutenRanking?.[2]?.id ?? r2;
-    const L  = targetL?.id ?? null;
-
-    let X, Y, Z;
-    if (tenun === 0) {
-        X = [r0]; Y = [r1]; Z = [r2];
-    } else if (tenun === 33) {
-        X = [r0]; Y = [...new Set([r1, B])]; Z = [r2];
-    } else if (tenun === 67) {
-        X = [...new Set([r0, A])]; Y = [...new Set([r1, B])]; Z = [r2];
-    } else {
-        X = [...new Set([r0, A])]; Y = [...new Set([r1, B])]; Z = [...new Set([r2, C])];
-    }
+    const X = [...new Set([seitenRanking[0].id, koutenRanking[0].id])];
+    const Y = [...new Set([seitenRanking[1].id, koutenRanking[1].id])];
+    const Z = [...new Set([seitenRanking[2].id, koutenRanking[2].id])];
+    const L = targetL.id;
 
     const combos = new Set();
     for (const x of X) {
@@ -1834,13 +1821,11 @@ function generateEnsanKekka(seitenRanking, koutenRanking, targetL, tenun) {
             }
         }
     }
-    if (L !== null) {
-        for (const x of X) {
-            for (const y of Y) {
-                const ids = [x, y, L];
-                if (new Set(ids).size < 3) continue;
-                combos.add(ids.slice().sort((a, b) => a - b).join('='));
-            }
+    for (const x of X) {
+        for (const y of Y) {
+            const ids = [x, y, L];
+            if (new Set(ids).size < 3) continue;
+            combos.add(ids.slice().sort((a, b) => a - b).join('='));
         }
     }
     return [...combos];
