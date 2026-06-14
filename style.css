@@ -1223,7 +1223,9 @@ footer.copyright-footer {
 #ensan-kekka-output {
   line-height: 1.8;
   font-size: 0.95em;
-  color: var(--text);
+  color: var(--text) !important;
+  font-family: var(--mono);
+  letter-spacing: 0.05em;
 }
 
 /* ==========================================

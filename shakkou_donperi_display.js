@@ -105,12 +105,12 @@ function injectShakkouStyles() {
    ============================================================================ */
 
 .shakkou-results-container {
-    background: transparent;
-    border: none;
+    background: transparent !important;
+    border: none !important;
     border-radius: 12px;
     padding: 0;
     margin: 20px 0;
-    box-shadow: none;
+    box-shadow: none !important;
 }
 
 .shakkou-header {
