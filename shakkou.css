@@ -5,9 +5,9 @@
 .shakkou-results-container {
     background: transparent !important;
     border: none !important;
-    border-radius: 12px;
+    border-radius: 0;
     padding: 0;
-    margin: 20px 0;
+    margin: 0;
     box-shadow: none !important;
 }
 
@@ -33,7 +33,7 @@
 
 .kiyone-section {
     margin: 0;
-    padding: 5px 20px 20px 20px;
+    padding: 16px 24px 24px 24px;
     background: transparent;
     border-left: none;
     border-radius: 0;
@@ -173,13 +173,15 @@
 
 .survival-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
-    margin-top: 15px;
-    background: rgba(30, 27, 19, 0.5);
-    border: 1px solid rgba(200, 184, 154, 0.15);
-    border-radius: 5px;
-    overflow: hidden;
-    table-layout: auto;
+    margin: 0 auto;
+}
+
+.survival-table thead th,
+.survival-table tbody td {
+    text-align: center;
+    width: 20%;
 }
 
 .survival-table thead th {
