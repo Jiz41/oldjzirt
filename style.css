@@ -1199,6 +1199,7 @@ footer.copyright-footer {
   background: var(--panel-2);
   border: 1px solid var(--border);
   border-radius: 6px;
+  color: var(--text-2);
 }
 
 #ensan-kekka-section h3 {
