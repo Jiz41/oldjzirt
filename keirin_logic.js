@@ -1512,7 +1512,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             const prefix = (index === 0) ? '最初の競りは、' : '<strong>さらに、</strong>';
             seriSummaryHtml += `<p>${prefix}選手<strong>${info.follower}</strong> vs 選手<strong>${info.contender}</strong>。予測勝者は **選手${info.winner}** です。</p>`;
         });
-        seriSummaryHtml += `<p style="font-size: 0.9em; color: #ffa726;">※体力消耗による減点補正が適用されています。</p></div>`;
+        seriSummaryHtml += `<p style="font-size: 14px; color: #ffa726;">※体力消耗による減点補正が適用されています。</p></div>`;
     }
 
     // 天雲指数
