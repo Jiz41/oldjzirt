@@ -715,7 +715,7 @@ button[onclick="calculatePrediction()"]:active {
 
 #scenario-output {
   background: var(--purple-bg) !important;
-  border: 1px solid var(--purple-br) !important;
+  border: none;
   border-radius: 6px;
   padding: 12px !important;
   margin: 8px 0;
