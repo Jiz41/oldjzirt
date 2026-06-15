@@ -1296,8 +1296,8 @@ footer.copyright-footer {
   border-radius: 6px;
 }
 #bank-tendency-display { --glass-blur: 8px; --glass-tint: 0.58; }
-#ritsu-column          { --glass-blur: 8px; --glass-tint: 0.58; padding: 10px 12px; margin: 12px 0; }
-#ensan-kekka-section   { --glass-blur: 8px; --glass-tint: 0.58; }
+#ritsu-column          { --glass-blur: 8px; --glass-tint: 0.48; padding: 10px 12px; margin: 12px 0; }
+#ensan-kekka-section   { --glass-blur: 8px; --glass-tint: 0.48; }
 
 /* 赤口カードの外周すりガラス（2026-06-12裁定）。
    外周＝最外殻（.shakkou-results-container）＋薄赤のカード地（.kiyone-section）。
@@ -1312,7 +1312,7 @@ footer.copyright-footer {
 }
 #results-container .kiyone-section {
   --glass-blur: 8px;
-  --glass-tint: 0.72;
+  --glass-tint: 0.62;
   background: rgba(16, 12, 8, var(--glass-tint));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   backdrop-filter: blur(var(--glass-blur));
