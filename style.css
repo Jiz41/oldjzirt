@@ -717,7 +717,7 @@ button[onclick="calculatePrediction()"]:active {
   background: var(--purple-bg) !important;
   border: none;
   border-radius: 6px;
-  padding: 12px !important;
+  padding: 12px 0 !important;
   margin: 8px 0;
   color: var(--text);
 }
@@ -1194,7 +1194,7 @@ footer.copyright-footer {
 }
 
 #ensan-kekka-section {
-  margin: 16px 12px;
+  margin: 12px 0;
   padding: 14px 16px;
   background: var(--panel-2);
   border: 1px solid var(--border);
