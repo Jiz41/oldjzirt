@@ -2,86 +2,34 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <style>
-html { -webkit-text-size-adjust:none; text-size-adjust:none; font-size:16px; }
-body { font-size:16px; opacity:1; }
-
-#jiz-splash {
-  position:fixed; inset:0; z-index:9999;
-  background:#1a1510;
-  display:flex; align-items:center; justify-content:center;
-  opacity:1;
-  transition:opacity 0.6s ease;
-}
-#jiz-splash.out { opacity:0; pointer-events:none; }
-
-#jiz-splash-inner {
-  display:flex; flex-direction:column;
-  align-items:center; gap:24px;
-  text-align:center;
-}
-
-#jiz-splash-subtitle {
-  
-  font-size:11px;
-  letter-spacing:0.3em;
-  color:rgba(200,176,130,0.6);
-  margin:0;
-}
-
-#jiz-splash-logo {
-  width:280px; max-width:80vw;
-  opacity:0;
-  transition:opacity 0.8s ease;
-}
-#jiz-splash-logo.visible { opacity:1; }
-
-#jiz-loader-wrap {
-  width:200px; height:1px;
-  background:rgba(200,160,96,0.15);
-  overflow:hidden;
-}
-#jiz-loader-bar {
-  height:100%; width:0%;
-  background:#c8a060;
-}
-
-#jiz-main-content {
-  opacity:0;
-  transition:opacity 0.5s ease;
-}
-#jiz-main-content.visible { opacity:1; }
-    </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="app-version" content="2.1.25">
+    <meta name="app-version" content="2.1.8">
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="./style.css">
-    <link rel="stylesheet" href="./shakkou.css">
-    <link rel="stylesheet" href="./kiyone.css">
-    <link rel="stylesheet" href="./paste-input.css">
 
     <!-- 🌌 赤口呑縁：サイバーパンク配色 -->
     <link rel="stylesheet" href="./kiyone_cyberpunk_addon.css">
 
     <!-- 🌐 PWA設定 -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="真自在律">
     <link rel="apple-touch-icon" href="./icon-192.png">
 
+    <script>
+  if ('serviceWorker' in navigator) {
+    document.addEventListener('DOMContentLoaded', () => {
+      navigator.serviceWorker.register('./sw.js');
+    });
+  }
+    </script>
     <script data-goatcounter="https://jiz41.goatcounter.com/count"
     data-goatcounter-settings='{"allow_frame": true}'
     async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
-<div id="jiz-splash">
-  <div id="jiz-splash-inner">
-    <p id="jiz-splash-subtitle">華耀天輪　真自在律</p>
-    <img id="jiz-splash-logo" src="./title.png" alt="真自在律">
-    <div id="jiz-loader-wrap"><div id="jiz-loader-bar"></div></div>
-  </div>
-</div>
-<div id="jiz-main-content">
 
 <script>
 (function(){
@@ -98,7 +46,7 @@ body { font-size:16px; opacity:1; }
   nav.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:99999;'
     +'display:flex;align-items:center;justify-content:space-evenly;height:56px;padding:0 12px;'
     +'backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);'
-    +'font-size:12px;'
+    +'font-family:sans-serif;font-size:12px;'
     +(isDark?'background:rgba(28,24,21,0.68);border-top:0.5px solid rgba(200,57,47,0.3);'
             :'background:rgba(246,240,226,0.68);border-top:0.5px solid rgba(197,181,154,0.5);');
 
@@ -203,11 +151,108 @@ body { font-size:16px; opacity:1; }
     })();
 </script>
 
+<script>
+(function() {
+    function addCopyButton() {
+        const target = document.getElementById('copy-button-container');
+        if (!target || document.getElementById('easy-copy-btn')) return;
+        const scenarioOutput = document.getElementById('scenario-output');
+        if (!scenarioOutput || scenarioOutput.innerHTML.trim() === "") return;
+
+        const btn = document.createElement('button');
+        btn.id = 'easy-copy-btn';
+        btn.innerHTML = '予想結果をコピー';
+        
+        // --- ソリッド & メカニカル・フィードバック定義 ---
+        btn.style = `
+            display: block;
+            width: 160px;
+            margin: 25px auto;
+            padding: 10px 0;
+            background: #000;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 1px;         /* 鋭い角 */
+            font-family: 'Helvetica', sans-serif;
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.25em;
+            cursor: pointer;
+            transition: transform 0.05s, background 0.05s; /* 応答速度を極限まで速く */
+            text-transform: uppercase;
+            outline: none;
+            -webkit-tap-highlight-color: transparent; /* スマホ特有の青枠を消す */
+        `;
+        
+        // 「カチッ」とした押し心地の再現（スペースキーの挙動）
+        btn.onmousedown = () => {
+            btn.style.transform = "scale(0.96) translateY(2px)"; // 物理的な沈み込み
+            btn.style.background = "#fff";                       // 反転（発光）
+            btn.style.color = "#000";
+        };
+        btn.onmouseup = () => {
+            btn.style.transform = "scale(1) translateY(0)";      // 即座に復帰
+            btn.style.background = "#000";
+            btn.style.color = "#fff";
+        };
+        // 指を離した時やスマホでのタッチ対応
+        btn.ontouchstart = btn.onmousedown;
+        btn.ontouchend = btn.onmouseup;
+
+        target.appendChild(btn);
+
+        btn.onclick = async () => {
+            try {
+                const bank = document.getElementById('bank-name').value;
+                const windDir = document.getElementById('wind-direction').value;
+                const windSpd = document.getElementById('wind-speed').value;
+                const windText = (windDir === 'none' || windDir === '無風') ? "無風 0m" : `${windDir} ${windSpd}m`;
+
+                const raceNoRaw = document.getElementById('race-no-hidden')?.value;
+                const tenunEl = document.getElementById('tenun-index-output');
+                const tenunVal = tenunEl?.dataset?.tenunValue;
+
+                const getBet = (id) => {
+                    const el = document.getElementById(id);
+                    if (!el) return "---";
+                    return Array.from(el.querySelectorAll('li')).map(li => li.innerText.trim()).join(', ');
+                };
+                const sunny = getBet('seitenrei-output');
+                const rainy = getBet('koutenrei-output');
+
+                let scenarioText = "";
+                document.querySelectorAll('.scenario-detail').forEach(div => {
+                    const title = div.querySelector('h4')?.innerText.replace('シミュレーション', '').trim() || "";
+                    const pTags = div.querySelectorAll('p');
+                    let bets = "";
+                    pTags.forEach(p => {
+                        if (p.innerText.includes('三連')) {
+                            const val = p.innerText.split(':')[1]?.trim();
+                            if (val) bets += (bets ? ", " : "") + val;
+                        }
+                    });
+                    if (title) scenarioText += `${title} ${bets}\n`;
+                });
+
+                const header = `${bank}${raceNoRaw ? raceNoRaw + 'R' : 'R'}${(tenunVal !== undefined && tenunVal !== '') ? ' 天雲指数: ' + tenunVal : ''}`;
+                const finalText = `${header}\n\n☀️ 晴天令：${sunny}\n⛈️ 荒天令：${rainy}\n\n${scenarioText}\n（${windText}）`;
+                await navigator.clipboard.writeText(finalText);
+                
+                // 成功時の控えめなフィードバック
+                const originalText = btn.innerHTML;
+                btn.innerHTML = 'コピー完了';
+                setTimeout(() => { btn.innerHTML = originalText; }, 1200);
+            } catch (err) { console.error(err); }
+        };
+    }
+    setInterval(addCopyButton, 500);
+})();
+</script>
 <input id="race-no-hidden" type="hidden" value="">
 
 <div class="container">
     <header>
-        <div class="subtitle">演算制&#x5FA1;多重交響体<span id="logic-version-display" style="font-size:10px;opacity:0.4;color:#e8872a;letter-spacing:normal;margin-left:8px;"></span></div>
+        <div class="subtitle">演算制&#x5FA1;多重交響体<span id="logic-version-display" style="font-size:0.65rem;opacity:0.4;color:#e8872a;letter-spacing:normal;margin-left:0.5em;"></span></div>
         <div class="title-image-container">
             <img src="./title.png" alt="華耀天輪 真・自在律" class="title-image">
         </div>
@@ -220,122 +265,268 @@ body { font-size:16px; opacity:1; }
 <div class="manual-content" id="manual-content">
 
     <h2>🚀 はじめての方へ：予想を出すまでの流れ</h2>
+    <p><b>事前に用意するもの：</b>出走表（脚質・得点・直近3走・並び）、競輪場の風向き・風速</p>
     <table>
         <thead>
-            <tr><th style="width:25%;">STEP</th><th>やること</th><th>何が起きるか</th></tr>
+            <tr><th style="width:25%;">STEP</th><th>やること</th><th>結果</th></tr>
         </thead>
         <tbody>
-            <tr><td><b>STEP 1</b></td><td>レース情報・選手データを入力</td><td>計算の土台が揃う</td></tr>
-            <tr><td><b>STEP 2</b></td><td>🚀 計算開始 を押す</td><td>演算開始</td></tr>
-            <tr><td><b>STEP 3</b></td><td>血判状図と赤口呑縁を読む</td><td>世界の序列と揺らぎが可視化される</td></tr>
+            <tr><td><b>STEP 1</b></td><td>レース情報を入力<br><small>「🔗 レース情報自動取得」か手入力</small></td><td>級班・バンク・風・選手データが揃う</td></tr>
+            <tr><td><b>STEP 2</b></td><td>7名の選手データを入力<br><small>脚質・得点・W印・直近3走・地元/欠場</small></td><td>各選手の評価が確定する</td></tr>
+            <tr><td><b>STEP 3</b></td><td>全体並びを入力<br><small>例: <code>123,45,67</code></small></td><td>ライン構成が確定する</td></tr>
+            <tr><td><b>STEP 4</b></td><td>🚀 予想を計算 を押す</td><td>演算開始</td></tr>
+            <tr><td><b>STEP 5</b></td><td>結果を読む</td><td>☀️晴天令＝安定の本命目<br>⛈️荒天令＝波乱時の保険目<br>🌌赤口呑縁＝1465世界線の収束傾向</td></tr>
         </tbody>
     </table>
 
-    <h2>⚙️ 入力項目</h2>
+    <h2>⚙️ ツールの全体構成と基本操作</h2>
+    <p>このツールは、入力されたレース情報と選手データに基づき、複数の展開パターンをシミュレーションし、独自ロジックで評価した予想結果を提供するモバイル向け競輪予想支援ツールです。</p>
 
-    <h3>1. レース基本情報</h3>
+    <h3>0. 🔗 レース情報自動取得（オプション）</h3>
+    <p>レース情報入力欄の上部にある <b>「🔗 レース情報自動取得」</b> パネルを使うと、開催場・日付・レース番号を選ぶだけで選手データが自動入力されます。風向き・風速も競輪場の位置情報から自動取得します。</p>
     <table>
         <thead>
-            <tr><th style="width:30%;">項目</th><th>内容</th><th>システムへの影響</th></tr>
+            <tr><th style="width:30%;">操作ステップ</th><th>内容</th></tr>
         </thead>
         <tbody>
-            <tr><td><b>級班</b></td><td>ガールズ / S級 / A級等</td><td>計算係数の最適化</td></tr>
-            <tr><td><b>バンク名</b></td><td>開催場所を選択</td><td>バンク固有の展開傾向を自動抽出</td></tr>
-            <tr><td><b>風向・風速</b></td><td>8方位 / 0.5m単位</td><td>kururu係数：ライン位置別のスタミナ損耗を演算</td></tr>
+            <tr><td><b>① 開催場を選ぶ</b></td><td>本日開催中の競輪場がボタン一覧で表示される。</td></tr>
+            <tr><td><b>② 日程を選ぶ</b></td><td>開催日（初日・2日目など）を選択。</td></tr>
+            <tr><td><b>③ レース番号を選ぶ</b></td><td>該当レースを選択すると選手データが自動入力される。</td></tr>
+            <tr><td><b>④ 手動補完</b></td><td>脚質が同数で判定できなかった選手は手動で設定する。<br><small>※ 9車立てのレースには非対応（自動入力は中断されます）。</small></td></tr>
         </tbody>
     </table>
-    <p style="font-size:14px;">※風情報は <a href="https://tenki.jp/lite/leisure/horse/" target="_blank">tenki.jp</a> や <a href="https://kazekeirin.info/" target="_blank">風競輪.info</a> を参照。無風や屋内時は「無風/屋内」を選択してください。</p>
+    <p style="font-size:0.85em;">※ 自動取得後も、各項目を必ず目視で確認してから予想を実行してください。</p>
 
-    <h3>2. 選手データ</h3>
+    <h3>1. レース基本情報の入力（土台を作る）</h3>
     <table>
         <thead>
-            <tr><th style="width:30%;">項目</th><th>内容</th></tr>
+            <tr>
+                <th style="width: 30%;">項目</th>
+                <th>入力内容・例</th>
+                <th>解説：システムへの影響</th>
+            </tr>
         </thead>
         <tbody>
-            <tr><td><b>脚質 / 得点</b></td><td>逃先・差マ・捲り / 競走得点（決まり手の中で最も高い値を指定）</td></tr>
-            <tr><td><b>W印 / 3走</b></td><td>専門紙評価 / 直近3走（新しい順。欠場等は9を代入）</td></tr>
-            <tr><td><b>地元 / 欠場</b></td><td>手動でチェック。システム自動判別なし</td></tr>
-            <tr><td><b>👑 GCボタン</b></td><td>若手の潜在能力補正。過度な影響があるため慎重に</td></tr>
-            <tr><td><b>S 1位 / B 1位</b></td><td>スタンディング・バックの1着候補を指定。展開の核を決定する</td></tr>
+            <tr>
+                <td><b>級班</b></td>
+                <td>ガールズ / S級 / A級等</td>
+                <td>級班に応じた計算係数の最適化。</td>
+            </tr>
+            <tr>
+                <td><b>バンク名</b></td>
+                <td>開催場所を選択</td>
+                <td>バンク固有の展開傾向（逃げ・差し等）を自動抽出。</td>
+            </tr>
+            <tr>
+                <td><b>風向・風速</b></td>
+                <td>8方位 / 0.5m単位</td>
+                <td><b>V8.0 捌風旋炉 枢</b>：風によるライン位置別のスタミナ損耗（kururu係数）を演算。</td>
+            </tr>
         </tbody>
     </table>
+    <p style="font-size: 0.85em;">※風情報は <a href="https://tenki.jp/lite/leisure/horse/" target="_blank">tenki.jp</a> や <a href="https://kazekeirin.info/" target="_blank">風競輪.info</a> を参照。無風や屋内時は「無風/屋内」を選択してください。</p>
 
-    <h3>3. 展開（並び）</h3>
+    <h3>2. 選手個別データの入力（精度を高める）</h3>
     <table>
         <thead>
-            <tr><th style="width:30%;">状態</th><th>書き方（例）</th></tr>
+            <tr>
+                <th style="width: 30%;">項目</th>
+                <th>内容・選択</th>
+                <th>解説：入力の目的</th>
+            </tr>
         </thead>
         <tbody>
-            <tr><td><b>通常</b></td><td><code>123,45,67</code>　ライン毎にカンマで区切る</td></tr>
-            <tr><td><b>ガールズ</b></td><td><code>1,2,3,4,5,6,7</code>　全員単騎</td></tr>
-            <tr><td><b>競り発生</b></td><td><code>1(3)2,45</code>　カッコ内が競り選手</td></tr>
+                  <tr>
+            <td><b>👑 GCボタン</b></td>
+            <td>チェックボックス</td>
+            <td>
+                若手の潜在能力補正。得点以上の実力を持つ選手を、上位層の期待値へ引き上げます。<br>
+                <small>※<b>過度な補正がかかるため、使用は慎重に判断してください。</b>本来の予想精度を大きく損なう恐れがあります。</small>
+            </td>
+        </tr>
+               <tr>
+            <td><b>地元 / 欠場</b></td>
+            <td>チェックボックス</td>
+            <td>
+                地元利の個別補正、および欠場選手の計算除外。<br>
+                <small>※<b>システムによる自動判別は行いません。</b>出走表等で確認し、手動でチェックを入れてください。</small>
+            </td>
+        </tr>
+            <tr>
+                        <tr>
+            <td><b>脚質 / 得点</b></td>
+            <td>逃先・差マ・捲り / 競走得点</td>
+            <td>
+                選手の基本戦術と実力の評価。<b>決まり手の中で最も高い値のもの</b>を指定してください。<br>
+                <small>※数値が同数の場合は、<b>今回の役割・位置</b>（自力か番手か）を優先して選択してください。</small>
+            </td>
+        </tr>
+
+<tr>
+    <td><b>W印 / 3走</b></td>
+    <td>◎〇△等 / 3走成績</td>
+    <td>
+        専門紙評価と近況のリズムを反映。<br>
+        <b>新しい順に</b>、3走の成績を入力してください。<br>
+        <small>※欠場・落車・棄権などは「<b>9</b>」を代入。</small>
+    </td>
+</tr>
+<td><b>S 1位 / B 1位</b></td>
+                <td>ラジオボタン指定</td>
+                <td>スタンディングとバックの1着候補から展開の核を決定。</td>
+            </tr>
         </tbody>
     </table>
 
-    <h3>3.5 ⚖️ 審眼八卦（オプション）</h3>
-    <p>重視したい要素をONにすると計算がその方向に傾く。何もONにしない状態が標準計算。</p>
-
-    <h2>🩸 血判状図の読み方</h2>
-    <p>計算実行後、結果セクションに血判状図が現れる。選手を「バルーン」として可視化した世界の地図——四つの言語でその意味を読む。</p>
-
+    <h3>3. 展開（ライン構成）の入力</h3>
     <table>
         <thead>
-            <tr><th style="width:30%;">言語</th><th>意味</th></tr>
+            <tr>
+                <th style="width: 30%;">状態・項目</th>
+                <th>書き方（例）</th>
+                <th>解説：計算への反映</th>
+            </tr>
         </thead>
         <tbody>
-            <tr><td><b>🔵 色＝素の強さ</b></td><td>青（低スコア）→赤（高スコア）のグラデーション。シナリオが変わっても色は変わらない——それが「素の強さ」</td></tr>
-            <tr><td><b>⭕ サイズ＝世界の序列</b></td><td>このシナリオ（晴天 / 荒天 / 赤口）での着順予測。大きいほど上位。タブを切り替えると変化する</td></tr>
-            <tr><td><b>💓 動き＝活性度</b></td><td>拍動＝計算最有力（特異点）/ 浮遊＝計算に存在感あり / 静止＝このシナリオでは出番なし</td></tr>
-            <tr><td><b>→ 線＝ライン内の引力</b></td><td>矢印でライン内のつながりを示す。特異点バルーンは破線枠で識別される</td></tr>
+            <tr>
+        <tr>
+            <td><b>基本並び</b></td>
+            <td><code>123,45,67</code></td>
+            <td>通常レース用。ライン毎にカンマで区切る。</td>
+        </tr>
+        <tr>
+            <td><b>ガールズ</b></td>
+            <td><code>1,2,3,4,5,6,7</code></td>
+            <td>全員単騎扱い。全選手の間をカンマで区切る。</td>
+        </tr>
+<td><b>競り発生</b></td>
+                <td><code>1(3)2, 45</code></td>
+                <td>カッコ内を競り選手と認識。展開の紛れを反映。</td>
+            </tr>
         </tbody>
     </table>
 
-    <h2>🌌 赤口呑縁（しゃっこうどんぺり）について</h2>
+    <h3>3.5 ⚖️ 審眼八卦（計算の色づけ）</h3>
+    <p><b>審眼八卦</b>パネルで「重視したい要素」をONにすると、自在律の計算がその方向に傾きます。感覚や情報に合わせてカスタマイズできます。</p>
+    <table>
+        <thead>
+            <tr><th style="width:30%;">項目</th><th>ONにしたときの効果</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><b>ライン強度</b></td><td>ライン協調係数を強調して評価。</td></tr>
+            <tr><td><b>競走得点</b></td><td>競走得点を重視する方向に補正。</td></tr>
+            <tr><td><b>近況</b></td><td>直近3走の成績リズムを強調。</td></tr>
+            <tr><td><b>印</b></td><td>専門紙のW印評価を重視する方向に補正。</td></tr>
+            <tr><td><b>展開</b></td><td>展開傾向を指定（先行有利・捲り有利・差し有利）して補正。</td></tr>
+        </tbody>
+    </table>
+    <p style="font-size:0.85em;">※ 何もONにしない状態が自在律の標準計算です。</p>
+
+    <h3>4. 予想の実行とアウトプット</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 30%;">出力項目</th>
+                <th>内容と活用方法</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><b>天雲指数</b></td>
+                <td>独自ロジックによる安定値：七曜院パラドキサ環による単次元的解析。</td>
+            </tr>
+            <tr>
+                <td><b>☀️ 晴天令</b></td>
+                <td>最も支持率と物理条件が安定した推奨買い目。</td>
+            </tr>
+            <tr>
+                <td><b>⛈️ 荒天令</b></td>
+                <td><b>自滅消耗や風の影響による波乱狙い。</td>
+            </tr>
+            <tr>
+                <td><b>🌌 赤口呑縁</b></td>
+                <td>
+                    <b>1,465の並行世界シミュレーション</b>：五更斎アメンティア清音による多次元展開解析。<br>
+                    <small>
+                        • <b>出現出目</b>：最も頻度の高い決着パターンTOP3を表示<br>
+                        • <b>因果分岐</b>：ライン崩壊や波乱イベント発生時の出目傾向<br>
+                        • <b>選手の生存濃度</b>：各選手の1着〜3着入線回数と圏外率を集計<br>
+                        ※級班ごとに異なる「世界線の重み付け」により、安定志向と波乱志向のバランスを調整
+                    </small>
+                </td>
+            </tr>
+            <tr>
+                <td><b>処理ログ</b></td>
+                <td>物理演算や各選手の補正ステップの確認。</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>5. 赤口呑縁（しゃっこうどんぺり）について</h3>
     <p><b>偽典『赤口呑縁』</b>は、1,465通りの並行世界をシミュレーションし、展開の「揺らぎ」を可視化する解析機構です。</p>
-
+    
     <table>
         <thead>
-            <tr><th style="width:30%;">要素</th><th>説明</th></tr>
+            <tr>
+                <th style="width: 30%;">要素</th>
+                <th>説明</th>
+            </tr>
         </thead>
         <tbody>
             <tr>
                 <td><b>世界線の構成</b></td>
-                <td>通常展開と波乱展開を級班ごとの比率で混合。<br><small>例：S級 = 879通常 + 586波乱 / A級 = 586通常 + 879波乱</small></td>
+                <td>
+                    通常展開（晴天令ベース）と波乱展開（荒天令ベース）を級班ごとの比率で混合。<br>
+                    <small>例：S級 = 879通常 + 586波乱 / A級 = 586通常 + 879波乱</small>
+                </td>
             </tr>
             <tr>
-                <td><b>"ゆらぎ"の詳細</b></td>
-                <td>ライン微崩壊・早駆け・風煽り・競り乱れ・落車・ダークホース・新人暴走・捲り自滅など、展開を変動させる複数のイベントをランダム発生させる。</td>
+                <td><b>”ゆらぎ”の詳細</b></td>
+                <td>
+                    ライン微崩壊・早駆け・風煽り・競り乱れ・落車・ダークホース・新人暴走・捲り自滅など、<br>
+                    展開を変動させる複数のイベント（級班ごとに7〜11種）をランダム発生させる。
+                </td>
             </tr>
             <tr>
                 <td><b>出現出目</b></td>
-                <td>1,465回の試行で最も多く出現した決着パターンを、頻度順にTOP3表示。<br><small>※頻度が高いほど「その決着に収束しやすい」ことを示す。</small></td>
+                <td>
+                    1,465回の試行で最も多く出現した決着パターンを、頻度順にTOP3表示。<br>
+                    <small>※頻度が高いほど「その決着に収束しやすい」ことを示す。</small>
+                </td>
             </tr>
             <tr>
                 <td><b>因果分岐</b></td>
-                <td>特定のカオスイベント（ライン崩壊など）が発生した世界線のみを抽出し、その条件下で最も出やすい決着パターンを分析。</td>
+                <td>
+                    特定のカオスイベント（ライン崩壊など）が発生した世界線のみを抽出し、<br>
+                    その条件下で最も出やすい決着パターンを分析。<br>
+                    <small>※「波乱時の保険」として活用可能。</small>
+                </td>
             </tr>
             <tr>
                 <td><b>生存濃度</b></td>
-                <td>各選手が1着・2着・3着・圏外にそれぞれ何回入線したかを集計。<br><small>※着順分布を見ることで、選手の「安定性」や「ヒモ適性」が判断できる。</small></td>
+                <td>
+                    各選手が1着・2着・3着・圏外にそれぞれ何回入線したかを集計。<br>
+                    <small>※着順分布を見ることで、選手の「安定性」や「ヒモ適性」が判断できる。</small>
+                </td>
             </tr>
         </tbody>
     </table>
 
-    <h4>🎯 血判状図と合わせた活用</h4>
+    <h4>🎯 赤口呑縁の活用方法</h4>
     <ul style="line-height: 1.8;">
-        <li><b>本命固め</b>：出現出目TOP1の選手が血判状図でも特異点（拍動）——信頼度が高い</li>
+        <li><b>本命固め</b>：出現出目TOP1が晴天令と一致 → 安定した展開</li>
         <li><b>ヒモ選択</b>：生存濃度で2着・3着の入線回数が多い選手を狙う</li>
-        <li><b>波乱対策</b>：因果分岐の出目を保険として押さえる</li>
+        <li><b>波乱対策</b>：因果分岐の出目を保険として買う</li>
         <li><b>買い目の絞り込み</b>：頻度が極端に低い決着（10回未満など）を除外</li>
     </ul>
 
-    <p style="font-size: 14px; color: #999;">
+    <p style="font-size: 0.85em; color: #999;">
         ※赤口呑縁は疑似統計的な傾向を示すものであり、実際のレース結果を保証するものではありません。<br>
         ※計算には数秒かかる場合があります（1,465回のシミュレーション実行のため）。
     </p>
 
     <div style="margin: 36px 12px 8px; padding: 24px 20px; border-top: 1px solid rgba(218,165,32,0.35); border-bottom: 1px solid rgba(218,165,32,0.35); text-align: center; line-height: 2.0;">
-        <p style="margin: 0; font-size: 14px; color: #bba060; letter-spacing: 0.08em;">
+        <p style="margin: 0; font-size: 0.88em; color: #bba060; letter-spacing: 0.08em;">
             このツールは選手を数値で見る。<br>
             しかしあなたは今、その数値の向こうに<br>
             選手の脚力と意地と駆け引きがあることを知っている。<br><br>
@@ -365,7 +556,7 @@ body { font-size:16px; opacity:1; }
     <label style="font-weight: bold; display: block; margin-bottom: 5px;">風向き・風速</label>
     <div style="display: flex; gap: 10px; margin-bottom: 5px;">
         <div style="flex: 1;">
-            <label for="wind-direction" style="font-size: 13px; color: #555;">風向</label>
+            <label for="wind-direction" style="font-size: 0.8em; color: #555;">風向</label>
             <select id="wind-direction" style="width: 100%; padding: 5px;">
                 <option value="none">🍃 無風/屋内</option>
                 <option value="北">北</option><option value="北東">北東</option>
@@ -375,11 +566,11 @@ body { font-size:16px; opacity:1; }
             </select>
         </div>
         <div style="flex: 1;">
-            <label for="wind-speed" style="font-size: 13px; color: #555;">風速(m)</label>
+            <label for="wind-speed" style="font-size: 0.8em; color: #555;">風速(m)</label>
             <input type="number" id="wind-speed" value="0" min="0" max="15" step="0.5" style="width: 100%; padding: 5px; box-sizing: border-box;">
         </div>
     </div>
-    <div style="font-size: 12px; color: #666; line-height: 1.4;">
+    <div style="font-size: 0.75em; color: #666; line-height: 1.4;">
         ※<a href="https://tenki.jp/lite/leisure/horse/" target="_blank" style="color: #0066cc; text-decoration: none;">tenki.jp</a> や 
         <a href="https://kazekeirin.info/" target="_blank" style="color: #0066cc; text-decoration: none;">風競輪.info</a> で競輪場の風向風速を調べて下さい
     </div>
@@ -470,125 +661,31 @@ body { font-size:16px; opacity:1; }
 function toggleShingan(){var b=document.getElementById('shingan-body'),a=document.getElementById('shingan-arrow'),o=b.style.display==='none';b.style.display=o?'block':'none';a.textContent=o?'\u25B2':'\u25BC';}
 function toggleShinganTenkai(cb){document.getElementById('sg-tenkai-opts').style.display=cb.checked?'flex':'none';}
 </script>
-            <button onclick="calculatePrediction()">&#x1F680; 計算開始</button>
+            <button onclick="calculatePrediction()">&#x1F680; 予想を計算 (実行)</button>
         </div>
 
         <div id="results-container">
-            <h2>📊 計算結果</h2>
+            <h2>📊 予想結果・推奨買い目</h2>
             <div class="result-section">
-                <!-- バンク背景：viewport固定の世界をセクション枠でクリップ（窓方式）。
-                     ラッパーに入れるのは背景層のみ。ポップオーバー・暗幕を入れると
-                     clip-pathで切り抜かれるため厳禁 -->
-                <div class="rs-bg-clip" aria-hidden="true">
-                  <div class="rs-bg">
-                    <div class="rs-bg-layer" id="rsbg-asa"></div>
-                    <div class="rs-bg-layer" id="rsbg-hiru"></div>
-                    <div class="rs-bg-layer" id="rsbg-yoru"></div>
-                    <div class="rs-bg-layer" id="rsbg-shinya"></div>
-                  </div>
-                </div>
                 <div id="bank-tendency-display"></div>
+                <h3>🔗 ライン強度（強弱グラデーション）</h3>
+                <div id="line-display" class="line-display">計算結果待ち...</div>
+                
                 <div id="tenun-index-output">
                     <span class="tenun-title" style="font-weight: bold; margin-bottom: 8px; display: block;">天雲指数</span>
                 </div>
 
-                <!-- [TEST ENV] 晴天令・荒天令 買い目表示を無効化（DOM要素はJS参照のため非表示で残す）
                 <h3>☀️ 晴天令 (安定推奨)</h3>
                 <div class="recommendation" id="seitenrei-output">計算結果待ち...</div>
                 <h3>⛈️ 荒天令 (波乱推奨)</h3>
                 <div class="recommendation" id="koutenrei-output">計算結果待ち...</div>
-                -->
-                <div id="seitenrei-output" style="display:none;"></div>
-                <div id="koutenrei-output" style="display:none;"></div>
-                <!-- 審眼八卦の寸評カード（#shingan-hakke-output）は独断実装のため除去（2026-06-11） -->
-
-                <!-- === 血判状図 === -->
-                <div id="keppan_container">
-                  <div class="keppan_section_header">血判状図</div>
-                  <div class="keppan_tabs">
-                    <button class="keppan_tab active" data-sc="逃" onclick="keppanSetScenario('逃')">逃げが決まるなら</button>
-                    <button class="keppan_tab"        data-sc="差" onclick="keppanSetScenario('差')">差しが決まるなら</button>
-                    <button class="keppan_tab"        data-sc="捲" onclick="keppanSetScenario('捲')">捲りが来るなら</button>
-                  </div>
-                  <div id="keppan_stage">
-                    <svg id="keppan_lineSvg">
-                      <defs>
-                        <marker id="keppan_arr0"  markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="rgba(255,255,255,0.6)"/></marker>
-                        <marker id="keppan_arr0h" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="rgba(255,255,255,0.95)"/></marker>
-                        <marker id="keppan_arr1"  markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="rgba(255,255,255,0.6)"/></marker>
-                        <marker id="keppan_arr1h" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="rgba(255,255,255,0.95)"/></marker>
-                        <marker id="keppan_arr2"  markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="rgba(255,255,255,0.6)"/></marker>
-                        <marker id="keppan_arr2h" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="rgba(255,255,255,0.95)"/></marker>
-                        <mask id="keppan_ringMask">
-                          <rect width="300" height="300" fill="black"/>
-                          <rect x="0" y="100" width="300" height="100" fill="white"/>
-                          <linearGradient id="keppan_rgt" x1="0" y1="1" x2="0" y2="0">
-                            <stop offset="0%"   stop-color="white" stop-opacity="1"/>
-                            <stop offset="30%"  stop-color="white" stop-opacity="0.82"/>
-                            <stop offset="60%"  stop-color="white" stop-opacity="0.28"/>
-                            <stop offset="100%" stop-color="white" stop-opacity="0"/>
-                          </linearGradient>
-                          <rect x="0" y="0" width="300" height="100" fill="url(#keppan_rgt)"/>
-                          <linearGradient id="keppan_rgb" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%"   stop-color="white" stop-opacity="1"/>
-                            <stop offset="30%"  stop-color="white" stop-opacity="0.82"/>
-                            <stop offset="60%"  stop-color="white" stop-opacity="0.28"/>
-                            <stop offset="100%" stop-color="white" stop-opacity="0"/>
-                          </linearGradient>
-                          <rect x="0" y="200" width="300" height="100" fill="url(#keppan_rgb)"/>
-                        </mask>
-                      </defs>
-                      <circle cx="150" cy="150" r="118" fill="none" stroke="rgba(255,255,255,0.01)" stroke-width="36" mask="url(#keppan_ringMask)"/>
-                      <circle cx="150" cy="150" r="118" fill="none" stroke="rgba(255,255,255,0.02)" stroke-width="28" mask="url(#keppan_ringMask)"/>
-                      <circle cx="150" cy="150" r="118" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="21" mask="url(#keppan_ringMask)"/>
-                      <circle cx="150" cy="150" r="118" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="15" mask="url(#keppan_ringMask)"/>
-                      <circle cx="150" cy="150" r="118" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="11" mask="url(#keppan_ringMask)"/>
-                      <circle cx="150" cy="150" r="118" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="7"  mask="url(#keppan_ringMask)"/>
-                      <circle cx="150" cy="150" r="118" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="5"  mask="url(#keppan_ringMask)"/>
-                      <circle cx="150" cy="150" r="118" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3"  mask="url(#keppan_ringMask)"/>
-                      <circle cx="150" cy="150" r="118" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" mask="url(#keppan_ringMask)"/>
-                      <circle cx="150" cy="150" r="118" fill="none" stroke="rgba(255,255,255,0.20)" stroke-width="0.5"/>
-                    </svg>
-                  </div>
-                  <div id="keppan_narabi"></div>
-                  <div class="keppan_overlay" id="keppan_overlay" onclick="keppanClosePop()"></div>
-                  <div class="keppan_popover" id="keppan_popover">
-                    <div class="keppan_pop_handle"></div>
-                    <div class="keppan_pop_header">
-                      <div class="keppan_pop_num"   id="keppan_popNum"></div>
-                      <div class="keppan_pop_name"  id="keppan_popName"></div>
-                      <div class="keppan_pop_wmark" id="keppan_popWmark"></div>
-                    </div>
-                    <div id="keppan_popFactors"></div>
-                    <div class="keppan_total_row">
-                      <div class="keppan_total_label">この展開での評価</div>
-                      <div class="keppan_total_val" id="keppan_popTotal"></div>
-                    </div>
-                  </div>
-                </div>
-                <!-- === /血判状図 === -->
-
-                <!-- === 令読み === -->
-                <div id="ritsu-column">
-                  <div id="ritsu-midashi" class="ritsu-midashi"></div>
-                  <div id="ritsu-env"    class="ritsu-block"></div>
-                  <div id="ritsu-seiten" class="ritsu-block"></div>
-                  <div id="ritsu-kouten" class="ritsu-block"></div>
-                  <div id="ritsu-soukai" class="ritsu-block"></div>
-                </div>
-                <!-- === /令読み === -->
-
-                <div id="ensan-kekka-section" style="display:none;">
-                  <h3>🎲 演算結果</h3>
-                  <p style="font-size:14px;color:var(--text-2);">計算が浮かび上がらせた組み合わせです。買い目の推奨ではありません。</p>
-                  <div id="ensan-kekka-output"></div>
-                </div>
-
+                <div id="shingan-hakke-output"></div>
                 <div id="scenario-output">
     <div id="shakkou-status-board" style="display:none;">
         <span id="span_0">0</span> / 1465
     </div>
 </div>
+                <div id="copy-button-container"></div>
 
             </div>
         </div>
@@ -611,7 +708,7 @@ function toggleShinganTenkai(cb){document.getElementById('sg-tenkai-opts').style
 </div>
 
 <script>
-const S_TXT = "【華耀天輪 真自在律】\nデータで競輪予想を深める📊\n無料の予想アシストツールはこちら👇";
+const S_TXT = "【華耀天輪 真自在律】\nデータで有利な買い目を提案📊\n無料の予想アシストツールはこちら👇";
 const S_URL = "https://huggingface.co/spaces/Jiz41/Jiz41r1t5u";
 
 function execShareX() {
@@ -729,11 +826,9 @@ function execCopy() {
 <script src="./shakkou_donperi_display.js" defer></script>
 <script src="./shakkou_donperi_core.js" defer></script>
 <script src="./keirin_logic.js" defer></script>
-<script src="./ritsu.js" defer></script>
 <script src="LogModule.js" defer></script>
 <script src="./meigen.js" defer></script>
 <script src="./paste-input.js" defer></script>
-<script src="./bg_world.js" defer></script>
 <script defer>
 document.addEventListener('DOMContentLoaded', function() {
     var el = document.getElementById('logic-version-display');
@@ -761,7 +856,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const corgiApp = document.createElement('div');
     corgiApp.id = 'corgi-app';
     corgiApp.innerHTML = `
-<div style="max-width:480px; margin:0 auto; padding:16px;  background:#0a0a0a; min-height:100vh; color:#e8e8e8;">
+<div style="max-width:480px; margin:0 auto; padding:16px; font-family:'Helvetica Neue',sans-serif; background:#0a0a0a; min-height:100vh; color:#e8e8e8;">
 
 <header style="text-align:center; padding:24px 0 16px;">
     <div class="title-image-container">
@@ -1081,132 +1176,6 @@ document.addEventListener('DOMContentLoaded', function() {
     padding: 0;
     z-index: 1;
   }
-
-  /* === 血判状図 === */
-  #keppan_container {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 12px 24px;
-    gap: 16px;
-    margin: 12px 0;
-    background: #12121a;
-    border-radius: 12px;
-    border: 1px solid rgba(200,169,110,0.12);
-  }
-  #keppan_container.visible { display: flex; }
-  .keppan_section_header {
-    font-size: 12px; color: rgba(200,169,110,0.7);
-    letter-spacing: 0.15em; margin-bottom: -4px;
-  }
-  .keppan_tabs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-  .keppan_tab {
-    padding: 6px 14px; border: 1px solid rgba(255,255,255,0.12); border-radius: 20px;
-    font-size: 11px; letter-spacing: 0.06em; cursor: pointer;
-    color: rgba(255,255,255,0.4); background: transparent; transition: all 0.25s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .keppan_tab.active { border-color: #c8a96e; color: #c8a96e; background: rgba(200,169,110,0.08); }
-  #keppan_stage { position: relative; width: 300px; height: 300px; }
-  #keppan_lineSvg {
-    position: absolute; inset: 0; width: 300px; height: 300px;
-    pointer-events: none; z-index: 0;
-  }
-  .keppan_bubble {
-    position: absolute; border-radius: 50%;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    transform: translate(-50%, -50%); cursor: pointer; user-select: none;
-    transition: width .45s cubic-bezier(.34,1.56,.64,1),
-                height .45s cubic-bezier(.34,1.56,.64,1),
-                background .45s ease, border-color .45s ease, opacity .45s ease;
-    z-index: 2; -webkit-tap-highlight-color: transparent;
-  }
-  .keppan_bubble_num   { font-weight: 800; line-height: 1.1; }
-  .keppan_bubble_name  { line-height: 1; margin-top: 1px; }
-  .keppan_bubble_wmark { line-height: 1; margin-top: 2px; }
-  #keppan_narabi {
-    font-size: 11px; letter-spacing: 0.12em;
-    color: rgba(255,255,255,0.30); margin-top: -4px;
-  }
-  .keppan_overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.55); z-index: 1099;
-  }
-  .keppan_overlay.open { display: block; }
-  .keppan_popover {
-    position: fixed; bottom: -100%; left: 0; right: 0;
-    background: #12121a; border-top: 1px solid rgba(200,169,110,0.2);
-    border-radius: 16px 16px 0 0; padding: 20px 20px calc(40px + 56px);
-    transition: bottom .35s cubic-bezier(.32,.72,0,1);
-    z-index: 1100; max-height: 72vh; overflow-y: auto;
-  }
-  .keppan_popover.open { bottom: 0; }
-  .keppan_pop_handle {
-    width: 36px; height: 4px; background: rgba(255,255,255,0.15);
-    border-radius: 2px; margin: 0 auto 16px;
-  }
-  .keppan_pop_header {
-    display: flex; align-items: baseline; gap: 8px;
-    margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.07);
-    padding-bottom: 12px;
-  }
-  .keppan_pop_num   { font-size: 28px; font-weight: 800; color: #c8a96e; }
-  .keppan_pop_name  { font-size: 14px; color: #e0d8c8; }
-  .keppan_pop_wmark { font-size: 14px; color: #c8a96e; margin-left: auto; }
-  .keppan_factor_row {
-    display: flex; align-items: center;
-    padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 10px;
-  }
-  .keppan_factor_row:last-of-type { border-bottom: none; }
-  .keppan_factor_label { flex: 1; font-size: 13px; color: #a09890; line-height: 1.3; }
-  .keppan_factor_label .sub { display: block; font-size: 10px; color: rgba(255,255,255,0.28); margin-top: 2px; letter-spacing: 0.05em; }
-  .keppan_factor_bar_wrap { width: 80px; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
-  .keppan_factor_val { font-size: 13px; font-weight: 700; }
-  .keppan_factor_val.plus  { color: #7eb8d4; }
-  .keppan_factor_val.minus { color: #d47e7e; }
-  .keppan_factor_val.zero  { color: rgba(255,255,255,0.28); }
-  .keppan_bar_bg { width: 80px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
-  .keppan_bar_fill { height: 100%; border-radius: 2px; }
-  .keppan_bar_fill.plus  { background: #7eb8d4; }
-  .keppan_bar_fill.minus { background: #d47e7e; }
-  .keppan_total_row {
-    margin-top: 14px; padding-top: 14px;
-    border-top: 1px solid rgba(200,169,110,0.25);
-    display: flex; justify-content: space-between; align-items: baseline;
-  }
-  .keppan_total_label { font-size: 12px; color: rgba(255,255,255,0.4); letter-spacing: 0.08em; }
-  .keppan_total_val   { font-size: 20px; font-weight: 800; color: #c8a96e; }
-  /* 三階層アニメーション（通常=微細浮遊／特異点=心拍様拍動／圏外=完全静止＋減彩）
-     注: .keppan_bubble は translate(-50%,-50%) で中心合わせしているため、
-     keyframes内のtransformには必ず translate(-50%,-50%) を併記すること */
-  .keppan_bubble.keppan_tier_float {
-    animation: keppan_float 8s ease-in-out infinite;
-  }
-  @keyframes keppan_float {
-    0%, 100% { transform: translate(-50%, -50%) translateY(0); }
-    50%      { transform: translate(-50%, -50%) translateY(-2px); }
-  }
-  .keppan_bubble.keppan_tier_tokuiten {
-    animation: keppan_pulse 2.5s ease-out infinite;
-  }
-  @keyframes keppan_pulse {
-    0%        { transform: translate(-50%, -50%) scale(1); }
-    8%        { transform: translate(-50%, -50%) scale(1.20); }
-    16%       { transform: translate(-50%, -50%) scale(1.02); }
-    24%       { transform: translate(-50%, -50%) scale(1.12); }
-    34%, 100% { transform: translate(-50%, -50%) scale(1); }
-  }
-  .keppan_bubble.keppan_tier_kengai { filter: grayscale(0.6) brightness(0.85); }
-  @media (prefers-reduced-motion: reduce) {
-    .keppan_bubble.keppan_tier_float,
-    .keppan_bubble.keppan_tier_tokuiten { animation: none; }
-    .keppan_bubble.keppan_tier_tokuiten {
-      border-width: 3px !important;
-      box-shadow: 0 0 12px rgba(200,169,110,0.65);
-    }
-  }
-  /* === /血判状図 === */
 </style>
 
 <div id="manakoBalloon">
@@ -1240,7 +1209,5 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 </script>
 
-</div>
-<script src="./splash.js"></script>
 </body>
 </html>

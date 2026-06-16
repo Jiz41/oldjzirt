@@ -3,9 +3,8 @@
    ========================================== */
 
 html {
-  font-size: 16px;
-  -webkit-text-size-adjust: none;
-  text-size-adjust: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 
@@ -53,6 +52,9 @@ html {
   --amber-bg:  rgba(160,122,44,0.07);
   --amber-br:  rgba(160,122,44,0.30);
 
+  --sans:  "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+  --serif: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  --mono:  'SF Mono','JetBrains Mono','Roboto Mono',monospace;
 }
 
 /* ==========================================
@@ -67,9 +69,9 @@ html {
 }
 
 body {
-  font-size: 16px;
   overflow-x: clip;
   min-height: 101vh;
+  font-family: var(--sans);
   margin: 0;
   padding: 0;
   padding-bottom: 64px !important;
@@ -102,7 +104,8 @@ a:hover {
 }
 
 code {
-  font-size: 14px;
+  font-family: var(--mono);
+  font-size: 0.88em;
   background: var(--bg-2);
   border: 1px solid var(--border-2);
   border-radius: 3px;
@@ -111,7 +114,7 @@ code {
 }
 
 small {
-  font-size: 13px;
+  font-size: 0.8em;
   color: var(--muted);
   line-height: 1.6;
 }
@@ -136,7 +139,8 @@ header {
 }
 
 .subtitle {
-  font-size: 11px;
+  font-size: 0.7em;
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
   color: var(--muted);
   letter-spacing: 0.35em;
   margin: 0 auto 10px;
@@ -176,8 +180,8 @@ header {
   line-height: 1.5;
 }
 
-#maxim-display-container .maxim-text    { font-size: 14px; }
-#maxim-display-container .maxim-speaker { font-size: 12px; color: var(--dim); }
+#maxim-display-container .maxim-text    { font-size: 0.88em; }
+#maxim-display-container .maxim-speaker { font-size: 0.72em; color: var(--dim); }
 
 /* ==========================================
    セクション見出し h2
@@ -215,7 +219,7 @@ h2::after {
 }
 
 h3 {
-  font-size: 16px;
+  font-size: 1em;
   color: var(--text-2);
   margin-top: 18px;
   margin-bottom: 8px;
@@ -224,7 +228,7 @@ h3 {
 }
 
 h4 {
-  font-size: 15px;
+  font-size: 0.92em;
   color: var(--muted);
   margin-top: 14px;
   margin-bottom: 6px;
@@ -236,7 +240,7 @@ h4 {
    ========================================== */
 .manual-header,
 .debug-log-header {
-  font-size: 16px;
+  font-size: 1em;
   color: var(--text-2);
   padding: 12px 15px;
   margin-top: 10px;
@@ -254,7 +258,7 @@ h4 {
 }
 
 .debug-log-header {
-  font-size: 11px;
+  font-size: 0.7em;
   color: var(--muted);
   padding: 8px 15px;
   margin-top: 15px;
@@ -270,13 +274,13 @@ h4 {
   margin: 0 0 15px;
   background: #fff;
   border-left: 3px solid var(--accent-br);
-  font-size: 14px;
+  font-size: 0.88em;
   line-height: 1.65;
   color: var(--text-2);
 }
 
 .manual-content h3 {
-  font-size: 16px;
+  font-size: 1em;
   color: var(--accent);
   border-bottom: 1px solid var(--border);
   padding-bottom: 5px;
@@ -299,7 +303,7 @@ h4 {
   padding: 7px 6px;
   text-align: left;
   vertical-align: top;
-  font-size: 14px;
+  font-size: 0.85em;
 }
 
 .manual-content th {
@@ -331,8 +335,9 @@ h4 {
   padding: 10px 12px;
   height: 100px;
   overflow-y: scroll;
+  font-family: var(--mono);
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 0.72em;
   max-width: 600px;
   margin: 0 auto 15px;
   line-height: 1.6;
@@ -344,7 +349,7 @@ h4 {
   float: right !important;
   width: auto !important;
   padding: 2px 6px !important;
-  font-size: 13px !important;
+  font-size: 0.8em !important;
   background: rgba(255,255,255,0.15) !important;
   border: 1px solid rgba(255,255,255,0.3) !important;
   border-radius: 4px !important;
@@ -405,6 +410,7 @@ input[type="text"] {
   background: var(--bg) !important;
   color: var(--text) !important;
   box-shadow: inset 2px 2px 5px rgba(0,0,0,0.08), inset -1px -1px 4px rgba(255,255,255,0.9) !important;
+  font-family: var(--sans) !important;
   font-size: 16px !important;
   font-variant-numeric: tabular-nums;
   appearance: none;
@@ -436,7 +442,7 @@ label[for="line-input"] {
 }
 
 .wind-note {
-  font-size: 12px;
+  font-size: 0.78em;
   color: var(--dim);
   margin-top: 6px;
   line-height: 1.6;
@@ -479,7 +485,7 @@ label[for="line-input"] {
 }
 
 .player-header > span:first-child {
-  font-size: 13px;
+  font-size: 0.8em;
   color: var(--muted);
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -503,19 +509,19 @@ label[for="line-input"] {
 }
 
 .crown-icon {
-  font-size: 16px;
+  font-size: 1em;
 }
 
 .local-group {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 13px;
+  font-size: 0.82em;
   color: var(--muted);
 }
 
 .local-group label {
-  font-size: 13px;
+  font-size: 0.82em;
   color: var(--muted) !important;
   margin-bottom: 0;
   letter-spacing: normal;
@@ -531,7 +537,7 @@ label[for="line-input"] {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: 0.8em;
   color: var(--muted);
   flex-basis: 100%;
 }
@@ -540,7 +546,7 @@ label[for="line-input"] {
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 16px;
+  font-size: 1em;
   text-transform: none;
   letter-spacing: normal;
   color: var(--muted) !important;
@@ -600,6 +606,7 @@ button[onclick="calculatePrediction()"] {
   color: #fff !important;
   border: none !important;
   border-radius: 6px !important;
+  font-family: var(--sans) !important;
   font-size: 15px !important;
   font-weight: 700 !important;
   letter-spacing: 0.2em !important;
@@ -618,7 +625,7 @@ button[onclick="calculatePrediction()"]:active {
    予想結果エリア
    ========================================== */
 #bank-tendency-display {
-  font-size: 13px;
+  font-size: 0.82em;
   color: var(--muted);
   padding: 8px 10px;
   background: var(--bg-2);
@@ -628,12 +635,21 @@ button[onclick="calculatePrediction()"]:active {
   line-height: 1.6;
 }
 
+.line-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
 .line-box {
   display: inline-block;
   padding: 4px 10px;
   border-radius: 6px;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 1em;
   transition: all 0.3s ease;
   line-height: 1.6;
   box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
@@ -646,7 +662,7 @@ button[onclick="calculatePrediction()"]:active {
 .seri-segment {
   display: inline-flex;
   align-items: center;
-  font-size: 14px;
+  font-size: 0.9em;
   font-weight: bold;
   border: 1px dashed var(--border-2);
   border-radius: 4px;
@@ -655,19 +671,11 @@ button[onclick="calculatePrediction()"]:active {
 }
 
 .seri-arrow {
-  font-size: 18px;
+  font-size: 1.1em;
   font-weight: bold;
   color: var(--red);
   margin: 0 2px;
 }
-
-/* ════════════════════════════════════════════════════════════
-   キャラ凍結による一時非表示（たまき退場・天雲指数の語りは総評の根拠行へ一本化）
-   JS側（tamaki_speech.js / generateTamakiTenunHTML呼び出し / calculateTenunIndexの
-   message生成 / dataset.tenunValue書き込み）はすべて温存している。
-   復活時はこの display:none の1行を削除するだけでよい。
-   ════════════════════════════════════════════════════════════ */
-#tenun-index-output { display: none !important; }
 
 #tenun-index-output {
   background: var(--amber-bg) !important;
@@ -680,7 +688,7 @@ button[onclick="calculatePrediction()"]:active {
 .tenun-title {
   color: var(--amber) !important;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 0.82em;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -715,21 +723,21 @@ button[onclick="calculatePrediction()"]:active {
 
 #scenario-output {
   background: var(--purple-bg) !important;
-  border: none;
+  border: 1px solid var(--purple-br) !important;
   border-radius: 6px;
-  padding: 12px 0 !important;
+  padding: 12px !important;
   margin: 8px 0;
   color: var(--text);
 }
 
 .recommendation {
-  font-size: 14px;
+  font-size: 0.9em;
   line-height: 1.8;
   color: var(--text-2);
 }
 
 #shakkou-status-board {
-  font-size: 13px;
+  font-size: 0.8em;
   color: var(--dim);
   text-align: center;
   padding: 6px;
@@ -803,7 +811,7 @@ button[onclick="calculatePrediction()"]:active {
 
 .bug-button {
   display: inline-block;
-  font-size: 13px;
+  font-size: 0.8em;
   color: #c8392f !important;
   border-color: rgba(200,57,47,0.4) !important;
   padding: 6px 18px;
@@ -825,14 +833,14 @@ button[onclick="calculatePrediction()"]:active {
 }
 
 .bug-log-desc {
-  font-size: 12px;
+  font-size: 0.78em;
   color: var(--dim);
   margin: 0 0 4px;
 }
 
 .bug-log-link {
   display: inline-block !important;
-  font-size: 13px;
+  font-size: 0.8em;
   color: var(--accent) !important;
   padding: 6px 18px !important;
   border: 1px solid var(--accent-br) !important;
@@ -861,7 +869,7 @@ footer.copyright-footer {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 0.75em;
   color: var(--dim);
   flex-wrap: wrap;
   margin-top: 10px;
@@ -1157,188 +1165,3 @@ footer.copyright-footer {
   }
 }
 
-/* ==========================================
-   令読みコラム
-   ========================================== */
-#ritsu-column {
-  margin: 16px 12px;
-  padding: 14px 16px;
-  background: var(--panel-2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-}
-
-/* 令読み未生成時はコラムごと非表示 */
-#ritsu-column:has(#ritsu-midashi:empty) {
-  display: none;
-}
-
-.ritsu-midashi {
-  font-weight: bold;
-  font-size: 19px;
-  letter-spacing: 0.08em;
-  color: var(--text);
-  padding-bottom: 8px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-}
-
-.ritsu-block {
-  line-height: 1.8;
-  font-size: 15px;
-  color: var(--text-2);
-}
-
-.ritsu-block + .ritsu-block {
-  margin-top: 10px;
-}
-
-#ensan-kekka-section {
-  margin: 12px 0;
-  padding: 14px 16px;
-  background: var(--panel-2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text-2);
-}
-
-#ensan-kekka-section h3 {
-  font-weight: bold;
-  font-size: 19px;
-  letter-spacing: 0.08em;
-  color: var(--text);
-  padding-bottom: 8px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-}
-
-#ensan-kekka-output {
-  line-height: 1.8;
-  font-size: 15px;
-  color: var(--text);
-  letter-spacing: 0.05em;
-}
-
-.ensan-bet {
-  color: var(--text);
-  font-size: 17px;
-  letter-spacing: 0.15em;
-  padding: 2px 0;
-}
-
-/* ==========================================
-   窓の中の競輪場 — すりガラス方式（確定 2026-06-12）
-   バンク画像は .result-section 自身の背景。
-   カードは backdrop-filter のすりガラスで濃淡を出す
-   ========================================== */
-
-/* ティント色の一元管理（和紙色） */
-:root {
-  --scrim-rgb: 252, 248, 236;
-}
-
-/* 予想結果セクション：計算実行（keirin_logic側が .visible 付与）まで非表示 */
-#results-container { display: none; }
-#results-container.visible { display: block; }
-
-/* バンク背景：.result-section 内の最背面レイヤー（cover・中央基準）。
-   4枚を重ね、時刻区分の .active をopacityクロスフェードで切替 */
-.result-section {
-  position: relative;
-  overflow: hidden;
-}
-/* クリップラッパー：viewport固定のバンクをセクション枠内に切り抜く。
-   clip-pathはfixed子孫も切り抜くため、中に入れるのは背景層のみ
-   （ポップオーバー・暗幕は従来DOM位置のまま）。
-   負のz-indexは禁止：.result-section/.containerはスタッキングコンテキストを
-   作らないため、ルート文脈の負のz層に沈み和紙背景の下敷きになる（2026-06-12不具合） */
-.rs-bg-clip {
-  position: absolute;
-  inset: 0;
-  clip-path: inset(0);
-  pointer-events: none;
-}
-/* バンク世界：viewport固定・等倍（スクロールしても不動、セクションが窓として滑る） */
-.rs-bg {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-}
-/* バンクの上に内容を出す（position:relative＋z-index autoは
-   スタッキングコンテキストを作らず、血判状図ポップ等の重なり関係を変えない） */
-.result-section > :not(.rs-bg-clip) {
-  position: relative;
-}
-.rs-bg .rs-bg-layer {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  opacity: 0;
-  transition: opacity 1.5s ease;
-}
-.rs-bg .rs-bg-layer.active { opacity: 1; }
-#rsbg-asa    { background-image: url('bg/bg01_asa.webp'); }
-#rsbg-hiru   { background-image: url('bg/bg02_hiru.webp'); }
-#rsbg-yoru   { background-image: url('bg/bg03_yoru.webp'); }
-#rsbg-shinya { background-image: url('bg/bg04_shinya.webp'); }
-
-/* すりガラスカード：ぼかし・ティントはCSS変数でカード単位に調整可能。
-   文字が密なカード（警告・総評）は紗を強め、装飾的なカード（ライン強度）は薄め */
-#bank-tendency-display,
-#ritsu-column,
-#ensan-kekka-section {
-  --glass-blur: 6px;
-  --glass-tint: 0.55;
-  background: rgba(var(--scrim-rgb), var(--glass-tint));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  backdrop-filter: blur(var(--glass-blur));
-  border-radius: 6px;
-}
-#bank-tendency-display { --glass-blur: 8px; --glass-tint: 0.58; }
-#ritsu-column          { --glass-blur: 8px; --glass-tint: 0.48; padding: 10px 12px; margin: 12px 0; }
-#ensan-kekka-section   { --glass-blur: 8px; --glass-tint: 0.48; }
-
-/* 赤口カードの外周すりガラス（2026-06-12裁定）。
-   外周＝最外殻（.shakkou-results-container）＋薄赤のカード地（.kiyone-section）。
-   内側のネオンデータ面（.deme-item/.chaos-item/.survival-table/.kiyone-voice/
-   .shakkou-header）は不透過のまま不触。
-   色相は元のグラデを引き継いだ暗色ティント。!importantはaddon側のbackground
-   !importantに勝つため、IDセレクタは注入styleに勝つために必要 */
-#results-container .shakkou-results-container {
-  background: transparent !important;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-#results-container .kiyone-section {
-  --glass-blur: 8px;
-  --glass-tint: 0.62;
-  background: rgba(16, 12, 8, var(--glass-tint));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  backdrop-filter: blur(var(--glass-blur));
-}
-
-/* backdrop-filter非対応環境：濃いめの不透明寄りティントへ退避 */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  #bank-tendency-display,
-  #ritsu-column,
-  #ensan-kekka-section {
-    background: rgba(var(--scrim-rgb), 0.92);
-  }
-  #results-container .shakkou-results-container {
-    background: transparent !important;
-  }
-  #results-container .kiyone-section {
-    background: rgba(16, 12, 8, 0.95);
-  }
-}
-
-/* ダークモード時のティント色（和紙ではなく現行ダークパネル色 #241e1a） */
-@media (prefers-color-scheme: dark) {
-  :root { --scrim-rgb: 36, 30, 26; }
-}
-
-/* reduced-motion：クロスフェード無効＝即時切替 */
-@media (prefers-reduced-motion: reduce) {
-  .rs-bg .rs-bg-layer { transition: none; }
-}

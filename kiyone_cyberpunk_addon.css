@@ -1,1 +1,333 @@
-/* kiyone_cyberpunk_addon.css — 統合済み。shakkou.cssを参照 */
+/* ============================================================================
+   🌌 清音専用：サイバーパンク・グリッチ配色の追加・上書き
+   既存のshakkou_donperi_display.jsのstyleElement.textContentに追加するか、
+   別途<style>タグで読み込む
+   ============================================================================ */
+
+/* ========================================
+   コンテナ・ヘッダーの再定義
+   ======================================== */
+
+.shakkou-results-container {
+    background: linear-gradient(135deg, #0a0005, #1a0a1a) !important;
+    border: 3px solid #9c27b0 !important;
+    box-shadow: 
+        0 8px 20px rgba(255, 20, 147, 0.3),
+        0 0 40px rgba(156, 39, 176, 0.2) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* グリッチ背景エフェクト（スキャンライン） */
+.shakkou-results-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(255, 20, 147, 0.03) 2px,
+            rgba(255, 20, 147, 0.03) 4px
+        );
+    pointer-events: none;
+    z-index: 1;
+    animation: scanline 8s linear infinite;
+}
+
+@keyframes scanline {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(100%); }
+}
+
+.shakkou-results-container > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* ヘッダー */
+.shakkou-header {
+    background: linear-gradient(135deg, #2d1b2e, #1a0a1a) !important;
+    border-bottom: 2px solid #e91e63 !important;
+    position: relative;
+}
+
+/* ヘッダー下部のネオングロー */
+.shakkou-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent,
+        #ff1493,
+        #00ffff,
+        #ff1493,
+        transparent
+    );
+    animation: headerGlow 3s ease-in-out infinite;
+}
+
+@keyframes headerGlow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* タイトル */
+.shakkou-title {
+    color: #ff1493 !important;
+    text-shadow: 
+        0 0 10px rgba(255, 20, 147, 0.8),
+        0 0 20px rgba(255, 20, 147, 0.4),
+        0 0 30px rgba(156, 39, 176, 0.3) !important;
+    animation: titlePulse 2s ease-in-out infinite;
+}
+
+@keyframes titlePulse {
+    0%, 100% { 
+        text-shadow: 
+            0 0 10px rgba(255, 20, 147, 0.8),
+            0 0 20px rgba(255, 20, 147, 0.4);
+    }
+    50% { 
+        text-shadow: 
+            0 0 15px rgba(255, 20, 147, 1),
+            0 0 30px rgba(255, 20, 147, 0.6),
+            0 0 45px rgba(156, 39, 176, 0.4);
+    }
+}
+
+/* サブタイトル */
+.shakkou-subtitle {
+    color: #e91e63 !important;
+    text-shadow: 0 0 5px rgba(233, 30, 99, 0.5);
+}
+
+/* ========================================
+   清音の声・コメント
+   ======================================== */
+
+.kiyone-section {
+    border-bottom: 1px solid rgba(156, 39, 176, 0.3) !important;
+}
+
+.kiyone-voice {
+    color: #ff1493 !important;
+    background: rgba(45, 27, 46, 0.4) !important;
+    border-left: 3px solid #ff1493 !important;
+    text-shadow: 0 0 5px rgba(255, 20, 147, 0.3);
+}
+
+.kiyone-comment {
+    color: #e91e63 !important;
+    border-left: 3px solid #9c27b0 !important;
+    background: rgba(45, 27, 46, 0.2) !important;
+}
+
+/* ========================================
+   セクションタイトル
+   ======================================== */
+
+.section-title {
+    color: #ff1493 !important;
+    border-bottom: 2px solid #9c27b0 !important;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* ========================================
+   出現出目
+   ======================================== */
+
+.deme-item {
+    background: rgba(26, 10, 26, 0.6) !important;
+    border: 1px solid rgba(156, 39, 176, 0.4) !important;
+    transition: all 0.3s;
+}
+
+.deme-item:hover {
+    background: rgba(45, 27, 46, 0.8) !important;
+    border-color: #ff1493 !important;
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.3);
+    transform: translateX(5px);
+}
+
+.deme-pattern {
+    color: #00ffff !important;
+    text-shadow: 
+        0 0 5px rgba(0, 255, 255, 0.8),
+        0 0 10px rgba(0, 255, 255, 0.4);
+}
+
+.deme-count {
+    color: #9c27b0 !important;
+}
+
+/* ========================================
+   因果分岐
+   ======================================== */
+
+.chaos-item {
+    background: rgba(26, 10, 26, 0.6) !important;
+    border-left: 4px solid #9c27b0 !important;
+    border: 1px solid rgba(156, 39, 176, 0.4) !important;
+    transition: all 0.3s;
+}
+
+.chaos-item:hover {
+    background: rgba(45, 27, 46, 0.8) !important;
+    border-left-color: #ff1493 !important;
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.2);
+    transform: translateX(5px);
+}
+
+.chaos-name {
+    color: #ff1493 !important;
+    text-shadow: 0 0 5px rgba(255, 20, 147, 0.4);
+}
+
+.chaos-count {
+    color: #9c27b0 !important;
+}
+
+.chaos-pattern {
+    color: #e91e63 !important;
+}
+
+.pattern-text {
+    color: #00ffff !important;
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.6);
+}
+
+.pattern-count {
+    color: #9c27b0 !important;
+}
+
+/* ========================================
+   生存濃度テーブル
+   ======================================== */
+
+.survival-table {
+    background: rgba(26, 10, 26, 0.6) !important;
+    border: 1px solid rgba(156, 39, 176, 0.4) !important;
+}
+
+.survival-table thead th {
+    background: rgba(45, 27, 46, 0.8) !important;
+    color: #ff1493 !important;
+    border-bottom: 2px solid #9c27b0 !important;
+    text-shadow: 0 0 5px rgba(255, 20, 147, 0.4);
+}
+
+.survival-table tbody td {
+    color: #e91e63 !important;
+    border-bottom: 1px solid rgba(156, 39, 176, 0.3) !important;
+}
+
+/* 1着入線列 */
+.survival-table tbody td:nth-child(2) {
+    filter: brightness(1.0);
+}
+
+/* 2着入線列 */
+.survival-table tbody td:nth-child(3) {
+    filter: brightness(0.9);
+}
+
+/* 3着入線列 */
+.survival-table tbody td:nth-child(4) {
+    filter: brightness(0.8);
+}
+
+/* 圏外（沈没）列 */
+.survival-table tbody td:nth-child(5) {
+    filter: brightness(0.7);
+}
+
+.survival-table tbody tr:hover {
+    background: rgba(45, 27, 46, 0.5) !important;
+}
+
+.car-number {
+    color: #00ffff !important;
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.6);
+}
+
+.rank-1 {
+    color: #ff1493 !important;
+    text-shadow: 0 0 5px rgba(255, 20, 147, 0.5);
+}
+
+.rank-2 {
+    color: #9c27b0 !important;
+}
+
+.rank-3 {
+    color: #00ffff !important;
+}
+
+.outside {
+    color: #666 !important;
+}
+
+/* ========================================
+   opening/closing特別スタイル
+   ======================================== */
+
+.kiyone-section.opening {
+    border-bottom: 2px solid #9c27b0 !important;
+}
+
+.kiyone-section.opening .kiyone-voice {
+    border-left-color: #ff1493 !important;
+    background: rgba(45, 27, 46, 0.5) !important;
+    box-shadow: 0 0 10px rgba(255, 20, 147, 0.1);
+}
+
+.kiyone-section.closing .kiyone-voice {
+    border-left-color: #ff1493 !important;
+    background: rgba(45, 27, 46, 0.5) !important;
+    box-shadow: 0 0 10px rgba(255, 20, 147, 0.1);
+}
+
+/* ========================================
+   進捗バー
+   ======================================== */
+
+.kiyone-calculation-start {
+    background: linear-gradient(135deg, #1a0a1a, #2d1b2e) !important;
+}
+
+.progress-bar-wrapper {
+    background: #0a0005 !important;
+    border: 2px solid #9c27b0 !important;
+    box-shadow: 
+        inset 0 2px 5px rgba(0, 0, 0, 0.5),
+        0 0 10px rgba(156, 39, 176, 0.3);
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #ff1493, #9c27b0, #00ffff, #9c27b0, #ff1493) !important;
+    background-size: 400% 100% !important;
+    animation: progressShimmer 2s ease-in-out infinite !important;
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.6);
+}
+
+@keyframes progressShimmer {
+    0% { background-position: 0% 0; }
+    50% { background-position: 100% 0; }
+    100% { background-position: 0% 0; }
+}
+
+.progress-text {
+    color: #00ffff !important;
+    text-shadow: 
+        0 0 5px rgba(0, 255, 255, 0.8),
+        0 0 10px rgba(0, 255, 255, 0.4);
+    font-weight: bold;
+}

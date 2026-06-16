@@ -1091,7 +1091,7 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
     }).sort((a, b) => b.final_score - a.final_score);
 
     if (seitenreiRanking.length < 3 || koutenreiRanking.length < 3) {
-        return { tenunIndex: 50, matchCount: null, message: 'データ不足のため指数算出不可', rankingWithData: [], koutenRankingWithData: [] };
+        return { tenunIndex: 50, message: 'データ不足のため指数算出不可', rankingWithData: [], koutenRankingWithData: [] };
     }
 
     const seitenTop3 = new Set(seitenreiRanking.slice(0, 3).map(p => p.id));
@@ -1127,7 +1127,6 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
 
     return {
         tenunIndex: tIndex,
-        matchCount: matchCount,  // Top3一致数（総評根拠行用。計算には不使用）
         message: finalHtml,
         rankingWithData: seitenreiRanking,
         koutenRankingWithData: koutenreiRanking
@@ -1162,7 +1161,7 @@ app.calculatePrediction = async function(guardedData) {
             app.logMessage(`[ROYAL] 選手${p.id}: 👑 戴冠（地力再定義)`);
         }
         return {
-            id: p.id, name: p.name, score, style: p.style, wmark: p.wmark,
+            id: p.id, score, style: p.style, wmark: p.wmark,
             recent: p.recent,
             is_s1: p.id === s1Id, is_b1: p.id === b1Id, is_scratch: p.isScratch,
             isLocal: p.isLocal,
@@ -1302,7 +1301,7 @@ app.calculatePrediction = async function(guardedData) {
         const tenkaiPattern = classifyTenkai(mv, sg, nNige, nMakuri);
         app.logMessage(`[TENKAI_PATTERN] mv=${mv.toFixed(1)} sg=${sg.toFixed(1)} nNige=${nNige} nMakuri=${nMakuri} → ${tenkaiPattern}`);
 
-        const _calcResult = displayResults(
+        displayResults(
             detailedScenarioResults,
             seitenreiResults.integratedScores,
             koutenreiResults.integratedScores,
@@ -1319,34 +1318,6 @@ app.calculatePrediction = async function(guardedData) {
             windSpeed,
             windDirection
         );
-
-        try {
-            if (typeof app.displayKeppan === 'function' && _calcResult?.relations) {
-                app.displayKeppan(_calcResult.relations);
-            }
-        } catch (e) { app.logMessage('[ERROR] displayKeppan呼び出し: ' + e.message); }
-        try {
-            if (typeof app.generateRitsuText === 'function' && _calcResult?.relations) {
-                app.generateRitsuText(_calcResult.relations);
-            }
-        } catch (e) { app.logMessage('[ERROR] generateRitsuText呼び出し: ' + e.message); }
-        try {
-            const ensanBets = generateEnsanKekka(
-                finalTenunData.rankingWithData,
-                finalTenunData.koutenRankingWithData,
-                _calcResult?.relations?.kouten?.L
-            );
-            const ensanSection = document.getElementById('ensan-kekka-section');
-            const ensanOutput  = document.getElementById('ensan-kekka-output');
-            if (ensanSection && ensanOutput) {
-                if (ensanBets.length > 0) {
-                    ensanOutput.innerHTML = ensanBets.map(b => `<div class="ensan-bet">${b}</div>`).join('');
-                    ensanSection.style.display = '';
-                } else {
-                    ensanSection.style.display = 'none';
-                }
-            }
-        } catch (e) { app.logMessage('[ERROR] generateEnsanKekka呼び出し: ' + e.message); }
 
         applyShinganHakke(basePlayers, seitenreiResults.integratedScores, koutenreiResults.integratedScores);
 
@@ -1464,8 +1435,17 @@ function applyShinganHakke(basePlayers, seitenScores, koutenScores) {
             .sort((a, b) => b.correctedScore - a.correctedScore);
     }
 
-    // 寸評カード表示（displayShinganHakke）は発注根拠のない独断実装のため
-    // 呼び出しごと除去（2026-06-11）。×1.05オーバーレイ計算とSNGNログは正規機能として上記に存置。
+    if (typeof app.displayShinganHakke === 'function') {
+        app.displayShinganHakke({
+            seitenRanked: rankPlayers(correctedSeiten),
+            koutenRanked: rankPlayers(correctedKouten),
+            scoreMin,
+            scoreThird,
+            sw,
+            hasLocal,
+            tenkaiType,
+        });
+    }
 }
 
 // displayResults
@@ -1501,8 +1481,28 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     const playerIdToScore = {};
     finalScores.forEach(p => { playerIdToScore[p.id] = p.score; });
 
-    // ライン強度グラデーション7箱は血判状図の強度ティントへ統合のため撤去（2026-06-12）。
-    // getStrengthColor / getTextColor は将来の解説カード等での再利用余地のため存置。
+    // ライン強度グラデーション
+    const lineDisplay = document.getElementById('line-display');
+    let displayHtml = '';
+
+    displayLineSegments.forEach(segment => {
+        if (segment.type === 'single') {
+            const score = playerIdToScore[segment.id];
+            if (score === undefined) return;
+            const rgb  = getStrengthColor(score, minScore, maxScore);
+            const text = getTextColor(rgb);
+            displayHtml += `<span class="line-box strength-color" style="background-color: ${rgb}; color: ${text};">${segment.id}</span>`;
+        } else if (segment.type === 'seri') {
+            const scoreF = playerIdToScore[segment.follower];
+            const scoreC = playerIdToScore[segment.contender];
+            if (scoreF === undefined || scoreC === undefined) return;
+            const rgbF = getStrengthColor(scoreF, minScore, maxScore); const textF = getTextColor(rgbF);
+            const rgbC = getStrengthColor(scoreC, minScore, maxScore); const textC = getTextColor(rgbC);
+            displayHtml += `<span class="seri-segment">(<span class="line-box strength-color" style="background-color: ${rgbF}; color: ${textF};">${segment.follower}</span><span class="seri-arrow">←</span><span class="line-box strength-color" style="background-color: ${rgbC}; color: ${textC};">${segment.contender}</span>)</span>`;
+        }
+    });
+
+    if (lineDisplay) lineDisplay.innerHTML = displayHtml;
 
     // 競りサマリー
     let seriSummaryHtml = '';
@@ -1512,7 +1512,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             const prefix = (index === 0) ? '最初の競りは、' : '<strong>さらに、</strong>';
             seriSummaryHtml += `<p>${prefix}選手<strong>${info.follower}</strong> vs 選手<strong>${info.contender}</strong>。予測勝者は **選手${info.winner}** です。</p>`;
         });
-        seriSummaryHtml += `<p style="font-size: 14px; color: #ffa726;">※体力消耗による減点補正が適用されています。</p></div>`;
+        seriSummaryHtml += `<p style="font-size: 0.9em; color: #ffa726;">※体力消耗による減点補正が適用されています。</p></div>`;
     }
 
     // 天雲指数
@@ -1593,23 +1593,22 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     if (_sgAnySwitchOn) {
         app.logMessage('[SNGN] 審眼八卦オンのためsendLogをスキップします。');
     } else {
-    // [TEST ENV] ハズレ解析GAS送信無効化
-    // App.sendLog(
-    //   {
-    //     race_id: CalculationSnapshot.race_id,
-    //     bank: document.getElementById('bank-name').value,
-    //     grade: document.getElementById('race-type').value,
-    //     wind: {
-    //       speed: parseFloat(document.getElementById('wind-speed').value) || 0,
-    //       direction: document.getElementById('wind-direction').value
-    //     },
-    //     tenun: tenunIndexData.tenunIndex
-    //   },
-    //   {
-    //     seiten: document.getElementById('seitenrei-output').innerHTML,
-    //     kouten: document.getElementById('koutenrei-output').innerHTML
-    //   }
-    // );
+    App.sendLog(
+      {
+        race_id: CalculationSnapshot.race_id,
+        bank: document.getElementById('bank-name').value,
+        grade: document.getElementById('race-type').value,
+        wind: {
+          speed: parseFloat(document.getElementById('wind-speed').value) || 0,
+          direction: document.getElementById('wind-direction').value
+        },
+        tenun: tenunIndexData.tenunIndex
+      },
+      {
+        seiten: document.getElementById('seitenrei-output').innerHTML,
+        kouten: document.getElementById('koutenrei-output').innerHTML
+      }
+    );
     } // _sgAnySwitchOn
 
     // ── relations データ出口（相関図用） ──────────────────────────────
@@ -1631,27 +1630,10 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
                 C: _seitenTop3[2] ?? null,
                 L: koutenreiBets ? (koutenreiBets.targetL ?? null) : null,
             },
-            lines:      displayLineSegments,
-            lineArrays: lines,
-            seri:       allSeriInfos.map((info, i) => ({ index: i, follower: info.follower, contender: info.contender, winner: info.winner })),
-            wind:   { speed: windSpeed, direction: windDirection, effective: (BANK_DATA[bankName]?.wind_direction_map?.[windDirection]) || '' },
-            bank:   { straight: _bankInfo.straight ?? 50, canto: _bankInfo.canto ?? 30, name: bankName, length: _bankInfo.length ?? null, wind_direction_map: _bankInfo.wind_direction_map ?? null },
-            allPlayers:     basePlayers,
-            seitenScores:   seitenreiIntegratedScores,
-            scenarioScores: (function() {
-                const MAP = { '先行有利': '逃', '差し有利': '差', '捲り有利': '捲' };
-                const out = {};
-                (allScenarioResults || []).forEach(({ scenario, results }) => {
-                    const key = MAP[scenario] || scenario;
-                    out[key] = {};
-                    (results || []).forEach(p => { out[key][p.id] = p.final_score; });
-                });
-                return out;
-            })(),
-            tenkaiPattern: tenkaiPattern,
-            raceId:        CalculationSnapshot.race_id || '',
-            tenunIndex:    tenunIndexData?.tenunIndex ?? 50,
-            tenunMatchCount: tenunIndexData?.matchCount ?? null,
+            lines:  displayLineSegments,
+            seri:   allSeriInfos.map((info, i) => ({ index: i, follower: info.follower, contender: info.contender, winner: info.winner })),
+            wind:   { speed: windSpeed, direction: windDirection },
+            bank:   { straight: _bankInfo.straight ?? 50, canto: _bankInfo.canto ?? 30, name: bankName },
         }
     };
 }
@@ -1799,36 +1781,6 @@ function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = [], k
         sanrenpuku: [[A.id, B.id, targetL.id], [A.id, C.id, targetL.id]],
         nirentan:   [[A.id, targetL.id], [targetL.id, A.id], [C.id, A.id]]
     };
-}
-
-function generateEnsanKekka(seitenRanking, koutenRanking, targetL) {
-    if (!seitenRanking || seitenRanking.length < 3) return [];
-    if (!koutenRanking || koutenRanking.length < 3) return [];
-    if (!targetL) return [];
-
-    const X = [...new Set([seitenRanking[0].id, koutenRanking[0].id])];
-    const Y = [...new Set([seitenRanking[1].id, koutenRanking[1].id])];
-    const Z = [...new Set([seitenRanking[2].id, koutenRanking[2].id])];
-    const L = targetL.id;
-
-    const combos = new Set();
-    for (const x of X) {
-        for (const y of Y) {
-            for (const z of Z) {
-                const ids = [x, y, z];
-                if (new Set(ids).size < 3) continue;
-                combos.add(ids.slice().sort((a, b) => a - b).join('='));
-            }
-        }
-    }
-    for (const x of X) {
-        for (const y of Y) {
-            const ids = [x, y, L];
-            if (new Set(ids).size < 3) continue;
-            combos.add(ids.slice().sort((a, b) => a - b).join('='));
-        }
-    }
-    return [...combos];
 }
 
 // UIイベント設定
@@ -2035,7 +1987,6 @@ const InputGuard = (() => {
             const isScratch = card.querySelector('.is-scratch')?.checked ?? false;
             result.push({
                 id       : idx,
-                name     : card.dataset.name || '',
                 isScratch,
                 score    : getScore(card, idx),
                 recent   : getRecent(card, idx),
