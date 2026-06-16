@@ -27,8 +27,8 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = event.request.url;
 
-  // HuggingFace上の外部JSはキャッシュしない（常に最新を取得）
-  if (url.includes('huggingface.co')) {
+  // 外部リソースはキャッシュしない（常に最新を取得）
+  if (url.includes('github.io') === false && !url.startsWith(self.location.origin)) {
     event.respondWith(fetch(event.request));
     return;
   }
