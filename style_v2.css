@@ -90,8 +90,9 @@ body {
   max-width: 600px;
   margin: 15px auto;
   background: var(--panel);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
-  border-radius: 4px;
+  box-shadow: none;
+  border-radius: 0;
+  border: 1px solid var(--border-2);
   padding: 0;
   box-sizing: border-box;
 }
@@ -144,7 +145,9 @@ header {
   font-size: 0.7em;
   font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
   color: var(--muted);
-  letter-spacing: 0.28em;
+  letter-spacing: 0.5em;
+  font-size: 0.65em;
+  text-transform: uppercase;
   margin: 0 auto 10px;
 }
 
@@ -191,7 +194,7 @@ header {
 h2 {
   font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.15em;
   color: var(--text);
   padding: 16px 16px 8px 24px;
   margin-top: 20px;
@@ -206,7 +209,7 @@ h2::before {
   top: 16px;
   bottom: 8px;
   width: 3px;
-  background: linear-gradient(180deg, var(--accent) 0%, var(--green) 100%);
+  background: var(--accent);
   border-radius: 2px;
 }
 
@@ -272,10 +275,10 @@ h4 {
 
 .manual-content {
   display: none;
-  padding: 15px;
+  padding: 15px 15px 15px 20px;
   margin: 0 0 15px;
-  background: var(--bg-2);
-  border-left: 3px solid var(--accent-br);
+  background: transparent;
+  border-left: 2px solid var(--accent);
   font-size: 0.88em;
   line-height: 1.65;
   color: var(--text-2);
@@ -366,11 +369,12 @@ h4 {
 .input-group {
   margin: 0 14px 18px;
   padding: 14px;
-  border-radius: 4px;
+  border-radius: 0;
   background: var(--panel);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  box-shadow: none;
   border: none;
-  border-top: 2px solid var(--accent);
+  border-top: 3px solid var(--accent);
+  border-left: 3px solid var(--accent);
   box-sizing: border-box;
   position: relative;
 }
@@ -378,10 +382,10 @@ h4 {
 .result-section {
   margin: 0 14px 18px;
   padding: 14px;
-  border-radius: 4px;
+  border-radius: 0;
   background: var(--panel);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
-  border: none;
+  box-shadow: none;
+  border: 1px solid var(--border-2);
   box-sizing: border-box;
 }
 
@@ -408,23 +412,25 @@ input[type="text"] {
   padding: 9px 11px !important;
   box-sizing: border-box !important;
   border: none !important;
-  border-radius: 3px !important;
-  background: var(--bg) !important;
+  border-bottom: 1px solid var(--border-2) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
   color: var(--text) !important;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.12) !important;
+  box-shadow: none !important;
   font-family: var(--sans) !important;
   font-size: 16px !important;
   font-variant-numeric: tabular-nums;
   appearance: none;
   -webkit-appearance: none;
-  transition: box-shadow 0.15s;
+  transition: border-color 0.15s;
   outline: none;
 }
 
 select:focus,
 input[type="number"]:focus,
 input[type="text"]:focus {
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.12), 0 0 0 2px rgba(179,138,0,0.25) !important;
+  border-bottom: 1px solid var(--accent) !important;
+  box-shadow: none !important;
 }
 
 label[for="line-input"] {
@@ -465,9 +471,9 @@ label[for="line-input"] {
 }
 
 .player-row {
-  border-radius: 4px !important;
+  border-radius: 0 !important;
   background: var(--panel) !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+  box-shadow: none !important;
   border: none !important;
   border-left: 5px solid #ccc !important;
   overflow: hidden;
@@ -584,7 +590,7 @@ label[for="line-input"] {
 .player-field input {
   padding: 6px 8px !important;
   font-size: 13px !important;
-  border-radius: 3px !important;
+  border-radius: 0 !important;
 }
 
 /* 競輪車番色（ライトモード） */
@@ -601,19 +607,19 @@ label[for="line-input"] {
    ========================================== */
 button[onclick="calculatePrediction()"] {
   display: block !important;
-  width: calc(100% - 28px) !important;
-  margin: 0 14px 14px !important;
-  padding: 14px !important;
-  background: #1e2e1e !important;
+  width: calc(100% + 28px) !important;
+  margin: 14px -14px -14px !important;
+  padding: 16px !important;
+  background: #000 !important;
   color: #fff !important;
-  border: 1px solid #384e38 !important;
-  border-radius: 2px !important;
+  border: none !important;
+  border-radius: 0 !important;
   font-family: var(--sans) !important;
   font-size: 15px !important;
   font-weight: 700 !important;
-  letter-spacing: 0.25em !important;
+  letter-spacing: 0.35em !important;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.20) !important;
+  box-shadow: none !important;
   transition: transform 0.1s ease, opacity 0.1s ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -631,7 +637,7 @@ button[onclick="calculatePrediction()"]:active {
   color: var(--muted);
   padding: 8px 10px;
   background: var(--bg-2);
-  border-radius: 4px;
+  border-radius: 0;
   margin-bottom: 12px;
   border-left: 3px solid var(--border-2);
   line-height: 1.6;
@@ -649,7 +655,7 @@ button[onclick="calculatePrediction()"]:active {
 .line-box {
   display: inline-block;
   padding: 4px 10px;
-  border-radius: 4px;
+  border-radius: 0;
   font-weight: bold;
   font-size: 1em;
   transition: all 0.3s ease;
@@ -682,7 +688,7 @@ button[onclick="calculatePrediction()"]:active {
 #tenun-index-output {
   background: var(--amber-bg) !important;
   border: 1px solid var(--amber-br) !important;
-  border-radius: 4px;
+  border-radius: 0;
   padding: 12px !important;
   margin: 8px 0;
 }
@@ -708,7 +714,7 @@ button[onclick="calculatePrediction()"]:active {
 #seitenrei-output {
   background: var(--green-bg) !important;
   border-left: 4px solid var(--green) !important;
-  border-radius: 4px;
+  border-radius: 0;
   padding: 12px !important;
   color: var(--text) !important;
   margin: 8px 0;
@@ -717,7 +723,7 @@ button[onclick="calculatePrediction()"]:active {
 #koutenrei-output {
   background: var(--red-bg) !important;
   border-left: 4px solid var(--red) !important;
-  border-radius: 4px;
+  border-radius: 0;
   padding: 12px !important;
   color: var(--text) !important;
   margin: 8px 0;
@@ -726,7 +732,7 @@ button[onclick="calculatePrediction()"]:active {
 #scenario-output {
   background: var(--purple-bg) !important;
   border: 1px solid var(--purple-br) !important;
-  border-radius: 4px;
+  border-radius: 0;
   padding: 12px !important;
   margin: 8px 0;
   color: var(--text);
@@ -781,7 +787,7 @@ button[onclick="calculatePrediction()"]:active {
 .btn-share-box {
   width: 36px !important;
   height: 36px !important;
-  border-radius: 4px !important;
+  border-radius: 0 !important;
   border: 1px solid var(--border-2) !important;
   background: var(--panel) !important;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
@@ -813,7 +819,7 @@ button[onclick="calculatePrediction()"]:active {
   border-color: rgba(200,57,47,0.4) !important;
   padding: 6px 18px;
   border: 1px solid rgba(200,57,47,0.4);
-  border-radius: 4px;
+  border-radius: 0;
   text-decoration: none;
   transition: border-color 0.15s, color 0.15s;
 }
@@ -841,7 +847,7 @@ button[onclick="calculatePrediction()"]:active {
   color: var(--accent) !important;
   padding: 6px 18px !important;
   border: 1px solid var(--accent-br) !important;
-  border-radius: 4px !important;
+  border-radius: 0 !important;
   background: transparent !important;
   text-decoration: none !important;
   transition: border-color 0.15s, color 0.15s;
@@ -924,10 +930,7 @@ footer.copyright-footer {
   }
 
   body {
-    background:
-      radial-gradient(ellipse at 50% 0%, rgba(200,57,47,0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 100%, rgba(122,155,133,0.04) 0%, transparent 50%),
-      #1c1815;
+    background: #1c1815;
     color: var(--text);
   }
 
@@ -942,7 +945,7 @@ footer.copyright-footer {
   }
 
   h2::before {
-    background: linear-gradient(180deg, #c8392f, #7a9b85) !important;
+    background: #c8392f !important;
   }
 
   h2::after {
@@ -990,24 +993,26 @@ footer.copyright-footer {
   .input-group {
     background: var(--panel) !important;
     box-shadow: none !important;
-    border: 0.5px solid rgba(255,255,255,0.10) !important;
-    border-top: 2px solid #c8392f !important;
+    border: none !important;
+    border-top: 3px solid #c8392f !important;
+    border-left: 3px solid #c8392f !important;
   }
 
   select,
   input[type="number"],
   input[type="text"] {
-    background: #f0e8d8 !important;
-    border: 0.5px solid rgba(255,255,255,0.12) !important;
-    color: #1a1612 !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.25) !important;
+    color: var(--text) !important;
     box-shadow: none !important;
   }
 
   select:focus,
   input[type="number"]:focus,
   input[type="text"]:focus {
-    border-color: #c8392f !important;
-    box-shadow: 0 0 0 2px rgba(200,57,47,0.2) !important;
+    border-bottom: 1px solid #c8392f !important;
+    box-shadow: none !important;
   }
 
   label {
@@ -1017,8 +1022,8 @@ footer.copyright-footer {
   .player-row {
     background: var(--panel) !important;
     box-shadow: none !important;
-    border: 0.5px solid rgba(255,255,255,0.10) !important;
-    border-left-width: 5px !important;
+    border: none !important;
+    border-left: 5px solid rgba(255,255,255,0.15) !important;
   }
 
   .player-header {
@@ -1036,9 +1041,9 @@ footer.copyright-footer {
   .player-row.id-7 { border-left-color: #f39c12 !important; }
 
   button[onclick="calculatePrediction()"] {
-    background: #7a1e18 !important;
-    border-color: #c8392f !important;
-    box-shadow: 0 0 20px rgba(200,57,47,0.30), 0 4px 12px rgba(0,0,0,0.4) !important;
+    background: #c8392f !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   .result-section {

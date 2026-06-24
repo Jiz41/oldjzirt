@@ -9,10 +9,8 @@
 
 .shakkou-results-container {
     background: linear-gradient(135deg, #0a0005, #1a0a1a) !important;
-    border: 3px solid #9c27b0 !important;
-    box-shadow:
-        0 8px 20px rgba(255, 20, 147, 0.3),
-        0 0 40px rgba(156, 39, 176, 0.2) !important;
+    border: 2px solid #9c27b0 !important;
+    box-shadow: none !important;
     position: relative;
     overflow: hidden;
 }
