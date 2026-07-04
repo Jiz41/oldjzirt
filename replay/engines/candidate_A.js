@@ -1,12 +1,7 @@
 (function(app) {
 
-// 真自在律 Ver10.23
-// LOGIC VERSION: 10.23
-// 【V10.23】generateSeitenreiBets() をV10.15版に復元（リプレイ台 replay/ による718レース実測で決定）。
-//           根拠: V10.16〜V10.21の展開パターン買い目はr2選出窓を失い変換率を毀損。
-//           実測: 現行31.8%/回収56.5% → 本版34.3%/回収71.7%（2026-05-17〜07-04, 実払戻精算）。
-//           r2選出: スコア3〜5位から ①追×(△/◎) → ②追 → ③スコア順先頭。特異点L除外なし。
-//           classifyTenkai/selectR2 は展開モードスコア補正・表示用に存置（買い目からは切断）。
+// 真自在律 Ver10.22
+// LOGIC VERSION: 10.22
 // 【V10.22】displayResults()にwindSpeed/windDirection引数を追加し、relationsデータをreturnに追加。
 // 【V10.21】荒天令A/B/C順序バグ修正: seitenSelectedIds を sanrenpuku[0](車番ソート)→sanrentan[0](スコア順)に変更。
 // 【V10.20】generateSeitenreiBets() を selectR2() 分離構造に刷新。展開パターンはr2選出基準のみに影響。
@@ -1712,7 +1707,6 @@ function selectR2(ranking, basePlayers, tenkaiPattern, excludeIds) {
     return r2 || candidates[0] || null;
 }
 
-// 【V10.23】V10.15版を復元。追加引数（basePlayers/tenkaiPattern/excludeL）は受けるが使用しない。
 function generateSeitenreiBets(ranking) {
     if (!ranking || ranking.length < 3) return null;
     const top2Ids = new Set([ranking[0].id, ranking[1].id]);

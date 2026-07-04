@@ -1,12 +1,7 @@
 (function(app) {
 
-// 真自在律 Ver10.23
-// LOGIC VERSION: 10.23
-// 【V10.23】generateSeitenreiBets() をV10.15版に復元（リプレイ台 replay/ による718レース実測で決定）。
-//           根拠: V10.16〜V10.21の展開パターン買い目はr2選出窓を失い変換率を毀損。
-//           実測: 現行31.8%/回収56.5% → 本版34.3%/回収71.7%（2026-05-17〜07-04, 実払戻精算）。
-//           r2選出: スコア3〜5位から ①追×(△/◎) → ②追 → ③スコア順先頭。特異点L除外なし。
-//           classifyTenkai/selectR2 は展開モードスコア補正・表示用に存置（買い目からは切断）。
+// 真自在律 Ver10.22
+// LOGIC VERSION: 10.22
 // 【V10.22】displayResults()にwindSpeed/windDirection引数を追加し、relationsデータをreturnに追加。
 // 【V10.21】荒天令A/B/C順序バグ修正: seitenSelectedIds を sanrenpuku[0](車番ソート)→sanrentan[0](スコア順)に変更。
 // 【V10.20】generateSeitenreiBets() を selectR2() 分離構造に刷新。展開パターンはr2選出基準のみに影響。
@@ -1712,7 +1707,6 @@ function selectR2(ranking, basePlayers, tenkaiPattern, excludeIds) {
     return r2 || candidates[0] || null;
 }
 
-// 【V10.23】V10.15版を復元。追加引数（basePlayers/tenkaiPattern/excludeL）は受けるが使用しない。
 function generateSeitenreiBets(ranking) {
     if (!ranking || ranking.length < 3) return null;
     const top2Ids = new Set([ranking[0].id, ranking[1].id]);
@@ -1740,7 +1734,7 @@ function generateSeitenreiBets(ranking) {
 function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = [], koutenRanking = []) {
     if (!ranking || ranking.length < 4) return null;
     const A = ranking[0], B = ranking[1], C = ranking[2];
-    const excludeIds = new Set([A.id, B.id, C.id, ...seitenTop3Ids]);
+    const top3Ids = new Set([A.id, B.id, C.id]);
 
     // ラインTOP（逃/自/両）のID集合
     const lineTops = new Set(
@@ -1754,7 +1748,9 @@ function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = [], k
     );
 
     // 荒天令スコア順から晴天令TOP3・top3を除いた候補リスト
-    const koutenCandidates = koutenRanking.filter(p => !excludeIds.has(p.id));
+    const koutenCandidates = koutenRanking.filter(p =>
+        !seitenTop3Ids.has(p.id) && !top3Ids.has(p.id)
+    );
 
     // ① 荒天令上位 かつ ラインTOP（逃/自/両）
     let targetL = koutenCandidates.find(p => lineTops.has(p.id)) || null;
@@ -1767,7 +1763,7 @@ function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = [], k
         let lCandidates = [];
         if (lineTops.size > 0) {
             lCandidates = [...lineTops]
-                .filter(id => !excludeIds.has(id))
+                .filter(id => !seitenTop3Ids.has(id) && !top3Ids.has(id))
                 .map(id => {
                     const p = ranking.find(p => p.id === id) || {};
                     let s = (p.final_score || 0) / 10;
@@ -1777,20 +1773,19 @@ function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = [], k
                 });
         }
         if (lCandidates.length === 0) {
-            lCandidates = ranking
-                .filter(p => !excludeIds.has(p.id))
-                .map(p => {
-                    let s = p.final_score / 10;
-                    if (p.is_b1) s += 10;
-                    if (p.is_s1) s += 5;
-                    if (['逃','自'].includes(p.style)) s += 3;
-                    return { ...p, lScore: s };
-                });
+            lCandidates = ranking.slice(3).filter(p =>
+                !seitenTop3Ids.has(p.id) && !top3Ids.has(p.id)
+            ).map(p => {
+                let s = p.final_score / 10;
+                if (p.is_b1) s += 10;
+                if (p.is_s1) s += 5;
+                if (['逃','自'].includes(p.style)) s += 3;
+                return { ...p, lScore: s };
+            });
         }
         lCandidates.sort((a, b) => b.lScore - a.lScore);
         targetL = lCandidates[0] || null;
     }
-    if (!targetL) return null;
     return {
         targetL,
         sanrenpuku: [[A.id, B.id, targetL.id], [A.id, C.id, targetL.id]],
