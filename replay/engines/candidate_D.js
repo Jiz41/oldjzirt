@@ -1,8 +1,7 @@
 (function(app) {
 
-// 真自在律 Ver10.24
-// LOGIC VERSION: 10.24
-// 【V10.24】特異点L除外を復活（二世界分離思想の維持）。実測35.4%/78.5%でV10.23を上回る。
+// 真自在律 Ver10.23
+// LOGIC VERSION: 10.23
 // 【V10.23】generateSeitenreiBets() をV10.15版に復元（リプレイ台 replay/ による718レース実測で決定）。
 //           根拠: V10.16〜V10.21の展開パターン買い目はr2選出窓を失い変換率を毀損。
 //           実測: 現行31.8%/回収56.5% → 本版34.3%/回収71.7%（2026-05-17〜07-04, 実払戻精算）。
@@ -1713,13 +1712,12 @@ function selectR2(ranking, basePlayers, tenkaiPattern, excludeIds) {
     return r2 || candidates[0] || null;
 }
 
-// 【V10.24】V10.23＋特異点L除外を復活（晴天令と荒天令の二世界分離思想）。
-//           リプレイ実測: L除外なし34.3%/71.7% → L除外あり35.4%/78.5%。思想と数字が一致。
+// 【candidate_D】V10.23 ＋ 特異点L除外（二世界分離思想の維持）
 function generateSeitenreiBets(ranking, basePlayers, tenkaiPattern, excludeL = null) {
     if (!ranking || ranking.length < 3) return null;
     const top2Ids = new Set([ranking[0].id, ranking[1].id]);
 
-    // r[2]: 3〜5位の中から ① 追×(△か◎) → ② 追 → ③ スコア順先頭（特異点Lは窓から除外）
+    // r[2]: 3〜5位の中から ① 追×(△か◎) → ② 追 → ③ スコア順先頭（Lは窓から除外）
     const rest    = ranking.slice(2).filter(p => !top2Ids.has(p.id) && (excludeL == null || p.id !== excludeL));
     const topRest = rest.slice(0, 3);
     const cand1   = topRest.filter(p => p.style === '追' && ['△','◎'].includes(p.wmark));
