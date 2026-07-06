@@ -945,8 +945,9 @@ footer.copyright-footer {
     color: var(--text) !important;
   }
 
+  /* 朱柱の頭に金の斗栱 */
   h2::before {
-    background: #c8392f !important;
+    background: linear-gradient(180deg, #d4a13a 0%, #d4a13a 22%, #c8392f 22%, #c8392f 100%) !important;
   }
 
   h2::after {
@@ -1000,11 +1001,12 @@ footer.copyright-footer {
     border: 1px solid rgba(255,255,255,0.07);
   }
 
+  /* 入力欄：朱の柱に金の梁 */
   .input-group {
     background: var(--panel) !important;
     box-shadow: none !important;
     border: none !important;
-    border-top: 3px solid #c8392f !important;
+    border-top: 1px solid rgba(212,161,58,0.55) !important;
     border-left: 3px solid #c8392f !important;
   }
 
@@ -1050,10 +1052,17 @@ footer.copyright-footer {
   .player-row.id-6 { border-left-color: #5a965a !important; }
   .player-row.id-7 { border-left-color: #f39c12 !important; }
 
+  /* 鳥居ボタン：朱の楼門に金の梁 */
   button[onclick="calculatePrediction()"] {
-    background: #c8392f !important;
+    background: linear-gradient(180deg, #d24237 0%, #b02f26 100%) !important;
     border: none !important;
-    box-shadow: none !important;
+    border-top: 3px solid #d4a13a !important;
+    border-bottom: 3px solid #d4a13a !important;
+    padding: 18px 16px !important;
+    font-size: 16px !important;
+    letter-spacing: 0.45em !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+    box-shadow: 0 4px 14px rgba(200,57,47,0.35) !important;
   }
 
   .result-section {
