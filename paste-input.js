@@ -444,9 +444,8 @@
     transition: filter 0.1s;
 }
 .proxy-btn-race:active { filter: brightness(0.85); }
-@media (prefers-color-scheme: light) {
-    #proxy-input-content { color: #ffffff; }
-}
+/* 意匠固定に伴いOS設定分岐を廃止（旧: lightモード時のみ白字にする応急パッチ） */
+#proxy-input-content { color: #ffffff; }
     `;
     document.head.appendChild(style);
 

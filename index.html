@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="app-version" content="2.1.8">
+    <meta name="app-version" content="2.2.0">
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="./style_v2.css">
 
@@ -34,7 +34,7 @@
 <script>
 (function(){
   /* --- 下部固定ナビバー --- */
-  var isDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var isDark=true; /* 意匠固定（常夜灯モード）: OS設定への追従を廃止 */
   var colorNormal =isDark?'#efe5d2':'#1a1612';
   var bgNormal    =isDark?'rgba(200,57,47,0.10)':'rgba(184,54,42,0.08)';
   var borderStyle =isDark?'1px solid rgba(200,57,47,0.4)':'1px solid rgba(184,54,42,0.35)';

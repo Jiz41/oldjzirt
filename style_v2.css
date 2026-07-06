@@ -889,9 +889,10 @@ footer.copyright-footer {
 }
 
 /* ==========================================
-   ダークモード（prefers-color-scheme: dark）
+   常夜灯モード（意匠固定：漆×朱×金）
+   旧: prefers-color-scheme: dark 追従 → 全端末で常設
    ========================================== */
-@media (prefers-color-scheme: dark) {
+@media all {
   :root {
     --bg:        #1c1815;
     --bg-2:      #241e1a;
@@ -949,7 +950,16 @@ footer.copyright-footer {
   }
 
   h2::after {
-    background: linear-gradient(90deg, rgba(200,57,47,0.4), transparent) !important;
+    background: linear-gradient(90deg, rgba(200,57,47,0.4), rgba(212,161,58,0.25), transparent) !important;
+  }
+
+  /* 金の差し色：社殿の飾り金具 */
+  .subtitle {
+    color: var(--gold);
+  }
+
+  .title-image {
+    border-bottom: 2px solid rgba(212,161,58,0.45);
   }
 
   a {
