@@ -1,13 +1,21 @@
 (function(app) {
 
-// 真自在律 Ver10.24
-// LOGIC VERSION: 10.24
-// 【V10.24】特異点L除外を復活（二世界分離思想の維持）。実測35.4%/78.5%でV10.23を上回る。
-// 【V10.23】generateSeitenreiBets() をV10.15版に復元（リプレイ台 replay/ による718レース実測で決定）。
-//           根拠: V10.16〜V10.21の展開パターン買い目はr2選出窓を失い変換率を毀損。
-//           実測: 現行31.8%/回収56.5% → 本版34.3%/回収71.7%（2026-05-17〜07-04, 実払戻精算）。
-//           r2選出: スコア3〜5位から ①追×(△/◎) → ②追 → ③スコア順先頭。特異点L除外なし。
-//           classifyTenkai/selectR2 は展開モードスコア補正・表示用に存置（買い目からは切断）。
+// 真自在律 Ver11.2.0
+// LOGIC VERSION: 11.2.0
+// 【V11.2.0】K2採用：晴天令の合成における競走得点項を二乗（1188行、1行変更）。
+//            リプレイ実測718R: 的中35.4%→34.5% / 回収78.5%→86.9%、拡張93R OOS: 61.4%→70.2%。
+//            回収優先の合意に基づき採用。荒天令・買い目生成は不変。
+// 【V11.1.1】getScenarioCoeffs() のシナリオ係数テーブルをV10系の値に復元。
+//            V11.0.1の3キー改訂（逃ブースト・追減点）を撤回。キー構造は3キーのまま値のみ復元。
+//            検証環境のリプレイ実測（718R・実払戻精算）に基づく採用。
+// 【V11.1.0】買い目生成（generateSeitenreiBets）を検証環境で確立したV10.24版に差し替え。
+//            3番手選出をスコア3〜5位窓に限定（追×(△/◎)→追→スコア順、特異点Lは窓から除外）。
+//            検証環境のリプレイ実測（718R・実払戻精算）に基づく採用。
+// 【V11.0.1】getScenarioCoeffs() シナリオ係数を脚質3種対応に改訂。
+//            旧: 自在・追込の2キーのみ（逃げは|| 1.0フォールバック）
+//            新: 逃・自・追の3キーを明示。先行有利→逃×1.05/自×1.03/追×1.00、
+//            捲り有利→逃×1.00/自×1.08/追×1.03、差し有利→逃×1.00/自×0.97/追×1.06。
+// 【v11.0.0】ロジックは変えてないけどUIを大幅変更
 // 【V10.22】displayResults()にwindSpeed/windDirection引数を追加し、relationsデータをreturnに追加。
 // 【V10.21】荒天令A/B/C順序バグ修正: seitenSelectedIds を sanrenpuku[0](車番ソート)→sanrentan[0](スコア順)に変更。
 // 【V10.20】generateSeitenreiBets() を selectR2() 分離構造に刷新。展開パターンはr2選出基準のみに影響。
@@ -92,7 +100,7 @@
 // 【V7.3】消耗ペナルティ適用拡大 ＆ 複数競り表示修正。
 // ------------------------------------------------------------------------------------
 
-app.LOGIC_VERSION = '10.16';
+app.LOGIC_VERSION = '11.0.1';
 
 // R_BIAS       : 競走得点の影響度スケール（S級は得点差が直結、チャレンジは薄める）
 // RECENT_WEIGHT: 近況着順の重み（チャレンジは調子ムラが大きいので上げる）
@@ -127,6 +135,243 @@ const SERI_FATIGUE_PENALTY_OUT = 0.25;
 const SERI_WIN_BONUS           = 0.05;
 const LOCAL_BONUS              = 1.03;
 
+// ====================================================================================
+// ✦ 無垢関数域 ── 副作用を持たない純粋関数群
+//   DOM・グローバル変数・CalculationSnapshot に触れない
+//   どの呼び出し元からも参照可能（function 宣言によるホイスト有効）
+// ====================================================================================
+
+function getPlayerPositions(lines) {
+    const positionMap = {};
+    let globalPosition = 1;
+
+    lines.forEach(line => {
+        line.forEach((id, localPos) => {
+            let label = '後方';
+            if (localPos === 0)      label = '先行';
+            else if (localPos === 1) label = '番手';
+            else if (localPos === 2) label = '3番手';
+
+            positionMap[id] = {
+                position: globalPosition,
+                label: label,
+                linePosition: localPos  // ライン内相対位置
+            };
+            globalPosition++;
+        });
+    });
+
+    return positionMap;
+}
+
+function getScenarioCoeffs(scenario) {
+    if (scenario === '先行有利') return { '逃': 1.00, '自': 1.05, '追': 1.02 };
+    if (scenario === '捲り有利') return { '逃': 1.00, '自': 1.00, '追': 1.05 };
+    if (scenario === '差し有利') return { '逃': 1.00, '自': 0.90, '追': 1.08 };
+    return { '逃': 1.0, '自': 1.0, '追': 1.0 };
+}
+
+function getStrengthColor(score, minScore, maxScore) {
+    if (maxScore === minScore) return 'rgb(142, 142, 142)';
+    const n = (score - minScore) / (maxScore - minScore);
+    const r = Math.round(52  + (231 - 52)  * n);
+    const g = Math.round(152 + (76  - 152) * n);
+    const b = Math.round(219 + (60  - 219) * n);
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
+function getTextColor(rgbColor) {
+    const match = rgbColor.match(/\d+/g);
+    if (!match || match.length < 3) return '#fff';
+    const luminance = (0.2126 * parseInt(match[0]) + 0.7152 * parseInt(match[1]) + 0.0722 * parseInt(match[2])) / 255;
+    return luminance > 0.5 ? '#333' : '#fff';
+}
+
+function formatOrderedBet(bet)  { return bet.join('-'); }
+function formatSanrenpuku(bet)  { return bet.slice().sort((a, b) => a - b).join('='); }
+
+function applyLineCountBonus(integratedScores, lines) {
+  const LINE_BONUS = { 4: 1.08, 3: 1.04 };
+  const bonusMap = {};
+  (lines || []).forEach(line => {
+    const bonus = LINE_BONUS[line.length] || 1.00;
+    line.forEach(id => { bonusMap[id] = bonus; });
+  });
+  const result = {};
+  Object.keys(integratedScores).forEach(id => {
+    result[id] = integratedScores[id] * (bonusMap[Number(id)] || 1.00);
+  });
+  return result;
+}
+
+function classifyTenkai(mv, sg, nNige, nMakuri) {
+  const oc = (lo, v, hi) => lo < v && v <= hi;  // (lo, hi]
+  const co = (lo, v, hi) => lo <= v && v < hi;  // [lo, hi)
+
+  const rules = [
+    [() => sg <= -5,                                                          '逃げ圧勝'],
+    [() => oc(-5,sg,0) && nNige >= 2,                                         'ちょい差し'],
+    [() => sg >= 10,                                                          '別線差し'],
+    [() => mv >= 5,                                                           '捲り'],
+    [() => mv<0  && oc(5,sg,10)  && nNige===1 && nMakuri===0,                '別線差し'],
+    [() => mv<0  && oc(0,sg,5)   && nNige===1 && nMakuri===0,                '別線差し'],
+    [() => mv<0  && oc(-5,sg,0)  && nNige===1 && nMakuri===1,                '逃げ圧勝'],
+    [() => co(0,mv,5) && oc(0,sg,5)  && nNige>=2  && nMakuri===1,            '捲り'],
+    [() => co(0,mv,5) && oc(5,sg,10) && nNige===1 && nMakuri===1,            '別線差し'],
+    [() => mv<0  && oc(-5,sg,0)  && nNige===1 && nMakuri===2,                '逃げ圧勝'],
+    [() => mv<0  && oc(0,sg,5)   && nNige===2 && nMakuri===0,                '別線差し'],
+    [() => mv<0  && oc(-5,sg,0)  && nNige===1 && nMakuri===0,                '逃げ圧勝'],
+    [() => mv<0  && oc(0,sg,5)   && nNige>=3  && nMakuri===0,                '逃げ圧勝'],
+    [() => co(0,mv,5) && oc(0,sg,5)  && nNige===1 && nMakuri===2,            '別線差し'],
+    [() => mv<0  && oc(0,sg,5)   && nNige===1 && nMakuri===1,                '別線差し'],
+    [() => mv<0  && oc(0,sg,5)   && nNige===2 && nMakuri===1,                '別線差し'],
+    [() => co(0,mv,5) && oc(0,sg,5)  && nNige===1 && nMakuri===1,            '捲り'],
+    [() => co(0,mv,5) && oc(5,sg,10) && nNige===1 && nMakuri===2,            '捲り'],
+  ];
+
+  return rules.find(([cond]) => cond())?.[1] ?? '現状';
+}
+
+function selectR2(ranking, basePlayers, tenkaiPattern, excludeIds) {
+    const baseMap = Object.fromEntries((basePlayers || []).map(p => [p.id, p]));
+    const styleOf = id => { const s = baseMap[id]?.style || ''; return s === '両' ? '自' : s; };
+    const clOf    = p  => p.c_l || baseMap[p.id]?.c_l || 1.0;
+    const candidates = ranking.filter(p => !excludeIds.has(p.id));
+
+    let r2 = null;
+    if (tenkaiPattern === '逃げ圧勝') {
+        r2 = candidates.find(p => styleOf(p.id) === '追' && clOf(p) > 1.0) || null;
+    } else if (tenkaiPattern === 'ちょい差し') {
+        const sashi = candidates.filter(p => styleOf(p.id) === '追')
+            .sort((a, b) => clOf(b) - clOf(a));
+        r2 = sashi[0] || null;
+    } else if (tenkaiPattern === '別線差し') {
+        r2 = candidates.find(p => ['追', '自'].includes(styleOf(p.id))) || null;
+    } else if (tenkaiPattern === '捲り') {
+        r2 = candidates.find(p => styleOf(p.id) === '自') || null;
+    }
+    return r2 || candidates[0] || null;
+}
+
+function generateSeitenreiBets(ranking, basePlayers, tenkaiPattern, excludeL = null) {
+    if (!ranking || ranking.length < 3) return null;
+    const top2Ids = new Set([ranking[0].id, ranking[1].id]);
+
+    // r[2]: 3〜5位の中から ① 追×(△か◎) → ② 追 → ③ スコア順先頭（特異点Lは窓から除外）
+    const rest    = ranking.slice(2).filter(p => !top2Ids.has(p.id) && (excludeL == null || p.id !== excludeL));
+    const topRest = rest.slice(0, 3);
+    const cand1   = topRest.filter(p => p.style === '追' && ['△','◎'].includes(p.wmark));
+    const cand2   = topRest.filter(p => p.style === '追');
+    const r2      = cand1[0] || cand2[0] || topRest[0];
+    if (!r2) return null;
+
+    const r = [ranking[0].id, ranking[1].id, r2.id];
+    return {
+        sanrentan: [
+            [r[0], r[1], r[2]],
+            [r[0], r[2], r[1]],
+            [r[1], r[0], r[2]],
+            [r[1], r[2], r[0]]
+        ],
+        sanrenpuku: [[r[0], r[1], r[2]]]
+    };
+}
+
+function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = [], koutenRanking = []) {
+    if (!ranking || ranking.length < 4) return null;
+    const A = ranking[0], B = ranking[1], C = ranking[2];
+    const excludeIds = new Set([A.id, B.id, C.id, ...seitenTop3Ids]);
+
+    // ラインTOP（逃/自/両）のID集合
+    const lineTops = new Set(
+        lines
+            .filter(line => line.length > 0)
+            .map(line => line[0])
+            .filter(id => {
+                const p = ranking.find(p => p.id === id);
+                return p && ['逃','自'].includes(p.style);
+            })
+    );
+
+    // 荒天令スコア順から晴天令TOP3・top3を除いた候補リスト
+    const koutenCandidates = koutenRanking.filter(p => !excludeIds.has(p.id));
+
+    // ① 荒天令上位 かつ ラインTOP（逃/自/両）
+    let targetL = koutenCandidates.find(p => lineTops.has(p.id)) || null;
+
+    // ② 荒天令上位の先頭（脚質不問）
+    if (!targetL) targetL = koutenCandidates[0] || null;
+
+    // ③ フォールバック：現行ラインTOP優先 → 逃/自+3ボーナス
+    if (!targetL) {
+        let lCandidates = [];
+        if (lineTops.size > 0) {
+            lCandidates = [...lineTops]
+                .filter(id => !excludeIds.has(id))
+                .map(id => {
+                    const p = ranking.find(p => p.id === id) || {};
+                    let s = (p.final_score || 0) / 10;
+                    if (p.is_b1) s += 10;
+                    if (p.is_s1) s += 5;
+                    return { ...p, lScore: s };
+                });
+        }
+        if (lCandidates.length === 0) {
+            lCandidates = ranking
+                .filter(p => !excludeIds.has(p.id))
+                .map(p => {
+                    let s = p.final_score / 10;
+                    if (p.is_b1) s += 10;
+                    if (p.is_s1) s += 5;
+                    if (['逃','自'].includes(p.style)) s += 3;
+                    return { ...p, lScore: s };
+                });
+        }
+        lCandidates.sort((a, b) => b.lScore - a.lScore);
+        targetL = lCandidates[0] || null;
+    }
+    if (!targetL) return null;
+    return {
+        targetL,
+        sanrenpuku: [[A.id, B.id, targetL.id], [A.id, C.id, targetL.id]],
+        nirentan:   [[A.id, targetL.id], [targetL.id, A.id], [C.id, A.id]]
+    };
+}
+
+function generateEnsanKekka(seitenRanking, koutenRanking, targetL) {
+    if (!seitenRanking || seitenRanking.length < 3) return [];
+    if (!koutenRanking || koutenRanking.length < 3) return [];
+    if (!targetL) return [];
+
+    const X = [...new Set([seitenRanking[0].id, koutenRanking[0].id])];
+    const Y = [...new Set([seitenRanking[1].id, koutenRanking[1].id])];
+    const Z = [...new Set([seitenRanking[2].id, koutenRanking[2].id])];
+    const L = targetL.id;
+
+    const combos = new Set();
+    for (const x of X) {
+        for (const y of Y) {
+            for (const z of Z) {
+                const ids = [x, y, z];
+                if (new Set(ids).size < 3) continue;
+                combos.add(ids.slice().sort((a, b) => a - b).join('='));
+            }
+        }
+    }
+    for (const x of X) {
+        for (const y of Y) {
+            const ids = [x, y, L];
+            if (new Set(ids).size < 3) continue;
+            combos.add(ids.slice().sort((a, b) => a - b).join('='));
+        }
+    }
+    return [...combos];
+}
+
+// ====================================================================================
+// ✦ 無垢関数域 ここまで
+// ====================================================================================
+
 // --- 外れ解剖：係数スナップショット領域 ---
 let CalculationSnapshot = {};
 
@@ -148,6 +393,7 @@ resetSnapshot();
 app.getCurrentCoefficients = () => JSON.parse(JSON.stringify(CalculationSnapshot));
 app.resetSnapshot = resetSnapshot;
 app.setRaceId = function(id) { app.logMessage(`[DEBUG setRaceId] 受信id: ${id} / 変更前: ${CalculationSnapshot.race_id}`); CalculationSnapshot.race_id = id; app.logMessage(`[DEBUG setRaceId] 変更後 CalculationSnapshot.race_id: ${CalculationSnapshot.race_id}`); };
+// 【封印中・要確認】未接続のまま保持（2026-05-25確定）。封印理由は applyPhysicalPenalty 定義部コメント参照。
 app.applyPhysicalPenalty    = applyPhysicalPenalty;
 app.applyTacticalAdjustments = applyTacticalAdjustments;
 app.getKururuAdjustment     = getKururuAdjustment;
@@ -245,34 +491,17 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA,
     CalculationSnapshot.wind_physics = { finalAdj: finalAdj, v: v };
     return { adj: finalAdj, v: v };
 }
-// ====================================================================================
-
-function getPlayerPositions(lines) {
-    const positionMap = {};
-    let globalPosition = 1;
-
-    lines.forEach(line => {
-        line.forEach((id, localPos) => {
-            let label = '後方';
-            if (localPos === 0)      label = '先行';
-            else if (localPos === 1) label = '番手';
-            else if (localPos === 2) label = '3番手';
-
-            positionMap[id] = {
-                position: globalPosition,
-                label: label,
-                linePosition: localPos  // ライン内相対位置
-            };
-            globalPosition++;
-        });
-    });
-
-    return positionMap;
-}
 
 // ====================================================================================
 // 物理層：直線長ペナルティ（V9.0）
 // ====================================================================================
+// 【封印中・要確認】この関数は本計算経路（runScenarioSimulation）から呼ばれていない。
+// 2026-05-25、データ不足を理由に意図的に未接続のまま保持することを確定。
+// 理由：
+//   - 検証データ1,021件中、直線35m未満バンクが0件（松戸・奈良・小田原等のデータ欠如）
+//   - 35〜50mバンクへの係数も弱すぎてランク変化がほぼ起きない（中央値0.56%減衰）
+// 35m未満バンクのデータが十分に蓄積されるまで、この関数に触れないこと。
+// 接続・係数調整・削除のいずれも「挙動変更」に該当するため、必ず要確認の上触ること。
 function applyPhysicalPenalty(players, bankData, lines) {
     const straight = (bankData && bankData.straight_deviation != null)
         ? bankData.straight_deviation
@@ -542,7 +771,7 @@ function parseLineInput(lineInput, allPlayers) {
 // ====================================================================================
 // calculateLineCoeffs  ★ C_L改修版
 // ====================================================================================
-function calculateLineCoeffs(players, settings) {
+function calculateLineCoeffs(players, settings, lineInput) {
 
     // 1. 欠場除外
     const participatingPlayers = players.filter(p => !p.is_scratch);
@@ -554,7 +783,6 @@ function calculateLineCoeffs(players, settings) {
     }
 
     // 2. ライン解析
-    const lineInput = document.getElementById('line-input').value;
     app.logMessage(`[PARSE] ライン入力解析: ${lineInput}`);
     const {
         lines: initialLines,
@@ -686,49 +914,6 @@ function applySeriCorrection(scoredPlayers, allSeriInfos, silent) {
 }
 
 // ====================================================================================
-// getScenarioCoeffs
-// ====================================================================================
-function getScenarioCoeffs(scenario) {
-    if (scenario === '先行有利') return { '自': 1.05, '追': 1.02 };
-    if (scenario === '捲り有利') return { '自': 1.00, '追': 1.05 };
-    if (scenario === '差し有利') return { '自': 0.90, '追': 1.08 };
-    return { '自': 1.0, '追': 1.0 };
-}
-
-// ====================================================================================
-// generateScenarioWagers
-// ====================================================================================
-function generateScenarioWagers(results, v) {
-    if (!results || results.length < 3) return { tritan: '---', trifuku: '---', ichiyo: "" };
-
-    const r = results.map(p => p.id);
-    let superiorPatternMessage = "";
-
-    const tenunText  = document.getElementById('tenun-index-output')?.innerText || "";
-    const isTenunZero = tenunText.includes("指数: 0") || tenunText.includes("大安吉日");
-
- if (isTenunZero && v <= 3.0) {
-    const top4 = results.slice(0, 4);
-    const trueIchiyo = top4.find(p => p.style === '追');
-    if (trueIchiyo) {
-        superiorPatternMessage = `【壱耀晴乾ノ象】天命、${trueIchiyo.id}番車に収束。`;
-    }
-}
-
-    const tritan = [
-        `${r[0]}-${r[1]}-${r[2]}`,
-        `${r[0]}-${r[2]}-${r[1]}`,
-        `${r[1]}-${r[0]}-${r[2]}`
-    ].join(', ');
-
-    const tri1 = [r[0], r[1], r[2]].sort((a, b) => a - b).join('=');
-    let tri2 = (r.length >= 4) ? [r[0], r[1], r[3]].sort((a, b) => a - b).join('=') : '';
-    const trifuku = [tri1, tri2].filter(t => t.length > 0).join(', ');
-
-    return { tritan, trifuku, ichiyo: superiorPatternMessage };
-}
-
-// ====================================================================================
 // assignFinalGrades
 // ====================================================================================
 function assignFinalGrades(scenarioPlayers) {
@@ -761,7 +946,7 @@ function assignFinalGrades(scenarioPlayers) {
 // ====================================================================================
 // calculate_koutenrei_bias（荒天令）
 // ====================================================================================
-function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
+function calculate_koutenrei_bias(players, scenario, BANK_DATA, v, lineInput, raceType) {
     let tempPlayers = JSON.parse(JSON.stringify(players));
     const appliedCoeffs = [];
 
@@ -770,7 +955,6 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
     const scoreMin   = Math.min(...allScores);
     const scoreRange = scoreMax - scoreMin;
 
-    const lineInput = document.getElementById('line-input').value;
     const { lines: initialLines } = parseLineInput(lineInput, tempPlayers);
 
     const lines = [];
@@ -789,7 +973,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
         }
 
         // 3. C_mental：S級または得点最高選手が直近1着続きの場合、プレッシャーで風に弱くなる
-        const raceGrade = document.getElementById('race-type').value;
+        const raceGrade = raceType;
         const participatingMaxScore = Math.max(...tempPlayers.map(pp => pp.score));
         const isHighPressure = ['s-kyu'].includes(raceGrade) || (p.score === participatingMaxScore);
         if (isHighPressure && p.recent.startsWith('1')) {
@@ -868,7 +1052,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
     });
 
     // 10. C_suicide
-    const raceGradeForSuicide = document.getElementById('race-type').value;
+    const raceGradeForSuicide = raceType;
     const suicideSettings = COEFFICIENT_SETTINGS[raceGradeForSuicide] || {};
     const SUICIDE_PENALTY = suicideSettings.SUICIDE_LIMIT || 0.90;
     const BOOTY_BONUS = 1.05;
@@ -944,7 +1128,7 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v) {
 // ====================================================================================
 // runScenarioSimulation
 // ====================================================================================
-function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, applyKoutenrei, lineInput, windSpeed, windDirection, lines) {
+function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, applyKoutenrei, lineInput, windSpeed, windDirection, lines, raceType) {
     // ── 展開モード判定 ──────────────────────────────
     const TENKAI_MODE_ENABLED = true; // falseで現行に戻せる
 
@@ -1004,7 +1188,7 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
 
         scenarioPlayers.forEach(p => {
             // 基本スコア × 得点補正 × 印 × 近況 × S1/B1位置 × ライン結束 × バンク脚質適性 × 地元補正
-            p.final_score = p.score * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e * p.c_local;
+            p.final_score = (applyKoutenrei ? p.score : (p.score * p.score)) * p.c_score_adj * p.c_wmark * p.c_recent * p.c_s1 * p.c_b1 * p.c_l * p.c_e * p.c_local; // [K2] 晴天令のみ競走得点項の重みを2倍（乗算合成のためscoreを二乗＝log空間で指数×2）
             p.final_score *= (p.physicalPenalty     || 1.0);  // 物理層：直線短ペナルティ
             p.final_score /= (p.cantoMakuriPenalty  || 1.0);  // 展開層：高カント捲りコスト
             p.final_score *= (p.warpBoost           || 1.0);  // 展開層：イン突きブースト
@@ -1018,7 +1202,7 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
         scenarioPlayers = applySeriCorrection(scenarioPlayers, allSeriInfos);
 
         if (applyKoutenrei) {
-            scenarioPlayers = calculate_koutenrei_bias(scenarioPlayers, scenario, BANK_DATA, v);
+            scenarioPlayers = calculate_koutenrei_bias(scenarioPlayers, scenario, BANK_DATA, v, lineInput, raceType);
         }
 
         scenarioPlayers.forEach(p => {
@@ -1085,7 +1269,7 @@ function runScenarioSimulation(basePlayers, allSeriInfos, settings, BANK_DATA, a
 // ====================================================================================
 // calculateTenunIndex
 // ====================================================================================
-function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResults, participatingPlayers) {
+function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResults, participatingPlayers, windSpeed) {
     const seitenreiRanking = Object.keys(seitenreiScores).map(id => {
         const pData = participatingPlayers.find(pp => pp.id === Number(id));
         return { ...pData, final_score: seitenreiScores[id] };
@@ -1097,7 +1281,7 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
     }).sort((a, b) => b.final_score - a.final_score);
 
     if (seitenreiRanking.length < 3 || koutenreiRanking.length < 3) {
-        return { tenunIndex: 50, message: 'データ不足のため指数算出不可', rankingWithData: [], koutenRankingWithData: [] };
+        return { tenunIndex: 50, matchCount: null, message: 'データ不足のため指数算出不可', rankingWithData: [], koutenRankingWithData: [] };
     }
 
     const seitenTop3 = new Set(seitenreiRanking.slice(0, 3).map(p => p.id));
@@ -1111,7 +1295,6 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
     const tenunIndexMap = { 3: 0, 2: 33, 1: 67, 0: 100 };
     const tIndex = tenunIndexMap[matchCount] ?? 50;
 
-    const windSpeed = parseFloat(document.getElementById('wind-speed').value) || 0;
     let targetPlayerId = null;
 
     if (tIndex === 33 && windSpeed <= 2.0) {
@@ -1133,6 +1316,7 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
 
     return {
         tenunIndex: tIndex,
+        matchCount: matchCount,  // Top3一致数（総評根拠行用。計算には不使用）
         message: finalHtml,
         rankingWithData: seitenreiRanking,
         koutenRankingWithData: koutenreiRanking
@@ -1167,7 +1351,7 @@ app.calculatePrediction = async function(guardedData) {
             app.logMessage(`[ROYAL] 選手${p.id}: 👑 戴冠（地力再定義)`);
         }
         return {
-            id: p.id, score, style: p.style, wmark: p.wmark,
+            id: p.id, name: p.name, score, style: p.style, wmark: p.wmark,
             recent: p.recent,
             is_s1: p.id === s1Id, is_b1: p.id === b1Id, is_scratch: p.isScratch,
             isLocal: p.isLocal,
@@ -1194,11 +1378,18 @@ app.calculatePrediction = async function(guardedData) {
 
     app.logMessage(`[CALC START] ${raceType} / バンク: ${bankName} / モード: ${koutenreiModeSelected ? '荒天令' : '晴天令'}`);
 
-    const { players: participatingPlayers, allSeriInfos, finalOrderedPlayerIds, displayLineSegments, lines } = calculateLineCoeffs(players, settings);
+    const currentLineInputForCalc = document.getElementById('line-input').value;
+    const { players: participatingPlayers, allSeriInfos, finalOrderedPlayerIds, displayLineSegments, lines } = calculateLineCoeffs(players, settings, currentLineInputForCalc);
     CalculationSnapshot.lines = lines;
 
     if (participatingPlayers.length === 0) {
         alert("出走選手がいないため、計算を中止しました。");
+        return;
+    }
+
+    const scoresForRangeGuard = participatingPlayers.map(p => p.score);
+    if (Math.max(...scoresForRangeGuard) - Math.min(...scoresForRangeGuard) === 0) {
+        alert("全選手が同得点のため計算できません（ルーキー戦等、得点差が出ない構成には対応しておりません）");
         return;
     }
 
@@ -1249,16 +1440,15 @@ app.calculatePrediction = async function(guardedData) {
     });
 
     try {
-        const currentLineInputForCalc = document.getElementById('line-input').value;
         app.logMessage(`[DEBUG] シミュレーション開始: ラインデータ "${currentLineInputForCalc}"`);
 
         const windSpeed     = parseFloat(document.getElementById('wind-speed').value) || 0;
         const windDirection = document.getElementById('wind-direction').value;
 
-        const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, false, currentLineInputForCalc, windSpeed, windDirection, lines);
+        const seitenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, false, currentLineInputForCalc, windSpeed, windDirection, lines, raceType);
         app.logMessage(`[CALC] 晴天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`);
 
-        const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, true, currentLineInputForCalc, windSpeed, windDirection, lines);
+        const koutenreiResults = runScenarioSimulation(basePlayers, allSeriInfos, settings, selectedBank, true, currentLineInputForCalc, windSpeed, windDirection, lines, raceType);
         app.logMessage(`[CALC] 荒天令完了（風速:${windSpeed}m/s 方向:${windDirection}）`);
 
         CalculationSnapshot.scores.final = {
@@ -1283,7 +1473,8 @@ app.calculatePrediction = async function(guardedData) {
             seitenScoresWithBonus,
             koutenreiResults.integratedScores,
             seitenreiResults.allScenarioResults,
-            participatingPlayers
+            participatingPlayers,
+            windSpeed
         );
 
         // gradeKey の確定
@@ -1307,23 +1498,51 @@ app.calculatePrediction = async function(guardedData) {
         const tenkaiPattern = classifyTenkai(mv, sg, nNige, nMakuri);
         app.logMessage(`[TENKAI_PATTERN] mv=${mv.toFixed(1)} sg=${sg.toFixed(1)} nNige=${nNige} nMakuri=${nMakuri} → ${tenkaiPattern}`);
 
-        displayResults(
+        const _calcResult = displayResults({
             detailedScenarioResults,
-            seitenreiResults.integratedScores,
-            koutenreiResults.integratedScores,
+            seitenreiIntegratedScores: seitenreiResults.integratedScores,
+            koutenreiIntegratedScores: koutenreiResults.integratedScores,
             bankName,
             allSeriInfos,
             finalOrderedPlayerIds,
-            seitenreiResults.allScenarioResults,
+            allScenarioResults: seitenreiResults.allScenarioResults,
             participatingPlayers,
             displayLineSegments,
-            finalTenunData,
+            tenunIndexData: finalTenunData,
             lines,
             tenkaiPattern,
             basePlayers,
             windSpeed,
             windDirection
-        );
+        });
+
+        try {
+            if (typeof app.displayKeppan === 'function' && _calcResult?.relations) {
+                app.displayKeppan(_calcResult.relations);
+            }
+        } catch (e) { app.logMessage('[ERROR] displayKeppan呼び出し: ' + e.message); }
+        try {
+            if (typeof app.generateRitsuText === 'function' && _calcResult?.relations) {
+                app.generateRitsuText(_calcResult.relations);
+            }
+        } catch (e) { app.logMessage('[ERROR] generateRitsuText呼び出し: ' + e.message); }
+        try {
+            const ensanBets = generateEnsanKekka(
+                finalTenunData.rankingWithData,
+                finalTenunData.koutenRankingWithData,
+                _calcResult?.relations?.kouten?.L
+            );
+            const ensanSection = document.getElementById('ensan-kekka-section');
+            const ensanOutput  = document.getElementById('ensan-kekka-output');
+            if (ensanSection && ensanOutput) {
+                if (ensanBets.length > 0) {
+                    ensanOutput.innerHTML = ensanBets.map(b => `<div class="ensan-bet">${b}</div>`).join('');
+                    ensanSection.style.display = '';
+                } else {
+                    ensanSection.style.display = 'none';
+                }
+            }
+        } catch (e) { app.logMessage('[ERROR] generateEnsanKekka呼び出し: ' + e.message); }
 
         applyShinganHakke(basePlayers, seitenreiResults.integratedScores, koutenreiResults.integratedScores);
 
@@ -1441,38 +1660,18 @@ function applyShinganHakke(basePlayers, seitenScores, koutenScores) {
             .sort((a, b) => b.correctedScore - a.correctedScore);
     }
 
-    if (typeof app.displayShinganHakke === 'function') {
-        app.displayShinganHakke({
-            seitenRanked: rankPlayers(correctedSeiten),
-            koutenRanked: rankPlayers(correctedKouten),
-            scoreMin,
-            scoreThird,
-            sw,
-            hasLocal,
-            tenkaiType,
-        });
-    }
+    // 寸評カード表示（displayShinganHakke）は発注根拠のない独断実装のため
+    // 呼び出しごと除去（2026-06-11）。×1.05オーバーレイ計算とSNGNログは正規機能として上記に存置。
 }
 
 // displayResults
 // ====================================================================================
-function getStrengthColor(score, minScore, maxScore) {
-    if (maxScore === minScore) return 'rgb(142, 142, 142)';
-    const n = (score - minScore) / (maxScore - minScore);
-    const r = Math.round(52  + (231 - 52)  * n);
-    const g = Math.round(152 + (76  - 152) * n);
-    const b = Math.round(219 + (60  - 219) * n);
-    return `rgb(${r}, ${g}, ${b})`;
-}
-
-function getTextColor(rgbColor) {
-    const match = rgbColor.match(/\d+/g);
-    if (!match || match.length < 3) return '#fff';
-    const luminance = (0.2126 * parseInt(match[0]) + 0.7152 * parseInt(match[1]) + 0.0722 * parseInt(match[2])) / 255;
-    return luminance > 0.5 ? '#333' : '#fff';
-}
-
-function displayResults(detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores, bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults, participatingPlayers, displayLineSegments, tenunIndexData, lines = [], tenkaiPattern = '現状', basePlayers = [], windSpeed = 0, windDirection = '無風') {
+function displayResults({
+    detailedScenarioResults, seitenreiIntegratedScores, koutenreiIntegratedScores,
+    bankName, allSeriInfos, finalOrderedPlayerIds, allScenarioResults,
+    participatingPlayers, displayLineSegments, tenunIndexData,
+    lines = [], tenkaiPattern = '現状', basePlayers = [], windSpeed = 0, windDirection = '無風'
+} = {}) {
     displayBankTendency();
 
     const finalScores = Object.keys(seitenreiIntegratedScores).map(id => ({
@@ -1487,28 +1686,8 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     const playerIdToScore = {};
     finalScores.forEach(p => { playerIdToScore[p.id] = p.score; });
 
-    // ライン強度グラデーション
-    const lineDisplay = document.getElementById('line-display');
-    let displayHtml = '';
-
-    displayLineSegments.forEach(segment => {
-        if (segment.type === 'single') {
-            const score = playerIdToScore[segment.id];
-            if (score === undefined) return;
-            const rgb  = getStrengthColor(score, minScore, maxScore);
-            const text = getTextColor(rgb);
-            displayHtml += `<span class="line-box strength-color" style="background-color: ${rgb}; color: ${text};">${segment.id}</span>`;
-        } else if (segment.type === 'seri') {
-            const scoreF = playerIdToScore[segment.follower];
-            const scoreC = playerIdToScore[segment.contender];
-            if (scoreF === undefined || scoreC === undefined) return;
-            const rgbF = getStrengthColor(scoreF, minScore, maxScore); const textF = getTextColor(rgbF);
-            const rgbC = getStrengthColor(scoreC, minScore, maxScore); const textC = getTextColor(rgbC);
-            displayHtml += `<span class="seri-segment">(<span class="line-box strength-color" style="background-color: ${rgbF}; color: ${textF};">${segment.follower}</span><span class="seri-arrow">←</span><span class="line-box strength-color" style="background-color: ${rgbC}; color: ${textC};">${segment.contender}</span>)</span>`;
-        }
-    });
-
-    if (lineDisplay) lineDisplay.innerHTML = displayHtml;
+    // ライン強度グラデーション7箱は血判状図の強度ティントへ統合のため撤去（2026-06-12）。
+    // getStrengthColor / getTextColor は将来の解説カード等での再利用余地のため存置。
 
     // 競りサマリー
     let seriSummaryHtml = '';
@@ -1518,7 +1697,7 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
             const prefix = (index === 0) ? '最初の競りは、' : '<strong>さらに、</strong>';
             seriSummaryHtml += `<p>${prefix}選手<strong>${info.follower}</strong> vs 選手<strong>${info.contender}</strong>。予測勝者は **選手${info.winner}** です。</p>`;
         });
-        seriSummaryHtml += `<p style="font-size: 0.9em; color: #ffa726;">※体力消耗による減点補正が適用されています。</p></div>`;
+        seriSummaryHtml += `<p style="font-size: 14px; color: #ffa726;">※体力消耗による減点補正が適用されています。</p></div>`;
     }
 
     // 天雲指数
@@ -1599,22 +1778,23 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
     if (_sgAnySwitchOn) {
         app.logMessage('[SNGN] 審眼八卦オンのためsendLogをスキップします。');
     } else {
-    App.sendLog(
-      {
-        race_id: CalculationSnapshot.race_id,
-        bank: document.getElementById('bank-name').value,
-        grade: document.getElementById('race-type').value,
-        wind: {
-          speed: parseFloat(document.getElementById('wind-speed').value) || 0,
-          direction: document.getElementById('wind-direction').value
-        },
-        tenun: tenunIndexData.tenunIndex
-      },
-      {
-        seiten: document.getElementById('seitenrei-output').innerHTML,
-        kouten: document.getElementById('koutenrei-output').innerHTML
-      }
-    );
+    // [TEST ENV] ハズレ解析GAS送信無効化
+    // App.sendLog(
+    //   {
+    //     race_id: CalculationSnapshot.race_id,
+    //     bank: document.getElementById('bank-name').value,
+    //     grade: document.getElementById('race-type').value,
+    //     wind: {
+    //       speed: parseFloat(document.getElementById('wind-speed').value) || 0,
+    //       direction: document.getElementById('wind-direction').value
+    //     },
+    //     tenun: tenunIndexData.tenunIndex
+    //   },
+    //   {
+    //     seiten: document.getElementById('seitenrei-output').innerHTML,
+    //     kouten: document.getElementById('koutenrei-output').innerHTML
+    //   }
+    // );
     } // _sgAnySwitchOn
 
     // ── relations データ出口（相関図用） ──────────────────────────────
@@ -1636,167 +1816,28 @@ function displayResults(detailedScenarioResults, seitenreiIntegratedScores, kout
                 C: _seitenTop3[2] ?? null,
                 L: koutenreiBets ? (koutenreiBets.targetL ?? null) : null,
             },
-            lines:  displayLineSegments,
-            seri:   allSeriInfos.map((info, i) => ({ index: i, follower: info.follower, contender: info.contender, winner: info.winner })),
-            wind:   { speed: windSpeed, direction: windDirection },
-            bank:   { straight: _bankInfo.straight ?? 50, canto: _bankInfo.canto ?? 30, name: bankName },
-        }
-    };
-}
-
-// ====================================================================================
-// 買い目生成ユーティリティ
-// ====================================================================================
-function formatOrderedBet(bet)  { return bet.join('-'); }
-function formatSanrenpuku(bet)  { return bet.slice().sort((a, b) => a - b).join('='); }
-
-function applyLineCountBonus(integratedScores, lines) {
-  const LINE_BONUS = { 4: 1.08, 3: 1.04 };
-  const bonusMap = {};
-  (lines || []).forEach(line => {
-    const bonus = LINE_BONUS[line.length] || 1.00;
-    line.forEach(id => { bonusMap[id] = bonus; });
-  });
-  const result = {};
-  Object.keys(integratedScores).forEach(id => {
-    result[id] = integratedScores[id] * (bonusMap[Number(id)] || 1.00);
-  });
-  return result;
-}
-
-function classifyTenkai(mv, sg, nNige, nMakuri) {
-  const oc = (lo, v, hi) => lo < v && v <= hi;  // (lo, hi]
-  const co = (lo, v, hi) => lo <= v && v < hi;  // [lo, hi)
-
-  const rules = [
-    [() => sg <= -5,                                                          '逃げ圧勝'],
-    [() => oc(-5,sg,0) && nNige >= 2,                                         'ちょい差し'],
-    [() => sg >= 10,                                                          '別線差し'],
-    [() => mv >= 5,                                                           '捲り'],
-    [() => mv<0  && oc(5,sg,10)  && nNige===1 && nMakuri===0,                '別線差し'],
-    [() => mv<0  && oc(0,sg,5)   && nNige===1 && nMakuri===0,                '別線差し'],
-    [() => mv<0  && oc(-5,sg,0)  && nNige===1 && nMakuri===1,                '逃げ圧勝'],
-    [() => co(0,mv,5) && oc(0,sg,5)  && nNige>=2  && nMakuri===1,            '捲り'],
-    [() => co(0,mv,5) && oc(5,sg,10) && nNige===1 && nMakuri===1,            '別線差し'],
-    [() => mv<0  && oc(-5,sg,0)  && nNige===1 && nMakuri===2,                '逃げ圧勝'],
-    [() => mv<0  && oc(0,sg,5)   && nNige===2 && nMakuri===0,                '別線差し'],
-    [() => mv<0  && oc(-5,sg,0)  && nNige===1 && nMakuri===0,                '逃げ圧勝'],
-    [() => mv<0  && oc(0,sg,5)   && nNige>=3  && nMakuri===0,                '逃げ圧勝'],
-    [() => co(0,mv,5) && oc(0,sg,5)  && nNige===1 && nMakuri===2,            '別線差し'],
-    [() => mv<0  && oc(0,sg,5)   && nNige===1 && nMakuri===1,                '別線差し'],
-    [() => mv<0  && oc(0,sg,5)   && nNige===2 && nMakuri===1,                '別線差し'],
-    [() => co(0,mv,5) && oc(0,sg,5)  && nNige===1 && nMakuri===1,            '捲り'],
-    [() => co(0,mv,5) && oc(5,sg,10) && nNige===1 && nMakuri===2,            '捲り'],
-  ];
-
-  return rules.find(([cond]) => cond())?.[1] ?? '現状';
-}
-
-function selectR2(ranking, basePlayers, tenkaiPattern, excludeIds) {
-    const baseMap = Object.fromEntries((basePlayers || []).map(p => [p.id, p]));
-    const styleOf = id => { const s = baseMap[id]?.style || ''; return s === '両' ? '自' : s; };
-    const clOf    = p  => p.c_l || baseMap[p.id]?.c_l || 1.0;
-    const candidates = ranking.filter(p => !excludeIds.has(p.id));
-
-    let r2 = null;
-    if (tenkaiPattern === '逃げ圧勝') {
-        r2 = candidates.find(p => styleOf(p.id) === '追' && clOf(p) > 1.0) || null;
-    } else if (tenkaiPattern === 'ちょい差し') {
-        const sashi = candidates.filter(p => styleOf(p.id) === '追')
-            .sort((a, b) => clOf(b) - clOf(a));
-        r2 = sashi[0] || null;
-    } else if (tenkaiPattern === '別線差し') {
-        r2 = candidates.find(p => ['追', '自'].includes(styleOf(p.id))) || null;
-    } else if (tenkaiPattern === '捲り') {
-        r2 = candidates.find(p => styleOf(p.id) === '自') || null;
-    }
-    return r2 || candidates[0] || null;
-}
-
-// 【V10.24】V10.23＋特異点L除外を復活（晴天令と荒天令の二世界分離思想）。
-//           リプレイ実測: L除外なし34.3%/71.7% → L除外あり35.4%/78.5%。思想と数字が一致。
-function generateSeitenreiBets(ranking, basePlayers, tenkaiPattern, excludeL = null) {
-    if (!ranking || ranking.length < 3) return null;
-    const top2Ids = new Set([ranking[0].id, ranking[1].id]);
-
-    // r[2]: 3〜5位の中から ① 追×(△か◎) → ② 追 → ③ スコア順先頭（特異点Lは窓から除外）
-    const rest    = ranking.slice(2).filter(p => !top2Ids.has(p.id) && (excludeL == null || p.id !== excludeL));
-    const topRest = rest.slice(0, 3);
-    const cand1   = topRest.filter(p => p.style === '追' && ['△','◎'].includes(p.wmark));
-    const cand2   = topRest.filter(p => p.style === '追');
-    const r2      = cand1[0] || cand2[0] || topRest[0];
-    if (!r2) return null;
-
-    const r = [ranking[0].id, ranking[1].id, r2.id];
-    return {
-        sanrentan: [
-            [r[0], r[1], r[2]],
-            [r[0], r[2], r[1]],
-            [r[1], r[0], r[2]],
-            [r[1], r[2], r[0]]
-        ],
-        sanrenpuku: [[r[0], r[1], r[2]]]
-    };
-}
-
-function generateKoutenreiBets(ranking, seitenTop3Ids = new Set(), lines = [], koutenRanking = []) {
-    if (!ranking || ranking.length < 4) return null;
-    const A = ranking[0], B = ranking[1], C = ranking[2];
-    const excludeIds = new Set([A.id, B.id, C.id, ...seitenTop3Ids]);
-
-    // ラインTOP（逃/自/両）のID集合
-    const lineTops = new Set(
-        lines
-            .filter(line => line.length > 0)
-            .map(line => line[0])
-            .filter(id => {
-                const p = ranking.find(p => p.id === id);
-                return p && ['逃','自'].includes(p.style);
-            })
-    );
-
-    // 荒天令スコア順から晴天令TOP3・top3を除いた候補リスト
-    const koutenCandidates = koutenRanking.filter(p => !excludeIds.has(p.id));
-
-    // ① 荒天令上位 かつ ラインTOP（逃/自/両）
-    let targetL = koutenCandidates.find(p => lineTops.has(p.id)) || null;
-
-    // ② 荒天令上位の先頭（脚質不問）
-    if (!targetL) targetL = koutenCandidates[0] || null;
-
-    // ③ フォールバック：現行ラインTOP優先 → 逃/自+3ボーナス
-    if (!targetL) {
-        let lCandidates = [];
-        if (lineTops.size > 0) {
-            lCandidates = [...lineTops]
-                .filter(id => !excludeIds.has(id))
-                .map(id => {
-                    const p = ranking.find(p => p.id === id) || {};
-                    let s = (p.final_score || 0) / 10;
-                    if (p.is_b1) s += 10;
-                    if (p.is_s1) s += 5;
-                    return { ...p, lScore: s };
+            lines:      displayLineSegments,
+            lineArrays: lines,
+            seri:       allSeriInfos.map((info, i) => ({ index: i, follower: info.follower, contender: info.contender, winner: info.winner })),
+            wind:   { speed: windSpeed, direction: windDirection, effective: (BANK_DATA[bankName]?.wind_direction_map?.[windDirection]) || '' },
+            bank:   { straight: _bankInfo.straight ?? 50, canto: _bankInfo.canto ?? 30, name: bankName, length: _bankInfo.length ?? null, wind_direction_map: _bankInfo.wind_direction_map ?? null },
+            allPlayers:     basePlayers,
+            seitenScores:   seitenreiIntegratedScores,
+            scenarioScores: (function() {
+                const MAP = { '先行有利': '逃', '差し有利': '差', '捲り有利': '捲' };
+                const out = {};
+                (allScenarioResults || []).forEach(({ scenario, results }) => {
+                    const key = MAP[scenario] || scenario;
+                    out[key] = {};
+                    (results || []).forEach(p => { out[key][p.id] = p.final_score; });
                 });
+                return out;
+            })(),
+            tenkaiPattern: tenkaiPattern,
+            raceId:        CalculationSnapshot.race_id || '',
+            tenunIndex:    tenunIndexData?.tenunIndex ?? 50,
+            tenunMatchCount: tenunIndexData?.matchCount ?? null,
         }
-        if (lCandidates.length === 0) {
-            lCandidates = ranking
-                .filter(p => !excludeIds.has(p.id))
-                .map(p => {
-                    let s = p.final_score / 10;
-                    if (p.is_b1) s += 10;
-                    if (p.is_s1) s += 5;
-                    if (['逃','自'].includes(p.style)) s += 3;
-                    return { ...p, lScore: s };
-                });
-        }
-        lCandidates.sort((a, b) => b.lScore - a.lScore);
-        targetL = lCandidates[0] || null;
-    }
-    if (!targetL) return null;
-    return {
-        targetL,
-        sanrenpuku: [[A.id, B.id, targetL.id], [A.id, C.id, targetL.id]],
-        nirentan:   [[A.id, targetL.id], [targetL.id, A.id], [C.id, A.id]]
     };
 }
 
@@ -2004,6 +2045,7 @@ const InputGuard = (() => {
             const isScratch = card.querySelector('.is-scratch')?.checked ?? false;
             result.push({
                 id       : idx,
+                name     : card.dataset.name || '',
                 isScratch,
                 score    : getScore(card, idx),
                 recent   : getRecent(card, idx),
