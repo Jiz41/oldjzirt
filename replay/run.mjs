@@ -94,6 +94,17 @@ for (const g of [...new Set(rows.map(r => r.grade))].sort()) {
   console.log(`  ${g.padEnd(12)} n=${String(a.n).padStart(4)} 的中率${a.hitPct.toFixed(1)}% 回収率${a.roiPct.toFixed(1)}%`);
 }
 
+// トリム回収率: 払戻上位5本を除いた回収率。回収率は少数の万車券で±10pt以上動くため、
+// 「勝ち」がベース精度の向上か大穴の偶然かを切り分ける（2026-07-15 実測: 月次回収の見かけの差は
+// ほぼ上位5本で説明され、トリム後は各月41〜55%に収斂した）
+{
+  const rets = rows.map(r => r.ret).sort((a, b) => b - a);
+  const top5 = rets.slice(0, 5).reduce((s, x) => s + x, 0);
+  const costAll = rows.reduce((s, r) => s + r.cost, 0);
+  const retAll = rows.reduce((s, r) => s + r.ret, 0);
+  console.log(`\nトリム回収率（上位5的中除外）: ${costAll ? ((retAll - top5) / costAll * 100).toFixed(1) : 0}%（上位5本=${top5}円）`);
+}
+
 // 期間2分割（採用条件「全体で勝ち、かつ両半期で負けていない」の判定材料。2026-07 コラム§4）
 const sorted = [...rows].sort((a, b) => a.date.localeCompare(b.date));
 const half = Math.floor(sorted.length / 2);
