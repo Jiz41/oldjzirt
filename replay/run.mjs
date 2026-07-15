@@ -2,6 +2,8 @@
 // 使い方:
 //   node replay/run.mjs --engine keirin_logic.js [--bankdata bankdata.json]
 //                       [--filter grade=a-kyu] [--out replay/result.json] [--verify]
+//                       [--fixtures replay/fixtures_XXXX.json]
+// fixtures.json は測定基準ゆえ変更禁止。別期間の計測は --fixtures で新ファイルを指定する。
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -23,7 +25,8 @@ const outPath = argOf('--out', null);
 const doVerify = args.includes('--verify');
 const filter = argOf('--filter', null); // 例: grade=a-kyu
 
-const fixtures = JSON.parse(fs.readFileSync(path.join(here, 'fixtures.json'), 'utf8'));
+const fixturesPath = path.resolve(repo, argOf('--fixtures', 'replay/fixtures.json'));
+const fixtures = JSON.parse(fs.readFileSync(fixturesPath, 'utf8'));
 const engine = createEngine(enginePath, bankdataPath);
 
 const setKey = (nums) => [...nums].sort((a, b) => Number(a) - Number(b)).join('=');
@@ -47,7 +50,7 @@ for (const fx of fixtures) {
       continue;
     }
     const s = settleRace(seitenHtml, koutenHtml, fx);
-    rows.push({ date: fx.date, month: fx.date.slice(0, 7), grade: fx.raceType, bank: fx.bankName, ...s });
+    rows.push({ date: fx.date, month: fx.date.slice(0, 7), grade: fx.raceType, bank: fx.bankName, tenun: fx.tenun ?? null, ...s });
 
     if (doVerify && fx.logged_bets?.seiten) {
       const rePuk = parseBets(seitenHtml, '三連複').map(b => setKey(b.split('=')));
@@ -89,6 +92,26 @@ console.log('\n級別:');
 for (const g of [...new Set(rows.map(r => r.grade))].sort()) {
   const a = agg(rows.filter(r => r.grade === g));
   console.log(`  ${g.padEnd(12)} n=${String(a.n).padStart(4)} 的中率${a.hitPct.toFixed(1)}% 回収率${a.roiPct.toFixed(1)}%`);
+}
+
+// 期間2分割（採用条件「全体で勝ち、かつ両半期で負けていない」の判定材料。2026-07 コラム§4）
+const sorted = [...rows].sort((a, b) => a.date.localeCompare(b.date));
+const half = Math.floor(sorted.length / 2);
+console.log('\n期間2分割:');
+for (const [label, list] of [['前半', sorted.slice(0, half)], ['後半', sorted.slice(half)]]) {
+  const a = agg(list);
+  const range = list.length ? `${list[0].date}〜${list[list.length - 1].date}` : '-';
+  console.log(`  ${label} ${range} n=${String(a.n).padStart(4)} 的中率${a.hitPct.toFixed(1)}% 回収率${a.roiPct.toFixed(1)}%`);
+}
+
+// 天雲指数別（fixtures に tenun がある場合のみ。§9）
+if (rows.some(r => r.tenun !== null && r.tenun !== undefined)) {
+  console.log('\n天雲指数別:');
+  const idxs = [...new Set(rows.map(r => r.tenun))].sort((a, b) => a - b);
+  for (const t of idxs) {
+    const a = agg(rows.filter(r => r.tenun === t));
+    console.log(`  指数${String(t).padEnd(4)} n=${String(a.n).padStart(4)} 的中率${a.hitPct.toFixed(1)}% 回収率${a.roiPct.toFixed(1)}%`);
+  }
 }
 
 if (outPath) {
