@@ -72,10 +72,13 @@ const skips = {};
 const skip = (why) => { skips[why] = (skips[why] || 0) + 1; };
 
 for (const r of rows) {
-  const [logId, ts, appId, raceInfoRaw, snapshotRaw, , predictionRaw, result, kimarite, status, , paySanrentan, paySanrenpuku, payNisyatan] = r;
+  // 実CSV列（2026-07-15 実データで確定）: 0:log_id 1:ts 2:app_id 3:race_info 4:snapshot
+  // 5:(空) 6:買い目JSON 7:着順 8:決まり手 9:status 10-11:(空) 12:3rentan 13:3renpuku 14:2syatan
+  const [logId, ts, appId, raceInfoRaw, snapshotRaw, , predictionRaw, result, kimarite, status, , , paySanrentan, paySanrenpuku, payNisyatan] = r;
 
   if (!ts || !/^\d{4}-\d{2}-\d{2}T/.test(ts)) { skip('header-or-bad-ts'); continue; }
-  const date = ts.slice(0, 10);
+  // レース日はJST基準（tsはUTC。+9hで日付化。race_idの日付部とも整合する）
+  const date = new Date(new Date(ts).getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10);
   if (fromDate && date < fromDate) { skip('before-from'); continue; }
   if (toDate && date > toDate) { skip('after-to'); continue; }
   if (String(status).trim() !== 'ANALYZED') { skip('status!=ANALYZED'); continue; }
@@ -92,13 +95,19 @@ for (const r of rows) {
   if (payouts.sanrentan === null || payouts.sanrenpuku === null || payouts.nisyatan === null) { skip('payout-missing'); continue; }
   if (!result || !/\d+-\d+-\d+/.test(result)) { skip('result-missing'); continue; }
 
-  const base = snapshot.scores?.base || {};
-  const ids = Object.keys(base).map(Number).sort((a, b) => a - b);
-  if (ids.length < 7) { skip('players<7'); continue; }
+  // scores.base は配列（新形式）またはidキーのオブジェクト（旧形式）の両対応
+  const baseRaw = snapshot.scores?.base || {};
+  const baseArr = Array.isArray(baseRaw)
+    ? baseRaw
+    : Object.entries(baseRaw).map(([id, b]) => ({ id: Number(id), ...b }));
+  const byId = new Map(baseArr.map(b => [Number(b.id), b]));
+  const ids = [...byId.keys()].sort((a, b) => a - b);
+  // 基準 fixtures.json にも5〜6車立てが46R含まれるため、下限は5名（2026-07-15 確認）
+  if (ids.length < 5) { skip('players<5'); continue; }
 
   let s1Id = null, b1Id = null;
   const players = ids.map(id => {
-    const b = base[id];
+    const b = byId.get(id);
     if (b.is_s1) s1Id = id;
     if (b.is_b1) b1Id = id;
     return {
@@ -121,7 +130,7 @@ for (const r of rows) {
   const kouten = prediction?.prediction?.kouten ?? prediction?.kouten ?? null;
 
   fixtures.push({
-    race_id: raceInfo.race_id ?? snapshot.race_id ?? '',
+    race_id: snapshot.race_id ?? raceInfo.race_id ?? '',
     log_id: logId,
     date,
     ts,

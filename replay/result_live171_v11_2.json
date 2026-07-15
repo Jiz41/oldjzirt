@@ -1,0 +1,6503 @@
+{
+ "engine": "keirin_logic.js",
+ "rows": [
+  {
+   "date": "2026-07-05",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🍊和歌山",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 280,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-4-3",
+     "7-3-4",
+     "4-7-3",
+     "4-3-7"
+    ],
+    "sPuks": [
+     "3=4=7"
+    ],
+    "kPuks": [
+     "2=4=7",
+     "2=3=7"
+    ],
+    "kTans2": [
+     "7-2",
+     "2-7",
+     "3-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-05",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🍊和歌山",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-3-1",
+     "7-1-3",
+     "3-7-1",
+     "3-1-7"
+    ],
+    "sPuks": [
+     "1=3=7"
+    ],
+    "kPuks": [
+     "2=3=7",
+     "1=2=7"
+    ],
+    "kTans2": [
+     "7-2",
+     "2-7",
+     "1-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-05",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🍊和歌山",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 1340,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-5-3",
+     "7-3-5",
+     "5-7-3",
+     "5-3-7"
+    ],
+    "sPuks": [
+     "3=5=7"
+    ],
+    "kPuks": [
+     "1=5=7",
+     "1=3=7"
+    ],
+    "kTans2": [
+     "7-1",
+     "1-7",
+     "3-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-05",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🍊和歌山",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 620,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-3-1",
+     "5-1-3",
+     "3-5-1",
+     "3-1-5"
+    ],
+    "sPuks": [
+     "1=3=5"
+    ],
+    "kPuks": [
+     "2=3=5",
+     "1=2=5"
+    ],
+    "kTans2": [
+     "5-2",
+     "2-5",
+     "1-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-05",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🍊和歌山",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-2",
+     "1-2-3",
+     "3-1-2",
+     "3-2-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=3=6",
+     "1=2=6"
+    ],
+    "kTans2": [
+     "1-6",
+     "6-1",
+     "2-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-05",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "🍊和歌山",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-2-7",
+     "5-7-2",
+     "2-5-7",
+     "2-7-5"
+    ],
+    "sPuks": [
+     "2=5=7"
+    ],
+    "kPuks": [
+     "2=3=5",
+     "3=5=7"
+    ],
+    "kTans2": [
+     "5-3",
+     "3-5",
+     "7-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-05",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "🍊和歌山",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 230,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-1-4",
+     "2-4-1",
+     "1-2-4",
+     "1-4-2"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "2=4=5"
+    ],
+    "kTans2": [
+     "2-5",
+     "5-2",
+     "4-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-05",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "🍊和歌山",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-4-6",
+     "1-6-4",
+     "4-1-6",
+     "4-6-1"
+    ],
+    "sPuks": [
+     "1=4=6"
+    ],
+    "kPuks": [
+     "1=3=4",
+     "1=3=6"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "6-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-05",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "🍊和歌山",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-1-6",
+     "5-6-1",
+     "1-5-6",
+     "1-6-5"
+    ],
+    "sPuks": [
+     "1=5=6"
+    ],
+    "kPuks": [
+     "1=4=5",
+     "4=5=6"
+    ],
+    "kTans2": [
+     "5-4",
+     "4-5",
+     "6-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-05",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "🍊和歌山",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-7-5",
+     "4-5-7",
+     "7-4-5",
+     "7-5-4"
+    ],
+    "sPuks": [
+     "4=5=7"
+    ],
+    "kPuks": [
+     "3=4=7",
+     "3=4=5"
+    ],
+    "kTans2": [
+     "4-3",
+     "3-4",
+     "5-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-05",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "🍊和歌山",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-6",
+     "1-6-3",
+     "3-1-6",
+     "3-6-1"
+    ],
+    "sPuks": [
+     "1=3=6"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=2=6"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "6-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-06",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🏦京王閣",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-1-3",
+     "5-3-1",
+     "1-5-3",
+     "1-3-5"
+    ],
+    "sPuks": [
+     "1=3=5"
+    ],
+    "kPuks": [
+     "1=5=6",
+     "3=5=6"
+    ],
+    "kTans2": [
+     "5-6",
+     "6-5",
+     "3-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-06",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🏦京王閣",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "1=4=5"
+    ],
+    "kTans2": [
+     "1-5",
+     "5-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-06",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🏦京王閣",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 610,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "3-1-2",
+     "3-2-1",
+     "1-3-2",
+     "1-2-3"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=3=4",
+     "2=3=4"
+    ],
+    "kTans2": [
+     "3-4",
+     "4-3",
+     "2-3"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-06",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🏦京王閣",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "1=4=5"
+    ],
+    "kTans2": [
+     "1-5",
+     "5-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🏦京王閣",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-3-5",
+     "2-5-3",
+     "3-2-5",
+     "3-5-2"
+    ],
+    "sPuks": [
+     "2=3=5"
+    ],
+    "kPuks": [
+     "2=3=7",
+     "2=5=7"
+    ],
+    "kTans2": [
+     "2-7",
+     "7-2",
+     "5-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🏦京王閣",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "3-1-2",
+     "3-2-1",
+     "1-3-2",
+     "1-2-3"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=3=4",
+     "2=3=4"
+    ],
+    "kTans2": [
+     "3-4",
+     "4-3",
+     "2-3"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "girls",
+   "bank": "🍔佐世保",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-4-5",
+     "1-5-4",
+     "4-1-5",
+     "4-5-1"
+    ],
+    "sPuks": [
+     "1=4=5"
+    ],
+    "kPuks": [
+     "1=4=6",
+     "1=5=6"
+    ],
+    "kTans2": [
+     "1-6",
+     "6-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🍔佐世保",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-3-1",
+     "5-1-3",
+     "3-5-1",
+     "3-1-5"
+    ],
+    "sPuks": [
+     "1=3=5"
+    ],
+    "kPuks": [
+     "2=3=5",
+     "1=2=5"
+    ],
+    "kTans2": [
+     "5-2",
+     "2-5",
+     "1-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🍔佐世保",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-5-3",
+     "7-3-5",
+     "5-7-3",
+     "5-3-7"
+    ],
+    "sPuks": [
+     "3=5=7"
+    ],
+    "kPuks": [
+     "5=6=7",
+     "3=6=7"
+    ],
+    "kTans2": [
+     "7-6",
+     "6-7",
+     "3-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🍔佐世保",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-2-5",
+     "7-5-2",
+     "2-7-5",
+     "2-5-7"
+    ],
+    "sPuks": [
+     "2=5=7"
+    ],
+    "kPuks": [
+     "2=6=7",
+     "5=6=7"
+    ],
+    "kTans2": [
+     "7-6",
+     "6-7",
+     "5-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🍔佐世保",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 7060,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-4-3",
+     "1-3-4",
+     "4-1-3",
+     "4-3-1"
+    ],
+    "sPuks": [
+     "1=3=4"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=2=3"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "girls",
+   "bank": "🍔佐世保",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 1960,
+   "hitSeiten": true,
+   "hitKouten": false,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-1-5",
+     "7-5-1",
+     "1-7-5",
+     "1-5-7"
+    ],
+    "sPuks": [
+     "1=5=7"
+    ],
+    "kPuks": [
+     "1=4=7",
+     "4=5=7"
+    ],
+    "kTans2": [
+     "7-4",
+     "4-7",
+     "5-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🍔佐世保",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-4-7",
+     "5-7-4",
+     "4-5-7",
+     "4-7-5"
+    ],
+    "sPuks": [
+     "4=5=7"
+    ],
+    "kPuks": [
+     "1=4=5",
+     "1=5=7"
+    ],
+    "kTans2": [
+     "5-1",
+     "1-5",
+     "7-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 600,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-1-2",
+     "4-2-1",
+     "1-4-2",
+     "1-2-4"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=3=4",
+     "2=3=4"
+    ],
+    "kTans2": [
+     "4-3",
+     "3-4",
+     "2-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "3-1-2",
+     "3-2-1",
+     "1-3-2",
+     "1-2-3"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=3=4",
+     "2=3=4"
+    ],
+    "kTans2": [
+     "3-4",
+     "4-3",
+     "2-3"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-1-2",
+     "4-2-1",
+     "1-4-2",
+     "1-2-4"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=4=5",
+     "2=4=5"
+    ],
+    "kTans2": [
+     "4-5",
+     "5-4",
+     "2-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-3",
+     "1-3-2",
+     "2-1-3",
+     "2-3-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-1-6",
+     "2-6-1",
+     "1-2-6",
+     "1-6-2"
+    ],
+    "sPuks": [
+     "1=2=6"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "2=3=6"
+    ],
+    "kTans2": [
+     "2-3",
+     "3-2",
+     "6-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-3-1",
+     "7-1-3",
+     "3-7-1",
+     "3-1-7"
+    ],
+    "sPuks": [
+     "1=3=7"
+    ],
+    "kPuks": [
+     "3=4=7",
+     "1=4=7"
+    ],
+    "kTans2": [
+     "7-4",
+     "4-7",
+     "1-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 290,
+   "hitSeiten": true,
+   "hitKouten": false,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-3",
+     "1-3-2",
+     "2-1-3",
+     "2-3-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "1=3=5"
+    ],
+    "kTans2": [
+     "1-5",
+     "5-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-3",
+     "1-3-2",
+     "2-1-3",
+     "2-3-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "1=3=5"
+    ],
+    "kTans2": [
+     "1-5",
+     "5-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-5-2",
+     "1-2-5",
+     "5-1-2",
+     "5-2-1"
+    ],
+    "sPuks": [
+     "1=2=5"
+    ],
+    "kPuks": [
+     "1=5=7",
+     "1=2=7"
+    ],
+    "kTans2": [
+     "1-7",
+     "7-1",
+     "2-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "girls",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 230,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "girls",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 150,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-5",
+     "1-5-2",
+     "2-1-5",
+     "2-5-1"
+    ],
+    "sPuks": [
+     "1=2=5"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=5"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-3",
+     "1-3-2",
+     "2-1-3",
+     "2-3-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-3",
+     "1-3-2",
+     "2-1-3",
+     "2-3-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "1=3=5"
+    ],
+    "kTans2": [
+     "1-5",
+     "5-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 900,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-1-2",
+     "7-2-1",
+     "1-7-2",
+     "1-2-7"
+    ],
+    "sPuks": [
+     "1=2=7"
+    ],
+    "kPuks": [
+     "1=3=7",
+     "2=3=7"
+    ],
+    "kTans2": [
+     "7-3",
+     "3-7",
+     "2-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-3",
+     "1-3-2",
+     "2-1-3",
+     "2-3-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "1=3=5"
+    ],
+    "kTans2": [
+     "1-5",
+     "5-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-07",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-4",
+     "1-4-3",
+     "3-1-4",
+     "3-4-1"
+    ],
+    "sPuks": [
+     "1=3=4"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=2=4"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🐓取手",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-2-1",
+     "5-1-2",
+     "2-5-1",
+     "2-1-5"
+    ],
+    "sPuks": [
+     "1=2=5"
+    ],
+    "kPuks": [
+     "2=3=5",
+     "1=3=5"
+    ],
+    "kTans2": [
+     "5-3",
+     "3-5",
+     "1-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🐓取手",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 2750,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-5",
+     "1-5-3",
+     "3-1-5",
+     "3-5-1"
+    ],
+    "sPuks": [
+     "1=3=5"
+    ],
+    "kPuks": [
+     "1=3=4",
+     "1=4=5"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🐓取手",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 910,
+   "hitSeiten": true,
+   "hitKouten": false,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "3-4-7",
+     "3-7-4",
+     "4-3-7",
+     "4-7-3"
+    ],
+    "sPuks": [
+     "3=4=7"
+    ],
+    "kPuks": [
+     "1=3=4",
+     "1=3=7"
+    ],
+    "kTans2": [
+     "3-1",
+     "1-3",
+     "7-3"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🐓取手",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 580,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "3-4-5",
+     "3-5-4",
+     "4-3-5",
+     "4-5-3"
+    ],
+    "sPuks": [
+     "3=4=5"
+    ],
+    "kPuks": [
+     "2=3=4",
+     "2=3=5"
+    ],
+    "kTans2": [
+     "3-2",
+     "2-3",
+     "5-3"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🐓取手",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-5-3",
+     "1-3-5",
+     "5-1-3",
+     "5-3-1"
+    ],
+    "sPuks": [
+     "1=3=5"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "1=2=3"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🐓取手",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-1-3",
+     "2-3-1",
+     "1-2-3",
+     "1-3-2"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=6",
+     "2=3=6"
+    ],
+    "kTans2": [
+     "2-6",
+     "6-2",
+     "3-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🐓取手",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-2-1",
+     "5-1-2",
+     "2-5-1",
+     "2-1-5"
+    ],
+    "sPuks": [
+     "1=2=5"
+    ],
+    "kPuks": [
+     "2=4=5",
+     "1=4=5"
+    ],
+    "kTans2": [
+     "5-4",
+     "4-5",
+     "1-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🐓取手",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-2-1",
+     "5-1-2",
+     "2-5-1",
+     "2-1-5"
+    ],
+    "sPuks": [
+     "1=2=5"
+    ],
+    "kPuks": [
+     "2=4=5",
+     "1=4=5"
+    ],
+    "kTans2": [
+     "5-4",
+     "4-5",
+     "1-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🐓取手",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-1-3",
+     "5-3-1",
+     "1-5-3",
+     "1-3-5"
+    ],
+    "sPuks": [
+     "1=3=5"
+    ],
+    "kPuks": [
+     "1=5=7",
+     "3=5=7"
+    ],
+    "kTans2": [
+     "5-7",
+     "7-5",
+     "3-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "girls",
+   "bank": "🐓取手",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 160,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-6-4",
+     "7-4-6",
+     "6-7-4",
+     "6-4-7"
+    ],
+    "sPuks": [
+     "4=6=7"
+    ],
+    "kPuks": [
+     "1=6=7",
+     "1=4=7"
+    ],
+    "kTans2": [
+     "7-1",
+     "1-7",
+     "4-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🐓取手",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-2-3",
+     "7-3-2",
+     "2-7-3",
+     "2-3-7"
+    ],
+    "sPuks": [
+     "2=3=7"
+    ],
+    "kPuks": [
+     "2=5=7",
+     "3=5=7"
+    ],
+    "kTans2": [
+     "7-5",
+     "5-7",
+     "3-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-5",
+     "1-5-3",
+     "3-1-5",
+     "3-5-1"
+    ],
+    "sPuks": [
+     "1=3=5"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=2=5"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 2310,
+   "hitSeiten": true,
+   "hitKouten": false,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-4-2",
+     "5-2-4",
+     "4-5-2",
+     "4-2-5"
+    ],
+    "sPuks": [
+     "2=4=5"
+    ],
+    "kPuks": [
+     "1=4=5",
+     "1=2=5"
+    ],
+    "kTans2": [
+     "5-1",
+     "1-5",
+     "2-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 540,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-5",
+     "1-5-2",
+     "2-1-5",
+     "2-5-1"
+    ],
+    "sPuks": [
+     "1=2=5"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=4=5"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-6",
+     "1-6-2",
+     "2-1-6",
+     "2-6-1"
+    ],
+    "sPuks": [
+     "1=2=6"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=6"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "6-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=6",
+     "1=4=6"
+    ],
+    "kTans2": [
+     "1-6",
+     "6-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 1430,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-6",
+     "1-6-2",
+     "2-1-6",
+     "2-6-1"
+    ],
+    "sPuks": [
+     "1=2=6"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=4=6"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "6-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 980,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-5",
+     "1-5-3",
+     "3-1-5",
+     "3-5-1"
+    ],
+    "sPuks": [
+     "1=3=5"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=2=5"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-3",
+     "1-3-2",
+     "2-1-3",
+     "2-3-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "1=3=5"
+    ],
+    "kTans2": [
+     "1-5",
+     "5-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 4570,
+   "hitSeiten": true,
+   "hitKouten": false,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=6",
+     "1=4=6"
+    ],
+    "kTans2": [
+     "1-6",
+     "6-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-3",
+     "1-3-2",
+     "2-1-3",
+     "2-3-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 320,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-4",
+     "1-4-3",
+     "3-1-4",
+     "3-4-1"
+    ],
+    "sPuks": [
+     "1=3=4"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=2=4"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 2790,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "6-1-2",
+     "6-2-1",
+     "1-6-2",
+     "1-2-6"
+    ],
+    "sPuks": [
+     "1=2=6"
+    ],
+    "kPuks": [
+     "1=3=6",
+     "2=3=6"
+    ],
+    "kTans2": [
+     "6-3",
+     "3-6",
+     "2-6"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 900,
+   "hitSeiten": true,
+   "hitKouten": false,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-1-3",
+     "2-3-1",
+     "1-2-3",
+     "1-3-2"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "2=3=4"
+    ],
+    "kTans2": [
+     "2-4",
+     "4-2",
+     "3-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 660,
+   "hitSeiten": true,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-3-1",
+     "2-1-3",
+     "3-2-1",
+     "3-1-2"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "2=3=5",
+     "1=2=5"
+    ],
+    "kTans2": [
+     "2-5",
+     "5-2",
+     "1-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "girls",
+   "bank": "🛳️玉野",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 440,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-08",
+   "month": "2026-07",
+   "grade": "girls",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 530,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-5",
+     "1-5-2",
+     "2-1-5",
+     "2-5-1"
+    ],
+    "sPuks": [
+     "1=2=5"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=5"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "⛩️防府",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-1-3",
+     "5-3-1",
+     "1-5-3",
+     "1-3-5"
+    ],
+    "sPuks": [
+     "1=3=5"
+    ],
+    "kPuks": [
+     "1=5=7",
+     "3=5=7"
+    ],
+    "kTans2": [
+     "5-7",
+     "7-5",
+     "3-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "⛩️防府",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "3-4-6",
+     "3-6-4",
+     "4-3-6",
+     "4-6-3"
+    ],
+    "sPuks": [
+     "3=4=6"
+    ],
+    "kPuks": [
+     "1=3=4",
+     "1=3=6"
+    ],
+    "kTans2": [
+     "3-1",
+     "1-3",
+     "6-3"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "⛩️防府",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-1-7",
+     "2-7-1",
+     "1-2-7",
+     "1-7-2"
+    ],
+    "sPuks": [
+     "1=2=7"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "2=5=7"
+    ],
+    "kTans2": [
+     "2-5",
+     "5-2",
+     "7-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "⛩️防府",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 17120,
+   "hitSeiten": true,
+   "hitKouten": false,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-4-7",
+     "5-7-4",
+     "4-5-7",
+     "4-7-5"
+    ],
+    "sPuks": [
+     "4=5=7"
+    ],
+    "kPuks": [
+     "1=4=5",
+     "1=5=7"
+    ],
+    "kTans2": [
+     "5-1",
+     "1-5",
+     "7-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "⛩️防府",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 590,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-5",
+     "1-5-3",
+     "3-1-5",
+     "3-5-1"
+    ],
+    "sPuks": [
+     "1=3=5"
+    ],
+    "kPuks": [
+     "1=3=7",
+     "1=5=7"
+    ],
+    "kTans2": [
+     "1-7",
+     "7-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️防府",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 2620,
+   "hitSeiten": true,
+   "hitKouten": false,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-6-2",
+     "5-2-6",
+     "6-5-2",
+     "6-2-5"
+    ],
+    "sPuks": [
+     "2=5=6"
+    ],
+    "kPuks": [
+     "5=6=7",
+     "2=5=7"
+    ],
+    "kTans2": [
+     "5-7",
+     "7-5",
+     "2-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️防府",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 2620,
+   "hitSeiten": true,
+   "hitKouten": false,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-6-2",
+     "5-2-6",
+     "6-5-2",
+     "6-2-5"
+    ],
+    "sPuks": [
+     "2=5=6"
+    ],
+    "kPuks": [
+     "5=6=7",
+     "2=5=7"
+    ],
+    "kTans2": [
+     "5-7",
+     "7-5",
+     "2-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "⛩️防府",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "3-1-2",
+     "3-2-1",
+     "1-3-2",
+     "1-2-3"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=3=7",
+     "2=3=7"
+    ],
+    "kTans2": [
+     "3-7",
+     "7-3",
+     "2-3"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-5",
+     "1-5-2",
+     "2-1-5",
+     "2-5-1"
+    ],
+    "sPuks": [
+     "1=2=5"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=5"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "⛩️弥彦",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 860,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-5",
+     "1-5-3",
+     "3-1-5",
+     "3-5-1"
+    ],
+    "sPuks": [
+     "1=3=5"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=2=5"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 2650,
+   "hitSeiten": true,
+   "hitKouten": false,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "6-1-2",
+     "6-2-1",
+     "1-6-2",
+     "1-2-6"
+    ],
+    "sPuks": [
+     "1=2=6"
+    ],
+    "kPuks": [
+     "1=3=6",
+     "2=3=6"
+    ],
+    "kTans2": [
+     "6-3",
+     "3-6",
+     "2-6"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 820,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-5",
+     "1-5-3",
+     "3-1-5",
+     "3-5-1"
+    ],
+    "sPuks": [
+     "1=3=5"
+    ],
+    "kPuks": [
+     "1=3=4",
+     "1=4=5"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-4-5",
+     "1-5-4",
+     "4-1-5",
+     "4-5-1"
+    ],
+    "sPuks": [
+     "1=4=5"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=2=5"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 760,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-2-3",
+     "4-3-2",
+     "2-4-3",
+     "2-3-4"
+    ],
+    "sPuks": [
+     "2=3=4"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "4-1",
+     "1-4",
+     "3-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 790,
+   "hitSeiten": true,
+   "hitKouten": false,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-3",
+     "1-3-2",
+     "2-1-3",
+     "2-3-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "⛩️弥彦",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-7",
+     "1-7-2",
+     "2-1-7",
+     "2-7-1"
+    ],
+    "sPuks": [
+     "1=2=7"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=7"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "7-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "girls",
+   "bank": "🛳️玉野",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-4-6",
+     "1-6-4",
+     "4-1-6",
+     "4-6-1"
+    ],
+    "sPuks": [
+     "1=4=6"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=2=6"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "6-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 1590,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "6-2-3",
+     "6-3-2",
+     "2-6-3",
+     "2-3-6"
+    ],
+    "sPuks": [
+     "2=3=6"
+    ],
+    "kPuks": [
+     "1=2=6",
+     "1=3=6"
+    ],
+    "kTans2": [
+     "6-1",
+     "1-6",
+     "3-6"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-3",
+     "1-3-2",
+     "2-1-3",
+     "2-3-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 1890,
+   "hitSeiten": true,
+   "hitKouten": false,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "6-1-5",
+     "6-5-1",
+     "1-6-5",
+     "1-5-6"
+    ],
+    "sPuks": [
+     "1=5=6"
+    ],
+    "kPuks": [
+     "1=3=6",
+     "3=5=6"
+    ],
+    "kTans2": [
+     "6-3",
+     "3-6",
+     "5-6"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 560,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-1-3",
+     "7-3-1",
+     "1-7-3",
+     "1-3-7"
+    ],
+    "sPuks": [
+     "1=3=7"
+    ],
+    "kPuks": [
+     "1=2=7",
+     "2=3=7"
+    ],
+    "kTans2": [
+     "7-2",
+     "2-7",
+     "3-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-7",
+     "1-7-2",
+     "2-1-7",
+     "2-7-1"
+    ],
+    "sPuks": [
+     "1=2=7"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=4=7"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "7-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "girls",
+   "bank": "🛳️玉野",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 860,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-3",
+     "1-3-2",
+     "2-1-3",
+     "2-3-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "1=3=5"
+    ],
+    "kTans2": [
+     "1-5",
+     "5-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-09",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🛳️玉野",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-1-6",
+     "2-6-1",
+     "1-2-6",
+     "1-6-2"
+    ],
+    "sPuks": [
+     "1=2=6"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "2=3=6"
+    ],
+    "kTans2": [
+     "2-3",
+     "3-2",
+     "6-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-4-1",
+     "2-1-4",
+     "4-2-1",
+     "4-1-2"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "2=4=6",
+     "1=2=6"
+    ],
+    "kTans2": [
+     "2-6",
+     "6-2",
+     "1-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 1050,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-4-7",
+     "5-7-4",
+     "4-5-7",
+     "4-7-5"
+    ],
+    "sPuks": [
+     "4=5=7"
+    ],
+    "kPuks": [
+     "2=4=5",
+     "2=5=7"
+    ],
+    "kTans2": [
+     "5-2",
+     "2-5",
+     "7-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "3-2-1",
+     "3-1-2",
+     "2-3-1",
+     "2-1-3"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "2=3=7",
+     "1=3=7"
+    ],
+    "kTans2": [
+     "3-7",
+     "7-3",
+     "1-3"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-4-5",
+     "1-5-4",
+     "4-1-5",
+     "4-5-1"
+    ],
+    "sPuks": [
+     "1=4=5"
+    ],
+    "kPuks": [
+     "1=4=6",
+     "1=5=6"
+    ],
+    "kTans2": [
+     "1-6",
+     "6-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-2",
+     "1-2-3",
+     "3-1-2",
+     "3-2-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=3=7",
+     "1=2=7"
+    ],
+    "kTans2": [
+     "1-7",
+     "7-1",
+     "2-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "💧大垣",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 2360,
+   "hitSeiten": true,
+   "hitKouten": false,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-1-3",
+     "2-3-1",
+     "1-2-3",
+     "1-3-2"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "2=3=4"
+    ],
+    "kTans2": [
+     "2-4",
+     "4-2",
+     "3-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "💧大垣",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "6-3-5",
+     "6-5-3",
+     "3-6-5",
+     "3-5-6"
+    ],
+    "sPuks": [
+     "3=5=6"
+    ],
+    "kPuks": [
+     "3=4=6",
+     "4=5=6"
+    ],
+    "kTans2": [
+     "6-4",
+     "4-6",
+     "5-6"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "💧大垣",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "6-3-5",
+     "6-5-3",
+     "3-6-5",
+     "3-5-6"
+    ],
+    "sPuks": [
+     "3=5=6"
+    ],
+    "kPuks": [
+     "3=4=6",
+     "4=5=6"
+    ],
+    "kTans2": [
+     "6-4",
+     "4-6",
+     "5-6"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "💧大垣",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-1-4",
+     "2-4-1",
+     "1-2-4",
+     "1-4-2"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "2=4=5"
+    ],
+    "kTans2": [
+     "2-5",
+     "5-2",
+     "4-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "💧大垣",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-3-2",
+     "5-2-3",
+     "3-5-2",
+     "3-2-5"
+    ],
+    "sPuks": [
+     "2=3=5"
+    ],
+    "kPuks": [
+     "1=3=5",
+     "1=2=5"
+    ],
+    "kTans2": [
+     "5-1",
+     "1-5",
+     "2-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🏝️いわき平",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 1340,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "3-1-4",
+     "3-4-1",
+     "1-3-4",
+     "1-4-3"
+    ],
+    "sPuks": [
+     "1=3=4"
+    ],
+    "kPuks": [
+     "1=3=5",
+     "3=4=5"
+    ],
+    "kTans2": [
+     "3-5",
+     "5-3",
+     "4-3"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🏝️いわき平",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 5780,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-1-2",
+     "4-2-1",
+     "1-4-2",
+     "1-2-4"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=4=5",
+     "2=4=5"
+    ],
+    "kTans2": [
+     "4-5",
+     "5-4",
+     "2-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🏝️いわき平",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 5620,
+   "hitSeiten": true,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-6",
+     "1-6-2",
+     "2-1-6",
+     "2-6-1"
+    ],
+    "sPuks": [
+     "1=2=6"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=4=6"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "6-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🏝️いわき平",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "3-1-2",
+     "3-2-1",
+     "1-3-2",
+     "1-2-3"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=3=5",
+     "2=3=5"
+    ],
+    "kTans2": [
+     "3-5",
+     "5-3",
+     "2-3"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-10",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏝️いわき平",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-5",
+     "1-5-2",
+     "2-1-5",
+     "2-5-1"
+    ],
+    "sPuks": [
+     "1=2=5"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=5"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-11",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏝️いわき平",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 570,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "3-1-2",
+     "3-2-1",
+     "1-3-2",
+     "1-2-3"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=3=6",
+     "2=3=6"
+    ],
+    "kTans2": [
+     "3-6",
+     "6-3",
+     "2-3"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-11",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏝️いわき平",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-3",
+     "1-3-2",
+     "2-1-3",
+     "2-3-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=7",
+     "1=3=7"
+    ],
+    "kTans2": [
+     "1-7",
+     "7-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-11",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏝️いわき平",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "1=4=5"
+    ],
+    "kTans2": [
+     "1-5",
+     "5-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-11",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏝️いわき平",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=7",
+     "1=4=7"
+    ],
+    "kTans2": [
+     "1-7",
+     "7-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-11",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 1560,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-3-5",
+     "7-5-3",
+     "3-7-5",
+     "3-5-7"
+    ],
+    "sPuks": [
+     "3=5=7"
+    ],
+    "kPuks": [
+     "3=4=7",
+     "4=5=7"
+    ],
+    "kTans2": [
+     "7-4",
+     "4-7",
+     "5-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-11",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 290,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-5-1",
+     "4-1-5",
+     "5-4-1",
+     "5-1-4"
+    ],
+    "sPuks": [
+     "1=4=5"
+    ],
+    "kPuks": [
+     "3=4=5",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "4-3",
+     "3-4",
+     "1-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-11",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 430,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-5-1",
+     "7-1-5",
+     "5-7-1",
+     "5-1-7"
+    ],
+    "sPuks": [
+     "1=5=7"
+    ],
+    "kPuks": [
+     "3=5=7",
+     "1=3=7"
+    ],
+    "kTans2": [
+     "7-3",
+     "3-7",
+     "1-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-11",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-4-3",
+     "7-3-4",
+     "4-7-3",
+     "4-3-7"
+    ],
+    "sPuks": [
+     "3=4=7"
+    ],
+    "kPuks": [
+     "2=4=7",
+     "2=3=7"
+    ],
+    "kTans2": [
+     "7-2",
+     "2-7",
+     "3-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-11",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-7-1",
+     "4-1-7",
+     "7-4-1",
+     "7-1-4"
+    ],
+    "sPuks": [
+     "1=4=7"
+    ],
+    "kPuks": [
+     "4=5=7",
+     "1=4=5"
+    ],
+    "kTans2": [
+     "4-5",
+     "5-4",
+     "1-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-3-5",
+     "4-5-3",
+     "3-4-5",
+     "3-5-4"
+    ],
+    "sPuks": [
+     "3=4=5"
+    ],
+    "kPuks": [
+     "3=4=7",
+     "4=5=7"
+    ],
+    "kTans2": [
+     "4-7",
+     "7-4",
+     "5-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-1-4",
+     "5-4-1",
+     "1-5-4",
+     "1-4-5"
+    ],
+    "sPuks": [
+     "1=4=5"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "2=4=5"
+    ],
+    "kTans2": [
+     "5-2",
+     "2-5",
+     "4-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 1430,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-1-5",
+     "2-5-1",
+     "1-2-5",
+     "1-5-2"
+    ],
+    "sPuks": [
+     "1=2=5"
+    ],
+    "kPuks": [
+     "1=2=6",
+     "2=5=6"
+    ],
+    "kTans2": [
+     "2-6",
+     "6-2",
+     "5-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-2",
+     "1-2-3",
+     "3-1-2",
+     "3-2-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=3=4",
+     "1=2=4"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "2-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏔️前橋",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-7-4",
+     "1-4-7",
+     "7-1-4",
+     "7-4-1"
+    ],
+    "sPuks": [
+     "1=4=7"
+    ],
+    "kPuks": [
+     "1=3=7",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "♨️伊東",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "3-5-6",
+     "3-6-5",
+     "5-3-6",
+     "5-6-3"
+    ],
+    "sPuks": [
+     "3=5=6"
+    ],
+    "kPuks": [
+     "2=3=5",
+     "2=3=6"
+    ],
+    "kTans2": [
+     "3-2",
+     "2-3",
+     "6-3"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "♨️伊東",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 330,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-5-4",
+     "1-4-5",
+     "5-1-4",
+     "5-4-1"
+    ],
+    "sPuks": [
+     "1=4=5"
+    ],
+    "kPuks": [
+     "1=5=7",
+     "1=4=7"
+    ],
+    "kTans2": [
+     "1-7",
+     "7-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "♨️伊東",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 4700,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-7-5",
+     "4-5-7",
+     "7-4-5",
+     "7-5-4"
+    ],
+    "sPuks": [
+     "4=5=7"
+    ],
+    "kPuks": [
+     "2=4=7",
+     "2=4=5"
+    ],
+    "kTans2": [
+     "4-2",
+     "2-4",
+     "5-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "♨️伊東",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 400,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-1-2",
+     "7-2-1",
+     "1-7-2",
+     "1-2-7"
+    ],
+    "sPuks": [
+     "1=2=7"
+    ],
+    "kPuks": [
+     "1=5=7",
+     "2=5=7"
+    ],
+    "kTans2": [
+     "7-5",
+     "5-7",
+     "2-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "girls",
+   "bank": "♨️伊東",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "6-7-1",
+     "6-1-7",
+     "7-6-1",
+     "7-1-6"
+    ],
+    "sPuks": [
+     "1=6=7"
+    ],
+    "kPuks": [
+     "4=6=7",
+     "1=4=6"
+    ],
+    "kTans2": [
+     "6-4",
+     "4-6",
+     "1-6"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "♨️伊東",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-3-2",
+     "4-2-3",
+     "3-4-2",
+     "3-2-4"
+    ],
+    "sPuks": [
+     "2=3=4"
+    ],
+    "kPuks": [
+     "3=4=5",
+     "2=4=5"
+    ],
+    "kTans2": [
+     "4-5",
+     "5-4",
+     "2-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "♨️伊東",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-3-5",
+     "4-5-3",
+     "3-4-5",
+     "3-5-4"
+    ],
+    "sPuks": [
+     "3=4=5"
+    ],
+    "kPuks": [
+     "2=3=4",
+     "2=4=5"
+    ],
+    "kTans2": [
+     "4-2",
+     "2-4",
+     "5-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "♨️伊東",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-3-7",
+     "4-7-3",
+     "3-4-7",
+     "3-7-4"
+    ],
+    "sPuks": [
+     "3=4=7"
+    ],
+    "kPuks": [
+     "2=3=4",
+     "2=4=7"
+    ],
+    "kTans2": [
+     "4-2",
+     "2-4",
+     "7-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "♨️伊東",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 850,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-7-3",
+     "1-3-7",
+     "7-1-3",
+     "7-3-1"
+    ],
+    "sPuks": [
+     "1=3=7"
+    ],
+    "kPuks": [
+     "1=4=7",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "♨️伊東",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-1-2",
+     "4-2-1",
+     "1-4-2",
+     "1-2-4"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=4=5",
+     "2=4=5"
+    ],
+    "kTans2": [
+     "4-5",
+     "5-4",
+     "2-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "♨️伊東",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-5-2",
+     "4-2-5",
+     "5-4-2",
+     "5-2-4"
+    ],
+    "sPuks": [
+     "2=4=5"
+    ],
+    "kPuks": [
+     "1=4=5",
+     "1=2=4"
+    ],
+    "kTans2": [
+     "4-1",
+     "1-4",
+     "2-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "girls",
+   "bank": "♨️伊東",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 130,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-5-6",
+     "1-6-5",
+     "5-1-6",
+     "5-6-1"
+    ],
+    "sPuks": [
+     "1=5=6"
+    ],
+    "kPuks": [
+     "1=4=5",
+     "1=4=6"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "6-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "♨️伊東",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-2-4",
+     "7-4-2",
+     "2-7-4",
+     "2-4-7"
+    ],
+    "sPuks": [
+     "2=4=7"
+    ],
+    "kPuks": [
+     "1=2=7",
+     "1=4=7"
+    ],
+    "kTans2": [
+     "7-1",
+     "1-7",
+     "4-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🏝️いわき平",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-3",
+     "1-3-2",
+     "2-1-3",
+     "2-3-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=2=6",
+     "1=3=6"
+    ],
+    "kTans2": [
+     "1-6",
+     "6-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🏝️いわき平",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 1310,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-4",
+     "1-4-3",
+     "3-1-4",
+     "3-4-1"
+    ],
+    "sPuks": [
+     "1=3=4"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=2=4"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🏝️いわき平",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-6",
+     "1-6-2",
+     "2-1-6",
+     "2-6-1"
+    ],
+    "sPuks": [
+     "1=2=6"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=4=6"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "6-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏝️いわき平",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-2",
+     "1-2-3",
+     "3-1-2",
+     "3-2-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=3=6",
+     "1=2=6"
+    ],
+    "kTans2": [
+     "1-6",
+     "6-1",
+     "2-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏝️いわき平",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 510,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-4-3",
+     "1-3-4",
+     "4-1-3",
+     "4-3-1"
+    ],
+    "sPuks": [
+     "1=3=4"
+    ],
+    "kPuks": [
+     "1=4=5",
+     "1=3=5"
+    ],
+    "kTans2": [
+     "1-5",
+     "5-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏝️いわき平",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-4-3",
+     "1-3-4",
+     "4-1-3",
+     "4-3-1"
+    ],
+    "sPuks": [
+     "1=3=4"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=2=3"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏝️いわき平",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-5-7",
+     "1-7-5",
+     "5-1-7",
+     "5-7-1"
+    ],
+    "sPuks": [
+     "1=5=7"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "1=2=7"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "7-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-chal",
+   "bank": "🏝️いわき平",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 910,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "6-2-1",
+     "6-1-2",
+     "2-6-1",
+     "2-1-6"
+    ],
+    "sPuks": [
+     "1=2=6"
+    ],
+    "kPuks": [
+     "2=3=6",
+     "1=3=6"
+    ],
+    "kTans2": [
+     "6-3",
+     "3-6",
+     "1-6"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏝️いわき平",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-4",
+     "1-4-2",
+     "2-1-4",
+     "2-4-1"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=4"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏯名古屋",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-4-3",
+     "2-3-4",
+     "4-2-3",
+     "4-3-2"
+    ],
+    "sPuks": [
+     "2=3=4"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=2=3"
+    ],
+    "kTans2": [
+     "2-1",
+     "1-2",
+     "3-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏯名古屋",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-4-3",
+     "1-3-4",
+     "4-1-3",
+     "4-3-1"
+    ],
+    "sPuks": [
+     "1=3=4"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=2=3"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "3-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏯名古屋",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-5",
+     "1-5-2",
+     "2-1-5",
+     "2-5-1"
+    ],
+    "sPuks": [
+     "1=2=5"
+    ],
+    "kPuks": [
+     "1=2=4",
+     "1=4=5"
+    ],
+    "kTans2": [
+     "1-4",
+     "4-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏯名古屋",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 190,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-4-6",
+     "1-6-4",
+     "4-1-6",
+     "4-6-1"
+    ],
+    "sPuks": [
+     "1=4=6"
+    ],
+    "kPuks": [
+     "1=3=4",
+     "1=3=6"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "6-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏯名古屋",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 210,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-1-4",
+     "2-4-1",
+     "1-2-4",
+     "1-4-2"
+    ],
+    "sPuks": [
+     "1=2=4"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "2=3=4"
+    ],
+    "kTans2": [
+     "2-3",
+     "3-2",
+     "4-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏯名古屋",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-2",
+     "1-2-3",
+     "3-1-2",
+     "3-2-1"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "1=3=5",
+     "1=2=5"
+    ],
+    "kTans2": [
+     "1-5",
+     "5-1",
+     "2-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "girls",
+   "bank": "🏯名古屋",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-2-5",
+     "1-5-2",
+     "2-1-5",
+     "2-5-1"
+    ],
+    "sPuks": [
+     "1=2=5"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=3=5"
+    ],
+    "kTans2": [
+     "1-3",
+     "3-1",
+     "5-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-12",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏯名古屋",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-1-6",
+     "2-6-1",
+     "1-2-6",
+     "1-6-2"
+    ],
+    "sPuks": [
+     "1=2=6"
+    ],
+    "kPuks": [
+     "1=2=5",
+     "2=5=6"
+    ],
+    "kTans2": [
+     "2-5",
+     "5-2",
+     "6-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-13",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🍔佐世保",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 490,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-2-1",
+     "5-1-2",
+     "2-5-1",
+     "2-1-5"
+    ],
+    "sPuks": [
+     "1=2=5"
+    ],
+    "kPuks": [
+     "2=3=5",
+     "1=3=5"
+    ],
+    "kTans2": [
+     "5-3",
+     "3-5",
+     "1-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-13",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🍔佐世保",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-5-2",
+     "4-2-5",
+     "5-4-2",
+     "5-2-4"
+    ],
+    "sPuks": [
+     "2=4=5"
+    ],
+    "kPuks": [
+     "4=5=7",
+     "2=4=7"
+    ],
+    "kTans2": [
+     "4-7",
+     "7-4",
+     "2-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-13",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🍔佐世保",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-4-1",
+     "7-1-4",
+     "4-7-1",
+     "4-1-7"
+    ],
+    "sPuks": [
+     "1=4=7"
+    ],
+    "kPuks": [
+     "3=4=7",
+     "1=3=7"
+    ],
+    "kTans2": [
+     "7-3",
+     "3-7",
+     "1-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-13",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🍔佐世保",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-1-2",
+     "5-2-1",
+     "1-5-2",
+     "1-2-5"
+    ],
+    "sPuks": [
+     "1=2=5"
+    ],
+    "kPuks": [
+     "1=4=5",
+     "2=4=5"
+    ],
+    "kTans2": [
+     "5-4",
+     "4-5",
+     "2-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-13",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🍔佐世保",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-7-1",
+     "2-1-7",
+     "7-2-1",
+     "7-1-2"
+    ],
+    "sPuks": [
+     "1=2=7"
+    ],
+    "kPuks": [
+     "2=3=7",
+     "1=2=3"
+    ],
+    "kTans2": [
+     "2-3",
+     "3-2",
+     "1-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-13",
+   "month": "2026-07",
+   "grade": "girls",
+   "bank": "🍔佐世保",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 660,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-2-4",
+     "7-4-2",
+     "2-7-4",
+     "2-4-7"
+    ],
+    "sPuks": [
+     "2=4=7"
+    ],
+    "kPuks": [
+     "2=5=7",
+     "4=5=7"
+    ],
+    "kTans2": [
+     "7-5",
+     "5-7",
+     "4-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-13",
+   "month": "2026-07",
+   "grade": "girls",
+   "bank": "🍔佐世保",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 420,
+   "hitSeiten": true,
+   "hitKouten": false,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-3-6",
+     "1-6-3",
+     "3-1-6",
+     "3-6-1"
+    ],
+    "sPuks": [
+     "1=3=6"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=2=6"
+    ],
+    "kTans2": [
+     "1-2",
+     "2-1",
+     "6-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-13",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "🍔佐世保",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 1540,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-3-1",
+     "5-1-3",
+     "3-5-1",
+     "3-1-5"
+    ],
+    "sPuks": [
+     "1=3=5"
+    ],
+    "kPuks": [
+     "3=4=5",
+     "1=4=5"
+    ],
+    "kTans2": [
+     "5-4",
+     "4-5",
+     "1-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-13",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "🍔佐世保",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "1-5-4",
+     "1-4-5",
+     "5-1-4",
+     "5-4-1"
+    ],
+    "sPuks": [
+     "1=4=5"
+    ],
+    "kPuks": [
+     "1=5=6",
+     "1=4=6"
+    ],
+    "kTans2": [
+     "1-6",
+     "6-1",
+     "4-1"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-13",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "🍔佐世保",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "5-2-7",
+     "5-7-2",
+     "2-5-7",
+     "2-7-5"
+    ],
+    "sPuks": [
+     "2=5=7"
+    ],
+    "kPuks": [
+     "2=3=5",
+     "3=5=7"
+    ],
+    "kTans2": [
+     "5-3",
+     "3-5",
+     "7-5"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-13",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "🍔佐世保",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "4-7-1",
+     "4-1-7",
+     "7-4-1",
+     "7-1-4"
+    ],
+    "sPuks": [
+     "1=4=7"
+    ],
+    "kPuks": [
+     "2=4=7",
+     "1=2=4"
+    ],
+    "kTans2": [
+     "4-2",
+     "2-4",
+     "1-4"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-13",
+   "month": "2026-07",
+   "grade": "s-kyu",
+   "bank": "🍔佐世保",
+   "tenun": 33,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "7-3-2",
+     "7-2-3",
+     "3-7-2",
+     "3-2-7"
+    ],
+    "sPuks": [
+     "2=3=7"
+    ],
+    "kPuks": [
+     "3=5=7",
+     "2=5=7"
+    ],
+    "kTans2": [
+     "7-5",
+     "5-7",
+     "2-7"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-14",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🏦京王閣",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 3060,
+   "hitSeiten": false,
+   "hitKouten": true,
+   "hitAny": true,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-3-1",
+     "2-1-3",
+     "3-2-1",
+     "3-1-2"
+    ],
+    "sPuks": [
+     "1=2=3"
+    ],
+    "kPuks": [
+     "2=3=4",
+     "1=2=4"
+    ],
+    "kTans2": [
+     "2-4",
+     "4-2",
+     "1-2"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-14",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🍁広島",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "3-4-2",
+     "3-2-4",
+     "4-3-2",
+     "4-2-3"
+    ],
+    "sPuks": [
+     "2=3=4"
+    ],
+    "kPuks": [
+     "1=3=4",
+     "1=2=3"
+    ],
+    "kTans2": [
+     "3-1",
+     "1-3",
+     "2-3"
+    ]
+   }
+  },
+  {
+   "date": "2026-07-14",
+   "month": "2026-07",
+   "grade": "a-kyu",
+   "bank": "🍁広島",
+   "tenun": 0,
+   "cost": 1000,
+   "ret": 0,
+   "hitSeiten": false,
+   "hitKouten": false,
+   "hitAny": false,
+   "nBets": {
+    "sTans": 4,
+    "sPuks": 1,
+    "kPuks": 2,
+    "kTans2": 3
+   },
+   "bets": {
+    "sTans": [
+     "2-3-4",
+     "2-4-3",
+     "3-2-4",
+     "3-4-2"
+    ],
+    "sPuks": [
+     "2=3=4"
+    ],
+    "kPuks": [
+     "1=2=3",
+     "1=2=4"
+    ],
+    "kTans2": [
+     "2-1",
+     "1-2",
+     "4-2"
+    ]
+   }
+  }
+ ]
+}
