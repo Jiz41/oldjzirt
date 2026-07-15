@@ -1020,8 +1020,12 @@ function calculate_koutenrei_bias(players, scenario, BANK_DATA, v, lineInput, ra
     });
 
     // 7. C_pace：超高得点の逃げ選手は競合他ラインに追いつかれやすい
-    const leaderPlayer = tempPlayers.find(pp => pp.style === '逃' || pp.style === '自');
-    if (leaderPlayer && leaderPlayer.score >= 105.0 && lines.length - 1 >= 2) {
+    const realLines = lines.filter(l => l.length >= 2);
+    const lineHeads = realLines
+        .map(l => tempPlayers.find(pp => pp.id === l[0]))
+        .filter(pp => pp && (pp.style === '逃' || pp.style === '自'));
+    const leaderPlayer = lineHeads.sort((a, b) => b.score - a.score)[0];
+    if (leaderPlayer && leaderPlayer.score >= 105.0 && realLines.length >= 2) {
         leaderPlayer.final_score *= 0.96;
         appliedCoeffs.push('C_pace');
     }
@@ -1399,6 +1403,11 @@ app.calculatePrediction = async function(guardedData) {
     basePlayers.forEach(p => {
         p.c_score_adj = 1.0 + (p.score / 100 - 1) * settings.R_BIAS;
 
+    // recent は左端が最古走・右端が最新走（2026-07-15 確定。fixtures718Rで実着順との相関が
+    // 右端ほど強い勾配 0.078→0.103→0.127 を確認。手動入力欄「直近3走」の実運用規約）。
+    // 注意: 下の trendBonus は規約上「数字増加=悪化」のはずだが、符号を規約通りに反転する
+    // 変更はリプレイ718Rで大敗（回収86.9%→75.0%、girls 108%→49.6%）したため不採用（2026-07-15計測）。
+    // 現行符号は「直近乱調（数字増加）の選手を押し上げる」逆張り係数として機能している。触るな。
     const recentScores = p.recent.split('').map(Number);
     const avgRank = recentScores.length > 0 ? recentScores.reduce((a, b) => a + b, 0) / recentScores.length : 4.0;
     let trendBonus = 0;
@@ -1410,6 +1419,9 @@ app.calculatePrediction = async function(guardedData) {
     }
     p.trendLabel = trendBonus > 0 ? '上昇' : trendBonus < 0 ? '下降' : '安定';
     // 4 - avgRank: 平均着順が良いほど正値（1着=+0.15）。trendBonus: 直近3走の方向性で±0.03
+    // 注意: RECENT_WEIGHT は全体乗算のため全選手一律＝順位に無効（死にノブ）。
+    // 差分に掛ける修正 `1.0 + (...) * RECENT_WEIGHT` はリプレイ718Rで s-kyu 回収87.9%→79.6%・
+    // 全体86.9%→86.3%と負けたため不採用（2026-07-15計測。a-chal/girls は微増だった）。
     p.c_recent = (1.0 + (4 - avgRank) * 0.05 + trendBonus) * settings.RECENT_WEIGHT;
 
         if      (p.wmark === '◎') p.c_wmark = 1.04;
