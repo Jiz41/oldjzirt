@@ -2,6 +2,8 @@
 
 // 真自在律 Ver11.2.0
 // LOGIC VERSION: 11.2.0
+// ※ バージョン更新時は下の LOGIC_VERSION 定数も必ず更新すること
+const LOGIC_VERSION = '11.2.0';
 // 【V11.2.0】K2採用：晴天令の合成における競走得点項を二乗（1188行、1行変更）。
 //            リプレイ実測718R: 的中35.4%→34.5% / 回収78.5%→86.9%、拡張93R OOS: 61.4%→70.2%。
 //            回収優先の合意に基づき採用。荒天令・買い目生成は不変。
@@ -100,7 +102,7 @@
 // 【V7.3】消耗ペナルティ適用拡大 ＆ 複数競り表示修正。
 // ------------------------------------------------------------------------------------
 
-app.LOGIC_VERSION = '11.0.1';
+app.LOGIC_VERSION = LOGIC_VERSION;
 
 // R_BIAS       : 競走得点の影響度スケール（S級は得点差が直結、チャレンジは薄める）
 // RECENT_WEIGHT: 近況着順の重み（チャレンジは調子ムラが大きいので上げる）
@@ -460,8 +462,6 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA,
         }
     }
 
-    if (!silent && !kururuLogged) app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 位置[${posLabel}] -> 風補正実行`);
-
     const map = BANK_DATA.wind_direction_map || {};
 
     function dirToVector(dirType) {
@@ -486,9 +486,9 @@ function getKururuAdjustment(p, direction, speed, isGirls, lineInput, BANK_DATA,
 
     const finalAdj = 1.0 + (vector * kp * (BANK_DATA.alpha || 1.0) * positionShield);
 
-    if (!silent && !kururuLogged) app.logMessage(`[kururu] 選手${playerId}: 方角[${selectedDir}] 属性[斜め補正済み] 位置[${posLabel}] -> 風補正実行`);
-
-    CalculationSnapshot.wind_physics = { finalAdj: finalAdj, v: v };
+    // 選手別マップで記録（resetSnapshot の初期形 finalAdj:{} に整合。単一値上書きは V11.2.x で修正）
+    CalculationSnapshot.wind_physics.finalAdj[playerId] = finalAdj;
+    CalculationSnapshot.wind_physics.v = v;
     return { adj: finalAdj, v: v };
 }
 
