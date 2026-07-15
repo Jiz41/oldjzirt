@@ -1,4 +1,8 @@
-# keirin_logic.js 依存マップ（Ver9.3）
+# keirin_logic.js 依存マップ（Ver11.2.0 時点で部分更新 2026-07-15）
+
+> ⚠️ 本文の関数解説は Ver9.3〜10.20 期に書かれたものが多く、行番号・細部が古い可能性がある。
+> 末尾の「主要関数インデックス」は Ver11.2.0 の実体から再生成済み（2026-07-15）なので行番号はそちらを正とする。
+> LOGIC_VERSION 更新時は本マップのインデックスも更新すること（CLAUDE.md 参照）。
 
 > 改修時の副作用事前把握用監視リスト。  
 > 「影響を与える」は「この関数を変えると壊れる可能性がある下流先」を指す。
@@ -79,13 +83,13 @@
 |---|---|
 | 依存する関数・変数 | `getPlayerPositions(lines)`, `CalculationSnapshot.tactical`, `app.logMessage` |
 | 影響を与える関数・変数 | `runScenarioSimulation`（`p.final_score /= p.cantoMakuriPenalty`, `p.final_score *= p.warpBoost`）, `shakkou_donperi_core.js` |
-| **副作用ポイント** | `players` 配列を直接変異。捲りペナルティは `canto > 32度 && style === '両'` にのみ適用。ワープブーストは競り情報の勝者が全体2番手のときのみ発動 |
+| **副作用ポイント** | `players` 配列を直接変異。捲りペナルティは `canto > 32度 && style === '自'` にのみ適用（V10.9で'両'→'自'に統一済み）。ワープブーストは競り情報の勝者が全体2番手のときのみ発動 |
 | 境界条件 | カント閾値: 32度。ワープブースト対象: 全体3〜4番手の選手のみ（×1.35）。`seriInfos` が空または null の場合はワープ非発動 |
 
 ---
 
-### `calculateSuperiorityList()`
-**何をするか**: 壱耀晴乾ノ象の統計的優位パターンを起動時1回評価してリストを返す。
+### `calculateSuperiorityList()`【削除済み・V10.10】
+**何をするか**: （V10.10で SUPERIOR_PATTERNS_FINAL_LIST ごと削除。以下は旧記述）壱耀晴乾ノ象の統計的優位パターンを起動時1回評価してリストを返す。
 
 | 項目 | 内容 |
 |---|---|
@@ -108,8 +112,8 @@
 
 ---
 
-### `getPlayerData(playerDataArray)`
-**何をするか**: 外部から渡されたプレイヤー生データを内部構造体（係数フィールド込み）に変換する。
+### `getPlayerData(playerDataArray)`【削除済み・V10.11】
+**何をするか**: （V10.11で死にコードとして削除。calculatePrediction() と重複かつ劣化版だった。以下は旧記述）外部から渡されたプレイヤー生データを内部構造体（係数フィールド込み）に変換する。
 
 | 項目 | 内容 |
 |---|---|
@@ -175,7 +179,7 @@
 |---|---|
 | 依存する関数・変数 | `SERI_FATIGUE_PENALTY_IN`, `SERI_FATIGUE_PENALTY_OUT`, `SERI_WIN_BONUS`, `app.logMessage` |
 | 影響を与える関数・変数 | `runScenarioSimulation`（シナリオごとに適用） |
-| **副作用ポイント** | `scoredPlayers` を直接変異（`final_score` 上書き）。競り情報がない場合はスキップ。全シナリオ（先行/捲り/差し）で毎回適用されるため影響が3倍に増幅される点に注意 |
+| **副作用ポイント** | `scoredPlayers` を直接変異（`final_score` 上書き）。競り情報がない場合はスキップ。3シナリオ（先行/捲り/差し）は basePlayers のディープコピーで独立実行され integratedScores に合算される。「3回適用で3倍に増幅」ではなく「3つの並行世界で各1回適用→合算」（2026-07-15 記述修正） |
 | 境界条件 | 勝者消耗率: `×(1+0.05)×(1-0.15)` = 実質 `-10.25%`。敗者: `×(1-0.25)` = `-25%` |
 
 ---
@@ -417,34 +421,35 @@
 - 全体読み込み禁止。必ず関数名を指定してピンポイントで読むこと
 - 関数名が不明な場合は本ファイルの主要関数インデックスで確認
 
-## 主要関数インデックス（keirin_logic.js Ver10.20）
+## 主要関数インデックス（keirin_logic.js Ver11.2.0・2026-07-15 実体から再生成）
 
 | 行番号 | 関数名 | 概要 |
 |--------|--------|------|
-| 125 | `resetSnapshot()` | CalculationSnapshot を初期化 |
-| 161 | `getKururuAdjustment()` | 風速・風向・ライン位置から風圧補正係数を返す（全バンク共通） |
-| 242 | `getPlayerPositions()` | ライン入力から選手ポジションマップを生成 |
-| 268 | `applyPhysicalPenalty()` | 落車・失格履歴による物理ペナルティを付与 |
-| 299 | `applyTacticalAdjustments()` | 展開・捲りペナルティ・ワープブーストを付与 |
-| 398 | `displayBankTendency()` | バンク傾向をUI表示 |
-| 453 | `parseLineInput()` | テキスト入力をライン配列に変換 |
-| 537 | `calculateLineCoeffs()` | C_L係数（ライン連携補正）を計算・付与 |
-| 651 | `applySeriCorrection()` | 競り補正をスコアに適用 |
-| 683 | `getScenarioCoeffs()` | シナリオ別係数セットを返す |
-| 693 | `generateScenarioWagers()` | シナリオ別スコアを計算 |
-| 726 | `assignFinalGrades()` | 最終グレード（A/B/C/D）を付与 |
-| 756 | `calculate_koutenrei_bias()` | 荒天令バイアスを計算 |
-| 939 | `runScenarioSimulation()` | シナリオシミュレーションを実行（晴天令/荒天令） |
-| 1040 | `calculateTenunIndex()` | 天雲指数を算出・ランキングを生成 |
-| 1318 | `applyShinganHakke()` | 審眼八卦（SNGN）補正を適用 |
-| 1409 | `getStrengthColor()` | スコアに応じた強さカラーを返す |
-| 1418 | `getTextColor()` | 背景色に応じた文字色を返す |
-| 1425 | `displayResults()` | 全結果をUIに描画するメイン出力関数 |
-| 1574 | `formatOrderedBet()` | 三連単買い目を「X-Y-Z」形式に整形 |
-| 1575 | `formatSanrenpuku()` | 三連複買い目を「X=Y=Z」形式に整形 |
-| 1577 | `applyLineCountBonus()` | ライン人数ボーナスを統合スコアに適用 |
-| 1591 | `classifyTenkai()` | mv/sg/nNige/nMakuri から展開パターンを判定 |
-| 1619 | `selectR2()` | 展開パターン別にr2を選出（excludeIds除外） |
-| 1640 | `generateSeitenreiBets()` | 晴天令買い目（三連単4点・三連複1点）を生成 |
-| 1655 | `generateKoutenreiBets()` | 荒天令買い目（特異点L・三連複・二車単）を生成 |
-| 2081 | `initInputGuardWrapper()` | 入力ガードラッパーを初期化 |
+| 146 | `getPlayerPositions()` | ライン入力から選手ポジションマップを生成 |
+| 169 | `getScenarioCoeffs()` | シナリオ別係数セットを返す |
+| 176 | `getStrengthColor()` | スコアに応じた強さカラーを返す |
+| 185 | `getTextColor()` | 背景色に応じた文字色を返す |
+| 192 | `formatOrderedBet()` | 三連単買い目を「X-Y-Z」形式に整形 |
+| 193 | `formatSanrenpuku()` | 三連複買い目を「X=Y=Z」形式に整形 |
+| 195 | `applyLineCountBonus()` | ライン人数ボーナスを統合スコアに適用 |
+| 209 | `classifyTenkai()` | mv/sg/nNige/nMakuri から展開パターンを判定 |
+| 237 | `selectR2()` | 展開パターン別にr2を選出（excludeIds除外） |
+| 258 | `generateSeitenreiBets()` | 晴天令買い目（三連単4点・三連複1点）を生成 |
+| 282 | `generateKoutenreiBets()` | 荒天令買い目（特異点L・三連複・二車単）を生成 |
+| 380 | `resetSnapshot()` | CalculationSnapshot を初期化 |
+| 417 | `getKururuAdjustment()` | 風速・風向・ライン位置から風圧補正係数を返す（全バンク共通） |
+| 505 | `applyPhysicalPenalty()` | 直線長ペナルティ（V9.0物理層）【封印中・未接続 2026-05-25確定】 |
+| 536 | `applyTacticalAdjustments()` | 展開・捲りペナルティ・ワープブーストを付与 |
+| 635 | `displayBankTendency()` | バンク傾向をUI表示 |
+| 690 | `parseLineInput()` | テキスト入力をライン配列に変換 |
+| 774 | `calculateLineCoeffs()` | C_L係数（ライン連携補正）を計算・付与 |
+| 887 | `applySeriCorrection()` | 競り補正をスコアに適用 |
+| 919 | `assignFinalGrades()` | 最終グレード（A/B/C/D）を付与 |
+| 949 | `calculate_koutenrei_bias()` | 荒天令バイアスを計算 |
+| 1135 | `runScenarioSimulation()` | シナリオシミュレーションを実行（晴天令/荒天令） |
+| 1276 | `calculateTenunIndex()` | 天雲指数を算出・ランキングを生成 |
+| 1599 | `applyShinganHakke()` | 審眼八卦（SNGN）補正を適用 |
+| 1681 | `displayResults()` | 全結果をUIに描画するメイン出力関数 |
+| 2221 | `initInputGuardWrapper()` | 入力ガードラッパーを初期化 |
+
+※ `getPlayerData` / `calculateSuperiorityList` / `generateScenarioWagers` は V10.10-11 で削除済み（本ファイル解説節の【削除済み】表記参照）。

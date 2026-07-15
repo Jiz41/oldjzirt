@@ -2,6 +2,8 @@
 
 keirin_logic.js に触れる前に必ず最初に docs/keirin_logic_dependency_map.md を読むこと。
 全体読み込み禁止。dependency_map.md の行番号でピンポイント読みのみ許可。
+LOGIC_VERSION 更新時は dependency_map.md の主要関数インデックス（行番号）も必ず更新すること。
+地図の劣化は「地図がない」より悪い事故（誤読改修）につながる。
 
 ## リプレイ台（模擬機）— 係数・ロジック変更の事前計測義務【恒久ルール】
 
