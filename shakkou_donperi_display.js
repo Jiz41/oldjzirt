@@ -100,7 +100,7 @@ function buildHeatmapHTML(cosmosResult) {
         const rankIdx = topByRank[rank].indexOf(stat.id);
         const isTop = rankIdx !== -1 && pct > 0;
         const badge = isTop ? `<span class="shakkou-badge ${medalClass[rankIdx]}">${badgeMap[rankIdx]}</span>` : '';
-        const bg = `rgba(212, 175, 55, ${Math.min(pct / 100, 1) * 0.75 + (pct > 0 ? 0.05 : 0)})`;
+        const bg = `rgba(77, 195, 255, ${Math.min(pct / 100, 1) * 0.75 + (pct > 0 ? 0.05 : 0)})`;
         const topClass = isTop ? 'shakkou-cell-top' : '';
         return `<td class="shakkou-heat-cell ${topClass}" style="background:${bg};">${badge}${pctLabel}</td>`;
     }
@@ -178,20 +178,20 @@ function injectShakkouStyles() {
    ============================================================================ */
 
 .shakkou-results-container {
-    background: linear-gradient(135deg, #0a0505, #1a0f0a);
-    border: 3px solid #8b4513;
+    background: linear-gradient(135deg, ##0c0d11, #15171e);
+    border: 3px solid #2e3140;
     border-radius: 12px;
     padding: 16px;
     margin: 20px 0;
-    box-shadow: 0 8px 20px rgba(139, 69, 19, 0.3);
+    box-shadow: 0 8px 20px rgba(46, 49, 64, 0.3);
 }
 
 .shakkou-section-title {
-    color: #d4af37;
+    color: #ffb62e;
     font-size: 16px;
     margin: 0 0 10px 0;
     padding-bottom: 8px;
-    border-bottom: 2px solid #8b4513;
+    border-bottom: 2px solid #2e3140;
 }
 
 .shakkou-top-patterns {
@@ -202,8 +202,8 @@ function injectShakkouStyles() {
 .shakkou-heat-table {
     width: 100%;
     border-collapse: collapse;
-    background: rgba(26, 15, 10, 0.5);
-    border: 1px solid #3a2810;
+    background: rgba(21, 23, 30, 0.5);
+    border: 1px solid #2e3140;
     border-radius: 5px;
     overflow: hidden;
     table-layout: auto;
@@ -211,21 +211,21 @@ function injectShakkouStyles() {
 
 .shakkou-pattern-table thead th,
 .shakkou-heat-table thead th {
-    background: rgba(42, 24, 16, 0.8);
-    color: #d4af37;
+    background: rgba(29, 32, 41, 0.8);
+    color: #ffb62e;
     padding: 10px;
     text-align: center;
-    border-bottom: 2px solid #8b4513;
+    border-bottom: 2px solid #2e3140;
     font-weight: bold;
     font-size: 13px;
 }
 
 .shakkou-pattern-table tbody td,
 .shakkou-heat-table tbody td {
-    color: #c9a55b;
+    color: #d9bb6e;
     padding: 8px;
     text-align: center;
-    border-bottom: 1px solid #3a2810;
+    border-bottom: 1px solid #2e3140;
     font-family: 'Courier New', monospace;
     font-size: 12px;
 }
@@ -237,18 +237,18 @@ function injectShakkouStyles() {
 
 .shakkou-rank {
     font-weight: bold;
-    color: #d4af37 !important;
+    color: #ffb62e !important;
 }
 
 .shakkou-pattern {
-    color: #d4af37;
+    color: #ffb62e;
     font-weight: bold;
     letter-spacing: 0.15em;
 }
 
 .shakkou-car-number {
     font-weight: bold;
-    color: #d4af37 !important;
+    color: #ffb62e !important;
     font-size: 14px;
     white-space: nowrap;
 }
@@ -260,7 +260,7 @@ function injectShakkouStyles() {
 
 .shakkou-cell-top {
     font-weight: bold;
-    border: 2px solid #d4af37 !important;
+    border: 2px solid #ffb62e !important;
 }
 
 .shakkou-badge {

@@ -33,10 +33,10 @@
   }
 
   var TIER_COLORS = {
-    '買い（強）': '#f8b500',
-    '買い': '#DAA520',
-    '見寄り': '#8a8a60',
-    '見': '#777777',
+    '買い（強）': 'var(--gold, #ffb62e)',
+    '買い': 'var(--neon-a, #39ffb0)',
+    '見寄り': 'var(--muted, #979aa6)',
+    '見': 'var(--tier-c, #6b6f7a)',
   };
 
   function renderHistoryTable(tierKey) {
@@ -149,7 +149,7 @@
     var headerHtml = '<h3 style="margin-bottom:4px;">🎯 買い/見 判定・配分電卓</h3>' +
       '<div style="display:flex; align-items:center; gap:10px; margin:8px 0;">' +
       '<span style="font-size:1.3em; font-weight:bold; color:' + color + ';">ティア：' + escapeHtml(tier) + '</span>' +
-      (isMiss ? '<span style="background:#5a2a2a; color:#ffb3b3; padding:2px 8px; border-radius:4px; font-size:0.85em;">見送り推奨</span>' : '') +
+      (isMiss ? '<span style="background:var(--accent-bg, rgba(255,77,109,0.1)); color:var(--accent, #ff4d6d); padding:2px 8px; border-radius:4px; font-size:0.85em;">見送り推奨</span>' : '') +
       '</div>';
 
     if (!data.tierResult.conditionC) {
@@ -163,7 +163,7 @@
 
     var budgetInput = '<div style="margin-top:14px;">' +
       '<label style="font-size:0.85em; color:#ccc;">このレースの予算（円）</label>' +
-      '<input type="number" inputmode="numeric" min="0" step="100" id="' + BUDGET_INPUT_ID + '" placeholder="例: 3000" style="width:100%; padding:6px; box-sizing:border-box; margin-top:4px; background:#1a1a1a; color:#e8e8e8; border:1px solid #444;">' +
+      '<input type="number" inputmode="numeric" min="0" step="100" id="' + BUDGET_INPUT_ID + '" placeholder="例: 3000" style="width:100%; padding:6px; box-sizing:border-box; margin-top:4px; background:var(--panel-2, #1d2029); color:var(--text, #eceae2); border:1px solid var(--border, #2e3140);">' +
       '</div>';
 
     var allocModeInput = '<div style="margin-top:10px; font-size:0.8em; color:#ccc;">' +

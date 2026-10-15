@@ -35,10 +35,10 @@
 (function(){
   /* --- 下部固定ナビバー --- */
   var isDark=true; /* 意匠固定（常夜灯モード）: OS設定への追従を廃止 */
-  var colorNormal =isDark?'#efe5d2':'#1a1612';
-  var bgNormal    =isDark?'rgba(200,57,47,0.10)':'rgba(184,54,42,0.08)';
-  var borderStyle =isDark?'1px solid rgba(200,57,47,0.4)':'1px solid rgba(184,54,42,0.35)';
-  var bgActive    =isDark?'rgba(200,57,47,0.25)':'rgba(184,54,42,0.22)';
+  var colorNormal =isDark?'#eceae2':'#1a1612';
+  var bgNormal    =isDark?'rgba(255,182,46,0.10)':'rgba(255,182,46,0.08)';
+  var borderStyle =isDark?'1px solid rgba(255,182,46,0.4)':'1px solid rgba(255,182,46,0.35)';
+  var bgActive    =isDark?'rgba(255,182,46,0.25)':'rgba(255,182,46,0.22)';
   var shadowNormal='0 2px 6px rgba(0,0,0,0.2)';
 
   var nav=document.createElement('div');
@@ -47,7 +47,7 @@
     +'display:flex;align-items:center;justify-content:space-evenly;height:56px;padding:0 12px;'
     +'backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);'
     +'font-family:sans-serif;font-size:12px;'
-    +(isDark?'background:rgba(28,24,21,0.68);border-top:0.5px solid rgba(200,57,47,0.3);'
+    +(isDark?'background:rgba(12,13,17,0.68);border-top:0.5px solid rgba(46,49,64,0.8);'
             :'background:rgba(246,240,226,0.68);border-top:0.5px solid rgba(197,181,154,0.5);');
 
 
@@ -248,7 +248,7 @@
 
 <div class="container">
     <header>
-        <div class="subtitle">演算制&#x5FA1;多重交響体<span id="logic-version-display" style="font-size:0.65rem;opacity:0.4;color:#e8872a;letter-spacing:normal;margin-left:0.5em;"></span></div>
+        <div class="subtitle">演算制&#x5FA1;多重交響体<span id="logic-version-display" style="font-size:0.65rem;opacity:0.4;color:var(--gold);letter-spacing:normal;margin-left:0.5em;"></span></div>
         <div class="title-image-container">
             <img src="./title.png" alt="華耀天輪 真・自在律" class="title-image">
         </div>
@@ -304,8 +304,8 @@
                         document.write(`
                         <div class="player-row id-${i}" data-id="${i}">
                             <div class="player-header">
-    <span>選手ID ${i}</span>
-    
+    <span><span class="id-badge id-badge-${i}"></span>選手ID ${i}</span>
+
     <div class="gold-cap-group" style="margin-left: auto; margin-right: 12px;">
     <label class="crown-switch">
         <input type="checkbox" id="goldcap-${i}" class="is-gold-cap">
@@ -318,7 +318,7 @@
         <input type="checkbox" id="local-${i}" class="is-local">
     </div>
 
-    <div class="local-group" style="color: #c07777; margin-left: 10px;">
+    <div class="local-group" style="color: var(--accent); margin-left: 10px;">
         <label for="scratch-${i}">欠場:</label>
         <input type="checkbox" id="scratch-${i}" class="is-scratch">
     </div>

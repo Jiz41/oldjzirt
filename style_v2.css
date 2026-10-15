@@ -14,45 +14,46 @@ html {
    ライトモード変数（デフォルト）
    ========================================== */
 :root {
-  --bg:        #f6f0e2;
-  --bg-2:      #fcf8ec;
-  --panel:     #fcf8ec;
-  --panel-2:   #f6f0e2;
-  --border:    rgba(197,181,154,0.4);
-  --border-2:  #c5b59a;
+  /* バルカロール（/root/jzirtboat）準拠パレット。意匠固定（常夜灯モード）のためダーク値のみ。 */
+  --bg:        #0c0d11;
+  --bg-2:      #15171e;
+  --panel:     #15171e;
+  --panel-2:   #1d2029;
+  --border:    #2e3140;
+  --border-2:  #2e3140;
 
-  --text:      #1a1612;
-  --text-2:    #3a3020;
-  --muted:     #6b5e4a;
-  --dim:       #a09880;
+  --text:      #eceae2;
+  --text-2:    #c7c5bd;
+  --muted:     #979aa6;
+  --dim:       #6b6f7a;
 
-  /* アクセント：朱印朱 */
-  --accent:    #b8362a;
-  --accent-bg: rgba(184,54,42,0.07);
-  --accent-br: rgba(184,54,42,0.30);
+  /* アクセント：朱 */
+  --accent:    #ff4d6d;
+  --accent-bg: rgba(255,77,109,0.07);
+  --accent-br: rgba(255,77,109,0.30);
 
-  /* 晴天令：抹茶 */
-  --green:     #5f7a3e;
-  --green-bg:  rgba(95,122,62,0.08);
-  --green-br:  rgba(95,122,62,0.35);
+  /* 晴天令：エメラルド */
+  --green:     #2ecc71;
+  --green-bg:  rgba(46,204,113,0.08);
+  --green-br:  rgba(46,204,113,0.35);
 
-  /* 荒天令：金茶（--redエイリアスで参照箇所を維持） */
-  --red:       #a07a2c;
-  --red-bg:    rgba(160,122,44,0.08);
-  --red-br:    rgba(160,122,44,0.32);
-  --gold:      #a07a2c;
-  --gold-bg:   rgba(160,122,44,0.08);
-  --gold-br:   rgba(160,122,44,0.32);
+  /* 荒天令：ネオンブルー（--redエイリアスで参照箇所を維持、茶色は使わない） */
+  --red:       #4dc3ff;
+  --red-bg:    rgba(77,195,255,0.08);
+  --red-br:    rgba(77,195,255,0.32);
+  --gold:      #ffb62e;
+  --gold-bg:   rgba(255,182,46,0.08);
+  --gold-br:   rgba(255,182,46,0.32);
 
-  /* 赤口呑縁：紺藍 */
-  --purple:    #2a4a7c;
-  --purple-bg: rgba(42,74,124,0.07);
-  --purple-br: rgba(42,74,124,0.30);
+  /* 赤口呑縁：ネオンブルー */
+  --purple:    #4dc3ff;
+  --purple-bg: rgba(77,195,255,0.07);
+  --purple-br: rgba(77,195,255,0.30);
 
-  /* 天雲指数：金茶 */
-  --amber:     #a07a2c;
-  --amber-bg:  rgba(160,122,44,0.07);
-  --amber-br:  rgba(160,122,44,0.30);
+  /* 天雲指数：金 */
+  --amber:     #ffb62e;
+  --amber-bg:  rgba(255,182,46,0.07);
+  --amber-br:  rgba(255,182,46,0.30);
 
   --sans:  "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
   --serif: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
@@ -307,25 +308,24 @@ h4 {
    カードパネル（input-group / result-section）
    ========================================== */
 .input-group {
-  margin: 0 14px 18px;
-  padding: 14px;
-  border-radius: 0;
+  margin: 0 10px 14px;
+  padding: 11px;
+  border-radius: 6px;
   background: var(--panel);
   box-shadow: none;
-  border: none;
-  border-top: 3px solid var(--accent);
-  border-left: 3px solid var(--accent);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
   box-sizing: border-box;
   position: relative;
 }
 
 .result-section {
-  margin: 0 14px 18px;
-  padding: 14px;
-  border-radius: 0;
+  margin: 0 10px 14px;
+  padding: 11px;
+  border-radius: 6px;
   background: var(--panel);
   box-shadow: none;
-  border: 1px solid var(--border-2);
+  border: 1px solid var(--border);
   box-sizing: border-box;
 }
 
@@ -411,11 +411,11 @@ label[for="line-input"] {
 }
 
 .player-row {
-  border-radius: 0 !important;
+  border-radius: 6px !important;
   background: var(--panel) !important;
   box-shadow: none !important;
-  border: none !important;
-  border-left: 5px solid #ccc !important;
+  border: 1px solid var(--border) !important;
+  border-left: 4px solid var(--border-2) !important;
   overflow: hidden;
 }
 
@@ -533,27 +533,45 @@ label[for="line-input"] {
   border-radius: 0 !important;
 }
 
-/* 競輪車番色（ライトモード） */
-.player-row.id-1 { border-left-color: #c8c8c8 !important; }
-.player-row.id-2 { border-left-color: #333333 !important; }
-.player-row.id-3 { border-left-color: #c04040 !important; }
-.player-row.id-4 { border-left-color: #3a6ab0 !important; }
-.player-row.id-5 { border-left-color: #c8a020 !important; }
-.player-row.id-6 { border-left-color: #4a7a4a !important; }
-.player-row.id-7 { border-left-color: #e07020 !important; }
+/* 競輪車番色（彩度を落とした値） */
+.player-row.id-1 { border-left-color: #c9cdd6 !important; }
+.player-row.id-2 { border-left-color: #4a4d58 !important; }
+.player-row.id-3 { border-left-color: #c24a52 !important; }
+.player-row.id-4 { border-left-color: #4a7fc0 !important; }
+.player-row.id-5 { border-left-color: #c9a93f !important; }
+.player-row.id-6 { border-left-color: #4f9660 !important; }
+.player-row.id-7 { border-left-color: #c97830 !important; }
+
+/* 枠色バッジ（player-header先頭） */
+.id-badge {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  border: 1px solid rgba(255,255,255,0.25);
+}
+.id-badge-1 { background: #c9cdd6; border-color: rgba(255,255,255,0.5); }
+.id-badge-2 { background: #4a4d58; border-color: rgba(255,255,255,0.45); }
+.id-badge-3 { background: #c24a52; }
+.id-badge-4 { background: #4a7fc0; }
+.id-badge-5 { background: #c9a93f; }
+.id-badge-6 { background: #4f9660; }
+.id-badge-7 { background: #c97830; }
 
 /* ==========================================
    予想実行ボタン
    ========================================== */
 button[onclick="calculatePrediction()"] {
   display: block !important;
-  width: calc(100% + 28px) !important;
-  margin: 14px -14px -14px !important;
-  padding: 16px !important;
-  background: #000 !important;
-  color: #fff !important;
+  width: calc(100% + 22px) !important;
+  margin: 12px -11px -11px !important;
+  padding: 14px !important;
+  background: var(--gold) !important;
+  color: #1a1612 !important;
   border: none !important;
-  border-radius: 0 !important;
+  border-radius: 0 0 6px 6px !important;
   font-family: var(--sans) !important;
   font-size: 15px !important;
   font-weight: 700 !important;
@@ -700,12 +718,12 @@ button[onclick="calculatePrediction()"]:active {
 }
 
 #copy-button-container button {
-  background: linear-gradient(180deg, var(--green) 0%, #2a4a2a 100%) !important;
-  color: #fff !important;
+  background: var(--panel-2) !important;
+  color: var(--text) !important;
   letter-spacing: 0.16em !important;
   width: 100% !important;
-  border-radius: 3px !important;
-  border: none !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--border) !important;
   font-size: 13px !important;
   padding: 10px !important;
   margin-top: 0 !important;
@@ -736,18 +754,18 @@ footer.copyright-footer {
    参考：晴天令・荒天令の買い目（折りたたみ）
    ========================================== */
 details.ref-bets-details {
-  border: 1px solid rgba(212,161,58,0.35);
-  border-radius: 8px;
-  background: rgba(212,161,58,0.06);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
   padding: 10px 14px;
-  margin: 14px 0;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  margin: 12px 0;
+  box-shadow: none;
 }
 
 details.ref-bets-details summary {
   font-weight: bold;
   cursor: pointer;
-  color: #d4a13a;
+  color: var(--gold);
   list-style: none;
   padding: 2px 0;
 }
@@ -778,44 +796,44 @@ details.ref-bets-details h3 {
    ========================================== */
 @media all {
   :root {
-    --bg:        #1c1815;
-    --bg-2:      #241e1a;
-    --panel:     #241e1a;
-    --panel-2:   #2e2620;
-    --border:    rgba(58,49,42,0.8);
-    --border-2:  #3a312a;
+    --bg:        #0c0d11;
+    --bg-2:      #15171e;
+    --panel:     #15171e;
+    --panel-2:   #1d2029;
+    --border:    #2e3140;
+    --border-2:  #2e3140;
 
-    --text:      #efe5d2;
-    --text-2:    #d4c4a8;
-    --muted:     #8a7a68;
-    --dim:       #5a4a3a;
+    --text:      #eceae2;
+    --text-2:    #c7c5bd;
+    --muted:     #979aa6;
+    --dim:       #6b6f7a;
 
-    --accent:    #c8392f;
-    --accent-bg: rgba(200,57,47,0.10);
-    --accent-br: rgba(200,57,47,0.35);
+    --accent:    #ff4d6d;
+    --accent-bg: rgba(255,77,109,0.10);
+    --accent-br: rgba(255,77,109,0.35);
 
-    --green:     #7a9b85;
-    --green-bg:  rgba(122,155,133,0.08);
-    --green-br:  rgba(122,155,133,0.32);
+    --green:     #2ecc71;
+    --green-bg:  rgba(46,204,113,0.08);
+    --green-br:  rgba(46,204,113,0.32);
 
-    --red:       #d4a13a;
-    --red-bg:    rgba(212,161,58,0.08);
-    --red-br:    rgba(212,161,58,0.30);
-    --gold:      #d4a13a;
-    --gold-bg:   rgba(212,161,58,0.08);
-    --gold-br:   rgba(212,161,58,0.30);
+    --red:       #4dc3ff;
+    --red-bg:    rgba(77,195,255,0.08);
+    --red-br:    rgba(77,195,255,0.30);
+    --gold:      #ffb62e;
+    --gold-bg:   rgba(255,182,46,0.08);
+    --gold-br:   rgba(255,182,46,0.30);
 
-    --purple:    #c8392f;
-    --purple-bg: rgba(200,57,47,0.10);
-    --purple-br: rgba(200,57,47,0.35);
+    --purple:    #4dc3ff;
+    --purple-bg: rgba(77,195,255,0.10);
+    --purple-br: rgba(77,195,255,0.35);
 
-    --amber:     #e8d4a8;
-    --amber-bg:  rgba(232,212,168,0.08);
-    --amber-br:  rgba(232,212,168,0.25);
+    --amber:     #ffb62e;
+    --amber-bg:  rgba(255,182,46,0.08);
+    --amber-br:  rgba(255,182,46,0.25);
   }
 
   body {
-    background: #1c1815;
+    background: var(--bg);
     color: var(--text);
   }
 
@@ -829,32 +847,32 @@ details.ref-bets-details h3 {
     color: var(--text) !important;
   }
 
-  /* 朱柱の頭に金の斗栱 */
+  /* 見出しの金アクセント（赤帯を撤去し細い金バーのみ） */
   h2::before {
-    background: linear-gradient(180deg, #d4a13a 0%, #d4a13a 22%, #c8392f 22%, #c8392f 100%) !important;
+    background: var(--gold) !important;
   }
 
   h2::after {
-    background: linear-gradient(90deg, rgba(200,57,47,0.4), rgba(212,161,58,0.25), transparent) !important;
+    background: linear-gradient(90deg, rgba(255,182,46,0.35), transparent) !important;
   }
 
-  /* 金の差し色：社殿の飾り金具 */
+  /* 金の差し色 */
   .subtitle {
     color: var(--gold);
   }
 
   .title-image {
-    border-bottom: 2px solid rgba(212,161,58,0.45);
+    border-bottom: 2px solid rgba(255,182,46,0.45);
   }
 
   a {
-    color: #c8392f;
+    color: var(--accent);
   }
 
   .debug-log-header {
-    color: #c8c1d8;
-    border-top-color: rgba(255,255,255,0.07);
-    border-bottom-color: rgba(255,255,255,0.07);
+    color: var(--text-2);
+    border-top-color: var(--border);
+    border-bottom-color: var(--border);
   }
 
   .debug-log-header:hover {
@@ -862,18 +880,18 @@ details.ref-bets-details h3 {
   }
 
   .debug-log {
-    background: #1c1815 !important;
-    color: #5a5470 !important;
-    border: 1px solid rgba(255,255,255,0.07);
+    background: var(--bg) !important;
+    color: var(--muted) !important;
+    border: 1px solid var(--border);
   }
 
-  /* 入力欄：朱の柱に金の梁 */
+  /* 入力欄：枠はヘアライン、左に金のアクセントのみ */
   .input-group {
     background: var(--panel) !important;
     box-shadow: none !important;
-    border: none !important;
-    border-top: 1px solid rgba(212,161,58,0.55) !important;
-    border-left: 3px solid #c8392f !important;
+    border: 1px solid var(--border) !important;
+    border-left: 3px solid var(--gold) !important;
+    border-top: none !important;
   }
 
   select,
@@ -881,7 +899,7 @@ details.ref-bets-details h3 {
   input[type="text"] {
     background: transparent !important;
     border: none !important;
-    border-bottom: 1px solid rgba(255,255,255,0.25) !important;
+    border-bottom: 1px solid var(--border) !important;
     color: var(--text) !important;
     box-shadow: none !important;
   }
@@ -889,81 +907,99 @@ details.ref-bets-details h3 {
   select:focus,
   input[type="number"]:focus,
   input[type="text"]:focus {
-    border-bottom: 1px solid #c8392f !important;
+    border-bottom: 1px solid var(--gold) !important;
     box-shadow: none !important;
   }
 
   label {
-    color: #8a8298 !important;
+    color: var(--muted) !important;
   }
 
   .player-row {
     background: var(--panel) !important;
     box-shadow: none !important;
-    border: none !important;
-    border-left: 5px solid rgba(255,255,255,0.15) !important;
+    border: 1px solid var(--border) !important;
+    border-left: 4px solid var(--border-2) !important;
+    border-radius: 6px !important;
   }
 
   .player-header {
     color: var(--text) !important;
-    border-bottom-color: rgba(255,255,255,0.07) !important;
+    border-bottom-color: var(--border) !important;
   }
 
-  /* 競輪車番色（ダーク・輝度上げ版） */
-  .player-row.id-1 { border-left-color: #9ca3af !important; }
-  .player-row.id-2 { border-left-color: #666666 !important; }
-  .player-row.id-3 { border-left-color: #d64d55 !important; }
-  .player-row.id-4 { border-left-color: #4a80c0 !important; }
-  .player-row.id-5 { border-left-color: #dab03f !important; }
-  .player-row.id-6 { border-left-color: #5a965a !important; }
-  .player-row.id-7 { border-left-color: #f39c12 !important; }
+  /* 競輪車番色（彩度を落とした落ち着いた値） */
+  .player-row.id-1 { border-left-color: #c9cdd6 !important; }
+  .player-row.id-2 { border-left-color: #4a4d58 !important; }
+  .player-row.id-3 { border-left-color: #c24a52 !important; }
+  .player-row.id-4 { border-left-color: #4a7fc0 !important; }
+  .player-row.id-5 { border-left-color: #c9a93f !important; }
+  .player-row.id-6 { border-left-color: #4f9660 !important; }
+  .player-row.id-7 { border-left-color: #c97830 !important; }
 
-  /* 鳥居ボタン：朱の楼門に金の梁 */
+  /* 枠色バッジ（player-header先頭に差し込む想定、1=白/2=黒は縁取り必須） */
+  .id-badge {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+  .id-badge-1 { background: #c9cdd6; border-color: rgba(255,255,255,0.5); }
+  .id-badge-2 { background: #4a4d58; border-color: rgba(255,255,255,0.45); }
+  .id-badge-3 { background: #c24a52; }
+  .id-badge-4 { background: #4a7fc0; }
+  .id-badge-5 { background: #c9a93f; }
+  .id-badge-6 { background: #4f9660; }
+  .id-badge-7 { background: #c97830; }
+
+  /* 予想実行ボタン：金地に黒字（主ボタン） */
   button[onclick="calculatePrediction()"] {
-    background: linear-gradient(180deg, #d24237 0%, #b02f26 100%) !important;
+    background: var(--gold) !important;
+    color: #1a1612 !important;
     border: none !important;
-    border-top: 3px solid #d4a13a !important;
-    border-bottom: 3px solid #d4a13a !important;
-    padding: 18px 16px !important;
-    font-size: 16px !important;
-    letter-spacing: 0.45em !important;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.35);
-    box-shadow: 0 4px 14px rgba(200,57,47,0.35) !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    padding: 16px !important;
+    font-size: 15px !important;
+    letter-spacing: 0.35em !important;
+    text-shadow: none;
+    box-shadow: none !important;
   }
 
   .result-section {
     background: var(--panel) !important;
     box-shadow: none !important;
-    border: 0.5px solid rgba(255,255,255,0.10) !important;
+    border: 1px solid var(--border) !important;
   }
 
   #seitenrei-output {
-    background: rgba(122,155,133,0.08) !important;
-    border-left-color: #7a9b85 !important;
+    background: rgba(46,204,113,0.08) !important;
+    border-left-color: #2ecc71 !important;
     color: var(--text) !important;
   }
 
   #koutenrei-output {
-    background: rgba(217,169,58,0.06) !important;
-    border-left-color: #d9a93a !important;
+    background: rgba(77,195,255,0.07) !important;
+    border-left-color: var(--red) !important;
     color: var(--text) !important;
   }
 
   #tenun-index-output {
-    background: rgba(227,168,87,0.07) !important;
-    border-color: rgba(227,168,87,0.25) !important;
+    background: rgba(255,182,46,0.07) !important;
+    border-color: rgba(255,182,46,0.25) !important;
     color: var(--text) !important;
   }
 
   .tenun-title {
-    color: #e3a857 !important;
+    color: var(--gold) !important;
   }
 
   #scenario-output {
-    background:
-      radial-gradient(circle at 100% 0%, rgba(200,57,47,0.10), transparent 60%),
-      var(--panel) !important;
-    border-color: rgba(200,57,47,0.35) !important;
+    background: var(--panel) !important;
+    border-color: var(--border) !important;
     color: var(--text) !important;
   }
 
@@ -972,38 +1008,40 @@ details.ref-bets-details h3 {
   }
 
   .seri-segment {
-    border-color: rgba(255,255,255,0.20);
+    border-color: var(--border);
   }
 
   .seri-arrow {
-    color: #d9a93a;
+    color: var(--gold);
   }
 
   #bank-tendency-display {
     background: var(--panel);
-    border-left-color: rgba(255,255,255,0.12);
-    color: #8a8298;
+    border-left-color: var(--border);
+    color: var(--muted);
   }
 
   #copy-button-container button {
-    background: linear-gradient(180deg, #7a9b85 0%, #2d4a3a 100%) !important;
+    background: var(--panel-2) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
   }
 
   footer.copyright-footer {
-    border-top-color: rgba(255,255,255,0.07);
+    border-top-color: var(--border);
   }
 
   .footer-bottom-row {
-    color: #5a5470;
+    color: var(--dim);
   }
 
   code {
     background: var(--panel-2);
-    border-color: rgba(255,255,255,0.12);
-    color: #c8c1d8;
+    border-color: var(--border);
+    color: var(--text-2);
   }
 
   small {
-    color: #8a8298;
+    color: var(--muted);
   }
 }
