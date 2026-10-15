@@ -64,12 +64,14 @@
 
   function computeDecisionData() {
     if (typeof App === 'undefined' || !App.lastCalcResult || !App.lastCalcResult.relations) return null;
-    if (typeof CalculationSnapshot === 'undefined') return null;
+    // CalculationSnapshot は keirin_logic.js の即時実行関数内の変数で外から見えない。公開APIの写しを使う。
+    if (typeof App.getCurrentCoefficients !== 'function') return null;
+    var snap = App.getCurrentCoefficients() || {};
 
     var relations = App.lastCalcResult.relations;
-    var base = (CalculationSnapshot.scores && CalculationSnapshot.scores.base) || [];
-    var seitenScores = (CalculationSnapshot.scores && CalculationSnapshot.scores.final && CalculationSnapshot.scores.final.seiten) || {};
-    var lines = CalculationSnapshot.lines || [];
+    var base = (snap.scores && snap.scores.base) || [];
+    var seitenScores = (snap.scores && snap.scores.final && snap.scores.final.seiten) || {};
+    var lines = snap.lines || [];
 
     if (base.length === 0 || Object.keys(seitenScores).length === 0) return null;
 
