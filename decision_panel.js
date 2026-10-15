@@ -176,6 +176,11 @@
 
     panel.innerHTML = headerHtml + budgetInput + allocModeInput + ticketsHeader + ticketsTableContainer + summaryEl;
 
+    window.DecisionPanelState = {
+      tier: tier,
+      tickets: perTicket.map(function (t) { return t.cars.join('-'); })
+    };
+
     bindCalcHandlers(data);
   }
 

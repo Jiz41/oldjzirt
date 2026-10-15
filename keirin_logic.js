@@ -635,53 +635,11 @@ async function loadBANK_DATA() {
 // displayBankTendency
 // ====================================================================================
 function displayBankTendency() {
-    const bankName  = document.getElementById('bank-name').value;
+    // 【2026-10-15 表示削除】バンクバイアス文言のUI表示を無効化。
+    // この関数は純粋な表示関数（計算への副作用なし、dependency_map.md確認済み）のため、
+    // メッセージ生成・挿入処理そのものを撤去し、表示領域を空にするのみとする。
     const displayArea = document.getElementById('bank-tendency-display');
-
-    if (!bankName || !BANK_DATA[bankName] || !displayArea) {
-        if (displayArea) displayArea.innerHTML = '';
-        return;
-    }
-
-    const bankInfo = BANK_DATA[bankName];
-    const bias = bankInfo.keirin_bias;
-    const biasMap = {
-        '先行': bias['先行'] || 1.0,
-        '捲り': bias['捲り'] || 1.0,
-        '差し': bias['差し'] || 1.0
-    };
-
-    let maxBias = -Infinity;
-    let strongestTendency = '';
-    const styleMap = { '先行': '逃先', '捲り': '捲り', '差し': '差マ' };
-
-    Object.keys(biasMap).forEach(key => {
-        if (biasMap[key] > maxBias) { maxBias = biasMap[key]; strongestTendency = key; }
-    });
-
-    let message = '';
-    if (maxBias > 1.03) {
-        message = `⚠️ **${bankName}**は**${styleMap[strongestTendency]}**が**出やすい**傾向があります。 (バイアス ${maxBias.toFixed(2)})`;
-    } else if (maxBias < 0.97) {
-        message = `✅ **${bankName}**は**${styleMap[strongestTendency]}**が最も低い傾向です。`;
-    } else {
-        message = `ℹ️ **${bankName}**は脚質による大きな傾向差は**ありません**。`;
-    }
-
-    const straight = bankInfo.straight || 50;
-    const canto    = bankInfo.canto    || 30;
-
-    if (straight < 35) {
-        message += `<br><span style="color: #d32f2f; font-weight: bold;">⚠️ 極端短直線(${straight}m)：4番手以降の到達困難</span>`;
-    } else if (straight < 50) {
-        message += `<br><span style="color: #f57c00;">⚠️ 短直線(${straight}m)：4番手以降に不利</span>`;
-    }
-    if (canto > 32) {
-        message += `<br><span style="color: #1976d2;">🔄 高カント(${canto}度)：捲りコスト増大</span>`;
-    }
-
-    displayArea.innerHTML = message;
-    app.logMessage(`[BANK] ${bankName} の展開傾向: ${message.replace(/<[^>]*>?/gm, '')}`);
+    if (displayArea) displayArea.innerHTML = '';
 }
 
 (async function() { await loadBANK_DATA(); })();
@@ -1311,10 +1269,8 @@ function calculateTenunIndex(seitenreiScores, koutenreiScores, allScenarioResult
         }
     }
 
-    let finalHtml = app.generateTamakiTenunHTML(tIndex, false, null);
-    if (targetPlayerId !== null) {
-        finalHtml += app.generateTamakiTenunHTML(tIndex, true, targetPlayerId);
-    }
+    app.logMessage(`[TENUN] 天雲指数: ${tIndex}`);
+    let finalHtml = '';
 
     return {
         tenunIndex: tIndex,

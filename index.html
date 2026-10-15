@@ -220,24 +220,20 @@
                 const sunny = getBet('seitenrei-output');
                 const rainy = getBet('koutenrei-output');
 
-                let scenarioText = "";
-                document.querySelectorAll('.scenario-detail').forEach(div => {
-                    const title = div.querySelector('h4')?.innerText.replace('シミュレーション', '').trim() || "";
-                    const pTags = div.querySelectorAll('p');
-                    let bets = "";
-                    pTags.forEach(p => {
-                        if (p.innerText.includes('三連')) {
-                            const val = p.innerText.split(':')[1]?.trim();
-                            if (val) bets += (bets ? ", " : "") + val;
-                        }
-                    });
-                    if (title) scenarioText += `${title} ${bets}\n`;
-                });
+                const header = `${bank}${raceNoRaw ? raceNoRaw + 'R' : 'R'}（${windText}）${(tenunVal !== undefined && tenunVal !== '') ? ' 天雲指数: ' + tenunVal : ''}`;
 
-                const header = `${bank}${raceNoRaw ? raceNoRaw + 'R' : 'R'}${(tenunVal !== undefined && tenunVal !== '') ? ' 天雲指数: ' + tenunVal : ''}`;
-                const finalText = `${header}\n\n☀️ 晴天令：${sunny}\n⛈️ 荒天令：${rainy}\n\n${scenarioText}\n（${windText}）`;
+                const state = window.DecisionPanelState;
+                let selectionText;
+                if (state && state.tier) {
+                    const ticketsText = (state.tickets && state.tickets.length) ? state.tickets.join('\n') : '（成立なし）';
+                    selectionText = `ティア：${state.tier}\n\n■ 厳選8点（三連単）\n${ticketsText}`;
+                } else {
+                    selectionText = '（判定なし）';
+                }
+
+                const finalText = `${header}\n${selectionText}\n\n☀️ 晴天令：${sunny}\n⛈️ 荒天令：${rainy}`;
                 await navigator.clipboard.writeText(finalText);
-                
+
                 // 成功時の控えめなフィードバック
                 const originalText = btn.innerHTML;
                 btn.innerHTML = 'コピー完了';
@@ -614,16 +610,13 @@
         <div id="results-container">
             <h2>📊 予想結果・推奨買い目</h2>
             <div class="result-section">
-                <div id="bank-tendency-display"></div>
-                <h3>🔗 ライン強度（強弱グラデーション）</h3>
-                <div id="line-display" class="line-display">計算結果待ち...</div>
-                
-                <div id="tenun-index-output">
-                    <span class="tenun-title" style="font-weight: bold; margin-bottom: 8px; display: block;">天雲指数</span>
-                </div>
+                <div id="bank-tendency-display" style="display:none;"></div>
+                <div id="line-display" class="line-display" style="display:none;">計算結果待ち...</div>
 
-                <details>
-                    <summary>参考：晴天令・荒天令の買い目</summary>
+                <div id="tenun-index-output" style="display:none;"></div>
+
+                <details class="ref-bets-details">
+                    <summary>参考：晴天令・荒天令の買い目（タップで開く）</summary>
                     <h3>☀️ 晴天令 (安定推奨)</h3>
                     <div class="recommendation" id="seitenrei-output">計算結果待ち...</div>
                     <h3>⛈️ 荒天令 (波乱推奨)</h3>
@@ -640,43 +633,6 @@
         </div>
     </div>
 
-<div id="share-area" class="share-align-fixed">
-  <span style="font-size: 10px !important; color: #888 !important; font-weight: bold !important; transform: translateY(6px) !important; flex-shrink: 0;">共有</span>
-  
-  <div onclick="execShareX()" class="btn-share-box">
-    <svg viewBox="0 0 24 24" width="16" height="16" class="icon-x-fix" style="fill: #000;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
-  </div>
-
-  <div onclick="execShareLine()" class="btn-share-box">
-    <svg viewBox="0 0 24 24" width="18" height="18"><path d="M24 10.304c0-4.369-4.705-7.923-10.5-7.923S3 5.935 3 10.304c0 3.913 3.73 7.18 8.775 7.818.341.073.805.226.921.518.106.265.07.679.034 0.947l-.149.894c-.045.27-.211 1.054.912.575 1.123-.479 6.064-3.57 8.271-6.111C23.081 13.528 24 12.012 24 10.304z" fill="#06C755"></path></svg>
-  </div>
-
-  <div onclick="execCopy()" class="btn-share-box">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-copy-fix" style="stroke: #000;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-  </div>
-</div>
-
-<script>
-const S_TXT = "【華耀天輪 真自在律】\nデータで有利な買い目を提案📊\n無料の予想アシストツールはこちら👇";
-const S_URL = "https://jiz41.github.io/oldjzirt/";
-
-function execShareX() {
-    window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(S_TXT) + "&url=" + encodeURIComponent(S_URL), '_blank');
-}
-function execShareLine() {
-    const lineUrl = "https://line.me/R/share?text=" + encodeURIComponent(S_TXT + "\n" + S_URL);
-    window.open(lineUrl, '_blank');
-}
-function execCopy() {
-    const t = S_TXT + "\n" + S_URL;
-    navigator.clipboard.writeText(t).then(() => alert("コピーしました！")).catch(() => {
-        const a = document.createElement("textarea"); a.value = t; document.body.appendChild(a);
-        a.select(); document.execCommand("copy"); document.body.removeChild(a);
-        alert("コピーしました！");
-    });
-}
-</script>
-
     <div class="debug-log-header" onclick="toggleDebugLog()">
         <span id="log-toggle-icon">▶</span> 🛠️ デバッグ・処理ログ
     </div>
@@ -686,50 +642,9 @@ function execCopy() {
         [INFO] bankdata.jsonの読み込みを待機しています...<br>
     </div>
     
-    <div class="bug-report-container">
-        <a href="https://forms.gle/f2uW4UxpGpeT9n8g6" target="_blank" rel="noopener noreferrer" class="bug-button">
-        不具合を報告する
-    </a>
-    </div>
 
-    <div class="bug-log-container">
-    <p class="bug-log-desc">不具合かな？と思ったら確認してみてください</p>
-    <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vR4HnK6A5_WvJYhvFfc-M5HMDRCwiVDwxW49d3bRxOltzLrhaI0C79Sry2xsZsiEIxehLOW4KlCuk5r/pubhtml?gid=237056219&single=true&gridlines=true"
-       target="_blank"
-       rel="noopener noreferrer"
-       class="bug-log-link">
-        皆様からのご報告と回答一覧
-    </a>
-</div>
-  
 <footer class="copyright-footer">
-    <div style="display:flex; justify-content:center; padding: 0 16px 16px;">
-  <a href="https://jiz41.github.io/kayoutouidouofficial/links-page.html"
-     target="_blank"
-     style="
-       display: flex;
-       align-items: center;
-       gap: 12px;
-       width: 100%;
-       padding: 14px 16px;
-       text-decoration: none;
-       border-radius: 6px;
-       border: 0.5px solid rgba(212,161,58,0.35);
-       background: rgba(212,161,58,0.07);
-       border-left: 3px solid #d4a13a;
-       box-sizing: border-box;
-     ">
-    <span style="font-size:22px; flex-shrink:0;">🛰</span>
-    <div style="flex:1; min-width:0;">
-      <div style="font-size:13px; font-weight:600; color:#d4a13a; margin-bottom:3px;">華耀東夷堂</div>
-      <div style="font-size:11px; color:#8a7a68; line-height:1.5;">公式サイトから関連SNSまで——華耀東夷堂の各拠点へのリンクはこちら。</div>
-    </div>
-    <span style="font-size:16px; color:#8a7a68; flex-shrink:0;">›</span>
-  </a>
-</div>
     <div class="footer-bottom-row">
-        <a href="https://note.com/kytnrnsnjzitr/n/nbc069a03d13c" target="_blank" class="footer-link">免責事項・利用規約</a>
-        <span class="footer-divider">|</span>
         <span>(C)2025-2026 Mushyn Reagan</span>
     </div>
 </footer>
@@ -770,7 +685,6 @@ function execCopy() {
 <script>var App = {};</script>
 
 <!-- 2. 機能モジュールの読み込み (deferによりHTML解析後に記述順で実行) -->
-<script src="./tamaki_speech.js" defer></script>
 <script src="./shakkou_donperi_display.js" defer></script>
 <script src="./shakkou_donperi_core.js" defer></script>
 <script src="./keirin_logic.js" defer></script>

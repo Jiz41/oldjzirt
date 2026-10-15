@@ -773,92 +773,6 @@ button[onclick="calculatePrediction()"]:active {
 }
 
 /* ==========================================
-   SNS共有ボタン
-   ========================================== */
-#share-area {
-  display: flex !important;
-  justify-content: flex-end !important;
-  align-items: center !important;
-  gap: 8px !important;
-  padding: 8px 14px 14px !important;
-  margin: 0 !important;
-}
-
-.btn-share-box {
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 0 !important;
-  border: 1px solid var(--border-2) !important;
-  background: var(--panel) !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer;
-  transition: box-shadow 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.btn-share-box:hover {
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12) !important;
-}
-
-.icon-copy-fix {
-  stroke: var(--text-2);
-}
-
-.bug-report-container {
-  text-align: center;
-  margin: 10px 14px;
-}
-
-.bug-button {
-  display: inline-block;
-  font-size: 0.8em;
-  color: #c8392f !important;
-  border-color: rgba(200,57,47,0.4) !important;
-  padding: 6px 18px;
-  border: 1px solid rgba(200,57,47,0.4);
-  border-radius: 0;
-  text-decoration: none;
-  transition: border-color 0.15s, color 0.15s;
-}
-
-.bug-button:hover {
-  border-color: var(--accent-br);
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.bug-log-container {
-  text-align: center;
-  margin: 6px 14px 20px;
-}
-
-.bug-log-desc {
-  font-size: 0.78em;
-  color: var(--dim);
-  margin: 0 0 4px;
-}
-
-.bug-log-link {
-  display: inline-block !important;
-  font-size: 0.8em;
-  color: var(--accent) !important;
-  padding: 6px 18px !important;
-  border: 1px solid var(--accent-br) !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  text-decoration: none !important;
-  transition: border-color 0.15s, color 0.15s;
-}
-
-.bug-log-link:hover {
-  background: var(--accent-bg);
-  text-decoration: none;
-}
-
-/* ==========================================
    フッター
    ========================================== */
 footer.copyright-footer {
@@ -878,14 +792,44 @@ footer.copyright-footer {
   margin-top: 10px;
 }
 
-.footer-link {
-  color: var(--dim);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+/* ==========================================
+   参考：晴天令・荒天令の買い目（折りたたみ）
+   ========================================== */
+details.ref-bets-details {
+  border: 1px solid rgba(212,161,58,0.35);
+  border-radius: 8px;
+  background: rgba(212,161,58,0.06);
+  padding: 10px 14px;
+  margin: 14px 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
 }
 
-.footer-divider {
-  color: var(--border-2);
+details.ref-bets-details summary {
+  font-weight: bold;
+  cursor: pointer;
+  color: #d4a13a;
+  list-style: none;
+  padding: 2px 0;
+}
+
+details.ref-bets-details summary::-webkit-details-marker {
+  display: none;
+}
+
+details.ref-bets-details summary::before {
+  content: '▶';
+  display: inline-block;
+  margin-right: 6px;
+  font-size: 0.8em;
+  transition: transform 0.15s;
+}
+
+details.ref-bets-details[open] summary::before {
+  content: '▼';
+}
+
+details.ref-bets-details h3 {
+  margin-top: 12px;
 }
 
 /* ==========================================
@@ -1123,53 +1067,12 @@ footer.copyright-footer {
     background: linear-gradient(180deg, #7a9b85 0%, #2d4a3a 100%) !important;
   }
 
-  .btn-share-box {
-    background: #000 !important;
-    border-color: #444 !important;
-    box-shadow: none !important;
-  }
-
-  .icon-x-fix {
-    fill: #ffffff !important;
-  }
-
-  .icon-copy-fix {
-    stroke: #ffffff !important;
-  }
-
-  .bug-button {
-    color: #c8392f !important;
-    border-color: rgba(200,57,47,0.4) !important;
-  }
-
-  .bug-button:hover {
-    border-color: rgba(200,57,47,0.35);
-    color: #c8392f;
-  }
-
-  .bug-log-desc {
-    color: #5a5470;
-  }
-
-  .bug-log-link {
-    color: var(--accent) !important;
-    border-color: var(--accent-br);
-  }
-
   footer.copyright-footer {
     border-top-color: rgba(255,255,255,0.07);
   }
 
   .footer-bottom-row {
     color: #5a5470;
-  }
-
-  .footer-link {
-    color: #5a5470;
-  }
-
-  .footer-divider {
-    color: rgba(255,255,255,0.12);
   }
 
   code {
