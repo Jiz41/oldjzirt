@@ -1517,6 +1517,9 @@ app.calculatePrediction = async function(guardedData) {
             windSpeed,
             windDirection
         });
+        // decision_panel.js 用: 計算結果（relations含む）をグローバルに保持するだけの読み取り専用フック。
+        // スコア計算・買い目生成ロジックへの変更は含まない（決裁電卓の発注に基づく最小追加）。
+        app.lastCalcResult = _calcResult;
 
         try {
             if (typeof app.displayKeppan === 'function' && _calcResult?.relations) {

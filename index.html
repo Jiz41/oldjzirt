@@ -596,7 +596,7 @@
                             <div class="player-fields">
     <div class="player-field"><label>脚質</label><select class="style"><option value="逃">逃先</option><option value="追">差マ</option><option value="自">捲り</option></select></div>
     <div class="player-field"><label>得点 (R)</label><input type="number" class="score" value="${defaultScores[i-1].toFixed(2)}"></div>
-    <div class="player-field"><label>W印</label><select class="wmark"><option value="◎">◎</option><option value="〇">〇</option><option value="△">△</option><option value="✕">✕</option><option value="無" ${i!==3?'selected':''}>無</option></select></div>
+    <div class="player-field"><label>W印（任意）</label><select class="wmark"><option value="◎">◎</option><option value="〇">〇</option><option value="△">△</option><option value="✕">✕</option><option value="無" selected>無</option></select></div>
     <div class="player-field"><label>直近3走</label><input type="text" class="recent" value="${defaultRecent[i-1]}"></div>
 </div>
                         </div>`);
@@ -774,6 +774,8 @@ function execCopy() {
 <script src="LogModule.js" defer></script>
 <script src="./meigen.js" defer></script>
 <script src="./paste-input.js" defer></script>
+<script src="./decision_core.js" defer></script>
+<script src="./decision_panel.js" defer></script>
 <script defer>
 document.addEventListener('DOMContentLoaded', function() {
     var el = document.getElementById('logic-version-display');

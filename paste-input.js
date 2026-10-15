@@ -264,6 +264,12 @@
     const allCarNos = [1, 2, 3, 4, 5, 6, 7];
     const detectedNos = new Set(data.riders.map(r => r.number));
 
+    // W印は任意入力：レースを読み込むたびに全員「無」へ戻す（前レースの印を持ち越さない）
+    allCarNos.forEach(n => {
+      const wEl = document.querySelector(`.player-row[data-id="${n}"] .wmark`);
+      if (wEl) wEl.value = '無';
+    });
+
     // 欠場リセット
     allCarNos.forEach(n => {
       const row = document.querySelector(`.player-row[data-id="${n}"]`);
@@ -378,7 +384,7 @@
     msgs.push('');
     msgs.push('📝 手動入力が必要な項目:');
     msgs.push('  ・👑（ゴールドキャップ）');
-    msgs.push('  ・W印（◎○△✕）');
+    msgs.push('  ・W印（任意。贔屓の選手に◎など。空のままで可）');
     if (recentMissing) msgs.push('  ・直近3走着順（一部取得不可）');
     if (sbMissing) msgs.push('  ・S/B 1位ラジオボタン（同数仮選択あり・要確認）');
     if (lineupMissing) msgs.push('  ・並び予想');
