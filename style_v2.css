@@ -243,7 +243,6 @@ h4 {
 /* ==========================================
    マニュアル・デバッグ
    ========================================== */
-.manual-header,
 .debug-log-header {
   font-size: 1em;
   color: var(--text-2);
@@ -258,10 +257,6 @@ h4 {
   transition: background 0.15s;
 }
 
-.manual-header:hover {
-  background: var(--bg-2);
-}
-
 .debug-log-header {
   font-size: 0.7em;
   color: var(--muted);
@@ -273,65 +268,10 @@ h4 {
   background: var(--bg-2);
 }
 
-.manual-content {
-  display: none;
-  padding: 15px 15px 15px 20px;
-  margin: 0 0 15px;
-  background: transparent;
-  border-left: 2px solid var(--accent);
-  font-size: 0.88em;
-  line-height: 1.65;
-  color: var(--text-2);
-}
-
-.manual-content h3 {
-  font-size: 1em;
-  color: var(--accent);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 5px;
-  margin-top: 16px;
-}
-
-.manual-content h4 {
-  color: var(--green);
-}
-
-.manual-content table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 8px;
-}
-
-.manual-content th,
-.manual-content td {
-  border: 1px solid var(--border-2);
-  padding: 7px 6px;
-  text-align: left;
-  vertical-align: top;
-  font-size: 0.85em;
-}
-
-.manual-content th {
-  background: var(--bg-2);
-  color: var(--muted);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-}
-
 .col-30 {
   width: 30%;
 }
 
-.manual-content ul {
-  padding-left: 18px;
-  margin: 8px 0;
-}
-
-.manual-content li {
-  margin-bottom: 5px;
-  color: var(--text-2);
-  line-height: 1.7;
-}
 
 .debug-log {
   display: none;
@@ -911,30 +851,12 @@ details.ref-bets-details h3 {
     color: #c8392f;
   }
 
-  .manual-content {
-    background: var(--panel);
-    border-left-color: rgba(200,57,47,0.35);
-    color: #c8c1d8;
-  }
-
-  .manual-content th {
-    background: var(--panel-2);
-    color: #8a8298;
-    border-color: rgba(255,255,255,0.12);
-  }
-
-  .manual-content td {
-    border-color: rgba(255,255,255,0.12);
-  }
-
-  .manual-header,
   .debug-log-header {
     color: #c8c1d8;
     border-top-color: rgba(255,255,255,0.07);
     border-bottom-color: rgba(255,255,255,0.07);
   }
 
-  .manual-header:hover,
   .debug-log-header:hover {
     background: var(--panel-2);
   }

@@ -21,8 +21,14 @@
     if (!container) return null;
     var el = document.createElement('div');
     el.id = PANEL_ID;
-    el.className = 'result-section';
-    container.insertBefore(el, container.firstChild);
+    // 「予想結果・推奨買い目」の結果欄（.result-section）の先頭に入れ込む。見つからなければ従来どおりコンテナ先頭。
+    var section = container.querySelector('.result-section');
+    if (section) {
+      section.insertBefore(el, section.firstChild);
+    } else {
+      el.className = 'result-section';
+      container.insertBefore(el, container.firstChild);
+    }
     return el;
   }
 
