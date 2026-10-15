@@ -72,7 +72,7 @@
     },
   };
 
-  // --- レース間の目安倍率 ---
+  // --- レース間の目安倍率（現在UI未使用。将来の目安計算用に定数のみ保持） ---
   var TIER_MULTIPLIER = {
     '買い（強）': 1.5,
     '買い': 1.0,
@@ -226,17 +226,53 @@
   }
 
   /**
-   * 予算の均等配分（100円単位、端数は確率の高いチケットから100円ずつ加算）。
+   * 予算配分。mode='even'（既定）は均等（100円単位、端数は確率の高いチケットから100円ずつ加算）。
+   * mode='sqrt' は確率の平方根に応じた傾斜配分（最大剰余法、100円単位）。
    * @param {number} budgetYen 予算（円）
    * @param {Array<{prob:number}>} perTicket computeProbabilities().perTicket
+   * @param {string} [mode] 'even'|'sqrt'（省略時 'even'）
    * @returns {{amounts:number[], total:number, diff:number}} amounts は perTicket と同順
    */
-  function allocateBudget(budgetYen, perTicket) {
+  function allocateBudget(budgetYen, perTicket, mode) {
     var m = perTicket.length;
     if (!(budgetYen > 0) || m === 0) {
       return { amounts: perTicket.map(function () { return 0; }), total: 0, diff: -(budgetYen || 0) };
     }
     var unit = 100;
+
+    if (mode === 'sqrt') {
+      var N = Math.floor(budgetYen / unit);
+      if (N <= 0) {
+        var zeroAmounts = perTicket.map(function () { return 0; });
+        return { amounts: zeroAmounts, total: 0, diff: 0 - budgetYen };
+      }
+      var weights = perTicket.map(function (t) { return Math.sqrt(Math.max(t.prob, 0)); });
+      var weightSum = weights.reduce(function (s, w) { return s + w; }, 0);
+      var rawUnits, baseUnitsArr, fracArr;
+      if (weightSum > 0) {
+        rawUnits = weights.map(function (w) { return (N * w) / weightSum; });
+      } else {
+        rawUnits = perTicket.map(function () { return N / m; });
+      }
+      baseUnitsArr = rawUnits.map(function (v) { return Math.floor(v); });
+      fracArr = rawUnits.map(function (v, idx) { return v - baseUnitsArr[idx]; });
+      var allocatedUnits = baseUnitsArr.reduce(function (s, u) { return s + u; }, 0);
+      var remainingUnits = N - allocatedUnits;
+
+      var fracOrder = fracArr
+        .map(function (f, idx) { return { idx: idx, frac: f }; })
+        .sort(function (a, b) { return b.frac - a.frac; });
+
+      for (var j = 0; j < remainingUnits && j < fracOrder.length; j++) {
+        baseUnitsArr[fracOrder[j].idx] += 1;
+      }
+
+      var sqrtAmounts = baseUnitsArr.map(function (u) { return u * unit; });
+      var sqrtTotal = sqrtAmounts.reduce(function (s, a) { return s + a; }, 0);
+      var sqrtDiff = sqrtTotal - budgetYen;
+      return { amounts: sqrtAmounts, total: sqrtTotal, diff: sqrtDiff };
+    }
+
     var rawShare = budgetYen / m;
     var baseUnits = Math.floor(rawShare / unit);
     var amounts = perTicket.map(function () { return baseUnits * unit; });

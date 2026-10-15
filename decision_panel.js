@@ -6,7 +6,7 @@
 
   var PANEL_ID = 'decision-panel';
   var BUDGET_INPUT_ID = 'decision-budget';
-  var BASE_BUDGET_INPUT_ID = 'decision-base-budget';
+  var ALLOC_MODE_NAME = 'decision-alloc-mode';
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
@@ -50,7 +50,7 @@
     var rows = perTicket.map(function (t, idx) {
       var combo = t.cars.join('-');
       var probPct = (t.prob * 100).toFixed(2) + '%';
-      var amount = amounts ? (amounts[idx] + '円') : '';
+      var amount = amounts ? (amounts[idx] > 0 ? (amounts[idx] + '円') : '0円（配分なし）') : '';
       return '<tr>' +
         '<td style="padding:4px 6px; font-weight:bold;">' + escapeHtml(combo) + '</td>' +
         '<td style="padding:4px 6px; color:#bba060;">' + probPct + '</td>' +
@@ -157,22 +157,14 @@
 
     var budgetInput = '<div style="margin-top:14px;">' +
       '<label style="font-size:0.85em; color:#ccc;">このレースの予算（円）</label>' +
-      '<input type="number" inputmode="numeric" min="0" step="100" id="' + BUDGET_INPUT_ID + '" placeholder="800" style="width:100%; padding:6px; box-sizing:border-box; margin-top:4px; background:#1a1a1a; color:#e8e8e8; border:1px solid #444;">' +
+      '<input type="number" inputmode="numeric" min="0" step="100" id="' + BUDGET_INPUT_ID + '" placeholder="例: 3000" style="width:100%; padding:6px; box-sizing:border-box; margin-top:4px; background:#1a1a1a; color:#e8e8e8; border:1px solid #444;">' +
       '</div>';
 
-    var baseBudgetInput = '<div style="margin-top:10px; font-size:0.8em; color:#999;">' +
-      '<label>基準額（任意・倍率の目安計算用）</label>' +
-      '<div style="display:flex; gap:6px; margin-top:4px;">' +
-      '<input type="number" inputmode="numeric" min="0" step="100" id="' + BASE_BUDGET_INPUT_ID + '" placeholder="例: 1000" style="flex:1; padding:6px; box-sizing:border-box; background:#1a1a1a; color:#e8e8e8; border:1px solid #444;">' +
-      '<button type="button" id="decision-apply-base" style="padding:6px 10px; background:#333; color:#DAA520; border:1px solid #555; border-radius:4px;">目安を予算に反映</button>' +
-      '</div>' +
-      '<p id="decision-base-hint" style="margin:4px 0 0;"></p>' +
+    var allocModeInput = '<div style="margin-top:10px; font-size:0.8em; color:#ccc;">' +
+      '<label style="display:block; margin-bottom:4px;"><input type="radio" name="' + ALLOC_MODE_NAME + '" value="even" checked> 均等（既定）</label>' +
+      '<label style="display:block;"><input type="radio" name="' + ALLOC_MODE_NAME + '" value="sqrt"> 確率に応じて傾斜（弱め）</label>' +
+      '<p style="font-size:0.72em; color:#777; margin:4px 0 0;">過去データ（834レース）では均等が最も安定。傾斜は好みで。</p>' +
       '</div>';
-
-    var multiplierNote = '<p style="font-size:0.72em; color:#777; margin-top:6px;">' +
-      'レース間の目安倍率: 買い（強）=1.5倍 / 買い=1.0倍 / 見寄り=0.5倍 / 見=買わない目安。' +
-      '8点は確率に関わらず均等配分（確率比例は過去の検証で成績が悪かったため不採用）。' +
-      '</p>';
 
     var ticketsHeader = '<h4 style="margin-top:16px;">買い目8点・的中確率（合計 ' + (totalProb * 100).toFixed(2) + '%）</h4>';
     if (perTicket.length < 8) {
@@ -182,22 +174,25 @@
     var ticketsTableContainer = '<div id="decision-tickets-table">' + renderTicketsTable(perTicket, null) + '</div>';
     var summaryEl = '<div id="decision-summary" style="margin-top:8px; font-size:0.85em; color:#bba060;"></div>';
 
-    panel.innerHTML = headerHtml + budgetInput + baseBudgetInput + multiplierNote + ticketsHeader + ticketsTableContainer + summaryEl;
+    panel.innerHTML = headerHtml + budgetInput + allocModeInput + ticketsHeader + ticketsTableContainer + summaryEl;
 
     bindCalcHandlers(data);
   }
 
   function bindCalcHandlers(data) {
     var budgetEl = document.getElementById(BUDGET_INPUT_ID);
-    var baseBudgetEl = document.getElementById(BASE_BUDGET_INPUT_ID);
-    var applyBtn = document.getElementById('decision-apply-base');
-    var hintEl = document.getElementById('decision-base-hint');
+    var modeEls = document.getElementsByName(ALLOC_MODE_NAME);
     var tablesContainer = document.getElementById('decision-tickets-table');
     var summaryEl = document.getElementById('decision-summary');
 
     var perTicket = data.probResult.perTicket;
-    var tier = data.tierResult.tier;
-    var multiplier = DecisionCore.TIER_MULTIPLIER[tier];
+
+    function getSelectedMode() {
+      for (var i = 0; i < modeEls.length; i++) {
+        if (modeEls[i].checked) return modeEls[i].value;
+      }
+      return 'even';
+    }
 
     function renderAllocation() {
       var budget = budgetEl ? parseFloat(budgetEl.value) : NaN;
@@ -206,7 +201,8 @@
         if (summaryEl) summaryEl.textContent = '';
         return;
       }
-      var alloc = DecisionCore.allocateBudget(budget, perTicket);
+      var mode = getSelectedMode();
+      var alloc = DecisionCore.allocateBudget(budget, perTicket, mode);
       tablesContainer.innerHTML = renderTicketsTable(perTicket, alloc.amounts);
       if (summaryEl) {
         var diffText = (alloc.diff >= 0 ? '+' : '') + alloc.diff;
@@ -214,34 +210,12 @@
       }
     }
 
-    function renderBaseHint() {
-      if (!hintEl) return;
-      var baseBudget = baseBudgetEl ? parseFloat(baseBudgetEl.value) : NaN;
-      if (!(baseBudget > 0)) { hintEl.textContent = ''; return; }
-      if (multiplier === 0) {
-        hintEl.textContent = 'ティアが「見」のため目安予算の提示はありません。';
-        return;
-      }
-      var suggested = Math.round((baseBudget * multiplier) / 100) * 100;
-      hintEl.textContent = 'このレースの目安予算 ＝ 基準額×' + multiplier + ' ＝ ' + suggested + '円';
-    }
-
     if (budgetEl) budgetEl.addEventListener('input', renderAllocation);
-    if (baseBudgetEl) baseBudgetEl.addEventListener('input', renderBaseHint);
-    if (applyBtn) {
-      applyBtn.addEventListener('click', function () {
-        var baseBudget = baseBudgetEl ? parseFloat(baseBudgetEl.value) : NaN;
-        if (!(baseBudget > 0) || multiplier === 0) return;
-        var suggested = Math.round((baseBudget * multiplier) / 100) * 100;
-        if (budgetEl) {
-          budgetEl.value = suggested;
-          renderAllocation();
-        }
-      });
+    for (var i = 0; i < modeEls.length; i++) {
+      modeEls[i].addEventListener('change', renderAllocation);
     }
 
     renderAllocation();
-    renderBaseHint();
   }
 
   function wrapCalculatePrediction() {
