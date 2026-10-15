@@ -275,6 +275,12 @@
     // 選手データ反映
     const venuePref = VENUE_PREF_MAP[data.venue] || null;
     const msgs = [];
+    const activeNos = new Set(activeRiders.map(r => r.number));
+
+    let recentMissing = false;
+    let sBestNo = null, sBestVal = -Infinity, sTieWarn = false;
+    let bBestNo = null, bBestVal = -Infinity, bTieWarn = false;
+
     data.riders.forEach(rider => {
       const row = document.querySelector(`.player-row[data-id="${rider.number}"]`);
       if (!row) return;
@@ -296,15 +302,86 @@
       } else {
         msgs.push(`⚠️ 車番${rider.number}: 脚質を検出できませんでした（決まり手が同数のため手動で入力ください）`);
       }
+
+      // 直近3走
+      const recentEl = row.querySelector('.recent');
+      if (recentEl) {
+        if (rider.recent3 !== null && rider.recent3 !== undefined) {
+          recentEl.value = rider.recent3;
+        } else {
+          msgs.push(`⚠️ 車番${rider.number}: 直近3走を取得できませんでした（初出走等。手入力してください）`);
+          recentMissing = true;
+        }
+      }
+
+      // S / B 首位の判定（車番昇順走査。同値は先に見つかった＝車番最小側を保持）
+      if (typeof rider.sCount === 'number') {
+        if (rider.sCount > sBestVal) {
+          sBestVal = rider.sCount;
+          sBestNo = rider.number;
+          sTieWarn = false;
+        } else if (rider.sCount === sBestVal) {
+          sTieWarn = true;
+        }
+      }
+      if (typeof rider.bCount === 'number') {
+        if (rider.bCount > bBestVal) {
+          bBestVal = rider.bCount;
+          bBestNo = rider.number;
+          bTieWarn = false;
+        } else if (rider.bCount === bBestVal) {
+          bTieWarn = true;
+        }
+      }
     });
+
+    // S 1位 / B 1位 ラジオボタン反映
+    let sbMissing = false;
+    if (sBestNo !== null) {
+      const sEl = document.querySelector(`.player-row[data-id="${sBestNo}"] .s1`);
+      if (sEl) sEl.checked = true;
+      if (sTieWarn) {
+        msgs.push(`⚠️ S 1位が同数のため車番${sBestNo}を仮選択（要確認）`);
+        sbMissing = true;
+      }
+    }
+    if (bBestNo !== null) {
+      const bEl = document.querySelector(`.player-row[data-id="${bBestNo}"] .b1`);
+      if (bEl) bEl.checked = true;
+      if (bTieWarn) {
+        msgs.push(`⚠️ B 1位が同数のため車番${bBestNo}を仮選択（要確認）`);
+        sbMissing = true;
+      }
+    }
+
+    // 並び予想
+    let lineupMissing = false;
+    if (data.lineup && data.lineup.source === 'official' && Array.isArray(data.lineup.lines)) {
+      const filteredLines = data.lineup.lines
+        .map(line => line.filter(no => activeNos.has(no)))
+        .filter(line => line.length > 0);
+      const lineInputEl = document.getElementById('line-input');
+      if (lineInputEl && filteredLines.length > 0) {
+        lineInputEl.value = filteredLines.map(line => line.join('')).join(',');
+        lineInputEl.dispatchEvent(new Event('input', { bubbles: true }));
+        lineInputEl.dispatchEvent(new Event('change', { bubbles: true }));
+      } else {
+        msgs.push('⚠️ 公式の並び予想から有効なラインを構成できませんでした。並びを手入力してください');
+        lineupMissing = true;
+      }
+    } else {
+      msgs.push('⚠️ 公式の並び予想がありません。並びを手入力してください');
+      lineupMissing = true;
+    }
 
     const log = document.getElementById('proxy-input-log');
     msgs.push('');
     msgs.push('📝 手動入力が必要な項目:');
+    msgs.push('  ・👑（ゴールドキャップ）');
     msgs.push('  ・W印（◎○△✕）');
-    msgs.push('  ・直近3走着順');
-    msgs.push('  ・S/B 1位ラジオボタン');
-    msgs.push('  ・並び予想');
+    if (recentMissing) msgs.push('  ・直近3走着順（一部取得不可）');
+    if (sbMissing) msgs.push('  ・S/B 1位ラジオボタン（同数仮選択あり・要確認）');
+    if (lineupMissing) msgs.push('  ・並び予想');
     log.textContent = `✅ ${data.venue} 自動入力完了\n` + msgs.join('\n');
   }
 
