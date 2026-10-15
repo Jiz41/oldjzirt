@@ -623,7 +623,7 @@ function cosmosObserver(allResults, basePlayers) {
     
     const topPatterns = Object.entries(allPatternCount)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
+        .slice(0, 5)
         .map(([pattern, count]) => ({ pattern, count }));
     
     // イベント統計

@@ -1,7 +1,9 @@
 (function(app) {
 
-// 真自在律 Ver11.2.0
-// LOGIC VERSION: 11.2.0
+// 真自在律 Ver11.3.0
+// LOGIC VERSION: 11.3.0
+// 【V11.3.0】審眼八卦（SNGN）を削除。applyShinganHakke()本体・呼び出し、sendLogの
+//            _sgAnySwitchOnスキップ分岐を除去し、sendLogは常時実行。未使用のため。
 // 【V11.2.0】K2採用：晴天令の合成における競走得点項を二乗（1188行、1行変更）。
 //            リプレイ実測718R: 的中35.4%→34.5% / 回収78.5%→86.9%、拡張93R OOS: 61.4%→70.2%。
 //            回収優先の合意に基づき採用。荒天令・買い目生成は不変。
@@ -1544,8 +1546,6 @@ app.calculatePrediction = async function(guardedData) {
             }
         } catch (e) { app.logMessage('[ERROR] generateEnsanKekka呼び出し: ' + e.message); }
 
-        applyShinganHakke(basePlayers, seitenreiResults.integratedScores, koutenreiResults.integratedScores);
-
         const resultsContainer = document.getElementById('results-container');
         if (resultsContainer) resultsContainer.classList.add('visible');
 
@@ -1578,90 +1578,6 @@ app.calculatePrediction = async function(guardedData) {
         console.error("計算実行中にエラー:", error);
         app.logMessage(`[ERROR] 計算中断: ${error.message}`);
     }
-}
-
-// ====================================================================================
-// ====================================================================================
-// applyShinganHakke — 審眼八卦後処理
-// ====================================================================================
-function applyShinganHakke(basePlayers, seitenScores, koutenScores) {
-    const sw = {
-        line:   document.getElementById('sg-line')?.checked   || false,
-        score:  document.getElementById('sg-score')?.checked  || false,
-        recent: document.getElementById('sg-recent')?.checked || false,
-        wmark:  document.getElementById('sg-wmark')?.checked  || false,
-        tenkai: document.getElementById('sg-tenkai')?.checked || false,
-    };
-    const tenkaiType = document.querySelector('input[name="sg-tenkai-type"]:checked')?.value || 'senkou';
-    const hasLocal = basePlayers.some(p => p.isLocal);
-    const anyOn = sw.line || sw.score || sw.recent || sw.wmark || sw.tenkai || hasLocal;
-
-    const out = document.getElementById('shingan-hakke-output');
-    if (!anyOn) { if (out) out.innerHTML = ''; return; }
-
-    const tenkaiStyleMap = { senkou: ['逃', '自'], makuri: ['自'], sashi: ['追'] };
-    const tenkaiStyles = tenkaiStyleMap[tenkaiType] || [];
-    const tenkaiLabel  = { senkou: '先行有利', makuri: '捲り有利', sashi: '差し有利' }[tenkaiType] || '';
-
-    // 発動ログ（ONのスイッチのみ・実車番で出力）
-    app.logMessage('[SNGN] 発動');
-    if (sw.line) {
-        const ids = basePlayers.filter(p => (CalculationSnapshot.line_coop[p.id] || 1.0) > 1.0).map(p => p.id);
-        app.logMessage(`[SNGN] ライン強度: 選手${ids.join('・')} に×1.05`);
-    }
-    if (sw.score) {
-        const ids = basePlayers.filter(p => p.c_score_adj > 1.0).map(p => p.id);
-        app.logMessage(`[SNGN] 競走得点: 選手${ids.join('・')} に×1.05`);
-    }
-    if (sw.recent) {
-        const ids = basePlayers.filter(p => p.c_recent > 1.0).map(p => p.id);
-        app.logMessage(`[SNGN] 近況: 選手${ids.join('・')} に×1.05`);
-    }
-    if (sw.wmark) {
-        const ids = basePlayers.filter(p => p.wmark === '◎' || p.wmark === '〇').map(p => p.id);
-        app.logMessage(`[SNGN] 印: 選手${ids.join('・')} に×1.05`);
-    }
-    if (sw.tenkai) {
-        const ids = basePlayers.filter(p => tenkaiStyles.includes(p.style)).map(p => p.id);
-        app.logMessage(`[SNGN] 展開(${tenkaiLabel}): 選手${ids.join('・')} に×1.05`);
-    }
-    if (hasLocal) {
-        const ids = basePlayers.filter(p => p.isLocal).map(p => p.id);
-        app.logMessage(`[SNGN] 地元(自動): 選手${ids.join('・')} に×1.05`);
-    }
-
-    function calcCorrected(baseScores) {
-        const result = {};
-        basePlayers.forEach(p => {
-            const c_l = CalculationSnapshot.line_coop[p.id] || p.c_l || 1.0;
-            let mult = 1.0;
-            if (sw.line   && c_l > 1.0)                                    mult *= 1.05;
-            if (sw.score  && p.c_score_adj > 1.0)                          mult *= 1.05;
-            if (sw.recent && p.c_recent > 1.0)                             mult *= 1.05;
-            if (sw.wmark  && (p.wmark === '◎' || p.wmark === '〇'))        mult *= 1.05;
-            if (sw.tenkai && tenkaiStyles.includes(p.style))               mult *= 1.05;
-            if (hasLocal  && p.isLocal)                                    mult *= 1.05;
-            result[p.id] = (baseScores[p.id] || 0) * mult;
-        });
-        return result;
-    }
-
-    const correctedSeiten = calcCorrected(seitenScores);
-    const correctedKouten = calcCorrected(koutenScores);
-
-    const allRawScores = basePlayers.map(p => p.score);
-    const scoreMin   = Math.min(...allRawScores);
-    const scoreMax   = Math.max(...allRawScores);
-    const scoreThird = (scoreMax - scoreMin) / 3;
-
-    function rankPlayers(corrMap) {
-        return basePlayers
-            .map(p => ({ ...p, c_l: CalculationSnapshot.line_coop[p.id] || p.c_l || 1.0, correctedScore: corrMap[p.id] || 0 }))
-            .sort((a, b) => b.correctedScore - a.correctedScore);
-    }
-
-    // 寸評カード表示（displayShinganHakke）は発注根拠のない独断実装のため
-    // 呼び出しごと除去（2026-06-11）。×1.05オーバーレイ計算とSNGNログは正規機能として上記に存置。
 }
 
 // displayResults
@@ -1772,12 +1688,6 @@ function displayResults({
     }
 
     app.logMessage(`[DEBUG sendLog直前] CalculationSnapshot.race_id: ${CalculationSnapshot.race_id}`);
-    // 審眼八卦がONの場合はハズレ解析シートへの送信をスキップ
-    const _sgAnySwitchOn = ['sg-line','sg-score','sg-recent','sg-wmark','sg-tenkai']
-        .some(id => document.getElementById(id)?.checked);
-    if (_sgAnySwitchOn) {
-        app.logMessage('[SNGN] 審眼八卦オンのためsendLogをスキップします。');
-    } else {
     App.sendLog(
       {
         race_id: CalculationSnapshot.race_id,
@@ -1794,7 +1704,6 @@ function displayResults({
         kouten: document.getElementById('koutenrei-output').innerHTML
       }
     );
-    } // _sgAnySwitchOn
 
     // ── relations データ出口（相関図用） ──────────────────────────────
     const _bankInfo   = BANK_DATA[bankName] || {};

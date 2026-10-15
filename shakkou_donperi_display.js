@@ -1,9 +1,9 @@
-// VERSION: 1.2
+// VERSION: 2.0
 (function(app) {
 // ============================================================================
 // 儀術『赤口呑縁（しゃっこうどんぺり）』表示制御システム
 // ============================================================================
-// 清音の神託をHTMLに描画し、既存UIと統合する
+// 出目上位5点・ヒートマップのみを表示する（清音の演出・審眼八卦は削除済み）
 // ============================================================================
 
 // ----------------------------------------------------------------------------
@@ -43,42 +43,120 @@ function updateShakkouProgress(current, total) {
 // ----------------------------------------------------------------------------
 
 /**
+ * 出目上位5点のテーブルHTMLを生成
+ * @param {object} cosmosResult - 計算結果
+ */
+function buildTopPatternsHTML(cosmosResult) {
+    const total = (cosmosResult.metadata && cosmosResult.metadata.totalSimulations) || 0;
+    const topPatterns = (cosmosResult.topPatterns || []).slice(0, 5);
+
+    const rows = topPatterns.map((p, idx) => {
+        const rate = total > 0 ? ((p.count / total) * 100).toFixed(1) : '0.0';
+        return `
+        <tr>
+            <td class="shakkou-rank">${idx + 1}</td>
+            <td class="shakkou-pattern">${p.pattern}</td>
+            <td class="shakkou-rate">${rate}%</td>
+            <td class="shakkou-count">${p.count}件</td>
+        </tr>`;
+    }).join('');
+
+    return `
+<div class="shakkou-top-patterns">
+    <h4 class="shakkou-section-title">出目 上位5点</h4>
+    <table class="shakkou-pattern-table">
+        <thead>
+            <tr><th>順位</th><th>出目</th><th>出現率</th><th>件数</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+    </table>
+</div>`;
+}
+
+/**
+ * ヒートマップ（車番×着順）のテーブルHTMLを生成
+ * @param {object} cosmosResult - 計算結果
+ */
+function buildHeatmapHTML(cosmosResult) {
+    const total = (cosmosResult.metadata && cosmosResult.metadata.totalSimulations) || 0;
+    const statistics = (cosmosResult.statistics || []).slice().sort((a, b) => a.id - b.id);
+
+    // 列（1〜3着）ごとに上位3車のidを求める（バッジ付与用）
+    const topByRank = {};
+    [1, 2, 3].forEach(rank => {
+        const sorted = statistics
+            .map(s => ({ id: s.id, value: (s.distribution && s.distribution[rank]) || 0 }))
+            .sort((a, b) => b.value - a.value);
+        topByRank[rank] = sorted.slice(0, 3).map(s => s.id);
+    });
+
+    const badgeMap = ['①', '②', '③'];
+    const medalClass = ['medal-gold', 'medal-silver', 'medal-bronze'];
+
+    function cellHTML(stat, rank) {
+        const count = (stat.distribution && stat.distribution[rank]) || 0;
+        const pct = total > 0 ? (count / total) * 100 : 0;
+        const pctLabel = pct.toFixed(1) + '%';
+        const rankIdx = topByRank[rank].indexOf(stat.id);
+        const isTop = rankIdx !== -1 && pct > 0;
+        const badge = isTop ? `<span class="shakkou-badge ${medalClass[rankIdx]}">${badgeMap[rankIdx]}</span>` : '';
+        const bg = `rgba(212, 175, 55, ${Math.min(pct / 100, 1) * 0.75 + (pct > 0 ? 0.05 : 0)})`;
+        const topClass = isTop ? 'shakkou-cell-top' : '';
+        return `<td class="shakkou-heat-cell ${topClass}" style="background:${bg};">${badge}${pctLabel}</td>`;
+    }
+
+    const rows = statistics.map(stat => {
+        const isAbsent = total > 0 && [1, 2, 3, 4, 5, 6, 7].every(r => ((stat.distribution && stat.distribution[r]) || 0) === 0);
+        const rowClass = isAbsent ? 'shakkou-row-absent' : '';
+        return `
+        <tr class="${rowClass}">
+            <td class="shakkou-car-number">${stat.id}番</td>
+            ${cellHTML(stat, 1)}
+            ${cellHTML(stat, 2)}
+            ${cellHTML(stat, 3)}
+        </tr>`;
+    }).join('');
+
+    return `
+<div class="shakkou-heatmap">
+    <h4 class="shakkou-section-title">ヒートマップ</h4>
+    <table class="shakkou-heat-table">
+        <thead>
+            <tr><th>車番</th><th>1着</th><th>2着</th><th>3着</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+    </table>
+</div>`;
+}
+
+/**
  * 赤口呑縁の結果を表示
  * @param {object} cosmosResult - 計算結果
  * @param {string} grade - 階級
  */
 function displayShakkouResults(cosmosResult, grade) {
-    const kiyoneMessage = app.generateKiyoneMessage(cosmosResult, grade);
     const scenarioOutput = document.getElementById('scenario-output');
-    
+
     if (scenarioOutput) {
         const existing = scenarioOutput.querySelector('.shakkou-results-container');
         if (existing) existing.remove();
-        
+
         const resultHTML = `
 <div class="shakkou-results-container">
-    <div class="shakkou-header">
-        <h3 class="shakkou-title">偽典『赤口呑縁』──</h3>
-        <div class="shakkou-subtitle">五更斎アメンティア清音による、1465の並行世界</div>
-    </div>
-    
-    <div class="kiyone-cutin-wrapper">
-        <img src="kiyone_01.png" alt="清音" class="kiyone-cutin-image glitch-effect">
-    </div>
-    
-    ${kiyoneMessage}
+    ${buildTopPatternsHTML(cosmosResult)}
+    ${buildHeatmapHTML(cosmosResult)}
 </div>
         `;
-        
+
         // 計算中の表示（進捗バー）を特定して、結果に置き換える
-        const progressArea = document.querySelector('.kiyone-calculation-start');
+        const progressArea = document.querySelector('.shakkou-calculation-start');
         if (progressArea) {
             progressArea.outerHTML = resultHTML;
         } else {
             scenarioOutput.insertAdjacentHTML('beforeend', resultHTML);
         }
     }
-    
+
     injectShakkouStyles();
 }
 
@@ -96,190 +174,34 @@ function injectShakkouStyles() {
     styleElement.id = 'shakkou-styles';
     styleElement.textContent = `
 /* ============================================================================
-   儀術『赤口呑縁』専用スタイル
+   儀術『赤口呑縁』結果表示スタイル（出目上位5点・ヒートマップのみ）
    ============================================================================ */
 
 .shakkou-results-container {
     background: linear-gradient(135deg, #0a0505, #1a0f0a);
     border: 3px solid #8b4513;
     border-radius: 12px;
-    padding: 0;
+    padding: 16px;
     margin: 20px 0;
     box-shadow: 0 8px 20px rgba(139, 69, 19, 0.3);
 }
 
-.shakkou-header {
-    background: linear-gradient(135deg, #2a1810, #1a0f0a);
-    padding: 20px;
-    border-bottom: 2px solid #8b4513;
-    text-align: center;
-}
-
-.shakkou-title {
+.shakkou-section-title {
     color: #d4af37;
-    font-size: 24px;
+    font-size: 16px;
     margin: 0 0 10px 0;
-    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-    letter-spacing: 0.1em;
-}
-
-.shakkou-subtitle {
-    color: #c9a55b;
-    font-size: 14px;
-    font-style: italic;
-}
-
-.kiyone-section {
-    margin: 0;
-    padding: 5px 20px 20px 20px;
-    background: transparent;
-    border-left: none;
-    border-radius: 0;
-    border-bottom: 1px solid #3a2810;
-}
-
-.kiyone-section:last-child {
-    border-bottom: none;
-}
-
-.kiyone-voice {
-    font-family: 'Noto Serif JP', 'Yu Mincho', 'YuMincho', serif;
-    font-size: 16px;
-    line-height: 1.8;
-    color: #d4af37;
-    font-style: italic;
-    white-space: pre-line;
-    margin: 15px 0;
-    padding: 15px 20px;
-    background: rgba(42, 24, 16, 0.3);
-    border-left: 3px solid #d4af37;
-    border-radius: 5px;
-}
-
-.kiyone-comment {
-    font-family: 'Noto Serif JP', 'Yu Mincho', 'YuMincho', serif;
-    color: #c9a55b;
-    font-style: italic;
-    margin: 15px 0;
-    padding: 12px 20px;
-    border-left: 3px solid #8b6914;
-    line-height: 1.6;
-    background: rgba(42, 24, 16, 0.2);
-    border-radius: 5px;
-}
-
-.section-title {
-    color: #d4af37;
-    font-size: 20px;
-    margin: 0 0 20px 0;
-    padding-bottom: 10px;
+    padding-bottom: 8px;
     border-bottom: 2px solid #8b4513;
 }
 
-.deme-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin: 15px 0;
+.shakkou-top-patterns {
+    margin-bottom: 20px;
 }
 
-.deme-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-    background: rgba(26, 15, 10, 0.5);
-    border-radius: 5px;
-    border: 1px solid #3a2810;
-    transition: all 0.3s;
-}
-
-.deme-item:hover {
-    background: rgba(42, 24, 16, 0.7);
-    border-color: #8b4513;
-    transform: translateX(5px);
-}
-
-.deme-pattern {
-    color: #d4af37;
-    font-weight: bold;
-    font-family: 'Courier New', monospace;
-    font-size: 20px;
-    letter-spacing: 0.2em;
-}
-
-.deme-count {
-    color: #8b6914;
-    font-family: 'Courier New', monospace;
-    font-size: 16px;
-}
-
-.chaos-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin: 15px 0;
-}
-
-.chaos-item {
-    background: rgba(26, 15, 10, 0.5);
-    padding: 15px;
-    border-left: 4px solid #8b4513;
-    border-radius: 5px;
-    border: 1px solid #3a2810;
-    transition: all 0.3s;
-}
-
-.chaos-item:hover {
-    background: rgba(42, 24, 16, 0.7);
-    border-left-color: #d4af37;
-    transform: translateX(5px);
-}
-
-.chaos-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.chaos-name {
-    color: #d4af37;
-    font-weight: bold;
-    font-size: 16px;
-}
-
-.chaos-count {
-    color: #8b6914;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-}
-
-.chaos-pattern {
-    color: #c9a55b;
-    font-size: 14px;
-    padding-left: 15px;
-    margin-top: 8px;
-}
-
-.pattern-text {
-    color: #d4af37;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    letter-spacing: 0.15em;
-}
-
-.pattern-count {
-    color: #8b6914;
-    font-family: 'Courier New', monospace;
-    margin-left: 10px;
-}
-
-.survival-table {
+.shakkou-pattern-table,
+.shakkou-heat-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 15px;
     background: rgba(26, 15, 10, 0.5);
     border: 1px solid #3a2810;
     border-radius: 5px;
@@ -287,124 +209,78 @@ function injectShakkouStyles() {
     table-layout: auto;
 }
 
-.survival-table thead th {
+.shakkou-pattern-table thead th,
+.shakkou-heat-table thead th {
     background: rgba(42, 24, 16, 0.8);
     color: #d4af37;
-    padding: 12px;
+    padding: 10px;
     text-align: center;
     border-bottom: 2px solid #8b4513;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 13px;
 }
 
-.survival-table tbody td {
+.shakkou-pattern-table tbody td,
+.shakkou-heat-table tbody td {
     color: #c9a55b;
-    padding: 10px;
+    padding: 8px;
     text-align: center;
     border-bottom: 1px solid #3a2810;
     font-family: 'Courier New', monospace;
     font-size: 12px;
-    white-space: nowrap;
 }
 
-.survival-table tbody tr:hover {
-    background: rgba(42, 24, 16, 0.5);
-}
-
-.survival-table tbody tr:last-child td {
+.shakkou-pattern-table tbody tr:last-child td,
+.shakkou-heat-table tbody tr:last-child td {
     border-bottom: none;
 }
 
-.car-number {
+.shakkou-rank {
     font-weight: bold;
     color: #d4af37 !important;
-    font-size: 16px;
 }
 
-.rank-1 { color: #e74c3c !important; font-weight: bold; }
-.rank-2 { color: #3498db !important; }
-.rank-3 { color: #2ecc71 !important; }
-.outside { color: #7f8c8d !important; }
-
-.kiyone-section.opening { border-bottom: 2px solid #8b4513; }
-.kiyone-section.opening .kiyone-voice { border-left-color: #d4af37; background: rgba(42, 24, 16, 0.4); }
-
-.kiyone-section.closing { margin-top: 20px; border-bottom: none; }
-.kiyone-section.closing .kiyone-voice { border-left-color: #d4af37; background: rgba(42, 24, 16, 0.4); text-align: center; }
-
-.kiyone-calculation-start {
-    padding: 30px 20px;
-    background: linear-gradient(135deg, #1a0f0a, #2a1810);
-    border-radius: 8px;
-    margin: 0;
-}
-
-.progress-container { margin-top: 20px; }
-
-.progress-bar-wrapper {
-    width: 100%;
-    height: 30px;
-    background: #0a0505;
-    border: 2px solid #8b4513;
-    border-radius: 5px;
-    overflow: hidden;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
-}
-
-.progress-bar {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #d4af37, #8b4513, #d4af37);
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-    transition: width 0.3s ease;
-}
-
-@keyframes shimmer {
-    0% { background-position: 100% 0; }
-    100% { background-position: -100% 0; }
-}
-
-.progress-text {
-    text-align: center;
+.shakkou-pattern {
     color: #d4af37;
-    font-family: 'Courier New', monospace;
-    font-size: 18px;
-    margin-top: 12px;
     font-weight: bold;
+    letter-spacing: 0.15em;
 }
 
-.kiyone-cutin-wrapper {
-    width: 100%;
-    max-width: 100px;
-    margin: 20px auto 0 auto;
-    overflow: hidden;
-    position: relative;
-    background: transparent;
+.shakkou-car-number {
+    font-weight: bold;
+    color: #d4af37 !important;
+    font-size: 14px;
+    white-space: nowrap;
 }
 
-.kiyone-cutin-image {
-    width: 100%;
-    height: auto;
-    display: block;
+.shakkou-heat-cell {
+    font-weight: normal;
+    transition: all 0.2s;
 }
 
-.glitch-effect {
-    position: relative;
-    animation: glitch-rgb 3s infinite;
+.shakkou-cell-top {
+    font-weight: bold;
+    border: 2px solid #d4af37 !important;
 }
 
-@keyframes glitch-rgb {
-    0%, 90% { transform: translate(0); filter: none; }
-    92% { transform: translate(-3px, 2px); filter: drop-shadow(3px 0 0 #ff00ff) drop-shadow(-3px 0 0 #00ffff); }
-    94% { transform: translate(2px, -2px); filter: drop-shadow(-2px 0 0 #ff00ff) drop-shadow(2px 0 0 #00ffff); }
-    96% { transform: translate(-1px, 1px); filter: none; }
+.shakkou-badge {
+    display: inline-block;
+    margin-right: 4px;
+    font-size: 13px;
+}
+
+.medal-gold { color: #ffd700 !important; }
+.medal-silver { color: #c0c0c0 !important; }
+.medal-bronze { color: #cd7f32 !important; }
+
+.shakkou-row-absent {
+    opacity: 0.4;
 }
 
 @media (max-width: 600px) {
-    .shakkou-title { font-size: 20px; }
-    .kiyone-voice { font-size: 14px; }
-    .survival-table thead th, .survival-table tbody td { padding: 8px 5px; font-size: 10px; }
+    .shakkou-section-title { font-size: 14px; }
+    .shakkou-pattern-table thead th, .shakkou-pattern-table tbody td,
+    .shakkou-heat-table thead th, .shakkou-heat-table tbody td { padding: 6px 4px; font-size: 11px; }
 }
 `;
     document.head.appendChild(styleElement);
@@ -416,95 +292,6 @@ function injectShakkouStyles() {
 
 app.startShakkouCalculation = function(grade) {
     showShakkouProgress(grade);
-}
-
-// ----------------------------------------------------------------------------
-// ⚖️ 審眼八卦 表示
-// ----------------------------------------------------------------------------
-app.displayShinganHakke = function(data) {
-    const { seitenRanked, koutenRanked, scoreMin, scoreThird, sw, hasLocal } = data;
-    const out = document.getElementById('shingan-hakke-output');
-    if (!out) return;
-
-    injectShinganStyles();
-
-    function sanrentan(ranked) {
-        if (ranked.length < 3) return '—';
-        return ranked[0].id + '-' + ranked[1].id + '-' + ranked[2].id;
-    }
-
-    function clLabel(c_l) {
-        if (c_l >= 1.05) return 'ライン連携厚く、';
-        if (c_l >= 1.01) return 'ライン連携あり、';
-        return '単騎同然、';
-    }
-    function localLabel(p) {
-        if (p.isLocal) return '地の利も重なる。';
-        return '';
-    }
-    function kiryokuLabel(score) {
-        if (score >= scoreMin + scoreThird * 2) return '機力上位、';
-        if (score >= scoreMin + scoreThird)     return '機力は中程度、';
-        return '機力に不安を残す、';
-    }
-    function recentLabel(p) {
-        return p.trendLabel === '上昇' ? '調子右肩上がり、'
-             : p.trendLabel === '下降' ? '近況に陰りあり、'
-             : '近況安定、';
-    }
-    function wmarkLabel(wmark) {
-        if (wmark === '◎') return '紙面の評価も高い。';
-        if (wmark === '〇') return '紙面の支持あり。';
-        return '';
-    }
-    function shimeLabel(rank) {
-        if (rank === 1) return '軸に推す。';
-        if (rank === 2) return 'ヒモに加えたい。';
-        return '抑えに加えたい。';
-    }
-
-    const top3 = seitenRanked.slice(0, 3);
-    const rankMap = {};
-    top3.forEach((p, i) => { rankMap[p.id] = i + 1; });
-    const top3Sorted = [...top3].sort((a, b) => a.id - b.id);
-
-    let commentsHtml = '';
-    top3Sorted.forEach(p => {
-        const rank = rankMap[p.id];
-        const wm = wmarkLabel(p.wmark);
-        const line1 = clLabel(p.c_l) + localLabel(p);
-        const line2 = kiryokuLabel(p.score) + recentLabel(p) + (wm || '') + shimeLabel(rank);
-        commentsHtml += '<div class="sg-comment">'
-            + '<div class="sg-comment-hd"><strong>' + p.id + '番</strong></div>'
-            + '<div class="sg-comment-ln">' + line1 + '</div>'
-            + '<div class="sg-comment-ln sg-indent">' + line2 + '</div>'
-            + '</div>';
-    });
-
-    out.innerHTML = '<div class="sg-container">'
-        + '<div class="sg-title">&#x2696;&#xFE0F; 審眼八卦</div>'
-        + '<div class="sg-bets">'
-        + '<div>三連単：' + sanrentan(seitenRanked) + '、' + sanrentan(koutenRanked) + '</div>'
-        + '</div>'
-        + '<div class="sg-comments">' + commentsHtml + '</div>'
-        + '</div>';
-};
-
-function injectShinganStyles() {
-    if (document.getElementById('shingan-hakke-styles')) return;
-    const s = document.createElement('style');
-    s.id = 'shingan-hakke-styles';
-    s.textContent = `
-.sg-container{margin:14px 0;padding:14px 16px;border:1px solid rgba(218,165,32,0.3);border-radius:8px;background:rgba(218,165,32,0.05)}
-.sg-title{font-size:13px;font-weight:bold;color:#c8a030;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(218,165,32,0.2)}
-.sg-bets{font-size:12px;color:#ddd;margin-bottom:12px;display:flex;flex-direction:column;gap:4px;padding:8px 10px;background:rgba(0,0,0,0.15);border-radius:6px}
-.sg-comment{margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.05)}
-.sg-comment:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
-.sg-comment-hd{font-size:12px;color:#c8a030;margin-bottom:2px}
-.sg-comment-ln{font-size:11px;color:#ccc;line-height:1.6}
-.sg-indent{padding-left:1em}
-    `;
-    document.head.appendChild(s);
 }
 
 app.completeShakkouCalculation = function(cosmosResult, grade) {
