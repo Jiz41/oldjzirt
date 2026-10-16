@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="app-version" content="2.5.0">
+    <meta name="app-version" content="2.6.0">
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="./style_v2.css">
 
@@ -226,7 +226,7 @@
                 let selectionText;
                 if (state && state.tier) {
                     const ticketsText = (state.tickets && state.tickets.length) ? state.tickets.join('\n') : '（成立なし）';
-                    selectionText = `ティア：${state.tier}\n\n■ 厳選8点（三連単6点＋二車単2点）\n${ticketsText}`;
+                    selectionText = `ティア：${state.tierText || state.tier}\n\n■ 厳選8点（三連単6点＋二車単2点）\n${ticketsText}`;
                 } else {
                     selectionText = '（判定なし）';
                 }

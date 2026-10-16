@@ -33,14 +33,13 @@
   }
 
   var TIER_COLORS = {
-    '買い（強）': 'var(--gold, #ffb62e)',
-    '買い': 'var(--neon-a, #39ffb0)',
-    '見寄り': 'var(--muted, #979aa6)',
-    '見': 'var(--tier-c, #6b6f7a)',
+    'A': 'var(--gold, #ffb62e)',
+    'B': 'var(--neon-a, #39ffb0)',
+    'C': 'var(--muted, #979aa6)',
   };
 
-  function renderHistoryTable(tierKey) {
-    var hist = DecisionCore.TIER_HISTORY[tierKey];
+  function renderHistoryTable(letter) {
+    var hist = DecisionCore.TIER_HISTORY[letter];
     if (!hist) return '';
     var rows = hist.rows.map(function (r) {
       if (r.note) {
@@ -48,7 +47,8 @@
       }
       return '<tr><td>' + escapeHtml(r.period) + '</td><td>n=' + r.n + '</td><td>回収率 ' + r.roi + '%</td></tr>';
     }).join('');
-    return '<table style="width:100%; font-size:0.78em; color:#aaa; border-collapse:collapse; margin-top:6px;">' + rows + '</table>' +
+    return '<h4 style="margin-top:12px; font-size:0.85em; color:#ccc;">過去実績（' + escapeHtml(letter) + '）</h4>' +
+      '<table style="width:100%; font-size:0.78em; color:#aaa; border-collapse:collapse; margin-top:6px;">' + rows + '</table>' +
       '<p style="font-size:0.72em; color:#777; margin:4px 0 0;">※過去データの目安（3期間の検証値。この8点構成を100円ずつ買った場合の回収率）。将来の結果を保証するものではありません。</p>';
   }
 
@@ -145,20 +145,26 @@
     }
 
     var tier = data.tierResult.tier;
-    var color = TIER_COLORS[tier] || '#aaa';
-    var isMiss = tier === '見';
+    var letter = data.tierResult.letter;
+    var subLabel = data.tierResult.subLabel;
+    var cautions = data.tierResult.cautions || [];
+    var color = TIER_COLORS[letter] || '#aaa';
 
     var headerHtml = '<h3 style="margin-bottom:4px;">🎯 買い/見 判定・配分電卓</h3>' +
       '<div style="display:flex; align-items:center; gap:10px; margin:8px 0;">' +
-      '<span style="font-size:1.3em; font-weight:bold; color:' + color + ';">ティア：' + escapeHtml(tier) + '</span>' +
-      (isMiss ? '<span style="background:var(--accent-bg, rgba(255,77,109,0.1)); color:var(--accent, #ff4d6d); padding:2px 8px; border-radius:4px; font-size:0.85em;">見送り推奨</span>' : '') +
+      '<span style="font-size:3.6em; font-weight:800; line-height:1; color:' + color + '; font-family:monospace;">' + escapeHtml(letter) + '</span>' +
+      '<div><span style="font-size:1em; color:' + color + ';">' + escapeHtml(subLabel) + '</span></div>' +
       '</div>';
 
-    if (!data.tierResult.conditionC) {
+    cautions.forEach(function (c) {
+      headerHtml += '<p style="font-size:0.78em; color:var(--gold, #ffb62e);">⚠ ' + escapeHtml(c) + '</p>';
+    });
+
+    if (letter === 'C') {
       headerHtml += '<p style="font-size:0.78em; color:#999;">理由: ' + data.tierResult.reasons.map(escapeHtml).join(' / ') + '</p>';
     }
 
-    headerHtml += renderHistoryTable(tier);
+    headerHtml += renderHistoryTable(letter);
 
     var perTicket = data.probResult.perTicket;
     var totalProb = data.probResult.totalProb;
@@ -180,12 +186,16 @@
     }
 
     var ticketsTableContainer = '<div id="decision-tickets-table">' + renderTicketsTable(perTicket, null) + '</div>';
+    var probCaveat = '<p style="font-size:0.72em; color:#777;">的中確率は晴天令スコアからの推定です。過去実績は表示より高めに出る傾向があります（全体: 表示15%に対し実績18%、条件C: 表示14%に対し実績19%）。</p>';
     var summaryEl = '<div id="decision-summary" style="margin-top:8px; font-size:0.85em; color:#bba060;"></div>';
 
-    panel.innerHTML = headerHtml + budgetInput + allocModeInput + ticketsHeader + ticketsTableContainer + summaryEl;
+    panel.innerHTML = headerHtml + budgetInput + allocModeInput + ticketsHeader + ticketsTableContainer + probCaveat + summaryEl;
 
+    var tierText = letter + '（' + subLabel + '）';
     window.DecisionPanelState = {
       tier: tier,
+      letter: letter,
+      tierText: tierText,
       tickets: perTicket.map(function (t) {
         var kind = t.type === 'nisyatan' ? '二車単' : '三連単';
         return kind + ' ' + t.cars.join('-');

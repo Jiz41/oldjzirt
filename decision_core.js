@@ -41,37 +41,31 @@
   ];
 
   // --- ティア別の過去回収率・件数（出典表示用。将来を保証しない） ---
+  // A/B/C表示への移行（2026-10-16）。C は旧「見寄り」と「見」を合算した数値。
+  // A内のS級（50件、回収率41%）はこの表に含めず、judgeTier() の cautions で個別に注意表示する。
   var TIER_HISTORY = {
-    '買い（強）': {
-      label: '買い（強）',
+    'A': {
+      label: 'A',
       rows: [
         { period: 'K2後学習', n: 138, roi: 354 },
         { period: 'K2前', n: 111, roi: 177 },
         { period: '封印検証', n: 12, roi: 354 },
       ],
     },
-    '買い': {
-      label: '買い',
+    'B': {
+      label: 'B',
       rows: [
         { period: 'K2後学習', n: 99, roi: 156 },
         { period: 'K2前', n: 150, roi: 145 },
         { period: '封印検証', n: 17, roi: 100 },
       ],
     },
-    '見寄り': {
-      label: '見寄り',
+    'C': {
+      label: 'C',
       rows: [
-        { period: 'K2後学習', n: 58, roi: 162 },
-        { period: 'K2前', n: 84, roi: 71 },
-        { period: '封印検証', n: 6, roi: 65 },
-      ],
-    },
-    '見': {
-      label: '見',
-      rows: [
-        { period: 'K2後学習', n: 291, roi: 53 },
-        { period: 'K2前', n: 451, roi: 50 },
-        { period: '封印検証', n: 47, roi: 71 },
+        { period: 'K2後学習', n: 349, roi: 71 },
+        { period: 'K2前', n: 535, roi: 53 },
+        { period: '封印検証', n: 53, roi: 70 },
       ],
     },
   };
@@ -180,9 +174,31 @@
       tier = '買い';
     } else {
       tier = '見寄り';
+      reasons.push('風が強め（3m/s以上）');
     }
 
-    return { tier: tier, conditionC: conditionC, reasons: reasons };
+    var letter;
+    var subLabel;
+    if (tier === '買い（強）') {
+      letter = 'A';
+      subLabel = '買い（強）';
+    } else if (tier === '買い') {
+      letter = 'B';
+      subLabel = '買い';
+    } else if (tier === '見寄り') {
+      letter = 'C';
+      subLabel = '見送り推奨（風が強め・境界）';
+    } else {
+      letter = 'C';
+      subLabel = '見送り推奨';
+    }
+
+    var cautions = [];
+    if (letter === 'A' && grade === 's-kyu') {
+      cautions.push('Aの中でもS級は過去実績が弱めです（50件、回収率41%。K2前3%・K2後学習64%・封印検証は1件で0%）。件数が少ないため参考値です。');
+    }
+
+    return { tier: tier, conditionC: conditionC, reasons: reasons, letter: letter, subLabel: subLabel, cautions: cautions };
   }
 
   /**
