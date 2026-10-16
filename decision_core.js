@@ -42,30 +42,30 @@
 
   // --- ティア別の過去回収率・件数（出典表示用。将来を保証しない） ---
   // A/B/C表示への移行（2026-10-16）。C は旧「見寄り」と「見」を合算した数値。
-  // A内のS級（50件、回収率41%）はこの表に含めず、judgeTier() の cautions で個別に注意表示する。
+  // 2026-10-16 実効風速(×beta)基準で再計算。重複race_idはkeep-last除去
   var TIER_HISTORY = {
     'A': {
       label: 'A',
       rows: [
-        { period: 'K2後学習', n: 138, roi: 354 },
-        { period: 'K2前', n: 111, roi: 177 },
-        { period: '封印検証', n: 12, roi: 354 },
+        { period: 'K2後学習', n: 224, roi: 283 },
+        { period: 'K2前', n: 201, roi: 180 },
+        { period: '封印検証', n: 26, roi: 229 },
       ],
     },
     'B': {
       label: 'B',
       rows: [
-        { period: 'K2後学習', n: 99, roi: 156 },
-        { period: 'K2前', n: 150, roi: 145 },
-        { period: '封印検証', n: 17, roi: 100 },
+        { period: 'K2後学習', n: 56, roi: 160 },
+        { period: 'K2前', n: 98, roi: 112 },
+        { period: '封印検証', n: 9, roi: 43 },
       ],
     },
     'C': {
       label: 'C',
       rows: [
-        { period: 'K2後学習', n: 349, roi: 71 },
-        { period: 'K2前', n: 535, roi: 53 },
-        { period: '封印検証', n: 53, roi: 70 },
+        { period: 'K2後学習', n: 306, roi: 55 },
+        { period: 'K2前', n: 497, roi: 46 },
+        { period: '封印検証', n: 47, roi: 71 },
       ],
     },
   };
@@ -147,7 +147,7 @@
    * @param {boolean} opts.lIsSingle Lが単騎（Lのラインの人数が1）か
    * @param {string} opts.grade 's-kyu'|'a-kyu'|'a-chal'|'girls'
    * @param {number} opts.numLines ライン数
-   * @param {number} opts.windSpeed 風速(m/s)
+   * @param {number} opts.windSpeed 実効風速(風速欄の値×場のbeta)(m/s)
    * @returns {{tier:string, conditionC:boolean, reasons:string[]}}
    */
   function judgeTier(opts) {
@@ -174,7 +174,7 @@
       tier = '買い';
     } else {
       tier = '見寄り';
-      reasons.push('風が強め（3m/s以上）');
+      reasons.push('実効風速が強め（3m/s以上）');
     }
 
     var letter;
@@ -194,9 +194,6 @@
     }
 
     var cautions = [];
-    if (letter === 'A' && grade === 's-kyu') {
-      cautions.push('Aの中でもS級は過去実績が弱めです（50件、回収率41%。K2前3%・K2後学習64%・封印検証は1件で0%）。件数が少ないため参考値です。');
-    }
 
     return { tier: tier, conditionC: conditionC, reasons: reasons, letter: letter, subLabel: subLabel, cautions: cautions };
   }

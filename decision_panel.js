@@ -105,6 +105,8 @@
     var windSpeedEl = document.getElementById('wind-speed');
     var grade = raceTypeEl ? raceTypeEl.value : 'a-kyu';
     var windSpeed = windSpeedEl ? (parseFloat(windSpeedEl.value) || 0) : 0;
+    var beta = (snap && snap.bank && snap.bank.beta) ? snap.bank.beta : 1.0;
+    var effWindSpeed = windSpeed * beta;
 
     var s1Player = base.find(function (p) { return p.id === labelToCar.s1; });
     var s1Style = s1Player ? s1Player.style : null;
@@ -119,7 +121,7 @@
       lIsSingle: lIsSingle,
       grade: grade,
       numLines: numLines,
-      windSpeed: windSpeed,
+      windSpeed: effWindSpeed,
     });
 
     var probResult = DecisionCore.computeProbabilities(seitenScores, grade, tickets);
@@ -131,6 +133,7 @@
       probResult: probResult,
       grade: grade,
       windSpeed: windSpeed,
+      effWindSpeed: effWindSpeed,
       numLines: numLines,
     };
   }
