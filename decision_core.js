@@ -41,33 +41,33 @@
     '買い（強）': {
       label: '買い（強）',
       rows: [
-        { period: 'K2後学習', n: 140, roi: 366 },
-        { period: 'K2前', n: 118, roi: 158 },
-        { period: '封印検証', n: 14, roi: 296 },
+        { period: 'K2後学習', n: 138, roi: 344 },
+        { period: 'K2前', n: 111, roi: 168 },
+        { period: '封印検証', n: 12, roi: 345 },
       ],
     },
     '買い': {
       label: '買い',
       rows: [
-        { period: 'K2後学習', n: 104, roi: 218 },
-        { period: 'K2前', n: 156, roi: 121 },
-        { period: '封印検証', n: 18, roi: 94 },
+        { period: 'K2後学習', n: 99, roi: 227 },
+        { period: 'K2前', n: 150, roi: 122 },
+        { period: '封印検証', n: 17, roi: 100 },
       ],
     },
     '見寄り': {
       label: '見寄り',
       rows: [
-        { period: 'K2後学習', n: 65, roi: 174 },
-        { period: 'K2前', n: 90, roi: 72 },
-        { period: '封印検証', n: 7, roi: 0 },
+        { period: 'K2後学習', n: 58, roi: 153 },
+        { period: 'K2前', n: 84, roi: 59 },
+        { period: '封印検証', n: 6, roi: 0 },
       ],
     },
     '見': {
       label: '見',
       rows: [
-        { period: 'K2後学習', n: 302, roi: 29 },
-        { period: 'K2前', n: 468, roi: 39 },
-        { period: '封印検証', n: 51, roi: 46 },
+        { period: 'K2後学習', n: 291, roi: 31 },
+        { period: 'K2前', n: 451, roi: 40 },
+        { period: '封印検証', n: 47, roi: 50 },
       ],
     },
   };
