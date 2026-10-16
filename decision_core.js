@@ -1,9 +1,9 @@
-// decision_core.js — 「買い/見」ティア・買い目8点・的中確率・配分計算の純粋ロジック。
+// decision_core.js — 「買い/見」ティア・買い目8点（三連単6点＋二車単2点）・的中確率・配分計算の純粋ロジック。
 // keirin_logic.js のスコア計算・買い目生成ロジックは一切呼び出さない／変更しない。
 // ブラウザ（グローバル DecisionCore）・Node（CommonJS/ESM の require/import）の両方で使えるようにする。
 //
 // 出典:
-// - ラベル定義(s1,s2,s3,L,o1)・買い目8点・ティア条件・確率モデル・配分方針は
+// - ラベル定義(s1,s2,s3,L,o1)・買い目8点（三連単6点＋二車単2点）・ティア条件・確率モデル・配分方針は
 //   /root/oldjzirt/replay/explore/common.mjs, replay/prob_calibration.mjs,
 //   replay/result_prob_calibration.json（T値）を根拠に実装。
 (function (root, factory) {
@@ -24,7 +24,7 @@
   };
   var OVERALL_T = 1.585;
 
-  // --- チケット定義（8点、三連単、ラベル順=着順） ---
+  // --- チケット定義（三連単6点、ラベル順=着順） ---
   var TICKETS = [
     ['o1', 's2', 'L'],
     ['s2', 's3', 's1'],
@@ -32,8 +32,12 @@
     ['s2', 's1', 'L'],
     ['o1', 's2', 's1'],
     ['L', 'o1', 's2'],
-    ['L', 's3', 'o1'],
-    ['s1', 'L', 's2'],
+  ];
+
+  // --- チケット定義（二車単2点、ラベル順=1着,2着） ---
+  var NITAN_TICKETS = [
+    ['s1', 'L'],
+    ['L', 's1'],
   ];
 
   // --- ティア別の過去回収率・件数（出典表示用。将来を保証しない） ---
@@ -41,33 +45,33 @@
     '買い（強）': {
       label: '買い（強）',
       rows: [
-        { period: 'K2後学習', n: 138, roi: 344 },
-        { period: 'K2前', n: 111, roi: 168 },
-        { period: '封印検証', n: 12, roi: 345 },
+        { period: 'K2後学習', n: 138, roi: 354 },
+        { period: 'K2前', n: 111, roi: 177 },
+        { period: '封印検証', n: 12, roi: 354 },
       ],
     },
     '買い': {
       label: '買い',
       rows: [
-        { period: 'K2後学習', n: 99, roi: 227 },
-        { period: 'K2前', n: 150, roi: 122 },
+        { period: 'K2後学習', n: 99, roi: 156 },
+        { period: 'K2前', n: 150, roi: 145 },
         { period: '封印検証', n: 17, roi: 100 },
       ],
     },
     '見寄り': {
       label: '見寄り',
       rows: [
-        { period: 'K2後学習', n: 58, roi: 153 },
-        { period: 'K2前', n: 84, roi: 59 },
-        { period: '封印検証', n: 6, roi: 0 },
+        { period: 'K2後学習', n: 58, roi: 162 },
+        { period: 'K2前', n: 84, roi: 71 },
+        { period: '封印検証', n: 6, roi: 65 },
       ],
     },
     '見': {
       label: '見',
       rows: [
-        { period: 'K2後学習', n: 291, roi: 31 },
-        { period: 'K2前', n: 451, roi: 40 },
-        { period: '封印検証', n: 47, roi: 50 },
+        { period: 'K2後学習', n: 291, roi: 53 },
+        { period: 'K2前', n: 451, roi: 50 },
+        { period: '封印検証', n: 47, roi: 71 },
       ],
     },
   };
@@ -119,23 +123,27 @@
   }
 
   /**
-   * 8点チケットをラベル->車番で展開する。成立しないチケット（ラベル未解決／車番重複）は除外。
+   * 8点チケット（三連単6点＋二車単2点）をラベル->車番で展開する。
+   * 成立しないチケット（ラベル未解決／車番重複）は除外。
    * @param {{s1:?number,s2:?number,s3:?number,L:?number,o1:?number}} labelToCar
-   * @returns {Array<{labels:string[], cars:number[]}>} 成立したチケットのみ
+   * @returns {Array<{labels:string[], cars:number[], type:string}>} 成立したチケットのみ
    */
   function buildTickets(labelToCar) {
-    var out = [];
-    TICKETS.forEach(function (labels) {
-      var cars = labels.map(function (l) { return labelToCar[l]; });
-      var resolved = cars.every(function (c) { return c !== null && c !== undefined; });
-      if (!resolved) return;
-      var uniq = {};
-      var dup = false;
-      cars.forEach(function (c) { if (uniq[c]) dup = true; uniq[c] = true; });
-      if (dup) return;
-      out.push({ labels: labels, cars: cars });
-    });
-    return out;
+    function expand(ticketLabelsList, type) {
+      var out = [];
+      ticketLabelsList.forEach(function (labels) {
+        var cars = labels.map(function (l) { return labelToCar[l]; });
+        var resolved = cars.every(function (c) { return c !== null && c !== undefined; });
+        if (!resolved) return;
+        var uniq = {};
+        var dup = false;
+        cars.forEach(function (c) { if (uniq[c]) dup = true; uniq[c] = true; });
+        if (dup) return;
+        out.push({ labels: labels, cars: cars, type: type });
+      });
+      return out;
+    }
+    return expand(TICKETS, 'sanrentan').concat(expand(NITAN_TICKETS, 'nisyatan'));
   }
 
   /**
@@ -178,11 +186,11 @@
   }
 
   /**
-   * Plackett-Luce 的中確率（三連単）。晴天令スコアのみ使用。
+   * Plackett-Luce 的中確率（三連単・二車単）。晴天令スコアのみ使用。
    * @param {Object<string,number>} seitenScores 出走全員の車番(文字列)->晴天令スコア
    * @param {string} grade 級班キー
-   * @param {Array<{labels:string[], cars:number[]}>} tickets buildTickets() の結果
-   * @returns {{perTicket:Array<{labels:string[],cars:number[],prob:number}>, totalProb:number, T:number}}
+   * @param {Array<{labels:string[], cars:number[], type:string}>} tickets buildTickets() の結果
+   * @returns {{perTicket:Array<{labels:string[],cars:number[],type:string,prob:number}>, totalProb:number, T:number}}
    */
   function computeProbabilities(seitenScores, grade, tickets) {
     var ids = Object.keys(seitenScores).map(Number);
@@ -217,8 +225,10 @@
       return prob;
     }
 
+    // 6点の三連単と2点の二車単は同時に起きない（三連単6点の先頭2着の組に s1-L / L-s1 は
+    // 含まれない）ので、合計は的中確率そのものになる。
     var perTicket = tickets.map(function (t) {
-      return { labels: t.labels, cars: t.cars, prob: orderProb(t.cars) };
+      return { labels: t.labels, cars: t.cars, type: t.type, prob: orderProb(t.cars) };
     });
     var totalProb = perTicket.reduce(function (s, t) { return s + t.prob; }, 0);
 
@@ -297,6 +307,7 @@
     GRADE_T: GRADE_T,
     OVERALL_T: OVERALL_T,
     TICKETS: TICKETS,
+    NITAN_TICKETS: NITAN_TICKETS,
     TIER_HISTORY: TIER_HISTORY,
     TIER_MULTIPLIER: TIER_MULTIPLIER,
     deriveLabels: deriveLabels,

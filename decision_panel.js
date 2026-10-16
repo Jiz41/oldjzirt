@@ -49,21 +49,23 @@
       return '<tr><td>' + escapeHtml(r.period) + '</td><td>n=' + r.n + '</td><td>回収率 ' + r.roi + '%</td></tr>';
     }).join('');
     return '<table style="width:100%; font-size:0.78em; color:#aaa; border-collapse:collapse; margin-top:6px;">' + rows + '</table>' +
-      '<p style="font-size:0.72em; color:#777; margin:4px 0 0;">※過去データの目安（3期間の検証値）。将来の結果を保証するものではありません。</p>';
+      '<p style="font-size:0.72em; color:#777; margin:4px 0 0;">※過去データの目安（3期間の検証値。この8点構成を100円ずつ買った場合の回収率）。将来の結果を保証するものではありません。</p>';
   }
 
   function renderTicketsTable(perTicket, amounts) {
     var rows = perTicket.map(function (t, idx) {
+      var kind = t.type === 'nisyatan' ? '二車単' : '三連単';
       var combo = t.cars.join('-');
       var probPct = (t.prob * 100).toFixed(2) + '%';
       var amount = amounts ? (amounts[idx] > 0 ? (amounts[idx] + '円') : '0円（配分なし）') : '';
       return '<tr>' +
+        '<td style="padding:4px 6px;">' + escapeHtml(kind) + '</td>' +
         '<td style="padding:4px 6px; font-weight:bold;">' + escapeHtml(combo) + '</td>' +
         '<td style="padding:4px 6px; color:#bba060;">' + probPct + '</td>' +
         (amounts ? '<td style="padding:4px 6px;">' + amount + '</td>' : '') +
         '</tr>';
     }).join('');
-    var header = '<tr style="color:#888; font-size:0.78em;"><th style="text-align:left; padding:4px 6px;">買い目(三連単)</th><th style="text-align:left; padding:4px 6px;">的中確率</th>' +
+    var header = '<tr style="color:#888; font-size:0.78em;"><th style="text-align:left; padding:4px 6px;">券種</th><th style="text-align:left; padding:4px 6px;">買い目</th><th style="text-align:left; padding:4px 6px;">的中確率</th>' +
       (amounts ? '<th style="text-align:left; padding:4px 6px;">配分</th>' : '') + '</tr>';
     return '<table style="width:100%; border-collapse:collapse; font-size:0.85em;">' + header + rows + '</table>';
   }
@@ -169,10 +171,10 @@
     var allocModeInput = '<div style="margin-top:10px; font-size:0.8em; color:#ccc;">' +
       '<label style="display:block; margin-bottom:4px;"><input type="radio" name="' + ALLOC_MODE_NAME + '" value="even" checked> 均等（既定）</label>' +
       '<label style="display:block;"><input type="radio" name="' + ALLOC_MODE_NAME + '" value="sqrt"> 確率に応じて傾斜（弱め）</label>' +
-      '<p style="font-size:0.72em; color:#777; margin:4px 0 0;">過去データ（834レース）では均等が最も安定。傾斜は好みで。</p>' +
+      '<p style="font-size:0.72em; color:#777; margin:4px 0 0;">均等が既定。傾斜は目安（この8点構成では傾斜の効果は未検証）。</p>' +
       '</div>';
 
-    var ticketsHeader = '<h4 style="margin-top:16px;">買い目8点・的中確率（合計 ' + (totalProb * 100).toFixed(2) + '%）</h4>';
+    var ticketsHeader = '<h4 style="margin-top:16px;">買い目8点（三連単6点＋二車単2点）・的中確率（合計 ' + (totalProb * 100).toFixed(2) + '%）</h4>';
     if (perTicket.length < 8) {
       ticketsHeader += '<p style="font-size:0.75em; color:#c99;">成立: ' + perTicket.length + '/8点（ラベル未解決または車番重複により一部除外）</p>';
     }
@@ -184,7 +186,10 @@
 
     window.DecisionPanelState = {
       tier: tier,
-      tickets: perTicket.map(function (t) { return t.cars.join('-'); })
+      tickets: perTicket.map(function (t) {
+        var kind = t.type === 'nisyatan' ? '二車単' : '三連単';
+        return kind + ' ' + t.cars.join('-');
+      })
     };
 
     bindCalcHandlers(data);
