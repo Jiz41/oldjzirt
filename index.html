@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="app-version" content="2.7.2">
+    <meta name="app-version" content="2.7.3">
     <title>華耀天輪 真・自在律</title>
     <link rel="stylesheet" href="./style_v2.css">
 
@@ -277,6 +277,7 @@
         <div style="flex: 1;">
             <label for="wind-direction" style="font-size: 0.8em; color: #555;">風向</label>
             <select id="wind-direction" style="width: 100%; padding: 5px;">
+                <option value="" selected disabled>風向を選択</option>
                 <option value="none">🍃 無風/屋内</option>
                 <option value="北">北</option><option value="北東">北東</option>
                 <option value="東">東</option><option value="南東">南東</option>
@@ -286,7 +287,7 @@
         </div>
         <div style="flex: 1;">
             <label for="wind-speed" style="font-size: 0.8em; color: #555;">風速(m)</label>
-            <input type="number" id="wind-speed" value="0" min="0" max="15" step="0.5" style="width: 100%; padding: 5px; box-sizing: border-box;">
+            <input type="number" id="wind-speed" min="0" max="15" step="0.5" placeholder="未入力" style="width: 100%; padding: 5px; box-sizing: border-box;">
         </div>
     </div>
     <div style="font-size: 0.75em; color: #666; line-height: 1.4;">

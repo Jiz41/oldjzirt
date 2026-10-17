@@ -1783,8 +1783,14 @@ const InputGuard = (() => {
         const speedEl = document.getElementById('wind-speed');
         const dir     = dirEl   ? dirEl.value   : 'none';
         let   speed   = speedEl ? Number(speedEl.value) : 0;
+        let   valid   = true;
+        let   invalidReason = null;
 
-        if (dir === 'none' || dir === '無風') {
+        if (!dir) {
+            log('ERROR: 風向が未選択です。計算をロックします。');
+            valid = false;
+            invalidReason = 'direction';
+        } else if (dir === 'none' || dir === '無風') {
             if (speedEl) {
                 speedEl.value    = 0;
                 speedEl.disabled = true;
@@ -1793,12 +1799,17 @@ const InputGuard = (() => {
             log(`INFO: 風向=無風 → 風速を強制的に 0 にセット。`);
         } else {
             if (speedEl) speedEl.disabled = false;
+            if (speedEl && speedEl.value.trim() === '') {
+                log('ERROR: 風速が未入力です。計算をロックします。');
+                valid = false;
+                invalidReason = 'speed';
+            }
             // サイレント・コレクト: 0.0〜20.0 の範囲外を補正
             if (isNaN(speed) || speed < 0)  { log(`WARN: 風速(${speed})が範囲外 → 0 に補正`); speed = 0; }
             if (speed > 20)                  { log(`WARN: 風速(${speed})が範囲外 → 20 に補正`); speed = 20; }
             speed = Math.round(speed * 10) / 10; // 小数1桁に丸め
         }
-        return { direction: dir, speed };
+        return { direction: dir, speed, valid, invalidReason };
     }
 
     // ──────────────────────────────────────────────────────
@@ -1994,6 +2005,13 @@ const InputGuard = (() => {
 
         // 2) 風向・風速
         const wind = getWindInfo();
+        if (!wind.valid) {
+            if (wind.invalidReason === 'direction') {
+                errors.push('風向が未選択です。自動取得に失敗した場合は風向を選び、風速を入力してください(無風は「無風/屋内」を選択)。');
+            } else {
+                errors.push('風速が未入力です。自動取得に失敗した場合は風速を入力してください(無風は0)。');
+            }
+        }
 
         // 3) 選手データ
         const players = getAllPlayersData();
