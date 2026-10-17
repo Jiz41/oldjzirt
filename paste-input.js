@@ -368,7 +368,28 @@
         .filter(line => line.length > 0);
       const lineInputEl = document.getElementById('line-input');
       if (lineInputEl && filteredLines.length > 0) {
-        lineInputEl.value = filteredLines.map(line => line.join('')).join(',');
+        const seriPairs = Array.isArray(data.lineup.seri) ? data.lineup.seri : [];
+        const buildLineStr = (line) => {
+          const seriMsgs = [];
+          let str = '';
+          let i = 0;
+          while (i < line.length) {
+            const pair = seriPairs.find(p => Array.isArray(p) && p.length === 2 &&
+              line[i] === p[0] && line[i + 1] === p[1]);
+            if (pair) {
+              str += `${pair[0]}(${pair[1]})`;
+              seriMsgs.push(`競りを検出: ${pair[0]}(${pair[1]})`);
+              i += 2;
+            } else {
+              str += `${line[i]}`;
+              i += 1;
+            }
+          }
+          return { str, seriMsgs };
+        };
+        const lineResults = filteredLines.map(line => buildLineStr(line));
+        lineInputEl.value = lineResults.map(r => r.str).join(',');
+        lineResults.forEach(r => r.seriMsgs.forEach(m => msgs.push(`ℹ️ ${m}`)));
         lineInputEl.dispatchEvent(new Event('input', { bubbles: true }));
         lineInputEl.dispatchEvent(new Event('change', { bubbles: true }));
       } else {

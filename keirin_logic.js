@@ -193,7 +193,7 @@ function formatOrderedBet(bet)  { return bet.join('-'); }
 function formatSanrenpuku(bet)  { return bet.slice().sort((a, b) => a - b).join('='); }
 
 function applyLineCountBonus(integratedScores, lines) {
-  const LINE_BONUS = { 4: 1.08, 3: 1.04 };
+  const LINE_BONUS = { 5: 1.08, 4: 1.08, 3: 1.04 };
   const bonusMap = {};
   (lines || []).forEach(line => {
     const bonus = LINE_BONUS[line.length] || 1.00;
