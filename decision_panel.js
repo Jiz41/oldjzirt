@@ -57,17 +57,20 @@
       var kind = t.type === 'nisyatan' ? '二車単' : '三連単';
       var combo = t.cars.join('-');
       var probPct = (t.prob * 100).toFixed(2) + '%';
+      var needOdds = t.prob > 0 ? (1 / t.prob).toFixed(1) + '倍〜' : '―';
       var amount = amounts ? (amounts[idx] > 0 ? (amounts[idx] + '円') : '0円（配分なし）') : '';
       return '<tr>' +
         '<td style="padding:4px 6px;">' + escapeHtml(kind) + '</td>' +
         '<td style="padding:4px 6px; font-weight:bold;">' + escapeHtml(combo) + '</td>' +
         '<td style="padding:4px 6px; color:#bba060;">' + probPct + '</td>' +
+        '<td style="padding:4px 6px; color:#8fdde6; font-weight:bold;">' + needOdds + '</td>' +
         (amounts ? '<td style="padding:4px 6px;">' + amount + '</td>' : '') +
         '</tr>';
     }).join('');
-    var header = '<tr style="color:#888; font-size:0.78em;"><th style="text-align:left; padding:4px 6px;">券種</th><th style="text-align:left; padding:4px 6px;">買い目</th><th style="text-align:left; padding:4px 6px;">的中確率</th>' +
+    var header = '<tr style="color:#888; font-size:0.78em;"><th style="text-align:left; padding:4px 6px;">券種</th><th style="text-align:left; padding:4px 6px;">買い目</th><th style="text-align:left; padding:4px 6px;">的中確率</th><th style="text-align:left; padding:4px 6px;">必要倍率</th>' +
       (amounts ? '<th style="text-align:left; padding:4px 6px;">配分</th>' : '') + '</tr>';
-    return '<table style="width:100%; border-collapse:collapse; font-size:0.85em;">' + header + rows + '</table>';
+    return '<table style="width:100%; border-collapse:collapse; font-size:0.85em;">' + header + rows + '</table>' +
+      '<p style="font-size:0.72em; color:#777; margin:4px 0 0;">※必要倍率＝1÷的中確率。直前の倍率がこれ以上なら旨味ありの目安です。</p>';
   }
 
   function computeDecisionData() {
