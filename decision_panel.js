@@ -99,7 +99,7 @@
       lCarId: lCarId,
     });
 
-    var tickets = DecisionCore.buildTickets(labelToCar);
+    var tickets = DecisionCore.buildTickets(labelToCar, lines);
 
     var raceTypeEl = document.getElementById('race-type');
     var windSpeedEl = document.getElementById('wind-speed');

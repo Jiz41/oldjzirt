@@ -116,13 +116,32 @@
     return { s1: s1, s2: s2, s3: s3, L: L, o1: o1 };
   }
 
+  // o1が3車ライン最後尾のとき、o1頭の3点を3着へ移す。2026-10-18、実績: 156Rで的中レース20→30。
+  var O1_TAIL_MAP = {
+    'o1,s2,L': ['s2', 'L', 'o1'],
+    'o1,s3,L': ['s3', 'L', 'o1'],
+    'o1,s2,s1': ['s2', 's1', 'o1'],
+  };
+
+  function isTailOfThreeCarLine(lines, carId) {
+    if (carId === null || carId === undefined || !Array.isArray(lines)) return false;
+    return lines.some(function (line) {
+      return Array.isArray(line) && line.length === 3 && line[2] === carId;
+    });
+  }
+
   /**
    * 8点チケット（三連単6点＋二車単2点）をラベル->車番で展開する。
    * 成立しないチケット（ラベル未解決／車番重複）は除外。
    * @param {{s1:?number,s2:?number,s3:?number,L:?number,o1:?number}} labelToCar
+   * @param {Array<number[]>=} lines 並び（省略時は従来どおり）。o1が3車ライン最後尾なら o1頭の3点を3着へ移す
    * @returns {Array<{labels:string[], cars:number[], type:string}>} 成立したチケットのみ
    */
-  function buildTickets(labelToCar) {
+  function buildTickets(labelToCar, lines) {
+    var tail = Array.isArray(lines) && isTailOfThreeCarLine(lines, labelToCar.o1);
+    var sanrentan = tail
+      ? TICKETS.map(function (labels) { return O1_TAIL_MAP[labels.join(',')] || labels; })
+      : TICKETS;
     function expand(ticketLabelsList, type) {
       var out = [];
       ticketLabelsList.forEach(function (labels) {
@@ -137,7 +156,7 @@
       });
       return out;
     }
-    return expand(TICKETS, 'sanrentan').concat(expand(NITAN_TICKETS, 'nisyatan'));
+    return expand(sanrentan, 'sanrentan').concat(expand(NITAN_TICKETS, 'nisyatan'));
   }
 
   /**
@@ -325,6 +344,7 @@
     TIER_MULTIPLIER: TIER_MULTIPLIER,
     deriveLabels: deriveLabels,
     buildTickets: buildTickets,
+    isTailOfThreeCarLine: isTailOfThreeCarLine,
     judgeTier: judgeTier,
     computeProbabilities: computeProbabilities,
     allocateBudget: allocateBudget,
