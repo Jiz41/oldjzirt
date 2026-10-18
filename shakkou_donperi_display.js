@@ -100,9 +100,10 @@ function buildHeatmapHTML(cosmosResult) {
         const rankIdx = topByRank[rank].indexOf(stat.id);
         const isTop = rankIdx !== -1 && pct > 0;
         const badge = isTop ? `<span class="shakkou-badge ${medalClass[rankIdx]}">${badgeMap[rankIdx]}</span>` : '';
-        const bg = `rgba(77, 195, 255, ${Math.min(pct / 100, 1) * 0.75 + (pct > 0 ? 0.05 : 0)})`;
+        const bg = pct > 0 ? `rgba(200, 100, 160, ${Math.min(pct / 100, 1) * 0.55 + 0.06})` : 'transparent';
+        const textColor = pct > 0 ? '#f2eee6' : '#7d6f8c';
         const topClass = isTop ? 'shakkou-cell-top' : '';
-        return `<td class="shakkou-heat-cell ${topClass}" style="background:${bg};">${badge}${pctLabel}</td>`;
+        return `<td class="shakkou-heat-cell ${topClass}" style="background:${bg};color:${textColor};">${badge}${pctLabel}</td>`;
     }
 
     const rows = statistics.map(stat => {
@@ -260,7 +261,7 @@ function injectShakkouStyles() {
 
 .shakkou-cell-top {
     font-weight: bold;
-    border: 2px solid #ffb62e !important;
+    border: 2px solid #8fdde6 !important;
 }
 
 .shakkou-badge {

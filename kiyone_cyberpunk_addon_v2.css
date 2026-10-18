@@ -322,3 +322,60 @@
     padding: 0 !important;
     margin: 8px 0 0 !important;
 }
+
+/* 赤口呑縁：出目上位5点・ヒートマップの配色を旧清音系（暗紫＋ソフトなピンク/シアン）に（v2.8.2） */
+
+.shakkou-results-container .shakkou-pattern-table,
+.shakkou-results-container .shakkou-heat-table {
+    background: #261d33 !important;
+    border: 1px solid #4b3358 !important;
+    border-radius: 6px !important;
+}
+
+.shakkou-results-container .shakkou-pattern-table thead th,
+.shakkou-results-container .shakkou-heat-table thead th {
+    background: #3c2b4a !important;
+    color: #e8a0c0 !important;
+    border-bottom: 1px solid #4b3358 !important;
+}
+
+.shakkou-results-container .shakkou-pattern-table tbody td,
+.shakkou-results-container .shakkou-heat-table tbody td {
+    border-bottom: 1px solid #3a2a47 !important;
+}
+
+.shakkou-results-container .shakkou-pattern-table tbody tr:nth-child(odd) td,
+.shakkou-results-container .shakkou-heat-table tbody tr:nth-child(odd) td {
+    background: #261d33 !important;
+}
+
+.shakkou-results-container .shakkou-pattern-table tbody tr:nth-child(even) td,
+.shakkou-results-container .shakkou-heat-table tbody tr:nth-child(even) td {
+    background: #2d2339 !important;
+}
+
+.shakkou-results-container .shakkou-section-title {
+    color: #e8a0c0 !important;
+    border-bottom: 1px solid #4b3358 !important;
+}
+
+.shakkou-results-container .shakkou-rank {
+    color: #e8a0c0 !important;
+}
+
+.shakkou-results-container .shakkou-pattern {
+    color: #8fdde6 !important;
+}
+
+.shakkou-results-container .shakkou-car-number {
+    color: #e8a0c0 !important;
+}
+
+.shakkou-results-container .shakkou-rate {
+    color: #f2eee6 !important;
+    font-weight: bold;
+}
+
+.shakkou-results-container .shakkou-count {
+    color: #a99bb8 !important;
+}
