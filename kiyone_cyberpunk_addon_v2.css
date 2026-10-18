@@ -305,3 +305,20 @@
         0 0 8px rgba(77, 195, 255, 0.35);
     font-weight: bold;
 }
+
+/* 赤口呑縁：外側の重なり枠を外し、晴天令・荒天令と同じ3本線（結果枠・折りたたみ枠・表枠）に揃える（v2.8.1） */
+#scenario-output {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.shakkou-results-container {
+    background: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 8px 0 0 !important;
+}
