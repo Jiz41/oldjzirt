@@ -49,7 +49,7 @@
     }).join('');
     return '<h4 style="margin-top:12px; font-size:0.85em; color:#ccc;">過去実績（' + escapeHtml(letter) + '）</h4>' +
       '<table style="width:100%; font-size:0.78em; color:#aaa; border-collapse:collapse; margin-top:6px;">' + rows + '</table>' +
-      '<p style="font-size:0.72em; color:#777; margin:4px 0 0;">※過去データの目安（3期間の検証値。この8点構成を100円ずつ買った場合の回収率）。将来の結果を保証するものではありません。</p>';
+      '<p style="font-size:0.72em; color:#777; margin:4px 0 0;">※この実績は旧の買い目構成（2026-10-18まで）での値です。現在の買い目（Aが頭の三連単6点＋二車単B-A,B-C）は台帳で検証中で、この表は当てはまりません。</p>';
   }
 
   function renderTicketsTable(perTicket, amounts) {

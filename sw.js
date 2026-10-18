@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jiz41-20261018';
+const CACHE_NAME = 'jiz41-20261019';
 const ASSETS = [
   './',
   './title.png',
