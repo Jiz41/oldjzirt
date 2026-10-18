@@ -379,3 +379,17 @@
 .shakkou-results-container .shakkou-count {
     color: #a99bb8 !important;
 }
+
+/* 背景装飾：右下に固定の薄い画像（スクロールしても動かず、タップは素通り）。下部ナビ(56px)の上に置く（v2.8.3） */
+body::after {
+    content: '';
+    position: fixed;
+    right: 0;
+    bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+    width: min(44vw, 280px);
+    aspect-ratio: 720 / 1199;
+    background: url('./bg_pair.webp') no-repeat right bottom / contain;
+    opacity: 0.16;
+    pointer-events: none;
+    z-index: 800;
+}
