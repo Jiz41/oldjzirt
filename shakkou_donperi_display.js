@@ -261,7 +261,8 @@ function injectShakkouStyles() {
 
 .shakkou-cell-top {
     font-weight: bold;
-    border: 2px solid #8fdde6 !important;
+    /* 罫線ではなく内側の影で四辺を描く（border-collapse の罫線競合で下辺・右辺が欠けるため） */
+    box-shadow: inset 0 0 0 2px #8fdde6;
 }
 
 .shakkou-badge {
