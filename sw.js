@@ -1,7 +1,7 @@
-const CACHE_NAME = 'jiz41-20261019';
+const CACHE_NAME = 'jiz41-20261019b';
 const ASSETS = [
   './',
-  './title.png',
+  './title.webp',
 ];
 
 // インストール時にキャッシュ
