@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jiz41-20261019d';
+const CACHE_NAME = 'jiz41-20261027a';
 const ASSETS = [
   './',
   './title.webp',

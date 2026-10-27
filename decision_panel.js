@@ -191,11 +191,16 @@
       ticketsHeader += '<p style="font-size:0.75em; color:#c99;">成立: ' + perTicket.length + '/8点（ラベル未解決または車番重複により一部除外）</p>';
     }
 
+    var lc = data.labelToCar || {};
+    function carText(l) { return (lc[l] === null || lc[l] === undefined) ? '―' : lc[l] + '番'; }
+    var labelLegend = '<p style="font-size:0.85em; color:#ccc; margin:6px 0;">' +
+      's1(A)＝' + carText('s1') + ' ／ s2(B)＝' + carText('s2') + ' ／ s3(C)＝' + carText('s3') + ' ／ L＝' + carText('L') + '</p>';
+
     var ticketsTableContainer = '<div id="decision-tickets-table">' + renderTicketsTable(perTicket, null) + '</div>';
     var probCaveat = '<p style="font-size:0.72em; color:#777;">的中確率は晴天令スコアからの推定です。過去実績は表示より高めに出る傾向があります（全体: 表示15%に対し実績18%、条件C: 表示14%に対し実績19%）。</p>';
     var summaryEl = '<div id="decision-summary" style="margin-top:8px; font-size:0.85em; color:#bba060;"></div>';
 
-    panel.innerHTML = headerHtml + budgetInput + allocModeInput + ticketsHeader + ticketsTableContainer + probCaveat + summaryEl;
+    panel.innerHTML = headerHtml + budgetInput + allocModeInput + ticketsHeader + labelLegend + ticketsTableContainer + probCaveat + summaryEl;
 
     var tierText = letter + '（' + subLabel + '）';
     window.DecisionPanelState = {
